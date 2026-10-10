@@ -25,12 +25,12 @@ VOICES = {  # Figur: Modell, Sprecher-ID, Tempo, Tonhöhe, Formanten, Zusatzfilt
               chain="highpass=f=160,acompressor=threshold=-20dB:ratio=3:attack=5:release=80"),
     "K": dict(model="de_DE-thorsten-medium", sid=0, speed=0.86, pitch=0.86, formant="shifted",
               chain="highpass=f=90", robot=True),
-    "B": dict(model="de_DE-karlsson-low", sid=0, speed=0.84, pitch=0.90, formant="preserved",
-              chain="lowpass=f=6500,acompressor=threshold=-20dB:ratio=2.5"),
-    "G": dict(model="de_DE-thorsten_emotional-medium", sid=0, speed=1.15, pitch=1.13, formant="preserved",
-              chain="vibrato=f=6.5:d=0.10"),
-    "A": dict(model="de_DE-ramona-low", sid=0, speed=0.95, pitch=1.03, formant="preserved",
-              chain="highpass=f=380,lowpass=f=3600,aecho=0.8:0.55:90|170:0.32|0.18"),
+    "B": dict(model="de_DE-karlsson-low", sid=0, speed=0.88, pitch=0.96, formant="preserved",
+              chain="acompressor=threshold=-20dB:ratio=2.5"),
+    "G": dict(model="de_DE-thorsten_emotional-medium", sid=0, speed=1.1, pitch=1.10, formant="preserved",
+              chain=""),
+    "A": dict(model="de_DE-eva_k-x_low", sid=0, speed=0.92, pitch=1.0, formant="preserved",
+              chain="highpass=f=250,lowpass=f=5000,aecho=0.8:0.3:70:0.15"),
 }
 NAMES = {"F": "Fussel", "K": "KURT", "B": "Brösel", "G": "Gurrmann", "A": "Durchsage"}
 
@@ -338,7 +338,7 @@ Dein Auftrag für KURT? Schreib ihn in die Kommentare. Vielleicht versteht er ih
 Kapitel
 {chap}
 
-Stimmen: KI-Sprachsynthese (Piper-Stimmen „Thorsten“ und „Kerstin“ von Thorsten-Voice, CC0; „Karlsson“ und „Ramona“ auf Basis des M-AILABS-Datensatzes)
+Stimmen: KI-Sprachsynthese (Piper-Stimmen „Thorsten“ (Thorsten-Voice, CC0), „Kerstin“ (CC0), „Karlsson“ und „Eva K“ (M-AILABS-Datensatz))
 Musik und Geräusche: selbst erzeugt in der Flausenfabrik
 Ausgedacht in der Flausenfabrik.
 
