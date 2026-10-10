@@ -17,7 +17,8 @@ from klang import SR
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "out"
 MODELS = sys.argv[2] if len(sys.argv) > 2 else "tts"
-FPS = 12
+FPS = 60         # echte 60 Bilder pro Sekunde
+MOUTH_FPS = 60   # Takt der Mundkanäle (open/wide/hiss) in timeline.json
 os.makedirs(os.path.join(OUT, "stimmen"), exist_ok=True)
 
 VOICES = {  # Figur: Modell, Sprecher-ID, Tempo, Tonhöhe, Formanten, Zusatzfilter
@@ -119,22 +120,60 @@ def voice(who, say, fx=None):
     return path, x
 
 
-def envelope(x):
-    hop = SR // FPS
-    n = int(np.ceil(len(x) / hop))
-    e = np.array([np.sqrt(np.mean(x[i * hop:(i + 1) * hop] ** 2)) if len(x[i * hop:(i + 1) * hop]) else 0 for i in range(n)])
-    ref = np.percentile(e, 90) + 1e-9
-    e = np.clip(e / ref, 0, 1)
-    e[e < 0.18] = 0
-    return [round(float(v) ** 0.7, 2) for v in e]
+def mouth_channels(x):
+    """Mundkanäle pro Bild (MOUTH_FPS) für die Lippenbewegung.
+
+    Pro Bild ein 50-ms-Hann-Fenster, zentriert auf die Bildzeit:
+      open  Öffnung 0..1: RMS / 90. Perzentil, weiches Knie, ^0.8, dann
+            Attack/Release (0.55/0.22) und 2 Bilder Vorlauf (Mund vor dem Ton)
+      wide  roh: log10(E 900–2600 Hz / E 150–900 Hz) auf stimmhaften Bildern,
+            sonst letzter Wert (main() normiert je Sprecher auf 0..1)
+      hiss  Zischanteil E 4–9 kHz / E gesamt, einpolig geglättet (k = 0.4)
+    Rückgabe: open, wide_raw, hiss, voiced (Maske für die Normierung).
+    """
+    hop = SR // MOUTH_FPS
+    win = int(0.05 * SR)
+    w = np.hanning(win)
+    n = int(np.ceil(len(x) / hop)) + 1
+    xp = np.pad(x.astype(np.float64), (win // 2, win + hop))
+    seg = xp[np.arange(win)[None, :] + hop * np.arange(n)[:, None]] * w
+    rms = np.sqrt(np.mean(seg ** 2, axis=1))
+    P = np.abs(np.fft.rfft(seg, axis=1)) ** 2
+    f = np.fft.rfftfreq(win, 1 / SR)
+    lo = P[:, (f >= 150) & (f < 900)].sum(1)
+    mid = P[:, (f >= 900) & (f < 2600)].sum(1)
+    hi = P[:, (f >= 4000) & (f < 9000)].sum(1)
+    ref = np.percentile(rms, 90) + 1e-9
+    e = np.clip((rms / ref - 0.12) / 0.88, 0, 1) ** 0.8
+    op, y = np.empty(n), 0.0
+    for i, v in enumerate(e):
+        y += (0.55 if v > y else 0.22) * (v - y)   # Attack schnell, Release weich
+        op[i] = y
+    op = np.concatenate([op[2:], np.zeros(2)])     # Mund führt den Ton um ~33 ms
+    k = min(4, n)                                  # am Zeilenende sanft schließen
+    op[n - k:] *= np.linspace(1, 0, k + 1)[1:]
+    hr = hi / (lo + mid + hi + 1e-12)
+    hs, y = np.empty(n), 0.0
+    for i, v in enumerate(hr):
+        y += 0.4 * (v - y)
+        hs[i] = y
+    raw = np.log10((mid + 1e-12) / (lo + 1e-12))
+    voiced = (op > 0.3) & (hs < 0.3)
+    wr = np.empty(n)
+    last = raw[voiced][0] if voiced.any() else float(np.median(raw))
+    for i in range(n):
+        if voiced[i]:
+            last = raw[i]
+        wr[i] = last
+    return op, wr, hs, voiced
 
 
 DEFAULTS = {
     "cam": dict(x=960, y=540, z=1, r=0),
     "fussel": dict(x=-500, y=900, s=0.8, r=0, flip=1, lx=0, ly=0, thread=1),
     "kurt": dict(x=860, y=900, s=1.6, shake=0),
-    "broesel": dict(x=2200, y=900, s=1.25, r=0, flip=-1, lid=0.55, wing=0),
-    "gurrmann": dict(x=2200, y=900, s=1.3, r=0, flip=-1, lid=0.2, wing=0),
+    "broesel": dict(x=2200, y=900, s=1.25, r=0, flip=-1, lid=0.55, wing=0, brow=0),
+    "gurrmann": dict(x=2200, y=900, s=1.3, r=0, flip=-1, lid=0.2, wing=0, brow=0),
     "train": dict(x=3000, y=740, s=1, r=0, doors=0),
     "ball": dict(x=0, y=0, s=1),
     "iris": dict(r=1200),
@@ -175,6 +214,22 @@ class TL:
             frm = self._value_at(actor, p, t0)
             self.tracks.setdefault(actor, {}).setdefault(p, []).append([t0, round(t0 + dur, 3), frm, v, ease_ok(ease)])
 
+    def arc(self, actor, x, y, h, dur, off=0.0, **extra):
+        """Sprung als Wurfparabel: x linear, y mit gleicher Schwerkraft rauf ('out') und runter ('in').
+
+        h = Scheitelhöhe über dem höheren der beiden Punkte. Ändert tl.t nicht.
+        """
+        t0 = round(self.t + off, 3)
+        y0 = self._value_at(actor, "y", t0)
+        apex = min(y0, y) - h
+        a, b = np.sqrt(y0 - apex), np.sqrt(y - apex)
+        tu = dur * a / (a + b)
+        self.key(actor, dur=dur, off=off, ease="lin", x=x)
+        self.key(actor, dur=tu, off=off, ease="out", y=apex)
+        self.key(actor, dur=dur - tu, off=off + tu, ease="in", y=y)
+        if extra:
+            self.key(actor, dur=dur, off=off, ease="io", **extra)
+
     def shot(self, x, y, z, dur=0.0, ease="io", off=0.0):
         self.key("cam", dur=dur, off=off, ease=ease, x=x, y=y, z=z)
 
@@ -205,8 +260,9 @@ class TL:
         path, x = voice(who, say, fx)
         self.t += pre
         d = len(x) / SR
+        op, wr, hs, voiced = mouth_channels(x)
         self.lines.append(dict(t0=round(self.t, 3), t1=round(self.t + d, 3), who=who, text=text,
-                               file=path, env=envelope(x), fx=fx))
+                               file=path, env=op, wide_raw=wr, voiced=voiced, ss=hs, fx=fx))
         self.t += d + gap
 
 
@@ -277,8 +333,24 @@ def main():
     for a in tl.states.values():
         for p in a:
             a[p].sort(key=lambda s: s[0])
-    tj = dict(fps=FPS, total=total, scenes=tl.scenes, tracks=tl.tracks, states=tl.states, cues=tl.cues,
-              lines=[dict(t0=l["t0"], t1=l["t1"], who=l["who"], env=l["env"], fx=l["fx"]) for l in tl.lines],
+    # Mundbreite je Sprecher normieren: 30. Perzentil -> 0 (rund), 70. -> 1 (breit), über stimmhafte Bilder
+    for who in {l["who"] for l in tl.lines}:
+        v = np.concatenate([l["wide_raw"][l["voiced"]] for l in tl.lines if l["who"] == who] + [np.zeros(0)])
+        p30, p70 = np.percentile(v, [30, 70]) if len(v) > 10 else (-2.0, -1.0)
+        for l in tl.lines:
+            if l["who"] != who:
+                continue
+            wn = np.clip((l["wide_raw"] - p30) / max(1e-3, p70 - p30), 0, 1)
+            wm = np.median(np.stack([np.r_[wn[:1], wn[:-1]], wn, np.r_[wn[1:], wn[-1:]]]), axis=0)   # 3er-Median
+            y, out = wm[0], np.empty(len(wm))
+            for i, a in enumerate(wm):
+                y += 0.35 * (a - y)
+                out[i] = y
+            l["wide"] = out
+    r2 = lambda a: [round(float(v), 2) for v in a]
+    tj = dict(fps=FPS, envRate=MOUTH_FPS, total=total, scenes=tl.scenes, tracks=tl.tracks, states=tl.states, cues=tl.cues,
+              lines=[dict(t0=l["t0"], t1=l["t1"], who=l["who"], fx=l["fx"], env=r2(l["env"]), wide=r2(l["wide"]), ss=r2(l["ss"]),
+                          q=l["text"].rstrip().endswith("?"), ex="!" in l["text"]) for l in tl.lines],
               sfx=[dict(t=round(e["t"], 3), name=e["name"]) for e in tl.sfxs])
     with open(os.path.join(OUT, "timeline.json"), "w") as f:
         json.dump(tj, f)

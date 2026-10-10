@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Baut Charge 001 komplett: Ton + Zeitplan, Bilder (parallel), fertiges MP4.
+# Baut Charge 001 komplett: Ton + Zeitplan, Bilder (parallel, echte Bildrate aus timeline.json, 60 fps), fertiges MP4.
 #   ./produce.sh <arbeitsordner> <tts-modelle> <schriftenordner>
 set -euo pipefail
 WORK=${1:?arbeitsordner}; MODELS=${2:?tts-modelle}; FONTS=${3:?schriften}
@@ -10,8 +10,8 @@ cd "$HERE"
 python3 prep_assets.py
 python3 build.py "$WORK" "$MODELS"
 
-N=$(python3 -c "import json;t=json.load(open('$WORK/timeline.json'));print(round(t['total']*t['fps']))")
-echo "Bilder: $N"
+read -r N FPS < <(python3 -c "import json;t=json.load(open('$WORK/timeline.json'));print(round(t['total']*t['fps']),t['fps'])")
+echo "Bilder: $N bei $FPS fps, $WORKERS Worker"
 export NODE_PATH=${NODE_PATH:-$(npm root -g)}
 pids=()
 : > "$WORK/teile.txt"
