@@ -1,0 +1,443 @@
+1
+00:00:05,200 --> 00:00:08,458
+Morgen. Bin zu spät. Zug fiel aus.
+
+2
+00:00:08,658 --> 00:00:09,522
+Schon wieder?
+
+3
+00:00:09,722 --> 00:00:15,168
+Signalstörung. Weichenstörung. Türstörung. Irgendwat is immer jestört.
+
+4
+00:00:16,068 --> 00:00:18,755
+Ooooh! Und was, wenn … Tauben die Bahn übernehmen?
+
+5
+00:00:18,955 --> 00:00:19,637
+Nee.
+
+6
+00:00:29,387 --> 00:00:31,584
+Kurt! Kurt! Ich hab einen Auftrag!
+
+7
+00:00:33,184 --> 00:00:40,280
+Guten Morgen. Hier spricht Kurt, Ihre kurbelbetriebene Unterhaltungs-Rechen-Technik. Bitte werfen Sie Ihre Idee in den Trichter.
+
+8
+00:00:40,480 --> 00:00:42,215
+Wie wirft man denn eine Idee?
+
+9
+00:00:42,415 --> 00:00:45,054
+Zusammenknüllen. Werfen. Hoffen.
+
+10
+00:00:47,304 --> 00:00:49,535
+Idee empfangen. Wird geprüft.
+
+11
+00:00:50,085 --> 00:00:53,707
+Tauben. Bahn. Übernehmen. Ich habe drei Rückfragen.
+
+12
+00:00:53,907 --> 00:00:54,505
+Okay!
+
+13
+00:00:54,705 --> 00:00:56,537
+Erstens. Welche Tauben?
+
+14
+00:00:56,737 --> 00:00:57,210
+Alle!
+
+15
+00:00:57,260 --> 00:00:59,234
+Zweitens. Welche Bahn?
+
+16
+00:00:59,434 --> 00:01:00,354
+Die ganze!
+
+17
+00:01:00,404 --> 00:01:01,992
+Drittens. Wer kurbelt?
+
+18
+00:01:04,942 --> 00:01:06,873
+Ick hab gleich Feierabend.
+
+19
+00:01:07,073 --> 00:01:08,658
+Es ist acht Uhr zwölf.
+
+20
+00:01:08,858 --> 00:01:10,347
+Gleich is relativ.
+
+21
+00:01:10,997 --> 00:01:13,310
+Bitte, Brösel! Bitte, bitte, bitte!
+
+22
+00:01:14,710 --> 00:01:18,363
+Na jut. Aber nur, weil meine Cousins da mitmachen.
+
+23
+00:01:18,563 --> 00:01:19,656
+Deine Cousins?
+
+24
+00:01:19,856 --> 00:01:28,446
+Halb Berlin is mit mir verwandt. Wir Stadttauben sitzen seit hundert Jahren auf jedem Bahnhof. Wir kennen den Laden besser als die Leute mit den Mützen.
+
+25
+00:01:30,646 --> 00:01:32,089
+Auftrag verstanden.
+
+26
+00:01:32,439 --> 00:01:33,816
+Und ich will mitfahren!
+
+27
+00:01:35,066 --> 00:01:37,397
+Fahrgast erkannt. Film startet.
+
+28
+00:01:39,197 --> 00:01:41,148
+Film 1. Die Übernahme.
+
+29
+00:01:45,548 --> 00:01:51,345
+[Durchsage] Gurr. Willkommen in Brötchenhausen Hauptbahnhof. Ab heute übernehmen wir den Bahnbetrieb. Gurr.
+
+30
+00:01:51,695 --> 00:01:53,878
+Wow! Die Tauben haben echt übernommen!
+
+31
+00:01:56,478 --> 00:01:59,352
+Guten Tag. Gurrmann, Zugbegleiter. Sie wünschen?
+
+32
+00:01:59,552 --> 00:02:01,346
+Ich will nach … äh … Krümelstadt!
+
+33
+00:02:01,546 --> 00:02:04,292
+Krümelstadt. Gleis eins. Abfahrt pünktlich.
+
+34
+00:02:04,492 --> 00:02:05,588
+Pünktlich? Wirklich?
+
+35
+00:02:05,788 --> 00:02:10,717
+Selbstverständlich. Wir Tauben warten nicht auf Züge. Wir sind schon da. Wir sind immer schon da.
+
+36
+00:02:10,917 --> 00:02:12,382
+Und wer fährt den Zug?
+
+37
+00:02:12,582 --> 00:02:17,487
+Lokführerin Gisela. Sie fliegt seit zwölf Jahren unfallfrei. Fahren ist neu für sie.
+
+38
+00:02:19,087 --> 00:02:25,813
+[Durchsage] Gurr. Bitte lassen Sie Ihr Gepäck nicht unbeaufsichtigt. Unbeaufsichtigte Brötchen werden sofort gegessen. Gurr.
+
+39
+00:02:26,163 --> 00:02:27,679
+Und wann kommt der Zug?
+
+40
+00:02:27,879 --> 00:02:31,207
+Der Zug kommt, wenn genug Krümel auf dem Bahnsteig liegen.
+
+41
+00:02:33,607 --> 00:02:35,682
+Das steht so im Fahrplan?
+
+42
+00:02:35,882 --> 00:02:37,188
+Das ist der Fahrplan.
+
+43
+00:02:38,238 --> 00:02:41,698
+Det stimmt sogar. Bei uns heißt det Fütterungszeit.
+
+44
+00:02:41,898 --> 00:02:45,609
+Notiert. Frage: Warum sitzen Tauben immer auf Bahnhöfen?
+
+45
+00:02:45,809 --> 00:02:49,339
+Weil da keener merkt, dass wir warten. Da warten alle.
+
+46
+00:02:53,939 --> 00:03:02,232
+[Durchsage] Gurr. Ausreichend Krümel erkannt. Der Zug nach Krümelstadt fährt ein. Bitte Vorsicht an der Bahnsteigkante. Gurr.
+
+47
+00:03:08,382 --> 00:03:10,965
+Er ist pünktlich! Er ist wirklich pünktlich!
+
+48
+00:03:11,165 --> 00:03:12,681
+Gurr. Einsteigen, bitte.
+
+49
+00:03:22,381 --> 00:03:24,066
+Film 2. Die Reform.
+
+50
+00:03:26,916 --> 00:03:28,165
+Fahrkarten, bitte.
+
+51
+00:03:28,365 --> 00:03:31,348
+Ich hab keine Fahrkarte. Ich hab nicht mal Arme.
+
+52
+00:03:31,548 --> 00:03:34,457
+Kein Problem. Bei uns bezahlt man mit Krümeln.
+
+53
+00:03:36,307 --> 00:03:39,053
+Ein Krümel. Das reicht bis … zur nächsten Bäckerei.
+
+54
+00:03:39,253 --> 00:03:41,231
+Gibt es hier eigentlich WLAN?
+
+55
+00:03:41,431 --> 00:03:44,374
+Natürlich. Das Passwort ist Gurr. Mit drei R.
+
+56
+00:03:45,174 --> 00:03:46,127
+Geht nicht.
+
+57
+00:03:46,327 --> 00:03:47,308
+Dann vier R.
+
+58
+00:03:49,108 --> 00:03:53,855
+[Durchsage] Gurr. Wegen einer Bäckerei an der Strecke halten wir außerplanmäßig. Gurr.
+
+59
+00:04:00,855 --> 00:04:05,678
+[Durchsage] Gurr. Wegen einer weiteren Bäckerei halten wir schon wieder außerplanmäßig. Gurr.
+
+60
+00:04:07,228 --> 00:04:09,441
+Wie viele Bäckereien gibt es denn?
+
+61
+00:04:09,641 --> 00:04:12,712
+In Deutschland? Zu viele, um pünktlich zu sein.
+
+62
+00:04:13,262 --> 00:04:16,844
+Und hier vorne ist der Ruhewagen. Hier wird nur leise gegurrt.
+
+63
+00:04:20,544 --> 00:04:30,356
+[Durchsage] Gurr. Unser Bordbistro hat für Sie geöffnet. Heute im Angebot: Krümel. Krümel mit Krümeln. Und Krümel, vegan. Gurr.
+
+64
+00:04:31,956 --> 00:04:40,639
+[Durchsage] Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, die zuerst da ist. Also für alle. Gurr.
+
+65
+00:04:41,789 --> 00:04:43,771
+Hey! Das ist mein Platz!
+
+66
+00:04:45,671 --> 00:04:49,652
+Siehste. Pünktlich halten die genau fünf Minuten durch.
+
+67
+00:04:49,852 --> 00:04:53,110
+Verspätung: zwölf Minuten. Ursache: Brötchen.
+
+68
+00:04:53,310 --> 00:04:56,895
+Kurt, wie lange dauert det noch? Mein Arm fällt ab.
+
+69
+00:04:57,095 --> 00:04:59,723
+Sie haben keinen Arm. Sie haben einen Flügel.
+
+70
+00:04:59,973 --> 00:05:01,412
+Mein Flügel fällt ab.
+
+71
+00:05:04,012 --> 00:05:05,840
+Film 3. Die Optimierung.
+
+72
+00:05:07,290 --> 00:05:11,929
+Liebe Fahrgäste. Die Bahnleitung hat das größte Hindernis für Pünktlichkeit gefunden.
+
+73
+00:05:12,129 --> 00:05:13,238
+Die Bäckereien?
+
+74
+00:05:13,438 --> 00:05:14,408
+Die Schienen.
+
+75
+00:05:16,758 --> 00:05:18,881
+Wir fliegen! Der Zug fliegt!
+
+76
+00:05:20,731 --> 00:05:23,767
+Natürlich. Schienen sind was für Leute ohne Flügel.
+
+77
+00:05:23,967 --> 00:05:26,972
+Da unten ist Brötchenhausen! Es ist winzig!
+
+78
+00:05:27,172 --> 00:05:29,988
+Von hier oben sieht alles aus wie ein Krümel.
+
+79
+00:05:31,588 --> 00:05:37,738
+[Durchsage] Gurr. Wir befinden uns jetzt im Schwarmverkehr. Bitte halten Sie sich an einer Feder fest. Gurr.
+
+80
+00:05:38,088 --> 00:05:39,613
+Ich hab keine Arme!
+
+81
+00:05:41,213 --> 00:05:47,252
+[Durchsage] Gurr. Gleiswechsel. Es gibt zwar keine Gleise mehr. Wir wechseln trotzdem. Gurr.
+
+82
+00:05:49,852 --> 00:05:57,204
+[Durchsage] Gurr. Nächster Halt: überall. Ausstieg in Fahrtrichtung links. Oder rechts. Oder unten. Gurr.
+
+83
+00:05:58,804 --> 00:06:05,293
+[Durchsage] Gurr. Aufgrund von Gegenwind verzögert sich die Weiterfahrt. Wir fliegen deshalb rückwärts. Gurr.
+
+84
+00:06:06,643 --> 00:06:09,019
+Wann kommen wir denn in Krümelstadt an?
+
+85
+00:06:09,219 --> 00:06:11,466
+Wir sind schon da. Wir sind immer schon da.
+
+86
+00:06:11,666 --> 00:06:13,692
+Aber wir fliegen doch nur im Kreis!
+
+87
+00:06:13,892 --> 00:06:16,290
+Im Kreis fliegen ist das neue Ankommen.
+
+88
+00:06:16,940 --> 00:06:18,724
+Berechne Ankunftszeit.
+
+89
+00:06:20,174 --> 00:06:24,548
+Ankunftszeit: kreisend. Verspätung: unendlich plus zwölf Minuten.
+
+90
+00:06:25,548 --> 00:06:27,495
+Kurt? Allet jut bei dir?
+
+91
+00:06:27,695 --> 00:06:33,094
+Verspätung wird berechnet. Verspätung wird berechnet. Verspätung wird ver… ver… ver…
+
+92
+00:06:35,744 --> 00:06:40,618
+[Durchsage] Gurr. Diese Fabrik ist jetzt ein Bahnhof. Bitte zurückbleiben. Gurr.
+
+93
+00:06:40,818 --> 00:06:43,308
+Brösel! Die Tauben sind aus dem Film raus!
+
+94
+00:06:43,508 --> 00:06:48,276
+Meine Cousins! Raus hier, aber zackig! Det hier is 'n Arbeitsplatz!
+
+95
+00:06:49,076 --> 00:06:51,031
+Die fressen die Stempelkarten!
+
+96
+00:06:51,231 --> 00:06:55,093
+Nicht die Stempelkarten! Da stehen meine Überstunden drauf!
+
+97
+00:06:56,943 --> 00:06:59,515
+Verzeihung. Wann fährt hier der nächste Zug?
+
+98
+00:06:59,715 --> 00:07:03,566
+Hier fährt gar nix! Hier fährt höchstens det Förderband!
+
+99
+00:07:06,916 --> 00:07:09,398
+[Durchsage] Gurr. Bitte Vorsicht am Förderband. Gurr.
+
+100
+00:07:09,598 --> 00:07:11,369
+Endlich mal pünktlich! Gurr!
+
+101
+00:07:12,319 --> 00:07:13,543
+Auftrag ausgef…
+
+102
+00:07:18,493 --> 00:07:21,524
+Brösel? Das war doch ein guter Auftrag, oder?
+
+103
+00:07:21,774 --> 00:07:27,041
+Die Tauben waren pünktlich. Die Züge sind geflogen. Und keener is anjekommen.
+
+104
+00:07:27,241 --> 00:07:28,336
+Also wie immer?
+
+105
+00:07:28,536 --> 00:07:29,952
+Also wie immer.
+
+106
+00:07:34,102 --> 00:07:35,263
+Feierabend.
+
+107
+00:07:38,013 --> 00:07:40,749
+Und was, wenn … Montag abgeschafft wird?
+
+108
+00:07:40,899 --> 00:07:41,670
+Nein.
+
+109
+00:07:43,020 --> 00:07:44,233
+Auftrag verst…
+
+110
+00:07:43,983 --> 00:07:44,711
+Kurt!
+
+111
+00:07:47,061 --> 00:07:49,809
+Abonnieren und tschüss. Ick hab Feierabend.
