@@ -1,0 +1,805 @@
+<title>Flausenfabrik Markenhandbuch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Mono:wght@400;500&family=Rethink+Sans:wght@400;600;800&display=swap">
+<style>
+/* Layout: eine Werkmappe. Oben die gelbe Werkhalle, darunter ruhige Register; der rote Faden unterstreicht jede Überschrift. */
+:root {
+  --senf: #F4B41A; --faden: #E33D6E; --faden-tief: #B82A55; --petrol: #135D66; --nacht: #1D1A2B; --taube: #A7A3C2; --garn: #FFF8EC;
+  --bg: #F1F4F3; --surface: #FFFFFF; --surface-2: #E5ECEA; --fg: #1D1A2B; --muted: #56616A; --line: #D2DBD9;
+  --accent-text: #0F5A63; --code-bg: #1D1A2B; --code-fg: #FFF8EC;
+  --f-display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --f-body: "Rethink Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --max: 1120px; --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14121C; --surface: #1F1C2B; --surface-2: #2A2639; --fg: #F3EFF8; --muted: #ADA8C6; --line: #373249;
+    --accent-text: #F4B41A; --code-bg: #0D0B14; --code-fg: #FFF8EC; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14121C; --surface: #1F1C2B; --surface-2: #2A2639; --fg: #F3EFF8; --muted: #ADA8C6; --line: #373249;
+  --accent-text: #F4B41A; --code-bg: #0D0B14; --code-fg: #FFF8EC; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 400 17px/1.6 var(--f-body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: var(--accent-text); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--faden); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.wrap { max-width: var(--max); margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
+
+/* Kopfleiste */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; align-items: center; gap: 20px; height: 56px; }
+.topbar .mark { display: flex; align-items: center; gap: 8px; font: 400 18px var(--f-display); color: var(--fg); text-decoration: none; flex: none; }
+.topbar .mark img { width: 30px; }
+.topbar nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.topbar nav::-webkit-scrollbar { display: none; }
+.topbar nav a { font: 500 12.5px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-decoration: none; padding: 6px 9px; border-radius: 999px; white-space: nowrap; }
+.topbar nav a:hover { color: var(--fg); background: var(--surface-2); }
+
+/* Werkhalle (Hero) */
+.hero { background-color: var(--senf); background-image: radial-gradient(rgba(29,26,43,.11) 2px, transparent 2.5px); background-size: 26px 26px; color: var(--nacht); position: relative; }
+.hero .wrap { padding-block: clamp(36px, 6vw, 72px) 0; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+.hero .kicker { font: 500 13px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+.hero h1 { margin-top: 18px; }
+.hero h1 img { width: min(100%, 640px); }
+.hero .claim { font: 400 clamp(30px, 5vw, 52px)/1 var(--f-display); margin-top: 22px; }
+.hero .lead { font-size: 19px; line-height: 1.55; max-width: 34em; margin-top: 18px; }
+.plate { background: var(--garn); color: var(--nacht); border-radius: 10px; padding: 18px 20px 20px; box-shadow: 0 0 0 4px var(--nacht), 8px 10px 0 4px rgba(29,26,43,.25); font: 400 14px/1.5 var(--f-mono); position: relative; margin-top: 8px; }
+.plate::before, .plate::after { content: ""; position: absolute; top: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--taube); box-shadow: inset 0 0 0 2px var(--nacht); }
+.plate::before { left: 10px; } .plate::after { right: 10px; }
+.plate h2 { font: 500 12px var(--f-mono); letter-spacing: .2em; text-align: center; padding-bottom: 10px; border-bottom: 2px dashed rgba(29,26,43,.3); margin-bottom: 8px; }
+.plate dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 5px; }
+.plate dt { color: #5C566E; } .plate dd { margin: 0; font-weight: 500; }
+.belt { grid-column: 1 / -1; display: flex; justify-content: space-around; align-items: flex-end; gap: 12px; margin-top: 8px; }
+.belt img:nth-child(1) { width: clamp(84px, 15vw, 170px); }
+.belt img:nth-child(2) { width: clamp(100px, 18vw, 200px); }
+.belt img:nth-child(3) { width: clamp(100px, 18vw, 200px); }
+.beltline { height: 30px; background: var(--nacht); position: relative; }
+.beltline::before { content: ""; position: absolute; inset: 9px 0; background: repeating-linear-gradient(90deg, var(--nacht) 0 22px, #3A3550 22px 44px); }
+@media (prefers-reduced-motion: no-preference) { .beltline::before { animation: run 2.4s linear infinite; } }
+@keyframes run { to { background-position: 44px 0; } }
+
+/* Register */
+section.reg { padding-block: clamp(56px, 8vw, 96px) 0; }
+.eyebrow { font: 500 12.5px var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+h2.title { font: 400 clamp(34px, 5vw, 52px)/1.02 var(--f-display); margin-top: 10px; padding-bottom: 20px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 16'%3E%3Cpath d='M3 8C30 -2 45 18 72 8S118 -2 140 8S190 16 217 6' fill='none' stroke='%23E33D6E' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E") left bottom / 180px 13px no-repeat; }
+.intro { font-size: 19px; max-width: 40em; margin-top: 20px; color: var(--fg); }
+.intro + .intro { margin-top: 12px; }
+h3 { font: 800 21px/1.25 var(--f-body); }
+.muted { color: var(--muted); }
+.mono { font-family: var(--f-mono); }
+.grid { display: grid; gap: 20px; margin-top: 32px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; min-width: 0; }
+.card p + p { margin-top: 10px; }
+.label { font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+/* Markenkern */
+.etym { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 32px; margin-top: 32px; align-items: center; }
+.etym .word { font: 400 clamp(44px, 8vw, 92px)/.9 var(--f-display); color: var(--faden); }
+.etym .word small { display: block; font: 500 14px var(--f-mono); letter-spacing: .1em; color: var(--muted); margin-top: 14px; }
+.values .card h3 { margin-bottom: 8px; }
+.notlist { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+.notlist li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; }
+.notlist li::before { content: "×"; font: 800 18px/1.4 var(--f-body); color: var(--faden); }
+.yeslist li::before { content: "✓"; color: var(--petrol); }
+:root[data-theme="dark"] .yeslist li::before { color: var(--senf); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .yeslist li::before { color: var(--senf); } }
+
+/* Logo */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.tile { border-radius: var(--r); padding: clamp(24px, 4vw, 44px); display: grid; place-items: center; min-height: 220px; position: relative; }
+.tile img { height: auto; }
+.tile .w-quer { width: min(100%, 420px); }
+.tile .w-stapel { width: 190px; }
+.tile .w-icon { width: 130px; }
+.tile .cap { position: absolute; left: 16px; bottom: 12px; font: 500 11.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; }
+.on-senf { background: var(--senf); color: var(--nacht); }
+.on-petrol { background: var(--petrol); color: var(--garn); }
+.on-garn { background: var(--garn); color: var(--nacht); box-shadow: inset 0 0 0 1px rgba(29,26,43,.12); }
+.on-nacht { background: var(--nacht); color: var(--garn); }
+.donts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; margin-top: 16px; }
+.dont { margin: 0; }
+.dont .box { background: var(--garn); border-radius: 10px; height: 120px; display: grid; place-items: center; overflow: hidden; padding: 12px; box-shadow: inset 0 0 0 1px rgba(29,26,43,.12); position: relative; }
+.dont .box::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 2px), var(--faden) calc(50% - 2px), var(--faden) calc(50% + 2px), transparent calc(50% + 2px)); opacity: .85; }
+.dont img { width: 85%; }
+.dont figcaption { font-size: 14.5px; margin-top: 8px; color: var(--muted); }
+.specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; margin-top: 16px; }
+
+/* Farben */
+.swatches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+@media (min-width: 980px) { .swatches { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+.swatch { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.swatch .chip { aspect-ratio: 4 / 3; padding: 12px 14px; font: 400 26px/1 var(--f-display); display: flex; align-items: flex-end; }
+.swatch .info { padding: 14px; display: grid; gap: 6px; flex: 1; align-content: start; }
+.swatch .name { font-weight: 800; font-size: 17px; line-height: 1.2; }
+.swatch .codes { font: 400 13px/1.5 var(--f-mono); color: var(--muted); }
+.swatch .role { font-size: 14.5px; line-height: 1.45; }
+.copyhex { font: 500 13px var(--f-mono); background: var(--surface-2); color: var(--fg); border: 0; border-radius: 6px; padding: 4px 8px; cursor: pointer; justify-self: start; }
+.copyhex:hover { background: var(--line); }
+.ratio { display: flex; height: 54px; border-radius: 10px; overflow: hidden; margin-top: 14px; box-shadow: inset 0 0 0 1px var(--line); }
+.ratio div { display: flex; align-items: flex-end; padding: 6px 8px; font: 500 12px var(--f-mono); min-width: 0; overflow: hidden; white-space: nowrap; }
+.tablewrap { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 15.5px; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); white-space: nowrap; }
+.pair { display: inline-flex; align-items: center; justify-content: center; min-width: 74px; padding: 6px 10px; border-radius: 8px; font: 400 18px/1 var(--f-display); }
+
+/* Schrift */
+.specimen { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 28px; padding-block: 28px; border-top: 1px solid var(--line); align-items: start; }
+.specimen:last-child { border-bottom: 1px solid var(--line); }
+.specimen .meta { display: grid; gap: 6px; }
+.specimen .meta b { font-size: 19px; }
+.specimen .sample { overflow-wrap: anywhere; }
+.s-display { font: 400 clamp(40px, 7vw, 76px)/1 var(--f-display); }
+.s-body { font: 800 clamp(24px, 3.4vw, 32px)/1.2 var(--f-body); }
+.s-body + p { margin-top: 10px; max-width: 36em; }
+.s-mono { font: 500 clamp(17px, 2.4vw, 22px)/1.4 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+
+/* Figuren */
+.cast { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; margin-top: 32px; }
+.char { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.char .stage { height: 250px; display: grid; place-items: end center; padding: 24px 24px 0; position: relative; }
+.char .stage img { height: 210px; width: auto; }
+.char .stage .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--nacht); }
+.char .body { padding: 22px 24px 24px; display: grid; gap: 14px; }
+.char h3 { font: 400 34px/1 var(--f-display); }
+.char .role { font: 500 12.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.char .quote { font: 400 22px/1.15 var(--f-display); color: var(--faden); }
+.char dl { margin: 0; display: grid; gap: 10px; }
+.char dt { font: 500 11.5px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.char dd { margin: 2px 0 0; font-size: 15.5px; line-height: 1.5; }
+.prompt { position: relative; background: var(--code-bg); color: var(--code-fg); border-radius: 10px; padding: 16px 16px 16px; font: 400 13px/1.6 var(--f-mono); }
+.prompt pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; padding-right: 6px; }
+.prompt .ph { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; font: 500 11px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--senf); }
+.copy { font: 500 11.5px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; background: var(--senf); color: var(--nacht); border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer; flex: none; }
+.copy:hover { background: var(--garn); }
+.copy.done { background: var(--faden); color: var(--garn); }
+
+/* Look */
+.lookgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0; margin-top: 32px; border-top: 1px solid var(--line); }
+.lookgrid > div { padding: 20px 20px 22px 0; border-bottom: 1px solid var(--line); }
+.lookgrid h3 { font-size: 18px; margin-bottom: 6px; }
+.lookgrid p { font-size: 15.5px; }
+.steps { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 0; counter-reset: st; }
+.steps li { counter-increment: st; padding: 18px 18px 22px; border-left: 3px solid var(--faden); position: relative; background: var(--surface); }
+.steps li + li { border-left-style: dashed; }
+.steps li::before { content: "Station " counter(st); display: block; font: 500 11.5px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faden); margin-bottom: 6px; }
+.steps b { display: block; font-size: 17px; margin-bottom: 4px; }
+.steps span { font-size: 14.5px; color: var(--muted); display: block; line-height: 1.5; }
+
+/* Ton */
+.voice { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 12px 32px; }
+.voice li b { display: block; font-size: 18px; }
+.voice li { padding-block: 10px; border-bottom: 1px solid var(--line); }
+.sonicht td:first-child { font-weight: 600; }
+.sonicht td.bad { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faden); text-decoration-thickness: 2px; }
+
+/* Formate */
+.formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; margin-top: 32px; }
+.fmt { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.fmt .band { padding: 18px 22px 16px; }
+.fmt .band h3 { font: 400 27px/1.05 var(--f-display); }
+.fmt .band .label { color: inherit; opacity: .8; margin-top: 8px; display: block; }
+.fmt .content { padding: 18px 22px 22px; display: grid; gap: 12px; }
+.fmt dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; font-size: 15px; }
+.fmt dt { font: 500 12px/1.9 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fmt dd { margin: 0; }
+.fmt .ex { font-size: 15px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.fmt .ex i { font-style: normal; color: var(--muted); font: 500 11.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.timeline { margin-top: 18px; }
+.tl-bar { display: flex; height: 44px; border-radius: 8px; overflow: hidden; }
+.tl-bar div { min-width: 0; border-right: 2px solid var(--bg); }
+.tl-bar div:last-child { border-right: 0; }
+.tl-axis { display: flex; justify-content: space-between; font: 400 12px var(--f-mono); color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.tl-list { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px 24px; }
+.tl-list li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 10px; font-size: 15px; }
+.tl-list li::before { content: ""; width: 14px; height: 14px; border-radius: 4px; background: var(--c); margin-top: 4px; box-shadow: inset 0 0 0 1px rgba(29,26,43,.2); }
+.tl-list b { font-family: var(--f-mono); font-weight: 500; font-size: 13px; font-variant-numeric: tabular-nums; display: block; color: var(--muted); }
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.week div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px 12px; min-height: 108px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.week .d { font: 500 12px var(--f-mono); letter-spacing: .1em; color: var(--muted); }
+.week .slot { font-size: 13px; line-height: 1.3; border-radius: 6px; padding: 6px 7px; font-weight: 600; overflow-wrap: anywhere; }
+.slot.main { background: var(--senf); color: var(--nacht); }
+.slot.short { background: var(--taube); color: var(--nacht); }
+.slot.aus { background: var(--faden); color: var(--garn); }
+
+/* Thumbnails & Kanal */
+.thumbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 32px; }
+.thumbs figure { margin: 0; }
+.thumbs img { border-radius: 10px; aspect-ratio: 16 / 9; width: 100%; object-fit: cover; }
+.thumbs figcaption { font-size: 14.5px; color: var(--muted); margin-top: 8px; }
+.rules { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; counter-reset: r; }
+.rules li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; font-size: 16px; }
+.rules li::before { counter-increment: r; content: counter(r); font: 400 18px/1.35 var(--f-display); color: var(--faden); }
+.legend { display: grid; gap: 8px; }
+.legend div { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 15px; }
+.legend span { width: 34px; height: 22px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(29,26,43,.2); }
+.bannerfig { margin: 0; position: relative; }
+.bannerfig .img { position: relative; border-radius: 10px; overflow: hidden; }
+.zone { position: absolute; border: 3px dashed; pointer-events: none; }
+.zone.desk { left: 0; right: 0; top: 35.28%; height: 29.375%; border-color: var(--nacht); border-left: 0; border-right: 0; }
+.zone.safe { left: 19.8%; top: 35.28%; width: 60.39%; height: 29.375%; border-color: var(--faden); }
+.zonekey { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); margin-top: 10px; }
+.zonekey span[style]::before { content: ""; display: inline-block; width: 24px; height: 12px; border-radius: 3px; background: linear-gradient(var(--c), var(--c)) center / 100% 3px no-repeat, var(--garn); box-shadow: inset 0 0 0 1px rgba(29,26,43,.2); vertical-align: -1px; margin-right: 8px; }
+.kitrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 20px; margin-top: 20px; align-items: start; }
+.kitrow figure { margin: 0; display: grid; gap: 10px; }
+.kitrow .pp { width: 150px; border-radius: 50%; }
+.kitrow .wm { width: 75px; }
+.endcard { aspect-ratio: 16 / 9; background: var(--petrol); border-radius: 10px; position: relative; overflow: hidden; color: var(--garn); max-width: 100%; }
+.endcard .ec-video { position: absolute; left: 7%; top: 22%; width: 43%; aspect-ratio: 16 / 9; border: 3px dashed var(--garn); border-radius: 8px; display: grid; place-items: center; font: 500 clamp(9px, 1.4vw, 13px) var(--f-mono); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 6px; }
+.endcard .ec-sub { position: absolute; left: 57%; top: 26%; width: 17%; aspect-ratio: 1; border-radius: 50%; background: var(--senf); display: grid; place-items: center; box-shadow: 0 0 0 3px var(--garn); }
+.endcard .ec-sub img { width: 74%; }
+.endcard .ec-broesel { position: absolute; right: 3%; bottom: 6%; width: 24%; }
+.endcard .ec-stamp { position: absolute; left: 7%; bottom: 9%; font: 400 clamp(16px, 3vw, 30px)/1 var(--f-display); color: var(--senf); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chips span { font: 500 13px var(--f-mono); background: var(--surface-2); padding: 5px 10px; border-radius: 999px; }
+
+/* Startplan */
+.charges { list-style: none; padding: 0; margin: 32px 0 0; border-top: 1px solid var(--line); }
+.charges li { display: grid; grid-template-columns: 116px minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.charges .no { font: 500 13px var(--f-mono); letter-spacing: .08em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.charges .t { font-weight: 600; font-size: 17px; }
+.charges .f { font: 500 11.5px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+.f.uww { background: var(--senf); color: var(--nacht); }
+.f.auf { background: var(--petrol); color: var(--garn); }
+.f.epi { background: var(--nacht); color: var(--garn); box-shadow: inset 0 0 0 1px var(--line); }
+.f.aus { background: var(--faden); color: var(--garn); }
+.f.trl { background: var(--taube); color: var(--nacht); }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.checks li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; }
+.checks li::before { content: ""; width: 20px; height: 20px; border: 2.5px solid var(--fg); border-radius: 5px; margin-top: 3px; }
+.checks b { display: block; }
+.checks span { color: var(--muted); font-size: 15.5px; }
+
+footer { margin-top: clamp(64px, 9vw, 110px); background: var(--nacht); color: var(--garn); }
+footer .wrap { padding-block: 40px 48px; display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: center; justify-content: space-between; }
+footer img { width: 220px; }
+footer p { font: 400 13px/1.6 var(--f-mono); color: var(--taube); }
+
+@media (max-width: 760px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .etym { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .specimen { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .charges li { grid-template-columns: minmax(0, 1fr) auto; }
+  .charges .no { grid-column: 1 / -1; }
+  .week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .topbar .mark span { display: none; }
+}
+</style>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="mark" href="#top"><img src="assets/logo/icon-fussel.svg" alt=""><span>Flausenfabrik</span></a>
+    <nav aria-label="Abschnitte">
+      <a href="#kern">Kern</a><a href="#logo">Logo</a><a href="#farben">Farben</a><a href="#schrift">Schrift</a><a href="#figuren">Figuren</a><a href="#look">Look</a><a href="#ton">Ton</a><a href="#formate">Formate</a><a href="#thumbnails">Thumbnails</a><a href="#kanal">Kanal</a><a href="#start">Start</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <p class="kicker">Markenhandbuch · Version 1.0 · Oktober 2026</p>
+      <h1><img src="assets/logo/logo-horizontal.svg" alt="Flausenfabrik"></h1>
+      <p class="claim">Unsinn am Fließband.</p>
+      <p class="lead">Die Flausenfabrik ist ein deutschsprachiger YouTube-Kanal für animierte Kurzgeschichten. Fussel hat die Ideen. Die Maschine KURT setzt sie um, leider wörtlich. Und Taube Brösel will eigentlich nur Feierabend.</p>
+    </div>
+    <div class="plate" role="group" aria-label="Typenschild des Kanals">
+      <h2>TYPENSCHILD</h2>
+      <dl>
+        <dt>Hersteller</dt><dd>Flausenfabrik</dd>
+        <dt>Modell</dt><dd>Animationskanal, Unterhaltung</dd>
+        <dt>Handle</dt><dd>@flausenfabrik</dd>
+        <dt>Sprache</dt><dd>Deutsch, per du</dd>
+        <dt>Zielgruppe</dt><dd>16–34 Jahre</dd>
+        <dt>Schicht</dt><dd>Freitag, 16:00 Uhr</dd>
+        <dt>Signatur</dt><dd>🧶</dd>
+        <dt>Baujahr</dt><dd>2026</dd>
+      </dl>
+    </div>
+    <div class="belt" aria-hidden="true">
+      <img src="assets/figuren/fussel.svg" alt="">
+      <img src="assets/figuren/kurt.svg" alt="">
+      <img src="assets/figuren/broesel.svg" alt="">
+    </div>
+  </div>
+  <div class="beltline" aria-hidden="true"></div>
+</div>
+
+<main class="wrap">
+
+<section class="reg" id="kern">
+  <p class="eyebrow">Markenkern</p>
+  <h2 class="title">Woher der Name kommt</h2>
+  <div class="etym">
+    <p class="word">Flau·se<small>die, meist Plural: Flausen</small></p>
+    <div>
+      <p class="intro" style="margin-top:0">Wer „Flausen im Kopf“ hat, hat lauter Unsinn im Sinn. Ursprünglich bedeutete Flause so viel wie Wollflocke oder Fussel.</p>
+      <p class="intro">Daraus ist die ganze Marke gebaut. Unser Maskottchen ist ein Wollfussel. Unsere Animationen sehen aus wie Filz. Und der rote Faden zieht sich durch jedes Video, vom Logo bis zum Abspann.</p>
+    </div>
+  </div>
+
+  <div class="grid g3 values">
+    <div class="card"><h3>Absurd mit Herz</h3><p>Wir übertreiben den Alltag, bis er kippt. Wir lachen mit unseren Figuren und nie über echte Menschen.</p></div>
+    <div class="card"><h3>Handschrift statt Masse</h3><p>Jede Folge hat eine eigene Geschichte, feste Figuren und einen erkennbaren Look. Lieber eine gute Folge als zehn beliebige.</p></div>
+    <div class="card"><h3>Offen mit KI</h3><p>Wir sagen, dass wir mit KI animieren, und zeigen in „Ausschuss“ sogar, was dabei schiefgeht. Die KI ist das Werkzeug. Ideen und Pointen kommen von uns.</p></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <p class="label">Mission</p>
+      <p style="font-size:19px;margin-top:8px">Wir machen aus kleinen Alltagsfragen große, liebevoll schiefe Animationsgeschichten. Man schaut sie in der Mittagspause und erzählt sie abends weiter.</p>
+      <p class="label" style="margin-top:22px">Für wen</p>
+      <p>Deutschsprachige Zuschauer zwischen 16 und 34, die YouTube am Handy und auf dem Fernseher schauen und Sketch-Comedy, Animationsserien und Geschichten mit Pointe mögen. Die Folgen sind familientauglich, richten sich aber an Jugendliche und Erwachsene.</p>
+    </div>
+    <div class="card">
+      <p class="label">Das sind wir nicht</p>
+      <ul class="notlist">
+        <li>Kein KI-News- oder Erklärkanal</li>
+        <li>Keine realistischen Menschen, keine Promis, keine Deepfakes</li>
+        <li>Kein Kinderkanal, auch wenn Fussel niedlich ist</li>
+        <li>Keine Endlos-Kompilationen ohne Geschichte</li>
+        <li>Kein Spott über echte Personen oder Gruppen</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="reg" id="logo">
+  <p class="eyebrow">Logo</p>
+  <h2 class="title">Ein Faden, ein Knäuel</h2>
+  <p class="intro">Der Faden kommt aus Fussels Kopf, spannt sich über den Schriftzug und landet als Wollknäuel auf dem i. Das ist der rote Faden der Marke. Ohne Faden ist es nicht unser Logo.</p>
+
+  <div class="tiles">
+    <div class="tile on-senf"><img class="w-quer" src="assets/logo/logo-horizontal.svg" alt="Logo quer, dunkel auf Flausengelb"><span class="cap">Hauptlogo · quer</span></div>
+    <div class="tile on-petrol"><img class="w-quer" src="assets/logo/logo-horizontal-hell.svg" alt="Logo quer, hell auf Petrol"><span class="cap">Hell · auf dunklen Flächen</span></div>
+    <div class="tile on-garn"><img class="w-stapel" src="assets/logo/logo-gestapelt.svg" alt="Logo gestapelt"><span class="cap">Gestapelt · Hochformat, Shorts</span></div>
+    <div class="tile on-nacht"><img class="w-icon" src="assets/logo/icon-fussel.svg" alt="Fussel als Bildmarke"><span class="cap">Bildmarke · Profil, Favicon, Wasserzeichen</span></div>
+  </div>
+
+  <div class="specs">
+    <div class="card"><p class="label">Schutzzone</p><p style="margin-top:6px">Rundum mindestens zweimal die Breite des Wollknäuels frei lassen. Keine Schrift, keine Figur, keine Kante darin.</p></div>
+    <div class="card"><p class="label">Mindestgröße</p><p style="margin-top:6px">Quer ab 160 px Breite, gestapelt ab 96 px. Darunter nur Fussel allein, ab 24 px.</p></div>
+    <div class="card"><p class="label">Flächen</p><p style="margin-top:6px">Dunkles Logo auf Flausengelb und Garnweiß. Helles Logo auf Petrol und Nachtschicht. Auf Fotos nur mit Farbfläche dahinter.</p></div>
+  </div>
+
+  <div class="donts" aria-label="Was mit dem Logo nicht passieren darf">
+    <figure class="dont"><div class="box"><img src="assets/logo/logo-horizontal.svg" alt="" style="transform:scaleX(1.35) scaleY(.8)"></div><figcaption>Nicht verzerren</figcaption></figure>
+    <figure class="dont"><div class="box"><img src="assets/logo/logo-horizontal.svg" alt="" style="filter:hue-rotate(150deg) saturate(1.6)"></div><figcaption>Nicht umfärben, auch den Faden nicht</figcaption></figure>
+    <figure class="dont"><div class="box" style="background:repeating-linear-gradient(45deg,#7FB8A4 0 10px,#E33D6E 10px 20px,#F4B41A 20px 30px)"><img src="assets/logo/logo-horizontal.svg" alt=""></div><figcaption>Nicht auf unruhigen Grund</figcaption></figure>
+    <figure class="dont"><div class="box"><img src="assets/logo/wortmarke.svg" alt="" style="transform:rotate(-12deg);filter:drop-shadow(6px 6px 3px rgba(0,0,0,.45))"></div><figcaption>Nicht drehen, keine Schatten</figcaption></figure>
+  </div>
+</section>
+
+<section class="reg" id="farben">
+  <p class="eyebrow">Farben</p>
+  <h2 class="title">Sechs Garnrollen</h2>
+  <p class="intro">Die Palette stammt aus einer Bastelkiste der Siebziger: Senf, Himbeere, Petrol. Jede Figur hat ihre Farbe, jedes Format auch.</p>
+
+  <div class="swatches">
+    <div class="swatch"><div class="chip on-senf">Aa</div><div class="info"><span class="name">Flausengelb</span><span class="codes">RGB 244 180 26</span><button class="copyhex" data-copy="#F4B41A">#F4B41A</button><span class="role">Hauptfarbe. Werkhalle, Banner, Format „Und was, wenn …?“</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--faden);color:var(--garn)">Aa</div><div class="info"><span class="name">Fadenrot</span><span class="codes">RGB 227 61 110</span><button class="copyhex" data-copy="#E33D6E">#E33D6E</button><span class="role">Fussel und der rote Faden. Akzent. Als Fläche nur bei „Ausschuss“.</span></div></div>
+    <div class="swatch"><div class="chip on-petrol">Aa</div><div class="info"><span class="name">KURT-Petrol</span><span class="codes">RGB 19 93 102</span><button class="copyhex" data-copy="#135D66">#135D66</button><span class="role">Die Maschine. Zweite Fläche, Format „Auftrag verstanden“.</span></div></div>
+    <div class="swatch"><div class="chip on-nacht">Aa</div><div class="info"><span class="name">Nachtschicht</span><span class="codes">RGB 29 26 43</span><button class="copyhex" data-copy="#1D1A2B">#1D1A2B</button><span class="role">Schrift, Konturen, Format „Alltag in Episch“.</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--taube);color:var(--nacht)">Aa</div><div class="info"><span class="name">Taubengrau</span><span class="codes">RGB 167 163 194</span><button class="copyhex" data-copy="#A7A3C2">#A7A3C2</button><span class="role">Brösel. Ruhige Nebenfläche, Shorts „Feierabend“.</span></div></div>
+    <div class="swatch"><div class="chip on-garn">Aa</div><div class="info"><span class="name">Garnweiß</span><span class="codes">RGB 255 248 236</span><button class="copyhex" data-copy="#FFF8EC">#FFF8EC</button><span class="role">Helle Schrift, Nähte, Kontur um freigestellte Figuren.</span></div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:28px">
+    <div>
+      <h3>Mengenverhältnis</h3>
+      <p class="muted" style="margin-top:4px;font-size:15.5px">So viel Fläche bekommt jede Farbe über alle Kanäle gerechnet.</p>
+      <div class="ratio" role="img" aria-label="Flausengelb 45 Prozent, Petrol 20, Nachtschicht 18, Garnweiß 9, Fadenrot 6, Taubengrau 2">
+        <div style="flex:45;background:var(--senf);color:var(--nacht)">45 %</div>
+        <div style="flex:20;background:var(--petrol);color:var(--garn)">20 %</div>
+        <div style="flex:18;background:var(--nacht);color:var(--garn)">18 %</div>
+        <div style="flex:9;background:var(--garn);color:var(--nacht)">9 %</div>
+        <div style="flex:6;background:var(--faden);color:var(--garn)">6</div>
+        <div style="flex:2;background:var(--taube)"></div>
+      </div>
+    </div>
+    <div>
+      <h3>Lesbare Paare</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Paar</th><th>Kontrast</th><th>Einsatz</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pair on-senf">Aa</span></td><td class="num">9,3 : 1</td><td>Jede Textgröße</td></tr>
+            <tr><td><span class="pair on-petrol">Aa</span></td><td class="num">7,1 : 1</td><td>Jede Textgröße</td></tr>
+            <tr><td><span class="pair" style="background:var(--faden);color:var(--garn)">Aa</span></td><td class="num">3,8 : 1</td><td>Nur große Schrift ab 24 px</td></tr>
+            <tr><td><span class="pair" style="background:var(--petrol);color:var(--senf)">Aa</span></td><td class="num">4,1 : 1</td><td>Nur große Schrift ab 24 px</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reg" id="schrift">
+  <p class="eyebrow">Schrift</p>
+  <h2 class="title">Drei Schriften, drei Aufgaben</h2>
+  <p class="intro">Alle drei sind kostenlos bei Google Fonts erhältlich und decken Umlaute und ß ab.</p>
+  <div style="margin-top:28px">
+    <div class="specimen">
+      <div class="meta"><b>Bagel Fat One</b><span class="label">Titel · Thumbnails · Logo</span><span class="muted" style="font-size:15px">Weich und dick wie gefilzte Wolle. Nur für kurze Zeilen, höchstens vier Wörter.</span></div>
+      <p class="sample s-display">Tauben fahren Bahn?!</p>
+    </div>
+    <div class="specimen">
+      <div class="meta"><b>Rethink Sans</b><span class="label">Text · Untertitel · Posts</span><span class="muted" style="font-size:15px">Regular für Fließtext, 600 zum Hervorheben, 800 für eingebrannte Untertitel in Shorts.</span></div>
+      <div class="sample"><p class="s-body">„Ick hab gleich Feierabend.“</p><p>Fussel will wissen, was passiert, wenn Montag abgeschafft wird. KURT hat da eine Idee, und Brösel hat schon jetzt keine Lust mehr.</p></div>
+    </div>
+    <div class="specimen">
+      <div class="meta"><b>DM Mono</b><span class="label">Etiketten · Nummern</span><span class="muted" style="font-size:15px">Für alles, was nach Fabrik aussieht: Chargen, Aufträge, Laufzeiten, Format-Badges. Immer in Versalien und gesperrt.</span></div>
+      <p class="sample s-mono">Charge 014 · Auftrag #0042 · Laufzeit 7:42</p>
+    </div>
+  </div>
+</section>
+
+<section class="reg" id="figuren">
+  <p class="eyebrow">Ensemble</p>
+  <h2 class="title">Die Belegschaft</h2>
+  <p class="intro">Drei Figuren, ein Ablauf: Fussel hat eine Idee, KURT produziert sie, es eskaliert, Brösel räumt auf. Jede Folge folgt diesem Motor.</p>
+  <p class="intro">Die Zeichnungen hier sind die Modellblätter. Im Video sind alle drei Filzpuppen, generiert mit den Prompts unter jeder Figur. Die Prompts sind auf Englisch, weil Bild- und Video-KIs damit verlässlicher arbeiten.</p>
+
+  <div class="cast">
+    <article class="char">
+      <div class="stage on-senf"><img src="assets/figuren/fussel.svg" alt="Fussel, ein himbeerroter Wollfussel mit großen Augen"><div class="floor"></div></div>
+      <div class="body">
+        <div><h3>Fussel</h3><p class="role">Maskottchen · Ideengeber</p></div>
+        <p class="quote">„Und was, wenn …?“</p>
+        <dl>
+          <dt>Wer</dt><dd>Ein Wollfussel, der aus Köpfen fällt, wenn jemand eine Flause hat. Wohnt seitdem in der Fabrik.</dd>
+          <dt>Wie</dt><dd>Neugierig, aufgedreht, furchtlos. Hat alle drei Sekunden eine Idee und versteht nie, warum etwas nicht gehen sollte.</dd>
+          <dt>Stimme</dt><dd>Hell, schnell, überschlägt sich. Kein Babysprech.</dd>
+          <dt>Eigenheit</dt><dd>Hat keine Arme und greift mit seinem Faden. Bei jeder Idee wird der Faden ein Stück kürzer.</dd>
+        </dl>
+        <div class="prompt"><div class="ph"><span>Figuren-Prompt</span><button class="copy" type="button">Kopieren</button></div><pre>Fussel, a small round fluffy pom-pom creature made of raspberry-pink wool (#E33D6E), tennis-ball sized, fuzzy spiky silhouette, two big white button eyes with black pupils, left eye slightly larger, small round open mouth, one loose raspberry yarn thread curling up from the top of its head, no arms, thin black pipe-cleaner legs with round black felt feet</pre></div>
+      </div>
+    </article>
+    <article class="char">
+      <div class="stage on-garn"><img src="assets/figuren/kurt.svg" alt="KURT, eine petrolfarbene Maschine mit Bildschirmgesicht, Trichter und Kurbel"><div class="floor"></div></div>
+      <div class="body">
+        <div><h3>KURT</h3><p class="role">Kurbelbetriebene Unterhaltungs-Rechen-Technik</p></div>
+        <p class="quote">„Auftrag verstanden.“</p>
+        <dl>
+          <dt>Wer</dt><dd>Die Maschine, die aus Ideen Filme macht. Oben kommt die Idee in den Trichter, rechts wird gekurbelt.</dd>
+          <dt>Wie</dt><dd>Höflich, gründlich, humorlos. Nimmt jedes Wort wörtlich. Siezt alle, auch die Taube. Spricht Amtsdeutsch.</dd>
+          <dt>Stimme</dt><dd>Ruhig, tief, monoton. Zwischen den Sätzen ein leises Rattern.</dd>
+          <dt>Eigenheit</dt><dd>Läuft nur, solange jemand kurbelt. Hört das Kurbeln auf, bleibt er mitten im Satz ste</dd>
+        </dl>
+        <div class="prompt"><div class="ph"><span>Figuren-Prompt</span><button class="copy" type="button">Kopieren</button></div><pre>KURT, a boxy vintage machine the size of a fridge, deep teal (#135D66) cabinet with rounded corners and felt-covered surfaces, a round dark CRT screen as face showing two glowing mustard-yellow square pixel eyes and a flat line mouth, an off-white funnel on top, a black hand crank with a raspberry handle on the right side, two round cream dials and a small mustard nameplate on the front, short black block legs</pre></div>
+      </div>
+    </article>
+    <article class="char">
+      <div class="stage on-petrol"><img src="assets/figuren/broesel.svg" alt="Brösel, eine graue Taube mit weißem Bauhelm und Klemmbrett"><div class="floor"></div></div>
+      <div class="body">
+        <div><h3>Brösel</h3><p class="role">Schichtleiter · einziger Angestellter</p></div>
+        <p class="quote">„Ick hab gleich Feierabend.“</p>
+        <dl>
+          <dt>Wer</dt><dd>Die Stadttaube, die den Laden zusammenhält. Trägt den weißen Helm, weil Weiß auf Baustellen die Farbe der Chefs ist. Das ist ihm wichtig.</dd>
+          <dt>Wie</dt><dd>Müde, brummig, pflichtbewusst. Heimlich das Herz der Fabrik. Lebt von Brötchenbröseln.</dd>
+          <dt>Stimme</dt><dd>Rau, langsam, leicht berlinernd.</dd>
+          <dt>Eigenheit</dt><dd>Räumt am Ende jeder Folge auf und stempelt aus. Das ist das Outro.</dd>
+        </dl>
+        <div class="prompt"><div class="ph"><span>Figuren-Prompt</span><button class="copy" type="button">Kopieren</button></div><pre>Brösel, a chubby lavender-grey (#A7A3C2) felt pigeon with an iridescent teal and raspberry neck, heavy half-closed tired eyelids, small dark beak with a white cere, pink feet, wearing a small white hard hat, holding a cream clipboard under one wing, slouched grumpy posture</pre></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <p class="label">Schauplatz</p>
+      <h3 style="margin-top:6px">Die Halle</h3>
+      <p style="margin-top:8px">Eine gemütliche Miniaturfabrik aus Pappe und Filz. Förderbänder aus Garn, warme Hängelampen, gelbe Wände, petrolfarbene Maschinen, überall Knöpfe, Garnrollen und Stempelkarten. Jede Folge beginnt und endet hier.</p>
+    </div>
+    <div class="prompt"><div class="ph"><span>Schauplatz-Prompt</span><button class="copy" type="button">Kopieren</button></div><pre>a cozy miniature factory hall built from cardboard and felt, conveyor belts made of yarn, warm hanging lamps, mustard-yellow walls, deep teal machines, scattered buttons, thread spools and punch cards, handmade stop-motion set</pre></div>
+  </div>
+</section>
+
+<section class="reg" id="look">
+  <p class="eyebrow">Look &amp; Animation</p>
+  <h2 class="title">Filz und Pappe</h2>
+  <p class="intro">Jedes Video sieht aus wie Stop-Motion mit Filzpuppen in einer Miniaturwelt. Das hebt uns von glatter KI-Optik ab und verzeiht kleine Fehler, denn bei Filz darf eine Kante wackeln.</p>
+
+  <div class="lookgrid">
+    <div><h3>Material</h3><p>Nadelfilz, Wolle, Pappe, Knöpfe, Garn, Holz. Fasern und Nähte sind sichtbar.</p></div>
+    <div><h3>Licht</h3><p>Weiches, warmes Studiolicht von oben links, sanfte Schatten. Kein Neon, kein Gegenlicht-Kitsch.</p></div>
+    <div><h3>Kamera</h3><p>Miniatur-Look mit geringer Schärfentiefe, wie mit 35-mm-Objektiv auf Augenhöhe der Figuren. Wenige, ruhige Fahrten.</p></div>
+    <div><h3>Bewegung</h3><p>Leicht ruckelig wie echte Stop-Motion: Bewegung auf 12 Bilder pro Sekunde reduzieren, als 24 fps exportieren.</p></div>
+    <div><h3>Farbe</h3><p>Die sechs Markenfarben bestimmen jedes Bild. Hintergründe meist Flausengelb oder Petrol.</p></div>
+    <div><h3>Formate</h3><p>Hauptfolgen 16:9 in 1920 × 1080 oder 3840 × 2160. Shorts 9:16 in 1080 × 1920.</p></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="prompt"><div class="ph"><span>Stil-Prompt · an jeden Prompt anhängen</span><button class="copy" type="button">Kopieren</button></div><pre>handmade stop-motion animation, needle-felted wool characters, miniature cardboard and felt set, visible wool fibers and stitches, button and yarn details, soft warm studio light from top left, shallow depth of field, tilt-shift miniature look, 35mm lens, color palette of mustard yellow, raspberry pink and deep teal, cozy and whimsical</pre></div>
+    <div class="prompt"><div class="ph"><span>Negativ-Prompt</span><button class="copy" type="button">Kopieren</button></div><pre>photorealistic, glossy plastic, 3D CGI render, realistic humans, celebrities, real brands, text, letters, logos, watermark, neon, cyberpunk, extra limbs, distorted faces, horror</pre></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card"><p class="label">So</p><ul class="notlist yeslist">
+      <li>Figuren immer aus ihren Referenzbildern erzeugen (Bild-zu-Video), nie nur aus Text</li>
+      <li>Pro Figur ein festes Referenzset: vorne, Seite, hinten, drei Gesichtsausdrücke</li>
+      <li>Clips kurz halten, 3–8 Sekunden, und im Schnitt erzählen</li>
+      <li>Schrift im Bild immer im Schnitt einsetzen, nie generieren lassen</li>
+    </ul></div>
+    <div class="card"><p class="label">Nicht so</p><ul class="notlist">
+      <li>Glänzender Plastik-3D-Look</li>
+      <li>Echte Menschen, Promis, echte Marken</li>
+      <li>Figuren, die von Szene zu Szene anders aussehen</li>
+      <li>Lange Kamerafahrten, in denen die KI die Form verliert</li>
+    </ul></div>
+  </div>
+
+  <h3 style="margin-top:48px">Die Fertigungsstraße</h3>
+  <p class="muted" style="margin-top:4px">So entsteht eine Folge, in dieser Reihenfolge.</p>
+  <ol class="steps">
+    <li><b>Ideenannahme</b><span>Kommentare, Notizbuch, Alltag. Die Idee muss in einen Satz mit „Und was, wenn …“ passen.</span></li>
+    <li><b>Drehbuch</b><span>Schreiben wir selbst. Eine Seite entspricht etwa einer Minute.</span></li>
+    <li><b>Storyboard</b><span>Ein Schlüsselbild pro Szene, mit Bild-KI aus den Referenzbildern.</span></li>
+    <li><b>Animation</b><span>Bild-zu-Video in kurzen Clips. Was nicht passt, wandert in den Ausschuss.</span></li>
+    <li><b>Ton</b><span>Feste KI-Stimme pro Figur, Geräusche, lizenzierte Musik, Sound-Logo.</span></li>
+    <li><b>Endkontrolle</b><span>Schnitt, Untertitel, Thumbnail, KI-Hinweis. Brösel stempelt ab.</span></li>
+  </ol>
+  <p class="muted" style="margin-top:14px;font-size:15px">Die Werkzeuge wechseln schnell. Entscheidend ist, dass ihre Lizenz die kommerzielle Nutzung auf YouTube erlaubt.</p>
+</section>
+
+<section class="reg" id="ton">
+  <p class="eyebrow">Tonalität</p>
+  <h2 class="title">So reden wir</h2>
+  <ul class="voice">
+    <li><b>Wir duzen. KURT siezt.</b>Er ist eine Maschine aus den Siebzigern und lässt sich das nicht nehmen.</li>
+    <li><b>Trocken statt laut.</b>Kein Caps-Lock, keine Versprechen im Titel, die das Video nicht hält.</li>
+    <li><b>Der Alltag ist die Bühne.</b>Bahn, Pfand, Elternabend, Behörde, Montag. Jeder kennt es, keiner hat es so gesehen.</li>
+    <li><b>Wir reden wie eine Fabrik.</b>Charge, Schicht, Auftrag, Ausschuss, Feierabend, Fließband, Stempelkarte.</li>
+  </ul>
+
+  <div class="tablewrap" style="margin-top:28px">
+    <table class="sonicht">
+      <thead><tr><th>Wo</th><th>So</th><th>Nicht so</th></tr></thead>
+      <tbody>
+        <tr><td>Titel</td><td>Und was, wenn Tauben die Bahn übernehmen?</td><td class="bad">KRASS!!! KI zeigt Tauben-Bahn 😱 (ESKALIERT)</td></tr>
+        <tr><td>Erste Zeile der Beschreibung</td><td>Fussel will wissen, was passiert, wenn Montag abgeschafft wird. KURT hat da eine Idee.</td><td class="bad">In diesem Video zeigen wir euch …</td></tr>
+        <tr><td>Community-Post</td><td>KURT hat 312 Aufträge im Postfach. Welcher wird Charge 015? 🧶</td><td class="bad">Leute, kommentiert bitte, sonst stirbt der Kanal</td></tr>
+        <tr><td>KI-Hinweis</td><td>Animiert mit KI-Werkzeugen, ausgedacht in der Flausenfabrik.</td><td class="bad">100 % KI-generiert!!!</td></tr>
+        <tr><td>Abo-Aufruf</td><td>Abo ist wie eine Stempelkarte. Brösel freut sich. Innerlich.</td><td class="bad">Vergesst nicht zu abonnieren und die Glocke zu aktivieren!</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid g2">
+    <div>
+      <h3>Beschreibungsvorlage</h3>
+      <p class="muted" style="margin-top:4px;font-size:15.5px">Jede Folge bekommt einen Produktionsschein. Die Ausschussquote ist ehrlich und ein Running Gag.</p>
+    </div>
+    <div class="prompt"><div class="ph"><span>Videobeschreibung</span><button class="copy" type="button">Kopieren</button></div><pre>[Ein Satz Handlung, endet mit einer Frage oder Pointe.]
+
+🧶 Charge 014 · Auftrag von @name · Laufzeit 7:42 · Ausschuss: 64 %
+Neue Charge jeden Freitag um 16 Uhr. Ein Abo ist wie eine Stempelkarte.
+
+Dein Auftrag für KURT? Schreib ihn in die Kommentare. Vielleicht versteht er ihn diesmal richtig.
+
+Animiert mit KI-Werkzeugen, ausgedacht in der Flausenfabrik.
+Musik: [Titel, Quelle, Lizenz]
+
+#Animation #Comedy #Flausenfabrik</pre></div>
+  </div>
+</section>
+
+<section class="reg" id="formate">
+  <p class="eyebrow">Formate</p>
+  <h2 class="title">Was vom Band läuft</h2>
+  <p class="intro">Fünf Formate, jedes mit eigener Farbe. Wer das Thumbnail sieht, weiß, welche Art Folge kommt.</p>
+
+  <div class="formats">
+    <article class="fmt"><div class="band on-senf"><h3>Und was, wenn …?</h3><span class="label">Hauptformat</span></div><div class="content">
+      <dl><dt>Länge</dt><dd>6–10 Minuten</dd><dt>Takt</dt><dd>2 × im Monat, Freitag</dd><dt>Idee</dt><dd>Eine absurde Frage über den Alltag, konsequent zu Ende gedacht.</dd></dl>
+      <p class="ex"><i>Beispiele</i>Und was, wenn dein Kühlschrank kündigt? · Und was, wenn Montag abgeschafft wird?</p></div></article>
+    <article class="fmt"><div class="band on-petrol"><h3>Auftrag verstanden</h3><span class="label">Community</span></div><div class="content">
+      <dl><dt>Länge</dt><dd>3–5 Minuten</dd><dt>Takt</dt><dd>1 × im Monat, Freitag</dd><dt>Idee</dt><dd>Ein Kommentar wird zum Auftrag. KURT setzt ihn um, Wort für Wort.</dd></dl>
+      <p class="ex"><i>Beispiele</i>„Mach mir einen Freund.“ · „Bring mir Fliegen bei.“</p></div></article>
+    <article class="fmt"><div class="band on-nacht"><h3>Alltag in Episch</h3><span class="label">Trailer-Parodie</span></div><div class="content">
+      <dl><dt>Länge</dt><dd>60–120 Sekunden</dd><dt>Takt</dt><dd>1 × im Monat, Freitag</dd><dt>Idee</dt><dd>Etwas völlig Normales als Kinotrailer, mit Donnerstimme und Zeitlupe.</dd></dl>
+      <p class="ex"><i>Beispiele</i>Pfand II: Die Rückgabe · Der Elternabend · Mülltrennung: Das Erwachen</p></div></article>
+    <article class="fmt"><div class="band" style="background:var(--taube);color:var(--nacht)"><h3>Feierabend</h3><span class="label">Shorts · 9:16</span></div><div class="content">
+      <dl><dt>Länge</dt><dd>15–45 Sekunden</dd><dt>Takt</dt><dd>3 × pro Woche</dd><dt>Idee</dt><dd>Ein Gag, eine Pointe, Brösel stempelt aus. Dazu Ausschnitte aus der Hauptfolge.</dd></dl>
+      <p class="ex"><i>Beispiele</i>Brösel und die Stempeluhr · KURT soll Kaffee kochen</p></div></article>
+    <article class="fmt"><div class="band" style="background:var(--faden);color:var(--garn)"><h3>Ausschuss</h3><span class="label">Pannen-Show</span></div><div class="content">
+      <dl><dt>Länge</dt><dd>2–4 Minuten</dd><dt>Takt</dt><dd>Letzter Sonntag im Monat</dd><dt>Idee</dt><dd>Die schönsten KI-Fehlschläge des Monats, kommentiert von Fussel und KURT.</dd></dl>
+      <p class="ex"><i>Beispiel</i>Ausschuss Nr. 1: Was die Maschine nicht hätte machen sollen</p></div></article>
+  </div>
+
+  <h3 style="margin-top:48px">Bauplan einer Folge „Und was, wenn …?“</h3>
+  <p class="muted" style="margin-top:4px;font-size:15.5px">Beispiel mit 7:40 Laufzeit, maßstabsgetreu.</p>
+  <div class="timeline">
+    <div class="tl-bar" role="img" aria-label="Zeitstrahl einer Folge von 0:00 bis 7:40">
+      <div style="flex:10;background:var(--faden)"></div>
+      <div style="flex:4;background:var(--nacht)"></div>
+      <div style="flex:76;background:var(--petrol)"></div>
+      <div style="flex:270;background:var(--senf)"></div>
+      <div style="flex:60;background:var(--faden-tief)"></div>
+      <div style="flex:40;background:var(--taube)"></div>
+    </div>
+    <div class="tl-axis"><span>0:00</span><span>2:00</span><span>4:00</span><span>6:00</span><span>7:40</span></div>
+    <ol class="tl-list">
+      <li style="--c:var(--faden)"><span><b>0:00–0:10</b>Kaltstart. Fussel stellt die Frage aus dem Titel, sofort.</span></li>
+      <li style="--c:var(--nacht)"><span><b>0:10–0:14</b>Sound-Logo „Ratter-Ratter-Pling“.</span></li>
+      <li style="--c:var(--petrol)"><span><b>0:14–1:30</b>Auftrag. KURT nimmt die Idee an: „Auftrag verstanden.“</span></li>
+      <li style="--c:var(--senf)"><span><b>1:30–6:00</b>Produktion. Die Idee wird wahr und eskaliert in drei Stufen.</span></li>
+      <li style="--c:var(--faden-tief)"><span><b>6:00–7:00</b>Kipppunkt. Alles fliegt auseinander.</span></li>
+      <li style="--c:var(--taube)"><span><b>7:00–7:40</b>Feierabend. Brösel räumt auf, stempelt aus, 20 Sekunden Endcard.</span></li>
+    </ol>
+  </div>
+  <p class="muted" style="font-size:12px;margin-top:6px">Die Achse zeigt Minuten. Die Abschnitte sind proportional zu ihrer Dauer.</p>
+
+  <h3 style="margin-top:48px">Schichtplan</h3>
+  <p class="muted" style="margin-top:4px;font-size:15.5px">Der Wochentakt nach der Startphase.</p>
+  <div class="week">
+    <div><span class="d">MO</span></div>
+    <div><span class="d">DI</span><span class="slot short">Short 18 Uhr</span></div>
+    <div><span class="d">MI</span></div>
+    <div><span class="d">DO</span><span class="slot short">Short 18 Uhr</span></div>
+    <div><span class="d">FR</span><span class="slot main">Hauptfolge 16 Uhr</span></div>
+    <div><span class="d">SA</span></div>
+    <div><span class="d">SO</span><span class="slot short">Short 18 Uhr</span><span class="slot aus">Letzter So: Ausschuss</span></div>
+  </div>
+</section>
+
+<section class="reg" id="thumbnails">
+  <p class="eyebrow">Thumbnails</p>
+  <h2 class="title">Aufnäher-Prinzip</h2>
+  <p class="intro">Jedes Thumbnail sieht aus wie ein Aufnäher: eine Farbfläche, eine Naht rundum, eine freigestellte Figur mit heller Kontur. Im fertigen Thumbnail steht dort ein Standbild der Filzfigur aus dem Video.</p>
+  <div class="thumbs">
+    <figure><img src="assets/youtube/thumbnail-beispiel-und-was-wenn.png" alt="Thumbnail-Beispiel: Tauben fahren Bahn?! mit Brösel auf Gelb"><figcaption>„Und was, wenn …?“ auf Flausengelb</figcaption></figure>
+    <figure><img src="assets/youtube/thumbnail-beispiel-auftrag-verstanden.png" alt="Thumbnail-Beispiel: KURT mit Auftragszettel und Stempel WÖRTLICH auf Petrol"><figcaption>„Auftrag verstanden“ auf Petrol</figcaption></figure>
+    <figure><img src="assets/youtube/thumbnail-beispiel-alltag-in-episch.png" alt="Thumbnail-Beispiel: Pfand, Die Rückgabe, mit riesiger Flasche und Fussel"><figcaption>„Alltag in Episch“ auf Nachtschicht</figcaption></figure>
+  </div>
+  <div class="grid g2">
+    <ol class="rules">
+      <li>Eine Figur, groß, mit klarem Gefühl. Sie füllt mindestens 40 % der Fläche.</li>
+      <li>Höchstens drei Wörter in Bagel Fat One. Das Thumbnail ergänzt den Titel und wiederholt ihn nicht.</li>
+      <li>Formatfarbe als Fläche, Naht als gestrichelte Linie 18 px vom Rand.</li>
+      <li>Figuren freigestellt mit 7 px Kontur in Garnweiß.</li>
+      <li>Unten rechts frei lassen, dort steht die Videolänge.</li>
+      <li>Test: Bei 160 px Breite auf dem Handy noch lesbar?</li>
+    </ol>
+    <div class="card">
+      <p class="label">Formatfarben</p>
+      <div class="legend" style="margin-top:12px">
+        <div><span style="background:var(--senf)"></span>Und was, wenn …?</div>
+        <div><span style="background:var(--petrol)"></span>Auftrag verstanden</div>
+        <div><span style="background:var(--nacht)"></span>Alltag in Episch</div>
+        <div><span style="background:var(--taube)"></span>Feierabend (Shorts)</div>
+        <div><span style="background:var(--faden)"></span>Ausschuss</div>
+      </div>
+      <p class="muted" style="margin-top:14px;font-size:14.5px">Maße: 1280 × 720 px, JPG oder PNG, unter 2 MB.</p>
+    </div>
+  </div>
+</section>
+
+<section class="reg" id="kanal">
+  <p class="eyebrow">Kanal-Kit</p>
+  <h2 class="title">Alles für YouTube</h2>
+  <figure class="bannerfig" style="margin-top:32px">
+    <div class="img"><img src="assets/youtube/banner-2560x1440.png" alt="Kanalbanner mit Logo, Claim, KURT links und Brösel rechts auf einem Förderband"><div class="zone desk"></div><div class="zone safe"></div></div>
+    <div class="zonekey"><span style="--c:var(--faden)">Auf allen Geräten sichtbar · 1546 × 423</span><span style="--c:var(--nacht)">Desktop · 2560 × 423</span><span>Gesamt 2560 × 1440 für TV</span></div>
+  </figure>
+  <p class="muted" style="margin-top:10px;font-size:15px">Logo und Claim sitzen in der sicheren Zone. KURT und Brösel stehen außerhalb und erscheinen auf Desktop und Fernseher.</p>
+
+  <div class="kitrow">
+    <figure><img class="pp" src="assets/youtube/profilbild-800.png" alt="Profilbild: Fussel auf Flausengelb"><figcaption><b>Profilbild</b><br><span class="muted">800 × 800 px. YouTube schneidet rund zu.</span></figcaption></figure>
+    <figure><div class="on-petrol" style="border-radius:10px;padding:18px;width:max-content"><img class="wm" src="assets/youtube/wasserzeichen-150.png" alt="Wasserzeichen: Fussel im gelben Kreis"></div><figcaption><b>Wasserzeichen</b><br><span class="muted">150 × 150 px, transparent. Wird im Video zum Abo-Knopf.</span></figcaption></figure>
+    <figure>
+      <div class="endcard" role="img" aria-label="Endcard-Aufbau: links nächstes Video, daneben Abo-Kreis mit Fussel, rechts Brösel">
+        <div class="ec-video">Nächste Charge</div>
+        <div class="ec-sub"><img src="assets/figuren/fussel.svg" alt=""></div>
+        <img class="ec-broesel" src="assets/figuren/broesel.svg" alt="">
+        <p class="ec-stamp">Feierabend!</p>
+      </div>
+      <figcaption><b>Endcard</b><br><span class="muted">Letzte 20 Sekunden. Brösel stempelt aus, links das nächste Video, daneben der Abo-Knopf.</span></figcaption>
+    </figure>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><p class="label">Sound-Logo</p><h3 style="margin-top:6px">Ratter-Ratter-Pling</h3><p style="margin-top:8px">Zwei Sekunden: KURTs Kurbel rattert zweimal, dann ein heller Glockenton, wenn die Idee fertig ist. Läuft nach dem Kaltstart, nie ganz am Anfang.</p></div>
+    <div class="card"><p class="label">Intro</p><h3 style="margin-top:6px">Höchstens vier Sekunden</h3><p style="margin-top:8px">Fussel zieht an seinem Faden, der Faden schreibt den Schriftzug, das Knäuel landet auf dem i. Pling.</p></div>
+    <div class="card"><p class="label">Kanaltrailer</p><h3 style="margin-top:6px">Willkommen in der Halle</h3><p style="margin-top:8px">45 Sekunden. KURT stellt den Betrieb auf Amtsdeutsch vor, Fussel unterbricht ihn ständig, Brösel beendet das Ganze: „Abonnieren und tschüss.“</p></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="prompt"><div class="ph"><span>Kanalbeschreibung</span><button class="copy" type="button">Kopieren</button></div><pre>Willkommen in der Flausenfabrik! Hier wird Unsinn am Fließband produziert: Fussel hat die Ideen, die Maschine KURT setzt sie um (leider wörtlich), und Taube Brösel will eigentlich nur Feierabend.
+
+Jeden Freitag um 16 Uhr läuft eine neue Charge animierter Geschichten vom Band. Dazu Shorts, Trailer für Dinge, die keinen Trailer brauchen, und einmal im Monat unser Ausschuss.
+
+Dein Auftrag für KURT? Ab in die Kommentare.
+
+Animiert mit KI-Werkzeugen, ausgedacht in der Flausenfabrik. 🧶</pre></div>
+    <div class="card">
+      <p class="label">Kanal-Keywords</p>
+      <div class="chips"><span>Animation</span><span>Comedy</span><span>Zeichentrick</span><span>KI Animation</span><span>Kurzfilm</span><span>Was wäre wenn</span><span>Sketch</span><span>Stop-Motion</span><span>Filz</span><span>deutsch</span><span>Flausenfabrik</span></div>
+      <p class="label" style="margin-top:22px">Handles</p>
+      <p style="margin-top:6px">@flausenfabrik auf YouTube, TikTok und Instagram. Überall gleich, überall Fussel als Profilbild.</p>
+    </div>
+  </div>
+</section>
+
+<section class="reg" id="start">
+  <p class="eyebrow">Startplan</p>
+  <h2 class="title">Die ersten zehn Chargen</h2>
+  <p class="intro">In den ersten drei Monaten reicht alle zwei Wochen eine Hauptfolge plus drei Shorts pro Woche. Erst wenn der Ablauf sitzt, geht es in den Wochentakt.</p>
+  <ol class="charges">
+    <li><span class="no">CHARGE 000</span><span class="t">Willkommen in der Flausenfabrik</span><span class="f trl">Trailer</span></li>
+    <li><span class="no">CHARGE 001</span><span class="t">Und was, wenn Tauben die Bahn übernehmen?</span><span class="f uww">Und was, wenn</span></li>
+    <li><span class="no">CHARGE 002</span><span class="t">Pfand II: Die Rückgabe</span><span class="f epi">Episch</span></li>
+    <li><span class="no">CHARGE 003</span><span class="t">Auftrag: „Mach mir einen Freund.“</span><span class="f auf">Auftrag</span></li>
+    <li><span class="no">CHARGE 004</span><span class="t">Und was, wenn dein Kühlschrank kündigt?</span><span class="f uww">Und was, wenn</span></li>
+    <li><span class="no">CHARGE 005</span><span class="t">Der Elternabend</span><span class="f epi">Episch</span></li>
+    <li><span class="no">CHARGE 006</span><span class="t">Und was, wenn Montag abgeschafft wird?</span><span class="f uww">Und was, wenn</span></li>
+    <li><span class="no">CHARGE 007</span><span class="t">Auftrag: „Bring mir Fliegen bei.“</span><span class="f auf">Auftrag</span></li>
+    <li><span class="no">CHARGE 008</span><span class="t">Ausschuss Nr. 1: Was die Maschine nicht hätte machen sollen</span><span class="f aus">Ausschuss</span></li>
+    <li><span class="no">CHARGE 009</span><span class="t">Und was, wenn Brösel befördert wird?</span><span class="f uww">Und was, wenn</span></li>
+    <li><span class="no">CHARGE 010</span><span class="t">Mülltrennung: Das Erwachen</span><span class="f epi">Episch</span></li>
+  </ol>
+
+  <h3 style="margin-top:48px">Vor dem Start prüfen</h3>
+  <div class="grid g2" style="margin-top:18px">
+    <ul class="checks">
+      <li><span><b>Namen sichern</b><span>Prüfen, ob @flausenfabrik auf YouTube, TikTok und Instagram frei ist, dazu flausenfabrik.de. Dann alles am selben Tag anlegen.</span></span></li>
+      <li><span><b>Markenrecherche</b><span>Vor größeren Ausgaben im DPMAregister nach ähnlichen Marken suchen. Eine Anmeldung in Klasse 41 (Unterhaltung) lohnt sich, sobald der Kanal wächst.</span></span></li>
+      <li><span><b>Nicht als Kinderkanal einstellen</b><span>Kanal auf „nicht speziell für Kinder“ setzen. Sonst fallen Kommentare weg, und damit das Format „Auftrag verstanden“.</span></span></li>
+      <li><span><b>Referenzbilder zuerst</b><span>Alle drei Figuren und die Halle als Referenzsets anlegen, bevor die erste Folge entsteht.</span></span></li>
+    </ul>
+    <ul class="checks">
+      <li><span><b>Lizenzen der KI-Werkzeuge</b><span>Nur Tools nutzen, deren Bedingungen kommerzielle Nutzung erlauben. Musik nur mit Lizenz, etwa aus der YouTube Audio-Mediathek.</span></span></li>
+      <li><span><b>KI-Kennzeichnung</b><span>YouTube verlangt eine Kennzeichnung vor allem für realistisch wirkende Inhalte. Unsere Filzwelt ist klar fiktiv; wir nennen KI trotzdem in jeder Beschreibung. Die aktuellen Regeln vor dem Start nachlesen.</span></span></li>
+      <li><span><b>Monetarisierung</b><span>Das Partnerprogramm schließt massenhaft produzierte, sich wiederholende Inhalte aus. Eigene Drehbücher, feste Figuren und feste Stimmen sind unsere Absicherung.</span></span></li>
+      <li><span><b>Upload-Routine</b><span>Beschreibungsvorlage, Endcard und Wasserzeichen einmal einrichten, dann bei jeder Charge wiederverwenden.</span></span></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="assets/logo/logo-horizontal-hell.svg" alt="Flausenfabrik">
+    <p>Markenhandbuch 1.0 · Stand Oktober 2026<br>Schicht läuft. Ausschuss: geheim.</p>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.copy, .copyhex');
+  if (!btn) return;
+  const text = btn.dataset.copy || btn.closest('.prompt').querySelector('pre').textContent;
+  const label = btn.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = 'Kopiert';
+    btn.classList.add('done');
+  } catch (err) {
+    const pre = btn.closest('.prompt')?.querySelector('pre');
+    if (pre) {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = 'Markiert';
+    }
+  }
+  setTimeout(() => { btn.textContent = label; btn.classList.remove('done'); }, 1600);
+});
+</script>

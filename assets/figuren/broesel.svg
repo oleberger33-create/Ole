@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Brösel">
+  <path d="M168 134L226 112L214 170Z" fill="#8C87AB"/>
+  <path d="M96 200L90 222M126 202L130 224" stroke="#E33D6E" stroke-width="6" stroke-linecap="round"/>
+  <path d="M78 224H100M118 226H140" stroke="#E33D6E" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="118" cy="150" rx="74" ry="58" fill="#A7A3C2"/>
+  <path d="M60 124C72 100 104 98 116 112C104 132 74 140 60 124Z" fill="#135D66"/>
+  <path d="M70 136C84 128 102 128 112 134C100 144 82 146 70 136Z" fill="#E33D6E" opacity=".6"/>
+  <path d="M118 132C150 118 186 128 190 156C176 180 136 182 120 166C112 156 112 140 118 132Z" fill="#8C87AB"/>
+  <rect x="146" y="150" width="44" height="54" rx="4" fill="#FFF8EC" transform="rotate(8 168 177)"/>
+  <rect x="158" y="146" width="20" height="9" rx="3" fill="#1D1A2B" transform="rotate(8 168 177)"/>
+  <path d="M156 168H182M155 178H180M154 188H172" stroke="#A7A3C2" stroke-width="3" stroke-linecap="round" transform="rotate(8 168 177)"/>
+  <circle cx="78" cy="84" r="36" fill="#A7A3C2"/>
+  <path d="M44 92L22 102L46 104Z" fill="#1D1A2B"/>
+  <ellipse cx="47" cy="91" rx="5" ry="4" fill="#FFF8EC"/>
+  <circle cx="68" cy="82" r="11" fill="#FFFFFF"/>
+  <circle cx="66" cy="87" r="5" fill="#1D1A2B"/>
+  <path d="M56.5 80A11.5 11.5 0 0 1 79.5 80Z" fill="#8C87AB"/>
+  <path d="M56 80.5H80" stroke="#1D1A2B" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M42 64A37 37 0 0 1 114 64Z" fill="#FFF8EC"/>
+  <path d="M72 29A37 37 0 0 1 86 29V64H72Z" fill="#E6DCC8"/>
+  <rect x="36" y="60" width="86" height="10" rx="5" fill="#E6DCC8"/>
+</svg>
