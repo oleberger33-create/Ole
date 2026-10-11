@@ -10,7 +10,7 @@ TITLE = "Und was, wenn Tauben die Bahn übernehmen?"
 FLOOR = 900          # Fußlinie in der Halle
 KX, KY, KS = 860, 900, 1.6
 FUNNEL = (852, 500)  # Trichteröffnung von KURT
-CRATE_X, CRATE_Y = 1150, 752   # Brösel auf der Kiste an der Kurbel
+CRATE_X, CRATE_Y = 1085, 752   # Brösel auf der Kiste (linke Hälfte, nah an der Kurbel)
 PLAT = 925           # Fußlinie Bahnsteig
 
 
@@ -22,7 +22,7 @@ def ansage(tl, text, say=None, gap=0.6):
 
 def halle_reset(tl, cranking=True):
     """Zurück in die Halle: Die Kamera steht noch ganz nah auf KURTs Bildschirm (der Film läuft dort weiter)
-    und fährt danach heraus – der Aufrufer setzt dafür eine Einstellung mit dur > 0, z. B. 1.1 s 'out'."""
+    und fährt danach heraus – der Aufrufer setzt dafür eine Einstellung mit dur > 0, z. B. 1.4 s 'io'."""
     tl.scene("halle")
     tl.shot(860, 685.6, 9.0)
     tl.st("fussel", vis=0, brow="none")
@@ -72,7 +72,7 @@ def write(tl):
     tl.key("fade", a=0, dur=1.0)
     tl.st("fussel", vis=1, sit=1)
     tl.key("fussel", x=470, y=610, s=0.8, flip=1)
-    tl.st("kurt", vis=1, screen="off", crank=0)
+    tl.st("kurt", vis=1, screen="off")
     tl.key("kurt", x=KX, y=KY, s=KS)
     tl.st("broesel", vis=1, walk=0, crank=0, hat="helmet")
     tl.key("broesel", x=2150, y=FLOOR, s=1.25, flip=-1, lid=0.55)
@@ -86,9 +86,9 @@ def write(tl):
     tl.key("fussel", lx=1, dur=0.4)
     tl.st("broesel", walk=0, off=3.0)
     tl.wait(3.1)
-    tl.shot(1150, 640, 1.45, dur=1.0)
+    tl.shot(1250, 640, 1.45, dur=1.0)        # auf Brösel; Fussel ganz aus dem Bild statt halb am Rand
     tl.line("B", "Morgen. Bin zu spät. Zug fiel aus.")
-    tl.shot(700, 600, 1.5)
+    tl.shot(660, 600, 1.8)                   # Fussel und KURT; Brösel ganz draußen
     tl.st("fussel", brow="sad")
     tl.line("F", "Schon wieder?")
     tl.shot(1250, 650, 1.6)
@@ -146,19 +146,27 @@ def write(tl):
     tl.line("F", "Wie wirft man denn eine Idee?")
     tl.line("K", "Zusammenknüllen. Werfen. Hoffen.", gap=0.6)
     # Fussel knüllt ein Stück Faden zur Idee und wirft
+    # Der Knäuel wächst an der Fadenspitze (stage.js hält ihn dort, solange 'tip' an ist) und fliegt
+    # von dort in den Trichter; hinter der Trichterkante sinkt er weg (Ausschnitt in stage.js).
     tl.st("fussel", eyes="happy")
     tl.key("fussel", thread=0.75, dur=0.6)
-    tl.st("ball", vis=1)
-    tl.key("ball", x=630, y=700, s=1)
+    tl.st("ball", vis=1, tip=1)
+    tl.key("ball", x=668, y=760, s=0.35)
+    tl.key("ball", s=1, dur=0.6, ease="out")
+    tl.st("ball", tip=0, off=0.6)
     tl.sfx("swish", off=0.6)
-    tl.arc("ball", FUNNEL[0], FUNNEL[1], h=140, dur=0.95, off=0.6)
-    tl.st("ball", vis=0, off=1.55)
+    tl.arc("ball", FUNNEL[0], FUNNEL[1] + 36, h=150, dur=1.0, off=0.6)
+    tl.st("ball", vis=0, off=1.6)
     tl.sfx("plopp", off=1.55)
-    tl.wait(1.9)
+    tl.st("kurt", screen="load", off=1.6)      # Spinner, sobald die Idee drin ist
+    tl.sfx("ratter", vol=0.6, off=1.6)
+    tl.wait(2.5)
     tl.st("fussel", eyes="normal")
+    tl.st("kurt", screen="on")                 # zum Sprechen das Gesicht, danach weiter prüfen
+    tl.line("K", "Idee empfangen. Wird geprüft.", gap=0.1)
     tl.st("kurt", screen="load")
-    tl.sfx("ratter", vol=0.6)
-    tl.line("K", "Idee empfangen. Wird geprüft.", gap=0.8)
+    tl.sfx("ratter", vol=0.5)
+    tl.wait(0.9)
     tl.st("kurt", screen="on")
     tl.line("K", "Tauben. Bahn. Übernehmen. Ich habe drei Rückfragen.")
     tl.line("F", "Okay!")
@@ -186,12 +194,14 @@ def write(tl):
     tl.st("fussel", brow="sad")
     tl.line("F", "Bitte, Brösel! Bitte, bitte, bitte!")
     tl.st("fussel", eyes="normal")
-    tl.shot(1250, 650, 1.5)
+    tl.shot(1150, 650, 1.5)                  # Brösel mit KURT und Fussel (ganz im Bild, nicht halb am Rand)
     tl.sfx("seufzer")
     tl.wait(1.2)
     tl.st("fussel", brow="none")
     tl.line("B", "Na jut. Aber nur, weil meine Cousins da mitmachen.")
+    tl.shot(620, 640, 1.8)                   # Gegenschuss auf Fussel (mit KURT, Brösel ganz draußen)
     tl.line("F", "Deine Cousins?")
+    tl.shot(1150, 650, 1.5)
     tl.key("broesel", wing=0.6, dur=0.4)
     tl.line("B", "Halb Berlin is mit mir verwandt. Wir Stadttauben sitzen seit hundert Jahren auf jedem Bahnhof. "
                  "Wir kennen den Laden besser als die Leute mit den Mützen.")
@@ -202,8 +212,7 @@ def write(tl):
     tl.key("broesel", x=CRATE_X + 40, dur=1.0)
     tl.arc("broesel", CRATE_X, CRATE_Y, h=50, dur=0.4, off=1.0)
     tl.sfx("hop", off=1.3)
-    tl.st("broesel", walk=0, crank=1, off=1.4)
-    tl.st("kurt", crank=1, off=1.4)
+    tl.st("broesel", walk=0, crank=1, off=1.4)   # Brösels 'crank' treibt KURTs Kurbel (stage.js)
     tl.sfx("kurbel", off=1.4, dur=3.0)
     tl.wait(2.0)
     tl.shot(880, 600, 1.3, dur=0.9)
@@ -211,8 +220,11 @@ def write(tl):
     tl.shot(700, 640, 1.6)
     tl.line("F", "Und ich will mitfahren!", gap=0.3)
     tl.sfx("boing")
-    tl.arc("fussel", FUNNEL[0], FUNNEL[1] + 20, h=100, dur=0.85, s=0.3)
-    tl.st("fussel", vis=0, off=0.85)
+    # Bogen bis tief in den Trichter: ab dem Scheitel schneidet stage.js ihn an der vorderen Trichterkante ab,
+    # er fällt also durch die Öffnung hinein statt vor dem Trichter zu verschwinden
+    tu = tl.arc("fussel", FUNNEL[0], FUNNEL[1] + 80, h=180, dur=0.9, s=0.3)
+    tl.st("fussel", funnel=1, off=tu)
+    tl.st("fussel", vis=0, funnel=0, off=0.9)
     tl.sfx("plopp", off=0.85)
     tl.shot(880, 600, 1.3, dur=0.9)
     tl.wait(1.2)
@@ -281,7 +293,7 @@ def write(tl):
 
     # Schnitt in die Halle
     halle_reset(tl)
-    tl.shot(1020, 640, 1.35, dur=1.1, ease="out")
+    tl.shot(1020, 640, 1.35, dur=1.4, ease="io")
     tl.sfx("kurbel", dur=6.0, vol=0.5)
     tl.wait(0.5)
     tl.line("B", "Det stimmt sogar. Bei uns heißt det Fütterungszeit.")
@@ -295,7 +307,7 @@ def write(tl):
     tl.st("fussel", vis=1)
     tl.st("gurrmann", vis=1)
     tl.st("crowd", mode="platform")
-    tl.shot(700, 650, 1.5)
+    tl.shot(760, 650, 1.5)                   # Gurrmann ganz im Bild (nicht mit abgeschnittenem Schwanz)
     tl.wait(0.4)
     tl.sfx("schuettel")
     tl.st("fussel", shake=1)
@@ -325,23 +337,27 @@ def write(tl):
     tl.shot(960, 540, 1.0)
     tl.st("crowd", mode="board")
     tl.sfx("fluegel", dur=2.5)
-    # Einsteigen: zur Tür laufen, hineinhüpfen (die Türöffnung verdeckt), drinnen bleiben, bis die Türen zu sind
+    # Einsteigen: zur Tür laufen, ausholen, im Bogen über die Bahnsteigkante in die Tür hüpfen (Landung auf
+    # der Schwelle), ein Stück ins Dunkel zurücktreten; erst ab der Landung schneidet die Türöffnung ihn aus
     tl.st("fussel", walk=1, eyes="normal")
     tl.key("fussel", x=700, dur=1.3)
-    tl.st("fussel", walk=0, board=1, off=1.3)
-    tl.key("fussel", y=672, s=0.45, dur=0.3, off=1.3, ease="out")
-    tl.key("fussel", y=662, s=0.38, dur=0.8, off=1.6)
+    tl.st("fussel", walk=0, off=1.3)
+    tl.arc("fussel", 700, 676, h=60, dur=0.5, off=1.4, s=0.55)
+    tl.st("fussel", board=1, off=1.9)
+    tl.key("fussel", y=664, s=0.42, dur=0.7, off=2.0)
     tl.st("fussel", vis=0, board=0, off=3.1)
     tl.st("gurrmann", walk=1, off=0.3)
     tl.key("gurrmann", flip=1, dur=0.25, off=0.3)
     tl.key("gurrmann", x=1260, dur=1.5, off=0.3)
-    tl.st("gurrmann", walk=0, board=1, off=1.8)
-    tl.key("gurrmann", y=672, s=0.8, dur=0.3, off=1.8, ease="out")
-    tl.key("gurrmann", flip=-1, dur=0.3, off=2.15)      # schaut als Zugbegleiter noch den Bahnsteig entlang
+    tl.st("gurrmann", walk=0, off=1.8)
+    tl.arc("gurrmann", 1260, 672, h=40, dur=0.4, off=1.85, s=0.8)
+    tl.st("gurrmann", board=1, off=2.25)
+    tl.key("gurrmann", flip=-1, dur=0.3, off=2.3)       # schaut als Zugbegleiter noch den Bahnsteig entlang
     tl.st("gurrmann", vis=0, board=0, off=3.1)
     tl.wait(2.6)
     tl.key("train", doors=0, dur=0.5)
     tl.sfx("tuer_zu")
+    tl.st("board", text="abfahrt", off=0.3)
     tl.wait(0.7)
     tl.sfx("zug_aus")
     tl.key("train", x=-1600, dur=4.0, ease="in")
@@ -397,7 +413,7 @@ def write(tl):
     tl.sfx("bremse")
     tl.key("outside", v=0, dur=1.4, ease="out")    # die Bäckerei gleitet mit der Landschaft herein
     tl.st("crowd", mode="window", off=1.0)
-    tl.shot(960, 420, 1.25, dur=1.4)
+    tl.shot(960, 510, 1.12, dur=1.4)         # sanft heran: Bäckerei im mittleren Fenster, Gurrmann ganz im Bild
     tl.wait(2.8)
     tl.sfx("gurren", vol=0.7)
     tl.wait(1.2)
@@ -424,11 +440,14 @@ def write(tl):
     tl.st("crowd", mode="loud")
     tl.wait(2.4)
     tl.st("crowd", mode="seats")
+    tl.shot(980, 520, 1.15, dur=7.0)         # unter den Durchsagen nicht stehen bleiben: langsam heran,
     ansage(tl, "Gurr. Unser Bordbistro hat für Sie geöffnet. Heute im Angebot: Krümel. Krümel mit Krümeln. "
                "Und Krümel, vegan. Gurr.")
+    tl.shot(900, 600, 1.25)                  # dann Schnitt auf Fussel und Gurrmann, die zuhören
+    tl.shot(840, 610, 1.33, dur=7.0)
     ansage(tl, "Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, "
                "die zuerst da ist. Also für alle. Gurr.", gap=0.4)
-    tl.shot(620, 600, 1.7, dur=1.0)
+    tl.shot(550, 610, 1.8, dur=1.0)          # Fussel allein im Bild (Gurrmann ganz draußen); die Taube fliegt von rechts ein
     tl.sfx("fluegel", dur=0.8)
     tl.st("sitter", on=1)
     tl.wait(1.0)
@@ -439,7 +458,7 @@ def write(tl):
     tl.st("fussel", eyes="normal", brow="none")
 
     halle_reset(tl)
-    tl.shot(1020, 640, 1.35, dur=1.1, ease="out")
+    tl.shot(1020, 640, 1.35, dur=1.4, ease="io")
     tl.sfx("kurbel", dur=8.0, vol=0.5)
     tl.wait(0.4)
     tl.line("B", "Siehste. Pünktlich halten die genau fünf Minuten durch.")
@@ -554,10 +573,11 @@ def write(tl):
     tl.chapter("Verspätung: unendlich")
     halle_reset(tl)
     tl.music("spannung", 0.45)
-    tl.st("kurt", screen="load")
-    tl.shot(900, 620, 1.35, dur=1.1, ease="out")
+    tl.st("kurt", screen="load", off=0.45)   # erst läuft noch der Film auf dem Schirm, dann rechnet KURT
+    tl.shot(900, 620, 1.35, dur=1.4, ease="io")
     tl.sfx("kurbel", dur=9.0, vol=0.7)
     tl.st("broesel", crankfast=1)
+    tl.wait(0.6)
     tl.line("K", "Berechne Ankunftszeit.", gap=0.3)
     tl.sfx("ratter", vol=0.8)
     tl.wait(1.4)
@@ -614,10 +634,13 @@ def write(tl):
     tl.key("broesel", lid=0.4, brow=0, dur=0.4)
     tl.st("crowd", mode="chaos")
     tl.st("gurrmann", vis=1, walk=0, fly=1, hat="cap")
-    tl.key("gurrmann", x=850, y=380, s=1.2, flip=1, wing=0, r=0)
-    tl.key("gurrmann", x=1450, y=FLOOR, dur=1.2, ease="io")
-    tl.st("gurrmann", fly=0, off=1.2)
-    tl.key("gurrmann", flip=-1, off=1.2)
+    # fliegt von oberhalb des Bildes ein (x 'out', y 'io': erst weit, dann tief), hoch über Brösels Helm,
+    # landet rechts neben der Kiste und dreht sich dann um
+    tl.key("gurrmann", x=900, y=120, s=1.2, flip=1, wing=0, r=0)
+    tl.key("gurrmann", x=1460, dur=1.3, ease="out")
+    tl.key("gurrmann", y=FLOOR, dur=1.3, ease="io")
+    tl.st("gurrmann", fly=0, off=1.3)
+    tl.key("gurrmann", flip=-1, dur=0.25, off=1.35)
     tl.sfx("fluegel", dur=1.2)
     tl.shot(1300, 640, 1.35, dur=1.0)
     tl.wait(1.6)
@@ -629,9 +652,9 @@ def write(tl):
     tl.wait(0.4)
     tl.sfx("gurren")
     tl.st("crowd", mode="tobelt")
-    tl.key("gurrmann", x=640, y=610, s=1.0, dur=1.2, ease="io")
+    tl.arc("gurrmann", 640, 610, h=220, dur=1.3, s=1.0)   # im Bogen über Brösel hinweg aufs Band
     tl.st("gurrmann", fly=1)
-    tl.st("gurrmann", fly=0, off=1.2)
+    tl.st("gurrmann", fly=0, off=1.3)
     tl.sfx("fluegel", dur=1.5)
     tl.wait(1.8)
     tl.sfx("hebel")
@@ -678,20 +701,22 @@ def write(tl):
     tl.st("broesel", sweep=1)
     tl.st("crumbs", funnel=0, fussel=0, floor=1)
     tl.wait(1.2)
-    tl.shot(560, 560, 1.6)
+    tl.shot(640, 600, 1.5)                   # Fussel, KURT und der fegende Brösel ganz im Bild
     tl.line("F", "Brösel? Das war doch ein guter Auftrag, oder?", gap=0.5)
-    tl.shot(1080, 660, 1.5)
+    tl.shot(1200, 660, 1.5)                  # KURT und Brösel; Fussel ganz draußen
     tl.key("broesel", lid=0.65, brow=0.4, dur=0.4)
     tl.line("B", "Die Tauben waren pünktlich. Die Züge sind geflogen. Und keener is anjekommen.")
     tl.shot(800, 600, 1.15)
     tl.line("F", "Also wie immer?")
     tl.line("B", "Also wie immer.", gap=0.8)
-    tl.st("broesel", sweep=0, broom=0, walk=1)
+    tl.st("broesel", sweep=0, broom=0)       # Besen weg (schrumpft in den Flügel, stage.js)
     tl.st("crumbs", floor=0)
-    tl.key("broesel", x=1600, flip=1, dur=2.4)
-    tl.shot(1500, 560, 1.5, dur=2.0)
-    tl.st("broesel", walk=0, off=2.4)
-    tl.wait(2.6)
+    tl.key("broesel", flip=1, dur=0.3, off=0.15)   # erst umdrehen, dann losgehen
+    tl.st("broesel", walk=1, off=0.35)
+    tl.key("broesel", x=1600, dur=2.4, off=0.35)
+    tl.shot(1500, 560, 1.5, dur=2.0, off=0.35)
+    tl.st("broesel", walk=0, off=2.75)
+    tl.wait(2.95)
     tl.key("broesel", wing=1, dur=0.25)
     tl.sfx("stempeluhr", off=0.25)
     tl.key("broesel", wing=0, dur=0.25, off=0.6)

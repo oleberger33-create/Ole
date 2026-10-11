@@ -242,6 +242,7 @@ class TL:
         """Sprung als Wurfparabel: x linear, y mit gleicher Schwerkraft rauf ('out') und runter ('in').
 
         h = Scheitelhöhe über dem höheren der beiden Punkte. Ändert tl.t nicht.
+        Rückgabe: Zeit vom Absprung bis zum Scheitel (für Zustände, die ab dem Scheitel gelten).
         """
         t0 = round(self.t + off, 3)
         y0 = self._value_at(actor, "y", t0)
@@ -253,6 +254,7 @@ class TL:
         self.key(actor, dur=dur - tu, off=t0 + tu - self.t, ease="in", y=y)
         if extra:
             self.key(actor, dur=dur, off=off, ease="io", **extra)
+        return tu
 
     def shot(self, x, y, z, dur=0.0, ease="io", off=0.0):
         """Kameraeinstellung. dur = 0 ist ein Schnitt. Schwenks dauern mindestens 0.3 s + Bildweg/1600 px/s
