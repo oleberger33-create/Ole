@@ -51,23 +51,35 @@ const DEF = {
   cam: { x: 960, y: 540, z: 1, r: 0 }, fussel: { x: -500, y: 900, s: 0.8, r: 0, flip: 1, lx: 0, ly: 0, thread: 1 },
   kurt: { x: 860, y: 900, s: 1.6, shake: 0 }, broesel: { x: 2200, y: 900, s: 1.25, r: 0, flip: -1, lid: 0.55, wing: 0, brow: 0 },
   gurrmann: { x: 2200, y: 900, s: 1.3, r: 0, flip: -1, lid: 0.2, wing: 0, brow: 0 }, train: { x: 3000, y: 740, s: 1, r: 0, doors: 0 },
-  ball: { x: 0, y: 0, s: 1 }, iris: { r: 1200 }, fade: { a: 0 }, logo: { p: 0 }, outside: { v: 1 }
+  ball: { x: 0, y: 0, s: 1 }, iris: { r: 1200, x: 960, y: 540 }, fade: { a: 0 }, logo: { p: 0 }, outside: { v: 1 }
 };
+// Easings (wie ease_fn in build.py): io = smoothstep, io5 = smootherstep, back/brake = easeOutBack mit
+// ~7 % / ~3 % Überschwingen (c = 1.4 / 0.9)
+const BACK_C = { back: 1.4, brake: 0.9 };
 function ease(e, u) {
   u = clamp(u, 0, 1);
   if (e === 'lin') return u;
   if (e === 'in') return u * u;
   if (e === 'out') return 1 - (1 - u) * (1 - u);
+  if (e === 'io5') return u * u * u * (u * (6 * u - 15) + 10);
+  const c = BACK_C[e];
+  if (c) { const v = u - 1; return 1 + (c + 1) * v * v * v + c * v * v; }
   return u * u * (3 - 2 * u);
+}
+// Wert eines Segments [t0, t1, von, nach, ease]; der Kamera-Zoom läuft logarithmisch (gleichmäßig empfundene Fahrt)
+function segVal(s, t, logz) {
+  const e = ease(s[4], (t - s[0]) / (s[1] - s[0]));
+  return logz ? s[2] * Math.pow(s[3] / s[2], e) : lerp(s[2], s[3], e);
 }
 function num(actor, prop, t) {
   const segs = TL.tracks[actor] && TL.tracks[actor][prop];
   let v = (DEF[actor] && DEF[actor][prop] !== undefined) ? DEF[actor][prop] : 0;
   if (!segs) return v;
+  const logz = actor === 'cam' && prop === 'z';
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i];
     if (s[0] > t) break;
-    if (t < s[1]) v = lerp(s[2], s[3], ease(s[4], (t - s[0]) / (s[1] - s[0])));
+    if (t < s[1]) v = segVal(s, t, logz);
     else v = s[3];
   }
   return v;
@@ -112,8 +124,20 @@ function sceneAt(t) {
 }
 // Ableitungen der Spuren, analytisch aus der Easing-Kurve des aktiven Segments.
 // Außerhalb von Segmenten (auch bei Sprüngen mit Dauer 0 an Schnitten) ist v = 0.
-function easeD(e, u) { if (e === 'lin') return 1; if (e === 'in') return 2 * u; if (e === 'out') return 2 * (1 - u); return 6 * u * (1 - u); }
-function easeDD(e, u) { if (e === 'lin') return 0; if (e === 'in') return 2; if (e === 'out') return -2; return 6 - 12 * u; }
+function easeD(e, u) {
+  if (e === 'lin') return 1; if (e === 'in') return 2 * u; if (e === 'out') return 2 * (1 - u);
+  if (e === 'io5') return 30 * u * u * (1 - u) * (1 - u);
+  const c = BACK_C[e];
+  if (c) { const v = u - 1; return 3 * (c + 1) * v * v + 2 * c * v; }
+  return 6 * u * (1 - u);
+}
+function easeDD(e, u) {
+  if (e === 'lin') return 0; if (e === 'in') return 2; if (e === 'out') return -2;
+  if (e === 'io5') return 60 * u - 180 * u * u + 120 * u * u * u;
+  const c = BACK_C[e];
+  if (c) return 6 * (c + 1) * (u - 1) + 2 * c;
+  return 6 - 12 * u;
+}
 function activeSeg(actor, prop, t) {
   const segs = TL.tracks[actor] && TL.tracks[actor][prop];
   if (!segs) return null;
@@ -194,6 +218,32 @@ function accHold(who, t) {
   }
   return h;
 }
+// Weiche Hülle einer Sprechzeile: e = 0..1 ab t0 − 0.15 über ain herein, nach t1 über aout hinaus; l = die Zeile
+// (für Haltungen beim Reden; l bleibt im Ausklingen gültig, damit z. B. l.ex nicht vorzeitig umspringt)
+const TE0 = { e: 0, l: null };
+function talkEnv(who, t, ain, aout) {
+  const l = lineAt(who, t, 0.15, aout);
+  return l ? { e: smooth((t - l.t0 + 0.15) / ain) * (1 - smooth((t - l.t1) / aout)), l } : TE0;
+}
+// Geglättete Sprech-Hülle einer Figur (Anstieg 0.1 s, Abklingen 0.25 s, läuft 1 s über das Zeilenende hinaus):
+// für Lautsprecher, Horn-Wellen und Zuhörer-Reaktionen, die nicht im 60-Hz-Takt flackern sollen
+function ampS(who, t, fx) {
+  const l = lineAt(who, t, 0, 1.0);
+  if (!l || (fx !== undefined && l.fx !== fx) || !l.envS) return 0;
+  const p = (t - l.t0) * TL.envRate, i = Math.floor(p);
+  return lerp(l.envS[i] || 0, l.envS[i + 1] || 0, p - i);
+}
+// Durchsage läuft (weich 0..1: 0.3 s herein, 0.5 s hinaus), ohne KURTs Lautsprecher in der Halle
+function annW(t) {
+  const l = lineAt('A', t, 0.3, 0.5);
+  if (!l || l.fx) return 0;
+  return smooth((t - l.t0 + 0.3) / 0.3) * (1 - smooth((t - l.t1) / 0.5));
+}
+// Fahrgäste im Zug: federn kurz nach dem Wagen nach (Welle von links nach rechts), kippen beim Bremsen
+function ride(x, t, ky, kr) {
+  const d = 0.12 * clamp(x / 1920, 0, 1);
+  return { dy: ky * integ('rockY', t - 0.06 - d), dr: kr * integ('seatLean', t - d) };
+}
 // Sekunden seit dem letzten Geräusch dieses Namens (1e9, wenn keins war)
 function since(name, t) {
   const a = SFXT[name];
@@ -227,10 +277,12 @@ function eventList(seed, t0, gapMin, gapMax, pDbl, dbl) {
   return out;
 }
 function blinkList(seed, forced) {
-  const f = forced.slice().sort((a, b) => a - b), out = [];
-  for (const c of eventList(seed, 0.5 + 2 * hash(seed, 0.5), 2.2, 5.5, 0.18, 0.24)) {
-    const k = lastLE(f, c + 0.35);
-    if (!(k >= 0 && f[k] > c - 0.35)) out.push(c);   // geplante Lidschläge weichen erzwungenen
+  // Szenenanfang: jede Figur blinzelt einmal beim "Ankommen", aber nicht alle im selben Bild
+  const f0 = forced.concat(TL.scenes.map((s, i) => s[0] + 0.3 + 0.9 * hash(seed, i + 0.5))).sort((a, b) => a - b), f = [], out = [];
+  for (const c of f0) if (!f.length || c - f[f.length - 1] > 0.7) f.push(c);   // dicht folgende erzwungene zusammenfassen
+  for (const c of eventList(seed, 0.5 + 2 * hash(seed, 0.5), 2.6, 6.0, 0.18, 0.24)) {
+    const k = lastLE(f, c + 0.9);
+    if (!(k >= 0 && f[k] > c - 0.9)) out.push(c);   // geplante Lidschläge weichen erzwungenen (±0.9 s)
   }
   const all = out.concat(f).sort((a, b) => a - b);
   return all.filter((c, k) => k === 0 || c - all[k - 1] > 0.2);
@@ -263,12 +315,15 @@ function env3(x, ain, hold, aout) { return x < 0 ? 0 : smooth(x / ain) * (1 - sm
 //   gx_/gy_<figur>    Blickrichtung Augen (schnelle Feder), lx_/ly_<figur> Kopf/Körper (langsame Feder)
 // ---------------------------------------------------------------------------
 const INT = {};
-const WALKERS = { fussel: { lean: 0.018, leanMax: 10 }, broesel: { lean: 0.010, leanMax: 6 }, gurrmann: { lean: 0.012, leanMax: 7 } };
+const WALKERS = { fussel: { lean: 0.02, leanMax: 12 }, broesel: { lean: 0.012, leanMax: 9 }, gurrmann: { lean: 0.012, leanMax: 9 } };
 const GAZERS = ['fussel', 'kurt', 'broesel', 'gurrmann'];
 const W2A = { F: 'fussel', K: 'kurt', B: 'broesel', G: 'gurrmann' };
 const JUMP = { up: [], down: [], air: [] };   // Fussels Absprünge, Landungen, Flugphasen (aus der y-Spur)
 let KSW = [];      // KURT: Grenzen der Sprechfenster [an, aus, an, aus, ...]
 let PECK = [], PECKF = [], DROOP = [];
+let STOPS = [];    // Zeiten, zu denen der Zug an einer Bäckerei zum Stehen kommt
+let BURST = [];    // Zeiten der Explosion (Schwarm bricht aus KURT aus)
+let FLAPPASS = [[], [], [], [], []];   // je Klappe der Versand-Luke: Zeiten, zu denen jemand hindurchfährt
 
 function actorVis(a, t, scene) {
   if (!st(a, 'vis', t, 0)) return false;
@@ -290,7 +345,7 @@ function headPt(a, t) {
 function annPt(l, t, scene) {
   if (l && l.fx === 'kurt') return headPt('kurt', t);
   if (scene === 'bahnhof') return [1770, 200];
-  if (scene === 'zug') return [1450, 60];
+  if (scene === 'zug') return [1780, 100];
   if (scene === 'himmel') return [960, -300];
   return null;
 }
@@ -327,6 +382,14 @@ function gazeTarget(a, t, scene) {
 function precompute() {
   // ---- Indizes: Zeilen je Sprecher, Betonungen, Geräusche ----
   TL.lines.forEach((l, i) => { l.i = i; (LBY[l.who] = LBY[l.who] || []).push(l); });
+  const R = TL.envRate, ka = 1 - Math.exp(-1 / (R * 0.1)), kr = 1 - Math.exp(-1 / (R * 0.25));
+  for (const l of TL.lines) {   // geglättete Hülle für ampS()
+    const out = new Float32Array(l.env.length + R);
+    let y = 0;
+    for (let i = 0; i < out.length; i++) { const v = l.env[i] || 0; y += (v > y ? ka : kr) * (v - y); out[i] = y; }
+    l.envS = out;
+  }
+  STOPS = ((TL.tracks.outside && TL.tracks.outside.v) || []).filter(s => s[3] === 0 && s[1] > s[0]).map(s => s[1]);
   for (const who in LBY) { ACC[who] = []; for (const l of LBY[who]) { l.acc = lineAccents(l); ACC[who].push(...l.acc); } }
   for (const e of TL.sfx) (SFXT[e.name] = SFXT[e.name] || []).push(e.t);
   for (const k in SFXT) SFXT[k].sort((a, b) => a - b);
@@ -352,17 +415,20 @@ function precompute() {
   JUMP.up.sort((a, b) => a.t - b.t); JUMP.down.sort((a, b) => a.t - b.t); JUMP.air.sort((a, b) => a[0] - b[0]);
   // ---- Federn und Kanäle ----
   const forced = { fussel: [], kurt: [], broesel: [], gurrmann: [] };
+  buildIdle();
+  buildCrowdModes();
   integrate(forced);
+  prepareCamera();
+  buildFlapPasses();
   // ---- Lidschläge: Zufallsplan + erzwungene (Schnitt, Augen-Wechsel, Blicksprung, Reaktionen) ----
-  const cutB = TL.scenes.map(s => s[0] + 0.06);
   const eyeT = ((TL.states.fussel && TL.states.fussel.eyes) || []).map(e => e[0]);
-  BLINK.fussel = blinkList(1, cutB.concat(eyeT, forced.fussel, SFXT.fehler || []));
-  BLINK.kurt = blinkList(2, cutB.concat(forced.kurt, (SFXT.plopp || []).map(x => x + 0.02)));
-  BLINK.broesel = blinkList(3, cutB.concat(forced.broesel));
-  BLINK.gurrmann = blinkList(4, cutB.concat(forced.gurrmann));
-  BLINK.endFussel = blinkList(5, cutB);
-  BLINK.sitter = blinkList(6, cutB);
-  for (let i = 0; i < 14; i++) BLINK['crowd' + i] = blinkList(10 + i, cutB);
+  BLINK.fussel = blinkList(1, eyeT.concat(forced.fussel, SFXT.fehler || []));
+  BLINK.kurt = blinkList(2, forced.kurt.concat((SFXT.plopp || []).map(x => x + 0.02)));
+  BLINK.broesel = blinkList(3, forced.broesel);
+  BLINK.gurrmann = blinkList(4, forced.gurrmann);
+  BLINK.endFussel = blinkList(5, []);
+  BLINK.sitter = blinkList(6, []);
+  for (let i = 0; i < 14; i++) BLINK['crowd' + i] = blinkList(10 + i, []);
   // ---- Picken der Bahnsteig-Tauben (30 % Doppelpicker), schnelles Picken an der Stempeluhr, Brösels Kopfhänger ----
   PECK = []; PECKF = [];
   for (let i = 0; i < 14; i++) { PECK.push(eventList(30 + i, 0.4 + 2 * hash(i, 4), 1.2, 4.0, 0.3, 0.32)); PECKF.push(eventList(60 + i, 0.3 * hash(i, 5), 0.35, 0.8, 0, 0)); }
@@ -392,7 +458,7 @@ function integrate(forced) {
   const arr = () => new Float64Array(n), f32 = () => new Float32Array(n);
   const crank = arr(), crankRate = arr(), belt = arr(), beltRate = arr(), land = arr();
   const kurtCrank = stCur('kurt', 'crank', 0), crankFast = stCur('broesel', 'crankfast', 0), beltRun = stCur('belt', 'run', 0);
-  const outV = segCur('outside', 'v');
+  const outV = segCur('outside', 'v'), fWalk = stCur('fussel', 'walk', 0);
   const kUp = 1 - Math.exp(-dt / 0.25), kDown = 1 - Math.exp(-dt / 0.5), kBelt = 1 - Math.exp(-dt / 0.35);
   // Federn: semi-implizites Euler, v += (−w²(y−Ziel) − 2zw·v)·dt; y += v·dt
   const W = Object.keys(WALKERS).map(name => ({
@@ -401,7 +467,7 @@ function integrate(forced) {
     l: 0, lv: 0, q: 0, qv: 0, px: null, py: null, phase: 0, wasVis: 0
   }));
   const springStep = (y, v, target, w, z) => { v += (-w * w * (y - target) - 2 * z * w * v) * dt; return [y + v * dt, v]; };
-  const wL = 2 * Math.PI * 1.7, zL = 0.45, wQ = 2 * Math.PI * 2.6, zQ = 0.3;
+  const wL = 13, zL = 0.35, wQ = 2 * Math.PI * 2.6, zQ = 0.3;   // Neigung: schwingt nach dem Anhalten 2–3-mal nach
   // Fussel: Faden (2.4 Hz, schwach gedämpft) und Fell (6 Hz) werden von Tempo-Änderungen angestoßen
   const thrX = f32(), thrY = f32(), jig = f32();
   const wT = 2 * Math.PI * 2.4, zT = 0.22, wJ = 2 * Math.PI * 6, zJ = 0.3;
@@ -418,6 +484,20 @@ function integrate(forced) {
     ex: 0, ey: 0, evx: 0, evy: 0, sx: 0, sy: 0, svx: 0, svy: 0, ox: 0, oy: 0, sacT: 0.4 + hash(gi, 9), sacN: 0
   }));
   let lastLine = -1e9;
+  // Zugwagen (nur Szene zug): Federung auf den Schienenstößen, phasengleich mit den "ta-dam" in zug_fahrt
+  // (Stoßabstand J Landschafts-px = 520 px/s ÷ 3.2 Hz), zweites Drehgestell 0.11 s später; Wanken mit
+  // wechselnder Seite; Ruck bei 'outside lurch'. seatLean: Fahrgäste kippen beim Bremsen nach vorn (+).
+  const rockY = f32(), rockR = f32(), seatLean = f32();
+  // Himmel: Windweg der Wolken und Kreiswinkel des Schwarms; Richtung ('swarm' dir) dreht in 0.8 s weich um
+  const cloud = arr(), swarmA = arr();
+  // Zug am Bahnsteig: Wagenkasten nickt mit der Beschleunigung (Ziel −0.008°/(px/s²), Feder 1.3 Hz, ζ 0.32),
+  // Stöße an den Schienenstößen alle 170 px (Feder 3 Hz), Stärke nach Tempo
+  const trainPitch = f32(), trainBump = f32(), trX = segCur('train', 'x'), trVis = stCur('train', 'vis', 0), trWings = stCur('train', 'wings', 0);
+  let tp = 0, tpv = 0, tbmp = 0, tbv = 0, tJ = null;
+  const J = 162.5, wRy = 2 * Math.PI * 2.4, zRy = 0.3, wRr = 2 * Math.PI * 1.1, zRr = 0.4, wSl = 13, zSl = 0.35;
+  const viewCur = stCur('outside', 'view', 'land');
+  const ZF = SFXT.zug_fahrt || [], LURCH = ((TL.states.outside && TL.states.outside.lurch) || []).filter(e => e[1]).map(e => e[0]);
+  let ry = 0, rvy = 0, rr = 0, rvr = 0, sl = 0, slv = 0, jRef = 0, jLast = 0, rSide = 1, zf = 0, lu = 0, bogie = [];
   const cuts = TL.scenes.map(s => s[0]);
   let cr = 0, br = 0, cut = 0, scene = TL.scenes[0][1];
   for (let i = 1; i < n; i++) {
@@ -425,12 +505,45 @@ function integrate(forced) {
     const cT = kurtCrank(t) ? (crankFast(t) ? 900 : 380) : 0;
     cr += (cT - cr) * (cT > cr ? kUp : kDown);
     crank[i] = crank[i - 1] + cr * dt; crankRate[i] = cr;
-    const bT = beltRun(t) ? 190 : 0;
+    const bT = beltRun(t) ? 240 : 0;
     br += (bT - br) * kBelt;
     belt[i] = belt[i - 1] + br * dt; beltRate[i] = br;
     land[i] = land[i - 1] + outV(t).v * 520 * dt;
     let atCut = false;
     while (cut < cuts.length && cuts[cut] <= t) { scene = TL.scenes[cut][1]; cut++; atCut = true; }
+    const sb = stBlend('swarm', 'dir', t, 1), dS = lerp(sb.prev, sb.cur, smooth(sb.tau / 0.8));
+    cloud[i] = cloud[i - 1] + dS * dt; swarmA[i] = swarmA[i - 1] + 0.9 * dS * dt;
+    // ---- Zugwagen ----
+    while (zf < ZF.length && ZF[zf] <= t) { jRef = land[i]; jLast = 0; zf++; }
+    if (scene !== 'zug' || atCut) { ry = rvy = rr = rvr = sl = slv = 0; bogie = []; }
+    if (scene === 'zug') {
+      const ov = outV(t), v = ov.v, view = viewCur(t), rails = view === 'land' || view === 'bakery';
+      const jn = Math.floor((land[i] - jRef) / J + 1e-6);
+      if (rails && jn > jLast && v > 0.02) {
+        rvy -= 55 * v; bogie.push([t + 0.11, 40 * v]);
+        rvr += 0.9 * rSide * v; rSide = -rSide;
+      }
+      jLast = Math.max(jLast, jn);
+      while (bogie.length && bogie[0][0] <= t) rvy -= bogie.shift()[1];
+      while (lu < LURCH.length && LURCH[lu] <= t) { rvr -= 16; rvy += 80; lu++; }
+      [ry, rvy] = springStep(ry, rvy, 0, wRy, zRy);
+      [rr, rvr] = springStep(rr, rvr, 0, wRr, zRr);
+      const sT = clamp(-segV(ov.s, t) * 3, -4, 4);   // Bremsen (dv/dt < 0): nach vorn, in Fahrtrichtung (+x)
+      [sl, slv] = springStep(sl, slv, sT, wSl, zSl);
+      const air = rails ? 0 : 1;   // fliegend: Luftschaukeln statt Schienenstöße
+      rockY[i] = ry + air * (6 * Math.sin(1.1 * t) + 3 * Math.sin(2.3 * t + 0.7));
+      rockR[i] = rr + air * 0.6 * Math.sin(0.7 * t + 0.3);
+      seatLean[i] = sl;
+    } else { rockY[i] = rockR[i] = seatLean[i] = 0; }
+    while (lu < LURCH.length && LURCH[lu] <= t) lu++;
+    if (scene === 'bahnhof' && trVis(t) && !trWings(t) && !atCut) {
+      const X = trX(t), acc = segA(X.s, t), vx = segV(X.s, t), j = Math.floor(X.v / 170);
+      [tp, tpv] = springStep(tp, tpv, clamp(-0.008 * acc, -2.2, 2.2), 2 * Math.PI * 1.3, 0.32);
+      if (tJ !== null && j !== tJ) tbv -= 0.07 * Math.abs(vx);
+      tJ = j;
+      [tbmp, tbv] = springStep(tbmp, tbv, 0, 2 * Math.PI * 3, 0.3);
+    } else { tp = tpv = tbmp = tbv = 0; tJ = null; }
+    trainPitch[i] = tp; trainBump[i] = tbmp;
     for (const a of W) {
       const X = a.cx(t), Y = a.cy(t), S = Math.max(0.1, a.cs(t).v);
       const vx = segV(X.s, t), vy = segV(Y.s, t);
@@ -447,7 +560,8 @@ function integrate(forced) {
       a.lean[i] = a.l; a.squash[i] = a.q; a.px = X.v; a.py = Y.v; a.wasVis = vis;
       // Gangphase. Tauben: Schrittlänge 36..60 px wächst mit dem Tempo, höchstens 3 Doppelschritte/s
       // (bis 180 px/s stehen die Füße fest). Fussel: Hüpfer von 30..60 px.
-      const vL = Math.hypot(vx, vy) / S;
+      let vL = Math.hypot(vx, vy) / S;
+      if (a.name === 'fussel' && fWalk(t) && Math.abs(Y.v - 610) < 40) vL += br / S;   // auf dem laufenden Band: läuft auf der Stelle dagegen an
       if (a.name === 'fussel') a.phase += vL / clamp(vL / 4, 30, 60) * dt;
       else a.phase += Math.min(vL / clamp(vL / 3, 36, 60), 3) * dt;
       a.ph[i] = a.phase; a.vL[i] = vL;
@@ -502,10 +616,131 @@ function integrate(forced) {
       g.gx[i] = g.ex; g.gy[i] = g.ey; g.lx[i] = g.sx; g.ly[i] = g.sy;
     }
   }
-  Object.assign(INT, { dt, crank, crankRate, belt, beltRate, land, thrX, thrY, jig, needle });
+  Object.assign(INT, { dt, crank, crankRate, belt, beltRate, land, thrX, thrY, jig, needle, rockY, rockR, seatLean, trainPitch, trainBump, cloud, swarmA });
   for (const a of W) Object.assign(INT, { ['dist_' + a.name]: a.dist, ['lean_' + a.name]: a.lean, ['squash_' + a.name]: a.squash, ['ph_' + a.name]: a.ph, ['vL_' + a.name]: a.vL });
   for (const w of WHOS) INT['en_' + w] = EN[w];
   for (const g of G) Object.assign(INT, { ['gx_' + g.a]: g.gx, ['gy_' + g.a]: g.gy, ['lx_' + g.a]: g.lx, ['ly_' + g.a]: g.ly });
+}
+// ---------------------------------------------------------------------------
+// Kamera. Vorab (init): je Szenen-Intervall ein fester Mindestzoom, der Handkamera-Drift, Wagen-Schaukeln
+// und Kamera-Rollen abdeckt (kein Zoom-Pumpen); alle Schlüssel x/y werden auf den gültigen Bereich ihres
+// Endzooms begrenzt (Fahrten laufen nie mehr gegen den Bildrand); x, y, ln z laufen durch eine Feder
+// (Nachschwingen ~1.5 %, ~70 ms Nachlauf), die an Schnitten (Dauer 0) und Szenenwechseln einrastet.
+// Pro Bild: Handkamera-Drift im Bildraum und Stöße aus den Geräuschen (Explosion, Stempel, ...).
+// ---------------------------------------------------------------------------
+const DRIFT_W = { halle: 1, bahnhof: 1, zug: 0.4, himmel: 0.4 };
+const SHAKE_W = { explosion_weich: 1, stamp: 0.6, aus: 0.35, bremse: 0.3, glitch: 0.3, hebel: 0.2, tuer_zu: 0.15, hop: 0.12, plopp: 0.1 };
+let SCN = [];
+function sceneIdx(t) { return Math.max(0, lastLE(TL.scenes, t + 1e-6, s => s[0])); }
+// Halbe Ausdehnung des sichtbaren Weltausschnitts bei Zoom z und Rollwinkel a [rad], plus Ränder mx/my [Welt-px]
+function camExt(z, a, mx, my) {
+  const c = Math.cos(a), sn = Math.abs(Math.sin(a));
+  return [Math.min(960, (960 * c + 540 * sn) / z + mx), Math.min(540, (960 * sn + 540 * c) / z + my)];
+}
+function prepareCamera() {
+  const sc = TL.scenes, dt = INT.dt;
+  SCN = sc.map(([t0, name], i) => {
+    const t1 = i + 1 < sc.length ? sc[i + 1][0] : TL.total, w = DRIFT_W[name] || 0;
+    let rMax = 0, ry = 0, rk = 0;
+    for (let t = t0; t < t1; t += 1 / 30) rMax = Math.max(rMax, Math.abs(num('cam', 'r', t)));
+    for (let k = Math.floor(t0 / dt); k < Math.min(INT.rockY.length, t1 / dt); k++) { ry = Math.max(ry, Math.abs(INT.rockY[k])); rk = Math.max(rk, Math.abs(INT.rockR[k])); }
+    const safe = w > 0 || ry > 0 ? 2 : 0;
+    const K = { name, t0, t1, w, aDeg: 0.15 * w + rk, sx: 5 * w + safe, sy: 3.5 * w + safe, rx: 1000 * Math.sin(rk * Math.PI / 180), ry };
+    const a = (rMax + K.aDeg) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+    K.zMin = Math.max(1, (960 * sn + 540 * c + K.sy) / (540 - K.ry), (960 * c + 540 * sn + K.sx) / (960 - K.rx));
+    return K;
+  });
+  // Schlüssel begrenzen: Endwert auf den gültigen Bereich beim Endzoom, Startwert = (begrenzter) Wert davor
+  for (const p of ['x', 'y']) {
+    const segs = (TL.tracks.cam && TL.tracks.cam[p]) || [];
+    segs.forEach((s, j) => {
+      let v = DEF.cam[p];
+      for (let q = 0; q < j; q++) { const o = segs[q]; if (o[0] > s[0]) break; v = s[0] < o[1] ? segVal(o, s[0]) : o[3]; }
+      s[2] = v;
+      const K = SCN[sceneIdx(s[0])], zE = Math.max(num('cam', 'z', s[1]), K.zMin);
+      const [ex, ey] = camExt(zE, (Math.abs(num('cam', 'r', s[1])) + K.aDeg) * Math.PI / 180, K.sx / zE + K.rx, K.sy / zE + K.ry);
+      s[3] = p === 'x' ? clamp(s[3], ex, 1920 - ex) : clamp(s[3], ey, 1080 - ey);
+    });
+  }
+  // Feder auf x, y, ln z (240 Hz). Einrasten an Schnitten; Zoom-Segmente mit 'in' (Fahrt in KURTs Schirm)
+  // laufen ungefedert, damit der Anschluss an den Filmtitel bildgenau sitzt.
+  const n = INT.rockY.length, camX = new Float32Array(n), camY = new Float32Array(n), camLZ = new Float32Array(n);
+  const tr = TL.tracks.cam || {}, snaps = sc.map(s => s[0]);
+  for (const p of ['x', 'y', 'z']) for (const s of tr[p] || []) if (s[1] - s[0] < 1e-6) snaps.push(s[0]);
+  snaps.sort((a, b) => a - b);
+  const cur = (p, logz) => {
+    const segs = tr[p] || [];
+    let k = 0;
+    return t => {
+      while (k < segs.length && segs[k][0] <= t) k++;
+      const sg = segs[k - 1];
+      if (!sg) return { v: DEF.cam[p], s: null };
+      return t < sg[1] ? { v: segVal(sg, t, logz), s: sg } : { v: sg[3], s: null };
+    };
+  };
+  const cX = cur('x'), cY = cur('y'), cZ = cur('z', true), w = 18, ze = 0.7;
+  let x = 0, y = 0, lz = 0, vx = 0, vy = 0, vz = 0, sk = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i * dt, X = cX(t).v, Y = cY(t).v, Z = cZ(t), LZ = Math.log(Z.v);
+    let snap = i === 0;
+    while (sk < snaps.length && snaps[sk] <= t + 1e-9) { snap = true; sk++; }
+    if (snap) { x = X; y = Y; lz = LZ; vx = vy = vz = 0; } else {
+      vx += (-w * w * (x - X) - 2 * ze * w * vx) * dt; x += vx * dt;
+      vy += (-w * w * (y - Y) - 2 * ze * w * vy) * dt; y += vy * dt;
+      vz += (-w * w * (lz - LZ) - 2 * ze * w * vz) * dt; lz += vz * dt;
+    }
+    if (Z.s && Z.s[4] === 'in') { lz = LZ; vz = Math.log(Z.s[3] / Z.s[2]) * segV([Z.s[0], Z.s[1], 0, 1, 'in'], t); }
+    camX[i] = x; camY[i] = y; camLZ[i] = lz;
+  }
+  Object.assign(INT, { camX, camY, camLZ });
+}
+// Wer auf dem Band durch die Versand-Luke fährt, stößt die Klappen auf (Zeiten vorab)
+function buildFlapPasses() {
+  BURST = CREC.filter(r => r.mode === 'burst').map(r => r.t0);
+  FLAPPASS = [[], [], [], [], []];
+  const riders = [];
+  CREC.forEach((rec, k) => {
+    if (rec.mode !== 'belt') return;
+    const t1 = k + 1 < CREC.length ? CREC[k + 1].t0 : TL.total;
+    for (let i = 0; i < CROWD_N; i++) riders.push([rec.t0, t1, t => beltX(i) + 55 + integ('belt', t) - integ('belt', rec.t0)]);
+  });
+  const gb = (TL.states.gurrmann && TL.states.gurrmann.belt) || [];
+  gb.forEach(([t0, on], k) => { if (on) riders.push([t0, k + 1 < gb.length ? gb[k + 1][0] : TL.total, t => gurrX(t) + 80]); });
+  for (const [t0, t1, X] of riders) for (let f = 0; f < 5; f++) {
+    const xf = 1768 + 31 * f;
+    for (let t = t0; t < t1; t += 1 / 120) if (X(t) >= xf) { FLAPPASS[f].push(t); break; }
+  }
+  for (const P of FLAPPASS) P.sort((a, b) => a - b);
+}
+// Gurrmann fährt auf dem Band mit (Zustand belt): x = Schlüsselwert + Bandweg seit dem Aufsteigen
+function gurrX(t) {
+  const x = num('gurrmann', 'x', t);
+  return st('gurrmann', 'belt', t, 0) ? x + integ('belt', t) - integ('belt', stT('gurrmann', 'belt', t)) : x;
+}
+// Stoß-Stärke 0..1 aus den Geräuschen der letzten 1.5 s (springt beim Aufprall, klingt mit e^(−6 t) ab)
+function shakeAmt(t) {
+  let a = 0;
+  for (const name in SHAKE_W) {
+    const L = SFXT[name];
+    if (!L) continue;
+    for (let k = lastLE(L, t); k >= 0 && t - L[k] < 1.5; k--) a += SHAKE_W[name] * Math.exp(-6 * (t - L[k]));
+  }
+  return Math.min(1, a);
+}
+// Kamera eines Bildes: Mittelpunkt, Zoom, Rollen und Bildraum-Versatz (Drift + Stoß)
+function camera(t) {
+  const K = SCN[sceneIdx(t)];
+  let cx = integ('camX', t), cy = integ('camY', t), cz = Math.exp(integ('camLZ', t));
+  const cr = num('cam', 'r', t), tr = shakeAmt(t), t2 = tr * tr;
+  cz = Math.max(cz, K.zMin) * (1 + 0.045 * t2);   // Stoß: kurz hineinstoßen, damit der Rand nie sichtbar wird
+  const dw = K.w * clamp((4 - cz) / 2.5, 0, 1);   // Handkamera; ganz nah (Fahrt in den Schirm) ruhig
+  const P2 = 2 * Math.PI;
+  const dx = 5 * dw * wob(t, 11) + 16 * t2 * (0.6 * Math.sin(P2 * 13 * t) + 0.4 * Math.sin(P2 * 19 * t + 1.3));
+  const dy = 3.5 * dw * wob(t, 12) + 16 * t2 * (0.6 * Math.sin(P2 * 17 * t + 0.7) + 0.4 * Math.sin(P2 * 27 * t + 2.1));
+  const dr = 0.15 * dw * wob(t, 13) + 0.5 * t2 * Math.sin(P2 * 11 * t + 0.4);
+  const [ex, ey] = camExt(cz, (Math.abs(cr) + K.aDeg + 0.5 * t2) * Math.PI / 180, (K.sx + 16 * t2) / cz + K.rx, (K.sy + 16 * t2) / cz + K.ry);
+  cx = clamp(cx, ex, 1920 - ex); cy = clamp(cy, ey, 1080 - ey);
+  return { cx, cy, cz, cr: cr + dr, dx, dy, K };
 }
 // Kanalwert zur Zeit t, linear zwischen den 240-Hz-Stützstellen
 function integ(name, t) {
@@ -699,6 +934,11 @@ function makeKurt(parent) {
   E('rect', { x: 5, y: 3, width: 6, height: 5, fill: C.screen }, ftrain); E('rect', { x: 16, y: 3, width: 6, height: 5, fill: C.screen }, ftrain); E('rect', { x: 27, y: 3, width: 6, height: 5, fill: C.screen }, ftrain);
   const fcloud = E('g', null, film);
   E('rect', { x: 0, y: 0, width: 18, height: 6, rx: 3, fill: C.garn, opacity: 0.6 }, fcloud);
+  // Filmtitel auf dem Schirm (vor dem Schnitt auf die Titelkarte): genau so groß und so hell, wie die Karte
+  // im ersten Bild steht (Kamera-Zoom 9 × KURT 1.6 = 14.4, Karte zu Beginn 1.25-fach)
+  const title = E('g', null, disp);
+  E('rect', { x: 70, y: 84, width: 90, height: 90, fill: '#163A3E' }, title);
+  const titleT = T(E('text', { x: 115, y: 121.92, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 5.556, fill: C.senf, 'letter-spacing': 1.389 }, title), 'FILM 1');
   const ans = E('g', null, disp); const bars = [];
   for (let i = 0; i < 7; i++) bars.push(E('rect', { x: 84 + i * 9, width: 6, rx: 2, fill: C.senf }, ans));
   const scan = E('rect', { x: 70, y: 84, width: 90, height: 90, fill: 'url(#scan)', opacity: 0.5 }, inner);
@@ -722,12 +962,14 @@ function makeKurt(parent) {
       const na = lerp(o.n1, Math.sin(t * 9) * 0.9, cw), nb = lerp(o.n2, Math.cos(t * 7) * 0.9, cw);
       setA(n1, 'd', `M56 215L${f1(56 + Math.sin(na) * 7)} ${f1(215 - Math.cos(na) * 7)}`);
       setA(n2, 'd', `M174 215L${f1(174 + Math.sin(nb) * 7)} ${f1(215 - Math.cos(nb) * 7)}`);
-      setA(scan, 'opacity', f3(0.5 + 0.05 * Math.sin(t * 1.3)));
+      // Zeilenraster: bei großer Kamera-Nähe (Fahrt in den Schirm) blendet es aus, sonst würden die Zeilen riesig
+      setA(scan, 'opacity', f3((0.5 + 0.05 * Math.sin(t * 1.3)) * clamp((5 - (o.camZ || 1)) / 2, 0, 1)));
       const mode = o.mode;
       setA(scr, 'fill', mode === 'red' ? '#4A1027' : (mode === 'off' ? '#0A1719' : C.screen));
       show(face, mode === 'on' || mode === 'glitch');
       show(load, mode === 'load'); show(err, mode === 'red'); show(boot, mode === 'boot');
-      show(film, mode === 'film'); show(ans, mode === 'ansage');
+      show(film, mode === 'film'); show(ans, mode === 'ansage'); show(title, mode === 'title');
+      if (mode === 'title' && titleT.textContent !== o.title) titleT.textContent = o.title;
       // Röhren-Umschalten: neuer Inhalt klappt in 0.12 s aus einer Linie auf
       setT(disp, o.flip < 0.999 ? `translate(0,128) scale(1,${f3(o.flip)}) translate(0,-128)` : '');
       if (mode === 'on' || mode === 'glitch') {
@@ -850,9 +1092,11 @@ function makePigeon(parent, opt) {
   return {
     g, opt, update(o) {
       const t = o.t, ph = o.ph || 0;
-      let face = o.face;
-      if (Math.abs(face) < 0.12) face = face < 0 ? -0.12 : 0.12;
-      setT(g, `translate(${f1(o.x)},${f1(o.y)}) rotate(${f2(o.r || 0)}) scale(${(o.s * face * (o.sx || 1)).toFixed(4)},${(o.s * (o.sy || 1)).toFixed(4)}) translate(-110,-226)`);
+      let face = o.face;   // Wenden: über eine Stauchung (|face| ≥ 0.22), nie ganz flach
+      if (Math.abs(face) < 0.22) face = face < 0 ? -0.22 : 0.22;
+      // Wischen bei schnellem Flug: entlang der Flugrichtung strecken, um die Körpermitte, volumengleich
+      const sm = o.smM > 0.01 ? `translate(0,${f1(-76 * o.s)}) rotate(${f1(o.smA)}) scale(${f3(1 + o.smM)},${f3(1 / (1 + o.smM))}) rotate(${f1(-o.smA)}) translate(0,${f1(76 * o.s)}) ` : '';
+      setT(g, `translate(${f1(o.x)},${f1(o.y)}) ${sm}rotate(${f2(o.r || 0)}) scale(${(o.s * face * (o.sx || 1)).toFixed(4)},${(o.s * (o.sy || 1)).toFixed(4)}) translate(-110,-226)`);
       const wa = o.walkAmt || 0, wp = o.wp || 0, S = o.stride || 40, fl = o.fly || 0, si = o.sit || 0;
       // Rumpf: atmen (Fußpunkt fest), beim Gehen zwei Senken pro Doppelschritt und Watscheln
       const b = o.breath || 0;
@@ -870,10 +1114,12 @@ function makePigeon(parent, opt) {
       let wr = -(o.wing || 0) * 55;
       if (o.crankAmt) wr = lerp(wr, -25 + Math.sin(o.crankA * Math.PI / 180) * 18, o.crankAmt);
       if (o.sweepAmt) wr = lerp(wr, Math.sin(t * 6) * 14, o.sweepAmt);
-      if (fl > 0) wr = lerp(wr, -20 - 45 * (0.5 + 0.5 * Math.sin(t * 26 + ph)), fl);
+      // Flattern: Schlagfrequenz je Taube; flapAmt < 1 = Gleiten mit erhobenen Flügeln (beim Sinken)
+      const fHz = o.flapHz || 26, fA = o.flapAmt === undefined ? 1 : o.flapAmt;
+      if (fl > 0) wr = lerp(wr, -20 - 45 * fA * (0.5 + 0.5 * Math.sin(t * fHz + ph)) - (1 - fA) * 28, fl);
       setT(wing, `rotate(${f1(wr)},125,138)`);
       show(farWing, fl > 0.02);
-      if (fl > 0.02) { setT(farWing, `rotate(${f1(lerp(-10, -30 + 50 * Math.sin(t * 26 + ph + 0.6), fl))},126,140)`); setA(farWing, 'opacity', f2(0.85 * fl)); }
+      if (fl > 0.02) { setT(farWing, `rotate(${f1(lerp(-10, -30 + 50 * fA * Math.sin(t * fHz + ph + 0.6) - (1 - fA) * 20, fl))},126,140)`); setA(farWing, 'opacity', f2(0.85 * fl)); }
       show(broom, !!o.broom);
       if (o.broom) setT(broom, 'rotate(25,150,150)');
       // Kopf: kurzer Ruck (0.1 s), dann stillhalten; dazu Picken, Nicken, Blick. Beim Gehen: Kopf stößt vor und bleibt in der Welt stehen.
@@ -904,16 +1150,31 @@ function makePigeon(parent, opt) {
   };
 }
 
+// Ideen-Knäuel; zwei Nachzieher (use) für schnellen Flug
 function makeBall(parent) {
-  const g = E('g', null, parent);
-  E('circle', { r: 16, fill: C.him }, g);
-  E('path', { d: 'M-12 -4Q0 -14 13 2M-13 5Q0 -4 10 10', fill: 'none', stroke: C.himD, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+  const ghosts = [0.35, 0.18].map(() => E('use', { href: '#ballArt', opacity: 0 }, parent));
+  const g = E('g', null, parent), art = E('g', { id: 'ballArt' }, g);
+  E('circle', { r: 16, fill: C.him }, art);
+  E('path', { d: 'M-12 -4Q0 -14 13 2M-13 5Q0 -4 10 10', fill: 'none', stroke: C.himD, 'stroke-width': 3, 'stroke-linecap': 'round' }, art);
+  g._ghosts = ghosts;
   return g;
 }
+// Wischen ohne Filter: in Bewegungsrichtung strecken (volumengleich), Mittelpunkt (cx, cy)
+function smearT(vx, vy, k, max, cx, cy) {
+  const m = Math.min(max, Math.hypot(vx, vy) * k);
+  if (m < 0.005) return '';
+  const a = Math.atan2(vy, vx) * 57.3;
+  return `translate(${f1(cx)},${f1(cy)}) rotate(${f1(a)}) scale(${f3(1 + m)},${f3(1 / (1 + m))}) rotate(${f1(-a)}) translate(${f1(-cx)},${f1(-cy)}) `;
+}
 
+// Zug (schaut nach links). Fahrwerk (Räder, Drehgestelle) und Wagenkasten getrennt: der Kasten nickt beim
+// Bremsen vorn ein, federt nach dem Halt 2–3-mal nach, hockt beim Anfahren hinten ein; Schienenstöße.
 function makeTrain(parent) {
   const g = E('g', null, parent);
-  const farW = E('g', null, g), body = E('g', null, g), nearW = E('g', null, g);
+  const speed = E('g', null, g), lines = [];
+  for (let i = 0; i < 4; i++) lines.push(E('path', { stroke: C.garn, 'stroke-width': 10, 'stroke-linecap': 'round', fill: 'none' }, speed));
+  const bodyG = E('g', null, g);
+  const farW = E('g', null, bodyG), body = E('g', null, bodyG), nearW = E('g', null, bodyG), chassis = E('g', null, g);
   function wingShape(p, fill, shade) {
     E('path', { d: 'M0 0C-60 -140 -260 -250 -430 -230C-420 -200 -380 -190 -360 -180C-390 -170 -400 -150 -390 -130C-360 -130 -330 -125 -310 -115C-330 -100 -335 -80 -320 -65C-260 -70 -150 -40 -60 20Z', fill }, p);
     E('path', { d: 'M-60 -60C-150 -120 -260 -170 -350 -190M-60 -30C-160 -80 -250 -110 -320 -120M-60 0C-150 -40 -230 -60 -300 -70', fill: 'none', stroke: shade, 'stroke-width': 8, 'stroke-linecap': 'round' }, p);
@@ -942,15 +1203,31 @@ function makeTrain(parent) {
   T(E('text', { x: 160, y: -100, 'font-family': FONT.bagel, 'font-size': 44, fill: C.garn }, body), 'Taubenbahn');
   const wheels = [];
   for (const x of [-640, -540, 540, 640]) {
-    const w = E('g', null, body);
-    E('circle', { r: 38, fill: C.ink }, w); E('path', { d: 'M-30 0H30M0 -30V30', stroke: C.ink2, 'stroke-width': 7 }, w); E('circle', { r: 9, fill: C.taube }, w);
-    wheels.push([w, x]);
+    const w = E('g', null, chassis);
+    E('circle', { r: 38, fill: C.ink }, w);
+    const sp = E('path', { d: 'M-30 0H30M0 -30V30', stroke: C.ink2, 'stroke-width': 7 }, w);
+    const ring = E('circle', { r: 22, fill: 'none', stroke: C.ink2, 'stroke-width': 9, opacity: 0 }, w);   // Speichen verwischt
+    E('circle', { r: 9, fill: C.taube }, w);
+    wheels.push([w, x, sp, ring]);
   }
-  E('rect', { x: -700, y: -70, width: 220, height: 26, rx: 8, fill: C.ink }, body); E('rect', { x: 480, y: -70, width: 220, height: 26, rx: 8, fill: C.ink }, body);
+  E('rect', { x: -700, y: -70, width: 220, height: 26, rx: 8, fill: C.ink }, chassis); E('rect', { x: 480, y: -70, width: 220, height: 26, rx: 8, fill: C.ink }, chassis);
   return {
-    g, update(o) {
-      setT(g, `translate(${o.x.toFixed(1)},${o.y.toFixed(1)}) rotate(${o.r.toFixed(2)}) scale(${o.s})`);
-      for (const [w, x] of wheels) setT(w, `translate(${x},-38) rotate(${(-o.x * 1.5 % 360).toFixed(1)})`);
+    g, body, update(o) {
+      // Fahrt-Wischen: minimal in Fahrtrichtung gestreckt (um die Wagenmitte), Tempo-Striche hinter dem Heck
+      const v = Math.abs(o.vx || 0), sx = 1 + v / 20000;
+      setT(g, `translate(${o.x.toFixed(1)},${o.y.toFixed(1)}) rotate(${o.r.toFixed(2)}) scale(${f3(o.s * sx)},${f3(o.s)})`);
+      setT(bodyG, `translate(0,${f2(o.sag || 0)}) rotate(${f3(o.pitch || 0)},0,-60)`);
+      const dpf = v * 1.5 / 60, blur = smooth((dpf - 14) / 12);   // Grad pro Bild: ab ~20° flimmern die Speichen
+      for (const [w, x, sp, ring] of wheels) {
+        setT(w, `translate(${x},-38) rotate(${(-o.x * 1.5 % 360).toFixed(1)})`);
+        setA(sp, 'opacity', f2(1 - blur)); setA(ring, 'opacity', f2(0.8 * blur));
+      }
+      const so = clamp((v - 300) / 900, 0, 0.55), tail = (o.vx || 0) < 0 ? 1 : -1;
+      show(speed, so > 0.01);
+      if (so > 0.01) lines.forEach((l, i) => {
+        const y = [-280, -205, -125, -75][i], x0 = tail * (880 + 30 * (i % 2)), len = (0.22 + 0.08 * i) * v;
+        setA(l, 'd', `M${f1(x0)} ${y}H${f1(x0 + tail * len)}`); setA(l, 'opacity', f2(so * (1 - 0.15 * i)));
+      });
       for (const [l, r, x] of doors) { setA(l, 'x', (x - 58 - o.doors * 52).toFixed(1)); setA(r, 'x', (x + o.doors * 52).toFixed(1)); }
       show(farW, o.wings); show(nearW, o.wings);
       if (o.wings) {
@@ -958,7 +1235,8 @@ function makeTrain(parent) {
         setT(fw, `translate(120,-320) rotate(${(20 + fl * 0.8).toFixed(1)})`);
         setT(nw, `translate(-60,-300) rotate(${(-6 + fl).toFixed(1)})`);
       }
-      heads.forEach((h, i) => setT(h, `translate(0,${(Math.sin(o.t * 5 + i) * 3).toFixed(1)})`));
+      // Fahrgäste: wippen; beim Bremsen rutschen die Köpfe nach vorn (links), beim Anfahren zurück
+      heads.forEach((h, i) => setT(h, `translate(${f1(6 * (o.pitch || 0))},${(Math.sin(o.t * 5 + i) * 3).toFixed(1)})`));
     }
   };
 }
@@ -976,6 +1254,13 @@ function makeMiniTrain(parent) {
 // Szenen
 // ---------------------------------------------------------------------------
 const H = {}; // dynamische Teile der Kulissen
+const BOARD = {
+  leer: ['--:--  ----------', '', ''],
+  kruemel: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'pünktlich'],
+  kruemel2: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'Abfahrt bei ausreichend Krümeln'],
+  einfahrt: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'fährt ein · Vorsicht!']
+};
+const FLAPS = 'ABCDEFGHIKLMNOPRSTUZ0123456789:·';
 
 (function buildHalle() {
   const g = sceneGroup('halle');
@@ -1008,6 +1293,8 @@ const H = {}; // dynamische Teile der Kulissen
   E('circle', { cx: 1615, cy: 310, r: 48, fill: 'none', stroke: C.ink, 'stroke-width': 5 }, g);
   H.hourHand = E('path', { d: 'M1615 310V284', stroke: C.ink, 'stroke-width': 6, 'stroke-linecap': 'round' }, g);
   H.minHand = E('path', { d: 'M1615 310V272', stroke: C.ink, 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+  H.secK = E('path', { d: 'M1615 318V270', stroke: C.him, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, g);   // tickt
+  E('circle', { cx: 1615, cy: 310, r: 4, fill: C.him }, g);
   E('rect', { x: 1572, y: 386, width: 86, height: 12, rx: 3, fill: C.ink }, g);
   T(E('text', { x: 1615, y: 430, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 18, fill: C.ink, 'letter-spacing': 2 }, g), 'STEMPELN');
   E('rect', { x: 1708, y: 250, width: 76, height: 180, rx: 6, fill: C.petD }, g);
@@ -1018,12 +1305,20 @@ const H = {}; // dynamische Teile der Kulissen
     E('rect', { x: 1718, y: 240 + i * 42, width: 56, height: 6, fill: C.him }, c);
     H.cards.push(c);
   }
-  // Lampen
-  for (const x of [300, 960, 1620]) {
-    E('path', { d: `M${x - 70} 210L${x + 70} 210L${x + 300} 700L${x - 300} 700Z`, fill: C.garn, opacity: 0.09 }, g);
-    E('path', { d: `M${x} 44V150`, stroke: C.ink, 'stroke-width': 4 }, g);
-    E('path', { d: `M${x - 66} 206L${x - 32} 150H${x + 32}L${x + 66} 206Z`, fill: C.pet }, g);
-    E('circle', { cx: x, cy: 208, r: 16, fill: C.garn }, g);
+  // Lampen: pendeln an der Decke (um den Aufhängepunkt), Lichtkegel schwingt mit; Staub tanzt im Licht
+  H.lamps = [300, 960, 1620].map(x => {
+    const L = E('g', null, g);
+    L._cone = E('path', { d: `M${x - 70} 210L${x + 70} 210L${x + 300} 700L${x - 300} 700Z`, fill: C.garn, opacity: 0.09 }, L);
+    E('path', { d: `M${x} 44V150`, stroke: C.ink, 'stroke-width': 4 }, L);
+    E('path', { d: `M${x - 66} 206L${x - 32} 150H${x + 32}L${x + 66} 206Z`, fill: C.pet }, L);
+    E('circle', { cx: x, cy: 208, r: 16, fill: C.garn }, L);
+    L._x = x; L._ang = 0;
+    return L;
+  });
+  H.dust = E('g', null, g); H.motes = [];
+  for (let k = 0; k < 3; k++) for (let j = 0; j < 6; j++) {
+    const m = E('circle', { r: f1(2 + 2 * hash(k * 6 + j, 33)), fill: C.garn }, H.dust);
+    m._k = k; m._j = j; m._h = [hash(k * 6 + j, 31), hash(k * 6 + j, 32), hash(k * 6 + j, 34)]; H.motes.push(m);
   }
   // Warnleuchte
   E('rect', { x: 1478, y: 44, width: 44, height: 12, fill: C.ink }, g);
@@ -1075,19 +1370,27 @@ const H = {}; // dynamische Teile der Kulissen
   H.stamp = E('g', null, g);
   E('rect', { x: -210, y: -50, width: 420, height: 100, rx: 14, fill: 'none', stroke: C.him, 'stroke-width': 8 }, H.stamp);
   T(E('text', { x: 0, y: 20, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 56, fill: C.him, 'letter-spacing': 6 }, H.stamp), 'CHARGE 001');
-  H.t1 = T(E('text', { x: 960, y: 560, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 116, fill: C.ink }, g), 'Und was, wenn Tauben');
-  H.t2 = T(E('text', { x: 960, y: 690, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 116, fill: C.ink }, g), 'die Bahn übernehmen?');
+  H.t1 = T(E('text', { id: 'ttl1', x: 960, y: 560, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 116, fill: C.ink }, g), 'Und was, wenn Tauben');
+  H.t2 = T(E('text', { id: 'ttl2', x: 960, y: 690, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 116, fill: C.ink }, g), 'die Bahn übernehmen?');
+  // Nachzieher beim schnellen Hereinfliegen (Kopien, nur Transform/Deckkraft ändern sich)
+  H.tGhost = ['ttl1', 'ttl1', 'ttl2', 'ttl2'].map(id => { const u = E('use', { href: '#' + id, opacity: 0 }); g.insertBefore(u, H.t1); return u; });
   T(E('text', { x: 960, y: 820, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 28, fill: C.ink, 'letter-spacing': 4 }, g), 'FORMAT: UND WAS, WENN …?');
 })();
 
+// Filmtitel = KURTs Bildschirm in Großaufnahme. Im ersten Bild deckt sich die Karte mit dem Schirm aus der
+// Halle (Loch r = 43·1.6·9, Ring und Gehäuse drumherum), dann öffnet sich der Rand und die Karte zoomt nach.
 (function buildFilmtitel() {
   const g = sceneGroup('filmtitel');
   E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: C.screen }, g);
-  H.ftGlow = E('circle', { cx: 960, cy: 540, r: 700, fill: '#163A3E' }, g);
-  H.ft1 = T(E('text', { x: 960, y: 470, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 64, fill: C.senf, 'letter-spacing': 16 }, g), 'FILM 1');
-  H.ft2 = T(E('text', { x: 960, y: 640, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 150, fill: C.senf }, g), 'Die Übernahme');
-  E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: 'url(#scan)', opacity: 0.6 }, g);
+  H.ftG = E('g', null, g);
+  H.ftGlow = E('circle', { cx: 960, cy: 540, r: 700, fill: '#163A3E' }, H.ftG);
+  H.ft1 = T(E('text', { x: 960, y: 470, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 64, fill: C.senf, 'letter-spacing': 16 }, H.ftG), 'FILM 1');
+  H.ft2 = T(E('text', { x: 960, y: 640, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 150, fill: C.senf }, H.ftG), 'Die Übernahme');
+  H.ftScan = E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: 'url(#scan)', opacity: 0.6 }, g);
   E('path', { d: 'M0 0H1920V1080H0Z M960 -260A1060 860 0 1 0 960.1 -260Z', fill: C.petDD, 'fill-rule': 'evenodd', opacity: 0.9 }, g);
+  H.ftHi = E('circle', { fill: '#fff' }, g);   // Glanzpunkt auf dem Glas
+  H.ftRim = [C.screen, C.petDD, C.pet].map(fill => E('path', { fill, 'fill-rule': 'evenodd' }, g));
+  H.ftRimFelt = E('path', { d: 'M-1000 -1000H1200V1200H-1000Z M61 128a54 54 0 1 0 108 0a54 54 0 1 0 -108 0Z', fill: 'url(#felt)', 'fill-rule': 'evenodd' }, g);
 })();
 
 (function buildBahnhof() {
@@ -1110,12 +1413,17 @@ const H = {}; // dynamische Teile der Kulissen
   H.b1 = T(E('text', { x: 140, y: 205, 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 38, fill: C.senf }, g), '');
   H.b2 = T(E('text', { x: 140, y: 265, 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 30, fill: C.garn }, g), '');
   H.b3 = T(E('text', { x: 140, y: 312, 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 30, fill: C.him }, g), '');
+  for (const y of [192, 255, 302]) E('rect', { x: 130, y, width: 660, height: 2, fill: C.ink }, g);   // Fallblatt-Teilung
   // Bahnhofsuhr
   E('path', { d: 'M1020 60V96', stroke: C.ink, 'stroke-width': 5 }, g);
   E('circle', { cx: 1020, cy: 150, r: 56, fill: '#fff' }, g);
   E('circle', { cx: 1020, cy: 150, r: 56, fill: 'none', stroke: C.ink, 'stroke-width': 7 }, g);
-  E('path', { d: 'M1020 150L1040 136M1020 150L1020 104', stroke: C.ink, 'stroke-width': 6, 'stroke-linecap': 'round' }, g);
-  H.secHand = E('path', { d: 'M1020 150V104', stroke: C.him, 'stroke-width': 3 }, g);
+  // Bahnhofsuhr 8:13–8:15: Sekundenzeiger läuft in 58.5 s herum, wartet oben, dann springt der Minutenzeiger
+  E('path', { d: 'M1020 150V122', stroke: C.ink, 'stroke-width': 6, 'stroke-linecap': 'round', transform: 'rotate(247,1020,150)' }, g);
+  H.clockMin = E('path', { d: 'M1020 150V104', stroke: C.ink, 'stroke-width': 6, 'stroke-linecap': 'round' }, g);
+  H.secHand = E('g', null, g);   // roter Zeiger mit Kelle
+  E('path', { d: 'M1020 162V104', stroke: C.him, 'stroke-width': 3 }, H.secHand);
+  E('circle', { cx: 1020, cy: 114, r: 6, fill: C.him }, H.secHand);
   // Bahnhofsschild
   E('path', { d: 'M1230 60V120M1560 60V120', stroke: C.ink, 'stroke-width': 4 }, g);
   E('rect', { x: 1150, y: 118, width: 490, height: 84, rx: 8, fill: C.garn }, g);
@@ -1132,7 +1440,8 @@ const H = {}; // dynamische Teile der Kulissen
   H.horn = E('g', null, f);
   E('path', { d: 'M1812 200L1730 160V250Z', fill: C.taubeD }, H.horn);
   E('rect', { x: 1806, y: 188, width: 22, height: 24, rx: 4, fill: C.ink }, H.horn);
-  H.hornWaves = E('path', { d: 'M1715 175q-14 30 0 60M1695 160q-24 45 0 90', fill: 'none', stroke: C.him, 'stroke-width': 5, 'stroke-linecap': 'round' }, H.horn);
+  // Schallwellen: zwei Bögen wandern nach außen und verblassen (Stärke aus der geglätteten Durchsage)
+  H.hornW = [0, 1].map(() => E('path', { d: 'M1715 175q-14 30 0 60', fill: 'none', stroke: C.him, 'stroke-width': 5, 'stroke-linecap': 'round' }, H.horn));
 })();
 
 (function buildZug() {
@@ -1146,26 +1455,30 @@ const H = {}; // dynamische Teile der Kulissen
   const W = [[170, 190, 480, 300], [720, 190, 480, 300], [1270, 190, 480, 300]];
   for (const [x, y, w, h] of W) E('rect', { x, y, width: w, height: h, rx: 34 }, cp);
   const out = E('g', { 'clip-path': 'url(#winclip)' }, g);
-  H.outLand = E('g', null, out); H.outBakery = E('g', null, out); H.outClouds = E('g', null, out);
+  // Aussicht: steht in der Welt still, während der Wagen schaukelt (H.outside hält dagegen)
+  H.outside = E('g', null, out);
+  H.outLand = E('g', null, H.outside); H.outClouds = E('g', null, H.outside);
   // Landschaft (wiederholt sich alle 1200 px)
   E('rect', { x: 0, y: 150, width: 1920, height: 400, fill: '#FFF1CF' }, H.outLand);
-  H.landFar = E('g', null, H.outLand); H.landNear = E('g', null, H.outLand); H.poles = E('g', null, H.outLand);
+  H.landFar = E('g', null, H.outLand); H.landNear = E('g', null, H.outLand);
+  H.outBakery = E('g', null, H.outLand);   // zwischen Hügeln und Masten: gleitet mit der Landschaft herein
+  H.poles = E('g', null, H.outLand); H.poleRects = [];
   for (let k = 0; k < 4; k++) {
     E('path', { d: `M${k * 1200} 420Q${k * 1200 + 300} 300 ${k * 1200 + 600} 410T${k * 1200 + 1200} 420V520H${k * 1200}Z`, fill: '#4F8E92' }, H.landFar);
     E('path', { d: `M${k * 1200} 460Q${k * 1200 + 200} 400 ${k * 1200 + 450} 455T${k * 1200 + 1200} 450V520H${k * 1200}Z`, fill: C.senfD }, H.landNear);
     for (const dx of [150, 520, 900]) { E('rect', { x: k * 1200 + dx, y: 395, width: 10, height: 50, fill: C.woodD }, H.landNear); E('circle', { cx: k * 1200 + dx + 5, cy: 385, r: 30, fill: C.pet }, H.landNear); }
-    for (const dx of [0, 600]) E('rect', { x: k * 1200 + dx, y: 180, width: 14, height: 320, fill: C.ink2 }, H.poles);
+    for (const dx of [0, 600]) { const pr = E('rect', { x: k * 1200 + dx, y: 180, width: 14, height: 320, fill: C.ink2 }, H.poles); pr._x = k * 1200 + dx + 7; H.poleRects.push(pr); }
   }
   E('rect', { x: 0, y: 480, width: 1920, height: 40, fill: '#7C7894' }, H.outLand);
-  // Bäckerei
-  E('rect', { x: 0, y: 150, width: 1920, height: 400, fill: '#FFF1CF' }, H.outBakery);
+  H.outLand.appendChild(H.poles);   // Masten ganz vorn, auch vor der Bäckerei
+  // Bäckerei (ein Gebäude an der Strecke, ohne eigenen Himmel; steht auf dem Boden der Landschaft)
   E('rect', { x: 560, y: 200, width: 800, height: 320, fill: C.garnD }, H.outBakery);
   for (let i = 0; i < 10; i++) E('path', { d: `M${560 + i * 80} 230h80l-10 50h-60z`, fill: i % 2 ? C.garn : C.him }, H.outBakery);
   E('rect', { x: 600, y: 300, width: 300, height: 200, rx: 10, fill: C.ink2 }, H.outBakery);
   for (let i = 0; i < 4; i++) E('ellipse', { cx: 650 + i * 66, cy: 440, rx: 28, ry: 18, fill: C.brezel }, H.outBakery);
   E('path', { d: 'M1040 340c-60-60 40-110 70-40c30-70 130-20 70 40c-30 30-110 30-140 0z', fill: 'none', stroke: C.brezel, 'stroke-width': 22 }, H.outBakery);
   T(E('text', { x: 1110, y: 470, 'text-anchor': 'middle', 'font-family': FONT.bagel, 'font-size': 52, fill: C.him }, H.outBakery), 'Bäckerei');
-  E('rect', { x: 0, y: 480, width: 1920, height: 40, fill: '#7C7894' }, H.outBakery);
+  E('rect', { x: 520, y: 500, width: 880, height: 22, rx: 6, fill: '#6A6684' }, H.outBakery);
   // Wolken
   E('rect', { x: 0, y: 150, width: 1920, height: 400, fill: '#BFE0DC' }, H.outClouds);
   H.cloudRow = E('g', null, H.outClouds);
@@ -1184,6 +1497,10 @@ const H = {}; // dynamische Teile der Kulissen
   E('rect', { x: 0, y: 900, width: 1920, height: 70, fill: C.taube, opacity: 0.5 }, g);
   E('rect', { x: 1210, y: 82, width: 480, height: 34, rx: 6, fill: C.pet }, g);
   H.kleber = T(E('text', { x: 1450, y: 106, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 20, fill: C.garn, 'letter-spacing': 3 }, g), 'RUHEWAGEN · BITTE LEISE GURREN');
+  // Deckenlautsprecher für die Durchsagen
+  H.speaker = E('g', null, g);
+  E('circle', { cx: 1780, cy: 100, r: 22, fill: C.ink2 }, H.speaker);
+  E('path', { d: 'M1768 92H1792M1765 100H1795M1768 108H1792', stroke: C.garnD, 'stroke-width': 3, 'stroke-linecap': 'round' }, H.speaker);
 })();
 
 (function buildHimmel() {
@@ -1198,13 +1515,17 @@ const H = {}; // dynamische Teile der Kulissen
   E('path', { d: 'M0 980Q400 940 800 975T1920 970V1080H0Z', fill: C.senfD }, H.landBelow);
   for (let i = 0; i < 9; i++) { const x = 700 + i * 34; E('rect', { x, y: 950 - (i % 3) * 8, width: 26, height: 22 + (i % 3) * 8, fill: [C.garn, C.him, C.garnD][i % 3] }, H.landBelow); E('path', { d: `M${x - 3} ${950 - (i % 3) * 8}l16-14 16 14z`, fill: C.ink2 }, H.landBelow); }
   T(E('text', { x: 834, y: 1030, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 20, fill: C.ink, 'letter-spacing': 2 }, H.landBelow), 'BRÖTCHENHAUSEN');
+  // Wolken in drei Ebenen (fern: klein, langsam, leicht getönt; nah: groß, schnell); fern zuerst gezeichnet
+  const puff = (c, fill) => { for (const [dx, dy, r] of [[0, 0, 60], [70, -25, 75], [140, 0, 58], [70, 25, 55], [-50, 15, 40]]) E('circle', { cx: dx, cy: dy, r, fill }, c); };
   H.clouds = [];
-  for (let k = 0; k < 9; k++) {
+  for (const layer of [0, 1, 2]) for (let k = layer; k < 9; k += 3) {
     const c = E('g', null, g);
-    for (const [dx, dy, r] of [[0, 0, 60], [70, -25, 75], [140, 0, 58], [70, 25, 55], [-50, 15, 40]]) E('circle', { cx: dx, cy: dy, r, fill: '#fff' }, c);
-    E('circle', { cx: 70, cy: 0, r: 1, fill: 'url(#felt)' }, c);
-    c._k = k; H.clouds.push(c);
+    puff(c, layer ? '#fff' : '#EAF5F2');
+    c._k = k; c._sp = [35, 80, 160][layer]; c._sc = [0.55, 0.85, 1.2][layer]; H.clouds.push(c);
   }
+  // zwei große Wolken ganz vorn, die kurz durchs Bild ziehen
+  const fg = sceneGroup('himmel', fxLayer);
+  H.fgClouds = [0, 1].map(k => { const c = E('g', null, fg); puff(c, '#fff'); c._k = k; return c; });
   H.swarm = E('g', null, g);
   H.brezel = E('g', { transform: 'translate(860,560)' }, H.swarm);
   E('path', { d: 'M0 0c-180-180 120-320 210-120c90-200 390-60 210 120c-90 90-330 90-420 0z', fill: 'none', stroke: C.brezel, 'stroke-width': 64, transform: 'translate(-110,-40)' }, H.brezel);
@@ -1218,9 +1539,9 @@ const H = {}; // dynamische Teile der Kulissen
 (function buildEndcard() {
   const g = sceneGroup('endcard');
   E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: C.pet }, g);
-  E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: 'url(#dotsL)' }, g);
+  H.endDots = E('rect', { x: -32, y: -32, width: 1984, height: 1144, fill: 'url(#dotsL)' }, g);   // driftet langsam
   E('rect', { x: 140, y: 220, width: 800, height: 450, rx: 18, fill: C.petD }, g);
-  E('rect', { x: 140, y: 220, width: 800, height: 450, rx: 18, fill: 'none', stroke: C.garn, 'stroke-width': 6, 'stroke-dasharray': '24 16' }, g);
+  H.endFrame = E('rect', { x: 140, y: 220, width: 800, height: 450, rx: 18, fill: 'none', stroke: C.garn, 'stroke-width': 6, 'stroke-dasharray': '24 16' }, g);
   T(E('text', { x: 540, y: 455, 'text-anchor': 'middle', 'font-family': FONT.mono, 'font-weight': 500, 'font-size': 34, fill: C.garn, 'letter-spacing': 6 }, g), 'NÄCHSTE CHARGE');
   E('circle', { cx: 1180, cy: 445, r: 165, fill: C.senf }, g);
   E('circle', { cx: 1180, cy: 445, r: 165, fill: 'none', stroke: C.garn, 'stroke-width': 8 }, g);
@@ -1237,50 +1558,125 @@ const train = makeTrain(trainLayer);
 const crowd = [];
 const CROWD_N = 14;
 const bodies = [C.taube, '#9C98B8', '#B3AFCB', '#8F8AAE'];
-for (let i = 0; i < CROWD_N; i++) crowd.push(makePigeon(i < 7 ? actorsBack : actorsFront, { body: bodies[i % 4], wingC: i % 2 ? '#7E79A0' : C.taubeD, neck: true }));
+// Jede Statistin, Gurrmann und Fussel stecken in einer Hülle ohne Transform: beim Einsteigen bekommt sie den
+// Tür-Ausschnitt (#doorclip, Weltkoordinaten), damit sie hinter dem Wagenkasten in der Tür verschwinden.
+for (let i = 0; i < CROWD_N; i++) {
+  const wrap = E('g', null, i < 7 ? actorsBack : actorsFront);
+  const p = makePigeon(wrap, { body: bodies[i % 4], wingC: i % 2 ? '#7E79A0' : C.taubeD, neck: true });
+  p.wrap = wrap; crowd.push(p);
+}
 const kurt = makeKurt(actors);
 const broesel = makePigeon(actors, { hat: 'helmet', board: true });
-const gurrmann = makePigeon(actors, { hat: 'cap', body: '#9C98B8' });
-const fussel = makeFussel(actors);
+const gurrWrap = E('g', null, actors), fusselWrap = E('g', null, actors);
+const gurrmann = makePigeon(gurrWrap, { hat: 'cap', body: '#9C98B8' });
+const fussel = makeFussel(fusselWrap);
+// Tür-Ausschnitt: alles außerhalb des Wagenkastens plus die offenen Türspalte (pro Bild aus Zug-Lage und Türen)
+const doorClip = E('clipPath', { id: 'doorclip' }, defs);
+const doorClipOut = E('path', { 'clip-rule': 'evenodd' }, doorClip);
+const doorClipGaps = [0, 1].map(() => E('rect', null, doorClip));
+// Versand-Luke vorn: Kopie der Klappen über den Band-Fahrgästen (nur solange jemand auf dem Band fährt)
+const flapsFront = E('g', null, sceneGroup('halle', actorsFront));
+H.flapsF = [];
+for (let i = 0; i < 5; i++) H.flapsF.push(E('rect', { x: 1768 + i * 31, y: 470, width: 27, height: 178, fill: C.taubeD, opacity: 0.9 }, flapsFront));
 const sitter = makePigeon(actorsFront, { body: '#B3AFCB' });
 const ball = makeBall(actorsFront);
 const crumbG = E('g', null, fxLayer);
 const crumbs = [];
 for (let i = 0; i < 46; i++) crumbs.push(E('rect', { width: 9, height: 7, rx: 2, fill: i % 3 ? C.brezel : C.senfDD }, crumbG));
+const dustG = E('g', null, fxLayer);   // Staubwölkchen bei Fussels harten Landungen
+const dust = [-1, 1, 0].map(dir => { const e = E('ellipse', { fill: C.garn }, dustG); e._dir = dir; return e; });
 const featherG = E('g', null, fxLayer);
 const feathers = [];
-for (let i = 0; i < 10; i++) feathers.push(E('ellipse', { rx: 12, ry: 5, fill: C.garn }, featherG));
+for (let i = 0; i < 16; i++) feathers.push(E('ellipse', { rx: 12, ry: 5, fill: i % 3 ? C.garn : C.taube }, featherG));
 
 const irisPath = E('path', { fill: C.ink, 'fill-rule': 'evenodd' }, overlay);
 const fadeRect = E('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: '#000', opacity: 0 }, overlay);
 
-// Positionen der Tauben je Modus
-const PLAT_POS = [[180, 905, -1], [300, 960, 1], [420, 900, 1], [260, 1030, -1], [1380, 910, -1], [1520, 960, 1], [1650, 905, -1],
-  [1760, 1010, -1], [1480, 1040, 1], [120, 1020, 1], [1320, 1010, -1], [1600, 1060, -1], [380, 1060, 1], [1720, 930, -1]];
+// Positionen der Tauben je Modus. Bahnsteig [x, y, Blick (+1 = nach links)]: 0–6 stehen hinter Fussels
+// Fußlinie (y < 925, Ebene actorsBack), 7–13 davor (actorsFront); links x 90–490, rechts 1350–1820, ≥ 100 px Abstand.
+const PLAT_POS = [[130, 880, -1], [280, 860, 1], [430, 880, -1], [1360, 870, 1], [1510, 900, -1], [1660, 865, 1], [1820, 880, 1],
+  [90, 1010, -1], [215, 965, 1], [370, 1045, -1], [490, 990, -1], [1350, 1000, 1], [1560, 1045, 1], [1760, 985, -1]];
 const SEAT_POS = [[150, 770], [280, 770], [650, 770], [930, 770], [1150, 770], [1430, 770], [1700, 770]];
+// Schwarm: hintere Ebene (0–6) kleiner und mit engeren Bahnen, damit sie weiter weg wirken
+const CS = Array.from({ length: 14 }, (_, i) => (i < 7 ? 0.42 : 0.55) + 0.13 * hash(i, 6));
 function chaosPos(i, t) {
-  const a = t * (0.6 + (i % 5) * 0.12) + i * 1.7;
-  return [960 + Math.sin(a) * (520 + (i % 3) * 180), 330 + Math.sin(a * 1.7 + i) * 170 + (i % 2) * 60];
+  const a = t * (0.6 + (i % 5) * 0.12) + i * 1.7, k = CS[i] / 0.6;
+  return [960 + Math.sin(a) * (520 + (i % 3) * 180) * k, 330 + (Math.sin(a * 1.7 + i) * 170 + (i % 2) * 60) * k];
 }
-function beltX(i) { return 160 + i * 115; }
+function beltX(i) { return 330 + i * 105; }
+// sin²-Buckel zwischen a und b (0 außerhalb)
+function hump(u, a, b) { const x = Math.sin(Math.PI * clamp((u - a) / (b - a), 0, 1)); return x * x; }
 
-// Pose einer Statisten-Taube in einem Modus (ohne Überblendung). face: +1 schaut nach links.
-function crowdPose(mode, i, t, m0, prevMode, noVel) {
-  const o = { x: 0, y: 0, s: 0.75, face: 1, r: 0, head: 0, lid: 0.25, open: 0, fly: 0, sit: 0, peck: 0, vis: true, flying: false };
-  const u = t - m0;
-  if (mode === 'platform' || mode === 'look' || mode === 'board') {
-    const [x, y, fl] = PLAT_POS[i];
-    o.x = x; o.y = y; o.face = -fl; o.s = 0.62 + (y - 900) / 900;
-    const pk = PECK[i], k = lastLE(pk, t);   // Picken: 0.28 s rein und raus, nach Zufallsplan
-    if (k >= 0 && t - pk[k] < 0.28) o.peck = -28 * Math.pow(Math.sin(Math.PI * (t - pk[k]) / 0.28), 2);
-    if (mode === 'look') { o.face = x < 600 ? -1 : 1; o.head = -14; o.peck = 0; o.lid = 0; }
-    if (mode === 'board') {
-      const uu = clamp((u - 0.08 * i) / 1.4, 0, 1), tx = i % 2 ? 700 : 1260;
-      o.x = lerp(x, tx, uu); o.y = lerp(y, 820, uu) - Math.sin(uu * Math.PI) * 120; o.face = tx > x ? -1 : 1;
-      o.fly = smooth(uu / 0.05); o.s *= lerp(1, 0.7, uu); o.peck = 0; o.flying = uu > 0;
-      if (uu >= 1) o.vis = false;
+// Leerlauf der Bahnsteig-Tauben: je Taube Ereignisse im Abstand P (2.0–4.2 s): Doppelpicken, Umschauen,
+// Gefieder schütteln, Umdrehen mit einem Schritt. Blickrichtung und Versatz nach jedem Ereignis vorab (init).
+let IDLE = [];
+function buildIdle() {
+  IDLE = PLAT_POS.map(([, , f], i) => {
+    const P = 2.0 + 2.2 * hash(i, 11), phi = P * hash(i, 12), n = Math.ceil((TL.total + phi) / P) + 2;
+    const type = [], face = [], dx = [];
+    let fc = f, d = 0;
+    for (let k = 0; k < n; k++) {
+      type.push(Math.floor(hash(i, k + 0.5) * 5)); face.push(fc); dx.push(d);
+      if (type[k] === 4) { fc = -fc; d = clamp(d - 18 * fc, -40, 40); }
     }
-  } else if (mode === 'seats' || mode === 'window' || mode === 'loud') {
+    return { P, phi, type, face, dx };
+  });
+}
+function platIdle(i, t) {
+  const I = IDLE[i], q = (t + I.phi) / I.P, k = clamp(Math.floor(q), 0, I.type.length - 2), u = (q - k) * I.P;
+  const ty = I.type[k], f0 = I.face[k], o = { face: f0, dx: I.dx[k], peck: 0, head: 0, wing: 0, sy: 1, walk: 0, wp: 0 };
+  if (ty <= 1) o.peck = -30 * (hump(u, 0, 0.32) + hump(u, 0.38, 0.66));
+  else if (ty === 2) o.head = (hash(i, k + 0.25) < 0.5 ? -1 : 1) * 14 * Math.sin(Math.PI * clamp(u / 1.2, 0, 1));
+  else if (ty === 3) { const h = hump(u, 0, 0.45); o.wing = 0.35 * h; o.sy = 1 + 0.05 * h; }
+  else {   // umdrehen: Blick läuft über die Stauchung auf die andere Seite, dann ein Doppelschritt
+    o.face = f0 * Math.cos(Math.PI * smooth(u / 0.22));
+    const w = clamp((u - 0.15) / 0.5, 0, 1);
+    o.dx = lerp(I.dx[k], I.dx[k + 1], smooth(w)); o.walk = hump(u, 0.12, 0.72); o.wp = w;
+  }
+  return o;
+}
+// Moduswechsel der Statisten als Kette {mode, t0, prev}; nur echte Wechsel zählen
+let CREC = [];
+function buildCrowdModes() {
+  const L = (TL.states.crowd && TL.states.crowd.mode) || [];
+  let cur = { mode: 'off', t0: -1e9, prev: null };
+  CREC = [cur];
+  for (const [t0, m] of L) if (m !== cur.mode) { cur = { mode: m, t0, prev: cur }; CREC.push(cur); }
+}
+function crowdRec(t) { return CREC[Math.max(0, lastLE(CREC, t + 1e-6, r => r.t0))]; }
+const FAM = m => (m === 'platform' || m === 'look' || m === 'board') ? 1 : (m === 'seats' || m === 'window' || m === 'loud') ? 2 : 0;
+
+// Pose einer Statisten-Taube unter einem Modus (ohne Überblendung). face: +1 schaut nach links.
+function crowdPose(i, t, rec, noVel) {
+  const mode = rec.mode, m0 = rec.t0, u = t - m0, prevMode = rec.prev ? rec.prev.mode : 'off';
+  const o = { x: 0, y: 0, s: 0.75, face: 1, r: 0, head: 0, lid: 0.25, open: 0, fly: 0, sit: 0, peck: 0, wing: 0, sy: 1,
+    walkAmt: 0, wp: 0, vis: true, flapAmt: 1, smA: 0, smM: 0, board: false };
+  if (FAM(mode) === 1) {
+    const [x, y] = PLAT_POS[i], id = platIdle(i, t);
+    Object.assign(o, { x: x + id.dx, y, s: 0.62 + (y - 900) / 900, face: id.face, peck: id.peck, head: id.head, wing: id.wing, sy: id.sy, walkAmt: id.walk, wp: id.wp });
+    // Krümel entdeckt: gestaffelt hindrehen (über die Stauchung), Kopf runter, ein paar Schritte hin, picken
+    const L = mode === 'look' ? rec : (mode === 'board' && prevMode === 'look' ? rec.prev : null);
+    if (L) {
+      const d = 0.04 * i + 0.12 * hash(i, 3), ul = t - L.t0 - d, v = smooth(ul / 0.25), fl = x < 650 ? -1 : 1;
+      o.face = lerp(o.face, fl, v); o.head = lerp(o.head, -14, v); o.lid = lerp(0.25, 0.05, v);
+      const go = clamp(1 - Math.abs(x - 650) / 1100, 0.15, 1), w = smooth((ul - 0.5) / 1.1);
+      o.x = lerp(o.x, o.x + (650 - x) * 0.14 * go, w);
+      o.walkAmt = lerp(o.walkAmt, hump(ul, 0.45, 1.7), v); o.wp = lerp(o.wp, clamp((ul - 0.5) / 1.1, 0, 1) * 1.5, v);
+      const pk = -30 * hump(((ul - 1.8) * (1.1 + 0.4 * hash(i, 4))) % 1, 0, 0.3);
+      o.peck = lerp(o.peck, ul > 1.8 ? pk : 0, v);
+    }
+    if (mode === 'board') {   // einsteigen: im Bogen zur nächsten Tür, in der dunklen Öffnung kleiner werden
+      const d = 0.07 * i + 0.2 * hash(i, 21), uu = clamp((u - d) / 1.4, 0, 1);
+      if (uu > 0) {   // Start und Ankunft mit Tempo 0 (io), Kopf/Picken blenden weich aus
+        const s0 = crowdPose(i, m0 + d, rec.prev, true), left = PLAT_POS[i][0] < 960, e = ease('io', uu), w = smooth(uu / 0.15);
+        const tx = num('train', 'x', t) + (left ? -280 : 280) * num('train', 's', t), ty = 640;
+        o.x = lerp(s0.x, tx, e); o.y = lerp(s0.y, ty, e) - 160 * Math.sin(Math.PI * e);
+        o.fly = smooth(uu / 0.08); o.s = s0.s * lerp(1, 0.8, e) * (1 - smooth((uu - 0.75) / 0.25));
+        o.peck = lerp(s0.peck, 0, w); o.head = lerp(s0.head, 0, w); o.walkAmt = lerp(s0.walkAmt, 0, w); o.face = s0.face; o.board = uu > 0.7;
+        if (uu >= 1) o.vis = false;
+      }
+    }
+  } else if (FAM(mode) === 2) {
     if (i >= SEAT_POS.length) o.vis = false;
     else {
       const [x, y] = SEAT_POS[i]; o.x = x; o.y = y; o.sit = 1; o.s = 0.72; o.face = i % 2 ? 1 : -1;
@@ -1288,72 +1684,80 @@ function crowdPose(mode, i, t, m0, prevMode, noVel) {
       if (mode === 'loud') { o.open = 0.5 + 0.5 * Math.abs(Math.sin(t * 9 + i)); o.head = Math.sin(t * 10 + i) * 10; o.y -= Math.abs(Math.sin(t * 8 + i)) * 10; }
     }
   } else if (mode === 'burst' || mode === 'chaos' || mode === 'clock' || mode === 'tobelt' || mode === 'belt') {
-    o.s = 0.6; o.fly = 1; o.flying = true;
+    o.s = CS[i]; o.fly = 1;
     let dflt = 0;   // Blickrichtung, wenn die Taube steht (0 = nur aus dem Tempo)
-    if (mode === 'burst') {
-      const uu = clamp(u / 1.4, 0, 1), [cx, cy] = chaosPos(i, t);
-      o.x = lerp(853, cx, ease('out', uu)); o.y = lerp(678, cy, ease('out', uu)); o.s = lerp(0.15, 0.6, uu);
+    if (mode === 'burst') {   // aus KURTs Schirm, gestaffelt
+      const d = 0.045 * i, uu = clamp((u - d) / 1.2, 0, 1), [cx, cy] = chaosPos(i, t);
+      if (u < d) o.vis = false;
+      o.x = lerp(860, cx, ease('out', uu)); o.y = lerp(686, cy, ease('out', uu)); o.s = lerp(0.1, CS[i], ease('out', uu));
     } else if (mode === 'chaos' || (mode === 'clock' && i % 3)) {
-      const [x, y] = chaosPos(i, t); o.x = x; o.y = y;
+      [o.x, o.y] = chaosPos(i, t);
       if (mode === 'chaos' && prevMode === 'clock' && i % 3 === 0 && u < 1) {   // von der Uhr zurück in den Schwarm, ohne Sprung
-        const w = ease('io', u); o.x = lerp(1660 + (i % 4) * 30, x, w); o.y = lerp(300 + (i % 3) * 50, y, w);
+        const w = ease('io', u); o.x = lerp(1660 + (i % 4) * 30, o.x, w); o.y = lerp(300 + (i % 3) * 50, o.y, w);
       }
     } else if (mode === 'clock') {
       const tx = 1660 + (i % 4) * 30, ty = 300 + (i % 3) * 50, [sx, sy] = chaosPos(i, m0), uu = clamp(u / 1.0, 0, 1);
       o.x = lerp(sx, tx, ease('io', uu)); o.y = lerp(sy, ty, ease('io', uu)); dflt = -1;
       o.fly = 1 - smooth((uu - 0.85) / 0.15);
-      if (uu >= 1) {   // an der Stempeluhr: schnell picken
-        const pk = PECKF[i], k = lastLE(pk, t);
-        if (k >= 0 && t - pk[k] < 0.2) o.peck = -26 * Math.pow(Math.sin(Math.PI * (t - pk[k]) / 0.2), 2);
-      }
+      if (uu >= 1) o.peck = -26 * hump((t * 2.2 + 0.37 * i) % 1, 0, 0.45);   // an der Stempeluhr: Karten fressen
     } else {
       const tx = beltX(i), ty = 608;
-      const [sx, sy] = prevMode === 'clock' || prevMode === 'chaos' || mode === 'tobelt' ? chaosPos(i, mode === 'tobelt' ? m0 : stT('crowd', 'mode', m0 - 0.01)) : [tx, ty];
       dflt = -1;
-      if (mode === 'tobelt') {
-        const uu = clamp((u - i * 0.05) / 1.2, 0, 1);
-        o.x = lerp(sx, tx, ease('io', uu)); o.y = lerp(sy, ty, ease('io', uu));
+      if (mode === 'tobelt') {   // fliegen weiter im Schwarm, bis sie (gestaffelt) zum Band abdrehen
+        const d = 0.04 * i, uu = clamp((u - d) / 1.2, 0, 1), [sx, sy] = chaosPos(i, Math.min(t, m0 + d));
+        o.x = lerp(sx, tx, ease('io', uu)); o.y = lerp(sy, ty, ease('io', uu)); o.s = lerp(CS[i], 0.6, uu);
         o.fly = 1 - smooth((uu - 0.85) / 0.15);
       } else {
         o.fly = 0; o.x = tx + (integ('belt', t) - integ('belt', m0)); o.y = ty; o.s = 0.6;
-        if (o.x > 1790) o.vis = false;
+        if (o.x > 1930) o.vis = false;   // erst hinter den Klappen der Versand-Luke ausblenden
         o.head = Math.sin(t * 3 + i) * 5;
       }
     }
-    if (!noVel) {   // Blickrichtung und Schräglage aus dem Tempo (stetiges Wenden, Neigen beim Sinken)
-      const p2 = crowdPose(mode, i, t + 0.01, m0, prevMode, true), vx = (p2.x - o.x) / 0.01, vy = (p2.y - o.y) / 0.01;
-      const fv = -Math.tanh(vx / 90);
+    if (!noVel) {   // Tempo: Blickrichtung (stetiges Wenden), Steigen/Sinken (Neigung), Flügelschlag, Wischen
+      const h = 1 / 120, p1 = crowdPose(i, t - h, rec, true), p2 = crowdPose(i, t + h, rec, true);
+      const vx = (p2.x - p1.x) / (2 * h), vy = (p2.y - p1.y) / (2 * h), fv = -Math.tanh(vx / 120);
       o.face = dflt ? lerp(dflt, fv, clamp(Math.abs(vx) / 120, 0, 1)) : fv;
-      o.r = -clamp(vy * 0.015, -18, 18) * (o.face < 0 ? -1 : 1) * o.fly;
+      // Neigung mit dem stetigen Blickwert gewichtet: beim Wenden (face ≈ 0) waagerecht, kein Vorzeichensprung
+      o.r = -clamp(Math.atan2(vy, Math.abs(vx) + 40) * 57.3 * 0.55, -24, 24) * clamp(o.face * 1.5, -1, 1) * o.fly;
+      o.flapAmt = clamp(0.35 - vy / 260, 0.25, 1);
+      const sp = Math.hypot(vx, vy);
+      o.smM = Math.min(0.22, sp / 4000) * o.fly; o.smA = Math.atan2(vy, vx) * 57.3;
     }
   } else o.vis = false;
+  if (mode === 'board' && !noVel && o.fly > 0) {   // Einsteiger: Blick und Neigung aus der Flugbahn
+    const h = 1 / 120, p1 = crowdPose(i, t - h, rec, true), p2 = crowdPose(i, t + h, rec, true);
+    const vx = (p2.x - p1.x) / (2 * h), vy = (p2.y - p1.y) / (2 * h);
+    o.face = lerp(o.face, -Math.tanh(vx / 120), o.fly);
+    o.r = -clamp(Math.atan2(vy, Math.abs(vx) + 40) * 57.3 * 0.55, -24, 24) * clamp(o.face * 1.5, -1, 1) * o.fly;
+    o.flapAmt = clamp(0.35 - vy / 260, 0.25, 1);
+  }
   return o;
 }
 
 function updateCrowd(t, scene) {
-  const mode = st('crowd', 'mode', t, 'off');
-  const m0 = stT('crowd', 'mode', t), u = t - m0;
-  const prevMode = (() => { const L = TL.states.crowd && TL.states.crowd.mode; if (!L) return 'off'; let p = 'off'; for (let i = 0; i < L.length; i++) { if (L[i][0] >= m0 - 1e-6) break; p = L[i][1]; } return p; })();
-  const fam = m => (m === 'platform' || m === 'look' || m === 'board') ? 1 : (m === 'seats' || m === 'window' || m === 'loud') ? 2 : 0;
-  const blendIn = fam(mode) && fam(mode) === fam(prevMode) && mode !== prevMode;
+  const rec = crowdRec(t), mode = rec.mode, u = t - rec.t0, prevMode = rec.prev ? rec.prev.mode : 'off';
+  const blendIn = FAM(mode) === 2 && FAM(prevMode) === 2;
   const hide = scene === 'logo' || scene === 'titel' || scene === 'filmtitel' || scene === 'endcard' || scene === 'himmel' ||
-    (fam(mode) === 2 && scene !== 'zug') || (fam(mode) === 0 && scene !== 'halle');
+    (FAM(mode) === 2 && scene !== 'zug') || (FAM(mode) === 0 && scene !== 'halle');
   // Durchsage: Statisten gurren das "Gurr." am Anfang und Ende mit; Gong: alle schauen hoch
   const ann = scene === 'bahnhof' || scene === 'zug' ? lineAt('A', t) : null;
   const tGong = since('gong', t), tGurr = Math.min(since('gurren', t), since('gurren_laut', t) + 0.0);
+  const listen = scene === 'bahnhof' || scene === 'zug';
   for (let i = 0; i < CROWD_N; i++) {
     const p = crowd[i];
-    let o = crowdPose(mode, i, t, m0, prevMode);
-    if (blendIn) {   // Moduswechsel gestaffelt: jede Taube 0.035 s später, 0.2 s weich
+    const o = crowdPose(i, t, rec);
+    if (blendIn) {   // im Zug: Moduswechsel gestaffelt, jede Taube 0.035 s später, 0.2 s weich
       const ui = smooth((u - i * 0.035) / 0.2);
       if (ui < 1) {
-        const q = crowdPose(prevMode, i, t, m0, null);
+        const q = crowdPose(i, t, rec.prev);
         for (const k of ['face', 'head', 'r', 'lid', 'open', 'y', 'peck']) o[k] = lerp(q[k], o[k], ui);
       }
     }
     const vis = o.vis && !hide;
     show(p.g, vis);
+    setA(p.wrap, 'clip-path', vis && o.board ? 'url(#doorclip)' : 'none');
     if (!vis) continue;
+    if (scene === 'zug' && FAM(mode) === 2) { const rd = ride(o.x, t, 0.4, 1); o.y += rd.dy; o.r += rd.dr; o.head += 0.6 * rd.dy; }
     const ph = i * 1.3;
     let open = o.open;
     if (ann && !ann.fx) {
@@ -1362,13 +1766,16 @@ function updateCrowd(t, scene) {
     }
     if (tGurr < 2.6) open = Math.max(open, 0.55 * Math.pow(Math.max(0, Math.sin(t * 13 + i * 2.1)), 2) * (1 - smooth((tGurr - 2.0) / 0.5)));
     const look = tGong < 2 ? smooth((tGong - i * 0.04) / 0.2) * (1 - smooth((tGong - 1.3 - i * 0.04) / 0.4)) : 0;
-    const settled = (1 - o.fly) * (o.vis ? 1 : 0);
+    const hear = listen ? annW(t - 0.05 * i) : 0;   // Durchsage: Kopf hoch zum Lautsprecher
+    const settled = 1 - o.fly;
+    const flapHz = 20 + 9 * hash(i, 5);
     p.update({
-      x: o.x, y: o.y + 6 * Math.sin(t * 26 + ph + Math.PI / 2) * o.fly, s: o.s, face: o.face, r: o.r, t, ph,
-      breath: 0.018 * Math.sin(2 * Math.PI * t / 3.1 + ph), period: 3.1,
-      head: o.head + (4 * Math.sin(2 * Math.PI * (0.2 + 0.3 * hash(i, 7)) * t + 6.28 * hash(i, 8)) + 12 * look) * settled,
+      x: o.x, y: o.y - 5 * o.flapAmt * Math.sin(t * flapHz + ph + 1.2) * o.fly, s: o.s, face: o.face, r: o.r, t, ph,
+      breath: 0.018 * Math.sin(2 * Math.PI * t / 3.1 + ph), period: 3.1, sy: o.sy * (1 + 0.015 * Math.sin(2.4 * t + i)),
+      head: o.head + (4 * Math.sin(2 * Math.PI * (0.2 + 0.3 * hash(i, 7)) * t + 6.28 * hash(i, 8)) + 12 * look + 8 * hear) * settled,
       snap: 5, peck: o.peck, open, puff: open, lid: o.lid, blink: blinkClosure('crowd' + i, t),
-      px: -2, py: -2 * look, fly: o.fly, sit: o.sit, wing: 0
+      px: -2, py: -2 * Math.max(look, hear), fly: o.fly, flapHz, flapAmt: o.flapAmt, sit: o.sit, wing: o.wing,
+      walkAmt: o.walkAmt, wp: o.wp, stride: 36, smA: o.smA, smM: o.smM
     });
   }
 }
@@ -1450,7 +1857,7 @@ function poseFussel(t) {
   const flinch = env3(tfe, 0.05, 0.05, 0.4);   // WLAN-Fehler: zusammenzucken
   fsy *= 1 - 0.08 * flinch; fsx *= 1 + 0.05 * flinch;
   // Sprechen: Betonungen heben den Körper und kippen ihn abwechselnd; Fragen: Kopf schief, Brauen hoch
-  const ql = lineAt('F', t, 0, 0.4);
+  const ql = lineAt('F', t, 0, 0.4), [scn] = sceneAt(t), hear = scn === 'bahnhof' || scn === 'zug' ? annW(t) : 0;   // lauscht der Durchsage
   let qa = 0;
   if (ql && ql.q) qa = smooth(((t - ql.t0) / (ql.t1 - ql.t0) - 0.7) / 0.15) * (1 - smooth((t - ql.t1) / 0.4));
   // Gewicht verlagern im Stehen
@@ -1471,7 +1878,7 @@ function poseFussel(t) {
     thread: num('fussel', 'thread', t), Lx: integ('thrX', t), Ly: integ('thrY', t), tip: 10 * spk, curl: clamp(e.wide, 0, 1),
     sit, tuck, splay,
     wide: e.wide, squint: e.squint, lid: e.lid, blink: blinkClosure('fussel', t), lx, ly,
-    eyeScale: 1 + 0.17 * e.wide + 0.04 * P.p + pop, raise: e.raise + 0.5 * P.p + 0.6 * qa + spk, tilt: e.tilt,
+    eyeScale: 1 + 0.17 * e.wide + 0.04 * P.p + pop, raise: e.raise + 0.5 * P.p + 0.6 * qa + spk + 0.35 * hear, tilt: e.tilt,
     mo: lerp(e.mo, mt.o, k), mw: lerp(e.mw, mt.w, k), ms: mt.s * k, smile: lerp(e.smile, 0.15, k)
   };
 }
@@ -1483,7 +1890,7 @@ function posePigeon(name, who, t, scene) {
   const wa = stSmooth(name, 'walk', t, 0.15), vL = integ('vL_' + name, t), sq = integ('squash_' + name, t);
   const ex = mt.l && mt.l.ex ? 1 : 0;
   const o = {
-    x: num(name, 'x', t), y: num(name, 'y', t), s: num(name, 's', t), face, t,
+    x: name === 'gurrmann' ? gurrX(t) : num(name, 'x', t), y: num(name, 'y', t), s: num(name, 's', t), face, t,
     r: num(name, 'r', t) + integ('lean_' + name, t), sx: 1 - sq * 0.3, sy: 1 + sq * 0.6,
     walkAmt: wa, wp: integ('ph_' + name, t), stride: clamp(vL / 3, 36, 60), smear: 0.35 * clamp((vL - 180) / 60, 0, 1) * wa,
     open: mt.o, ex, puff: mt.o, lid: num(name, 'lid', t), brow: num(name, 'brow', t),
@@ -1494,7 +1901,8 @@ function posePigeon(name, who, t, scene) {
   if (name === 'broesel') {
     o.ph = 0.3; o.period = 3.6; o.breath = 0.025 * Math.sin(2 * Math.PI * t / 3.6 + 0.3);
     o.blink = blinkClosure('broesel', t, 1.6);
-    o.wing += (ex ? 0.4 : 0.12) * smooth(en * 1.5);
+    const te = talkEnv(who, t, 0.35, 0.5);   // Klemmbrett hebt sich beim Reden, bei Ausrufen mehr
+    o.wing = Math.min(1.15, o.wing + (te.l && te.l.ex ? 0.4 : 0.12) * te.e);
     o.lid -= 0.15 * P.p;
     const kd = lastLE(DROOP, t), dr = kd >= 0 ? env3(t - DROOP[kd], 0.25, 0.4, 0.3) * (1 - clamp(en * 2, 0, 1)) : 0;
     o.hr -= 6 * dr;
@@ -1510,6 +1918,7 @@ function posePigeon(name, who, t, scene) {
     o.blink = blinkClosure(name, t);
     o.wing += 0.35 * accHold(who, t);   // Zugbegleiter zeigt mit dem Flügel
     o.hr += 4 * en;                      // spricht mit erhobenem Kinn
+    if (scene === 'bahnhof' || scene === 'zug') o.hr += 6 * Math.sin(2.2 * t) * annW(t);   // nickt zur Durchsage
   }
   return o;
 }
@@ -1535,7 +1944,7 @@ function poseKurt(t) {
     squint: sb.cur === 'on' && sb.prev === 'boot' ? env3(sb.tau, 0.15, 0.9, 0.3) : 0,
     n1: -0.6 + 0.12 * Math.sin(0.7 * t) + 1.7 * integ('needle', t), n2: 2.3 + 0.1 * Math.sin(0.53 * t + 1) - 0.9 * others,
     funnelR: 1.5 * P.sp, funnelSq: tpl < 1 ? 1 - 0.15 * Math.exp(-7 * tpl) * Math.cos(20 * tpl) * smooth(tpl / 0.03) : 1,
-    steam: !!st('kurt', 'steam', t, 0)
+    steam: !!st('kurt', 'steam', t, 0), title: 'FILM ' + st('filmtitel', 'nr', t, 1), camZ: 1
   };
 }
 
@@ -1543,14 +1952,17 @@ function updateCrumbs(t, scene, fx, fy) {
   let k = 0;
   const put = (x, y, r) => { if (k >= crumbs.length) return; const c = crumbs[k++]; show(c, true); setT(c, `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${r.toFixed(0)})`); };
   if (st('crumbs', 'fussel', t, 0) && (scene === 'bahnhof' || scene === 'zug')) {
-    const u = t - stT('crumbs', 'fussel', t);
+    const c0 = stT('crumbs', 'fussel', t), u = t - c0;
+    fx = num('fussel', 'x', c0); fy = num('fussel', 'y', c0);   // Krümel bleiben liegen, wo sie herausgeschüttelt wurden
     const n = scene === 'zug' ? 1 : 12;
     const floor = scene === 'zug' ? 815 : fy + 10;
     for (let i = 0; i < n; i++) {
       const tt = clamp(u - 0.3 - i * 0.05, 0, 9);
-      const vx = rnd(i, 3) * 160, y0 = fy - 80;
-      const y = Math.min(floor - (i % 4) * 4, y0 + 260 * tt + 600 * tt * tt);
-      put(fx + vx * Math.min(tt, 0.6), y, i * 40 + tt * 300);
+      const vx = rnd(i, 3) * 160, y0 = fy - 80, fl = floor - (i % 4) * 4;
+      // fällt, springt am Boden einmal kurz auf und bleibt liegen
+      const tl = (-260 + Math.sqrt(260 * 260 + 2400 * Math.max(0, fl - y0))) / 1200, tau = tt - tl;
+      const y = tau < 0 ? y0 + 260 * tt + 600 * tt * tt : fl - 18 * Math.abs(Math.sin(9 * tau)) * Math.exp(-8 * tau) * (tau < 0.7 ? 1 : 0);
+      put(fx + vx * Math.min(tt, 0.6), y, i * 40 + Math.min(tt, tl + 0.35) * 300);
     }
   }
   if (st('crumbs', 'funnel', t, 0) && scene === 'halle') {
@@ -1571,10 +1983,13 @@ function updateCrumbs(t, scene, fx, fy) {
 }
 
 // Fussel auf der Endcard: glücklich, atmet, blinzelt, schaut zu Brösel, wenn der spricht
-function poseEndFussel(t) {
+// u = Zeit seit Beginn der Endcard: alle 2.4 s ein Hüpfer im Kreis (Ausholen, Bogen, Landung mit Stauchen)
+function poseEndFussel(t, u) {
   const lb = 0.6 * clamp(integ('en_B', t) * 3, 0, 1);
+  const p = (u + 1.2) % 2.4, hop = Math.max(0, Math.sin(Math.PI * clamp(p / 0.6, 0, 1))), land = hump(p, 0.58, 0.78), crouch = hump(p, 2.22, 2.42);
+  const sq = 0.12 * land + 0.08 * crouch;
   return {
-    x: 1180, y: 540, s: 1.15, r: Math.sin(t * 2) * 3 + 1.5 * Math.sin(2 * Math.PI * t / 5.3), face: 1, fsx: 1, fsy: 1, m: 0, ang: 0, t,
+    x: 1180, y: 540 - 40 * hop, s: 1.15, r: Math.sin(t * 2) * 3 + 1.5 * Math.sin(2 * Math.PI * t / 5.3), face: 1, fsx: 1 + sq, fsy: 1 - sq + 0.06 * hop, m: 0, ang: 0, t,
     bsy: 1 + 0.022 * Math.sin(2 * Math.PI * t / 2.8 + 1.3), lift: 0, thread: 1, Lx: 0, Ly: 0, tip: 0, curl: 0, sit: 0, tuck: 0, splay: 0,
     wide: 0, squint: 1, lid: 0.15, blink: blinkClosure('endFussel', t), lx: lb + 0.1 * wob(t, 3), ly: 0.05 * wob(t, 4), eyeScale: 1,
     raise: 0.4, tilt: 0, mo: 0.45, mw: 1, ms: 0, smile: 1
@@ -1589,14 +2004,10 @@ function render(frame) {
   const [scene, s0] = sceneAt(t);
   for (const n in SC) for (const g of SC[n]) show(g, n === scene);
 
-  // Kamera
-  let cx = num('cam', 'x', t), cy = num('cam', 'y', t), cz = num('cam', 'z', t), cr = num('cam', 'r', t);
-  const ar = Math.abs(cr) * Math.PI / 180;
-  if (ar > 0.001) cz = Math.max(cz, Math.cos(ar) + Math.sin(ar) * 1920 / 1080 + 0.04);
-  cz = Math.max(cz, 1);
-  const hw = 960 / cz, hh = 540 / cz;
-  cx = clamp(cx, hw, 1920 - hw); cy = clamp(cy, hh, 1080 - hh);
-  setT(world, `translate(960,540) rotate(${cr.toFixed(2)}) scale(${cz.toFixed(4)}) translate(${(-cx).toFixed(1)},${(-cy).toFixed(1)})`);
+  // Kamera (+ im Zug: der Wagen schaukelt in der Welt, die Aussicht hält dagegen)
+  const cam = camera(t), rkY = scene === 'zug' ? integ('rockY', t) : 0, rkR = scene === 'zug' ? integ('rockR', t) : 0;
+  setT(world, `translate(${f2(960 + cam.dx)},${f2(540 + cam.dy)}) rotate(${f3(cam.cr)}) scale(${cam.cz.toFixed(4)}) translate(${f2(-cam.cx)},${f2(-cam.cy)})` +
+    (scene === 'zug' ? ` translate(0,${f2(rkY)}) rotate(${f3(rkR)},960,1000)` : ''));
 
   const stage = !['logo', 'titel', 'filmtitel'].includes(scene);
   show(actors, stage); show(actorsBack, stage); show(actorsFront, stage); show(trainLayer, stage); show(fxLayer, stage);
@@ -1606,11 +2017,27 @@ function render(frame) {
   show(fussel.g, fv);
   const fx = num('fussel', 'x', t), fy = num('fussel', 'y', t);
   let fo = null;
-  if (fv) { fo = poseFussel(t); fussel.update(fo); }
+  if (fv) {
+    fo = poseFussel(t);
+    if (scene === 'zug') { const rd = ride(fo.x, t, 0.4, 1); fo.y += rd.dy; fo.r += rd.dr; }
+    fussel.update(fo);
+  }
+  // Staub: drei Wölkchen quellen an den Füßen auf und verblassen (0.35 s), Größe nach Aufprall-Tempo
+  const kl = lastLE(JUMP.down, t, j => j.t), dl = kl >= 0 ? t - JUMP.down[kl].t : 1e9;
+  const dOn = fv && dl < 0.35 && JUMP.down[kl].v > 700;
+  show(dustG, dOn);
+  if (dOn) {
+    const u = dl / 0.35, e = easeOut(u), k = num('fussel', 's', t) / 0.8 * clamp(JUMP.down[kl].v / 2000, 0.5, 1.1);
+    for (const d of dust) {
+      const r = (4 + 22 * e) * k * (d._dir ? 1 : 0.8);
+      setA(d, 'cx', f1(fx + d._dir * (20 + 46 * e) * k)); setA(d, 'cy', f1(fy - (4 + (d._dir ? 8 : 14) * e) * k));
+      setA(d, 'rx', f1(r)); setA(d, 'ry', f1(r * 0.62)); setA(d, 'opacity', f2(0.55 * (1 - u) * smooth(dl / 0.03)));
+    }
+  }
   // KURT
   const kv = actorVis('kurt', t, scene);
   show(kurt.g, kv);
-  if (kv) kurt.update(poseKurt(t));
+  if (kv) { const ko = poseKurt(t); ko.camZ = cam.cz; kurt.update(ko); }
   // Brösel
   const bv = actorVis('broesel', t, scene);
   show(broesel.g, bv);
@@ -1622,7 +2049,7 @@ function render(frame) {
     broesel.update(o);
   }
   // Gurrmann
-  const gv = actorVis('gurrmann', t, scene);
+  const gv = actorVis('gurrmann', t, scene) && gurrX(t) < 1990;   // auf dem Band: erst hinter der Luke weg
   show(gurrmann.g, gv);
   if (gv) {
     const o = posePigeon('gurrmann', 'G', t, scene);
@@ -1631,6 +2058,7 @@ function render(frame) {
     o.y -= stSmooth('gurrmann', 'fly', t, 0.3) * 30 + fly * 6 * Math.sin(t * 26 + 1.1 + Math.PI / 2);
     o.r -= clamp(numV('gurrmann', 'y', t) * 0.015, -18, 18) * (o.face < 0 ? -1 : 1) * fly;
     o.fly = fly;
+    if (scene === 'zug') { const rd = ride(o.x, t, 0.25, 1.4); o.y += rd.dy; o.r += rd.dr; }   // steht im Gang: schwankt mehr
     gurrmann.update(o);
   }
   // Taube auf Fussels Kopf: fliegt im Bogen an, landet mit kleinem Stauchen, reitet auf seinem Atem mit
@@ -1638,7 +2066,7 @@ function render(frame) {
   show(sitter.g, sOn);
   if (sOn) {
     const tau = t - stT('sitter', 'on', t), u = clamp(tau / 0.7, 0, 1), fs = num('fussel', 's', t);
-    const hx = fx + 6, hy = fy - fo.lift * fs - (150 + 130 * (fo.bsy - 1)) * fs;
+    const hx = fo.x + 6, hy = fo.y - fo.lift * fs - (150 + 130 * (fo.bsy - 1)) * fs;
     const xl = tau - 0.7, q = xl > 0 ? 0.15 * Math.exp(-7 * xl) * Math.sin(25 * xl) : 0;
     const fl = 1 - smooth((u - 0.8) / 0.2);
     sitter.update({
@@ -1650,11 +2078,41 @@ function render(frame) {
   // Ball (Idee)
   const balv = st('ball', 'vis', t, 0) && scene === 'halle';
   show(ball, balv);
-  if (balv) setT(ball, `translate(${num('ball', 'x', t).toFixed(1)},${num('ball', 'y', t).toFixed(1)}) rotate(${(t * 400 % 360).toFixed(1)})`);
+  if (balv) {
+    const bx = num('ball', 'x', t), by = num('ball', 'y', t), vx = numV('ball', 'x', t), vy = numV('ball', 'y', t), sp = Math.hypot(vx, vy);
+    setT(ball, `${smearT(vx, vy, 1 / 2500, 0.45, bx, by)}translate(${f1(bx)},${f1(by)}) rotate(${(t * 400 % 360).toFixed(1)})`);
+    ball._ghosts.forEach((gh, j) => {
+      const on = sp > 600, d = (j + 1) / 120;
+      show(gh, on);
+      if (on) { setT(gh, `translate(${f1(num('ball', 'x', t - d))},${f1(num('ball', 'y', t - d))}) rotate(${((t - d) * 400 % 360).toFixed(1)})`); setA(gh, 'opacity', j ? 0.18 : 0.35); }
+    });
+  } else ball._ghosts.forEach(gh => show(gh, false));
   // Zug
   const tv = st('train', 'vis', t, 0) && (scene === 'bahnhof' || scene === 'himmel');
   show(train.g, tv);
-  if (tv) train.update({ x: num('train', 'x', t), y: num('train', 'y', t) + (st('train', 'wings', t, 0) ? Math.sin(t * 7) * 10 : 0), s: num('train', 's', t), r: num('train', 'r', t), doors: num('train', 'doors', t), wings: st('train', 'wings', t, 0), flap: st('train', 'flap', t, 0), t });
+  if (tv) {
+    const wings = st('train', 'wings', t, 0), vx = numV('train', 'x', t), vy = numV('train', 'y', t);
+    let r = num('train', 'r', t);
+    if (wings) {   // fliegend: Nase folgt der Flugbahn (Zug schaut nach links), nur bei Tempo
+      const dir = Math.atan2(vy, vx) * 57.3 - 180, wrap = ((dir + 540) % 360) - 180;
+      r += clamp(wrap * 0.7, -18, 18) * clamp(Math.hypot(vx, vy) / 250, 0, 1);
+    }
+    const pitch = integ('trainPitch', t);
+    // fliegend: Körper hebt sich im Abschlag der Flügel (an den Flügelschlag gekoppelt)
+    train.update({ x: num('train', 'x', t), y: num('train', 'y', t) + (wings ? Math.sin(t * 7) * 10 : 0), s: num('train', 's', t), r, vx,
+      pitch, sag: 4 * Math.abs(pitch) + integ('trainBump', t), doors: num('train', 'doors', t), wings, flap: st('train', 'flap', t, 0), t });
+  }
+  // Tür-Ausschnitt für Einsteigende: Welt außerhalb des Wagenkastens + offene Türspalte
+  if (tv && scene === 'bahnhof') {
+    const tx = num('train', 'x', t), ty = num('train', 'y', t) + 4 * Math.abs(integ('trainPitch', t)) + integ('trainBump', t), ts = num('train', 's', t), dw = 52 * num('train', 'doors', t) * ts;
+    setA(doorClipOut, 'd', `M-500 -500H2420V1580H-500Z M${f1(tx - 850 * ts)} ${f1(ty - 330 * ts)}H${f1(tx + 850 * ts)}V${f1(ty - 60 * ts)}H${f1(tx - 850 * ts)}Z`);
+    doorClipGaps.forEach((g, k) => {
+      const cx = tx + (k ? 280 : -280) * ts;
+      setA(g, 'x', f1(cx - dw)); setA(g, 'y', f1(ty - 306 * ts)); setA(g, 'width', f1(Math.max(0, 2 * dw))); setA(g, 'height', f1(244 * ts));
+    });
+  }
+  setA(fusselWrap, 'clip-path', fv && tv && st('fussel', 'board', t, 0) ? 'url(#doorclip)' : 'none');
+  setA(gurrWrap, 'clip-path', gv && tv && st('gurrmann', 'board', t, 0) ? 'url(#doorclip)' : 'none');
 
   updateCrowd(t, scene);
   updateCrumbs(t, scene, fx, fy);
@@ -1664,6 +2122,21 @@ function render(frame) {
     H.signN.textContent = String(st('sign', 'n', t, 3));
     const hh = (8 + t / 600) * 30, mm = (12 + t / 10) * 6;
     setT(H.hourHand, `rotate(${hh.toFixed(1)},1615,310)`); setT(H.minHand, `rotate(${mm.toFixed(1)},1615,310)`);
+    const tu = t % 1;   // Sekundenzeiger: springt jede Sekunde mit kleinem Überschwinger
+    setT(H.secK, `rotate(${f1(6 * (Math.floor(t) + (tu < 0.14 ? ease('back', tu / 0.14) : 1)))},1615,310)`);
+    // Lampen pendeln; stärker, wenn KURT wackelt, beim Alarm und beim schnellen Kurbeln
+    const warnS = stSmooth('warn', 'on', t, 0.4), amp = 0.9 + 5 * num('kurt', 'shake', t) + 2.5 * warnS + 1.5 * stSmooth('broesel', 'crankfast', t, 0.4);
+    H.lamps.forEach((L, k) => {
+      L._ang = amp * Math.sin(2 * Math.PI * t / (2.7 + 0.35 * k) + 1.9 * k);
+      setT(L, `rotate(${f2(L._ang)},${L._x},44)`);
+      setA(L._cone, 'opacity', f3(0.09 + 0.02 * Math.sin(3.1 * t + k) + 0.03 * warnS * Math.sin(23 * t + 2 * k)));
+    });
+    const cmD = st('crowd', 'mode', t, 'off'), dBoost = ['burst', 'chaos', 'clock', 'tobelt'].includes(cmD) ? 1.8 : 1;
+    for (const m of H.motes) {   // Staub sinkt langsam im Kegel, blendet oben und unten weich (kein Springen beim Umlauf)
+      const L = H.lamps[m._k], [h, h1, h2] = m._h, v = 10 + 18 * h, y = 230 + ((460 * h1 + t * v) % 460), q = (y - 210) / 490;
+      const x = L._x + (2 * h2 - 1) * 0.8 * (70 + 230 * q) + 12 * Math.sin(0.6 * t + 2.1 * m._j) + (y - 44) * Math.tan(-L._ang * Math.PI / 180);
+      setA(m, 'cx', f1(x)); setA(m, 'cy', f1(y)); setA(m, 'opacity', f3(Math.min(1, 0.5 * dBoost * Math.sin(Math.PI * (y - 230) / 460))));
+    }
     const warn = st('warn', 'on', t, 0);
     const wp = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI * 2.2);   // Warnleuchte 2.2 Hz (unter 3 Hz, fotosensibel unkritisch)
     setA(H.warnDome, 'fill', warn ? (wp > 0.5 ? '#FF7A9A' : C.him) : '#7A3046');
@@ -1673,18 +2146,36 @@ function render(frame) {
     const bo = integ('belt', t);
     setA(H.beltTop, 'stroke-dashoffset', (-bo).toFixed(1));
     for (const r of H.rollers) { const a = bo / 13; setA(r, 'd', `M${(r._x - Math.cos(a) * 10).toFixed(1)} ${(630 - Math.sin(a) * 10).toFixed(1)}L${(r._x + Math.cos(a) * 10).toFixed(1)} ${(630 + Math.sin(a) * 10).toFixed(1)}`); }
-    const bw = clamp(integ('beltRate', t) / 190, 0, 1);   // Klappen schwingen mit dem Bandtempo
-    H.flaps.forEach((fl, i) => setT(fl, bw > 0.002 ? `rotate(${(Math.sin(t * 6 + i) * 6 * bw).toFixed(1)},${1781 + i * 31},470)` : ''));
-    const cm = st('crowd', 'mode', t, 'off'), cu = t - stT('crowd', 'mode', t);
+    // Klappen schwingen mit dem Bandtempo und werden von Durchfahrenden aufgestoßen
+    const bw = clamp(integ('beltRate', t) / 240, 0, 1), cm = st('crowd', 'mode', t, 'off'), cu = t - stT('crowd', 'mode', t);
+    show(flapsFront, cm === 'tobelt' || cm === 'belt');
+    H.flaps.forEach((fl, i) => {
+      let a = Math.sin(t * 6 + i) * 6 * bw;
+      const P = FLAPPASS[i];
+      for (let k = lastLE(P, t); k >= 0 && t - P[k] < 2; k--) { const d = t - P[k]; a -= 22 * Math.exp(-3 * d) * Math.sin(9 * d); }
+      const tr = Math.abs(a) > 0.02 ? `rotate(${f1(a)},${1781 + i * 31},470)` : '';
+      setT(fl, tr); setT(H.flapsF[i], tr);
+    });
     H.cards.forEach((c, i) => {
       if ((cm === 'clock' && cu > 1.2 + i * 0.5) || cm === 'tobelt' || cm === 'belt' || (cm === 'off' && t > TL.cues.endcard_hold - 60 && st('sign', 'n', t, 3) === 0)) {
         const uu = cm === 'clock' ? cu - 1.2 - i * 0.5 : 3;
         setT(c, `translate(${(-uu * 80 - i * 20).toFixed(0)},${Math.min(640, uu * 300 + uu * uu * 200).toFixed(0)}) rotate(${(uu * 120 * (i % 2 ? 1 : -1)).toFixed(0)},1746,${254 + i * 42})`);
       } else setT(c, '');
     });
-    const fe = ['burst', 'chaos', 'clock', 'tobelt'].includes(cm);
-    show(featherG, fe);
-    if (fe) feathers.forEach((e, i) => { const tt = (t * 0.3 + i / 10) % 1, ex = 300 + i * 150 + Math.sin(t * 2 + i) * 60, ey = 100 + tt * 800; setA(e, 'cx', ex.toFixed(1)); setA(e, 'cy', ey.toFixed(1)); setA(e, 'transform', `rotate(${(Math.sin(t * 3 + i) * 40).toFixed(1)},${300 + i * 150},${ey.toFixed(1)})`); });
+    // Federn: beim Knall aus dem Trichter geschleudert (Luftwiderstand), dann taumeln sie wie Laub;
+    // der Umlauf von unten nach oben liegt außerhalb des Bildes; auf dem Band blenden sie aus
+    const fe = ['burst', 'chaos', 'clock', 'tobelt', 'belt'].includes(cm) && BURST.length;
+    show(featherG, !!fe);
+    if (fe) {
+      const tau = t - BURST[Math.max(0, lastLE(BURST, t))], fade = cm === 'belt' ? 1 - smooth(cu / 1.5) : 1;
+      feathers.forEach((e, i) => {
+        const ang = -Math.PI / 2 + (2 * hash(i, 1) - 1) * 1.2, v0 = 450 + 400 * hash(i, 2), vT = 60 + 50 * hash(i, 3), k = 2.2, ex = 1 - Math.exp(-k * tau);
+        const x = 852 + Math.cos(ang) * v0 * ex / k + 25 * (2 * hash(i, 4) - 1) * tau + 55 * Math.sin(1.6 * t + i) * ex;
+        const y = ((500 + vT * tau + (Math.sin(ang) * v0 - vT) * ex / k + 60) % 1240 + 1240) % 1240 - 60;
+        setA(e, 'cx', f1(x)); setA(e, 'cy', f1(y)); setA(e, 'transform', `rotate(${f1(40 * Math.cos(1.6 * t + i) + 300 * (1 - ex))},${f1(x)},${f1(y)})`);
+        setA(e, 'opacity', f2(fade));
+      });
+    }
   } else show(featherG, false);
   if (scene === 'logo') {
     const p = num('logo', 'p', t);
@@ -1699,41 +2190,97 @@ function render(frame) {
   }
   if (scene === 'titel') {
     const u = t - s0;
-    const sc = u < 0.25 ? 1.8 - u * 3.2 : 1;
-    setT(H.stamp, `translate(960,320) rotate(-4) scale(${Math.max(1, sc).toFixed(3)})`);
+    // Stempel fällt beschleunigt (aufs Stempel-Geräusch bei 0.25 s), staucht unter 1 und federt zurück;
+    // den Aufprall-Stoß macht die Kamera (SHAKE_W.stamp)
+    const sc = u < 0.25 ? lerp(1.8, 0.92, ease('in', u / 0.25)) : lerp(0.92, 1, ease('back', (u - 0.25) / 0.2));
+    setT(H.stamp, `translate(960,320) rotate(-4) scale(${f3(sc)})`);
     setA(H.stamp, 'opacity', u < 0.05 ? 0 : 1);
-    setT(H.t1, `translate(${(-(1 - smooth((u - 0.4) / 0.5)) * 1400).toFixed(0)},0)`);
-    setT(H.t2, `translate(${((1 - smooth((u - 0.6) / 0.5)) * 1400).toFixed(0)},0)`);
+    // Zeilen fliegen herein und bremsen mit kleinem Überschwinger; schnell: gestreckt + zwei Nachzieher
+    const lx = (k, uu) => (k ? 1 : -1) * (1 - ease('brake', (uu - (k ? 0.6 : 0.4)) / 0.55)) * 1700;   // ganz außerhalb des Bildes
+    [H.t1, H.t2].forEach((el, k) => {
+      const x = lx(k, u), v = (lx(k, u + 1 / 240) - lx(k, u - 1 / 240)) * 120, sx = 1 + Math.abs(v) / 9000;
+      setT(el, `translate(${f1(x)},0) translate(960,0) scale(${f3(sx)},1) translate(-960,0)`);
+      [1 / 120, 1 / 60].forEach((d, j) => {
+        const gh = H.tGhost[2 * k + j], on = Math.abs(v) > 1500;
+        setA(gh, 'opacity', on ? (j ? 0.18 : 0.35) : 0);
+        if (on) setT(gh, `translate(${f1(lx(k, u - d) - x)},0)`);
+      });
+    });
   }
   if (scene === 'filmtitel') {
+    const u = t - s0;
     H.ft1.textContent = 'FILM ' + st('filmtitel', 'nr', t, 1);
     H.ft2.textContent = st('filmtitel', 'name', t, '');
-    const fl = 0.92 + 0.05 * Math.sin(t * 11.3) + 0.03 * Math.sin(t * 27.1);   // Röhrenflimmern, stetig
-    setA(H.ft1, 'opacity', fl.toFixed(3)); setA(H.ft2, 'opacity', fl.toFixed(3));
-    setA(H.ftGlow, 'opacity', (0.6 + 0.15 * Math.sin(t * 3.1)).toFixed(3));
+    // Anschluss: im ersten Bild exakt KURTs Schirm (Zoom 14.4), dann öffnet sich der Rand in 0.7 s
+    const R0 = 43 * 1.6 * 9, R = lerp(R0, 1150, ease('out', u / 0.7)), rimOn = u < 0.75;
+    for (const e of H.ftRim) show(e, rimOn);
+    show(H.ftRimFelt, rimOn); show(H.ftHi, rimOn);
+    if (rimOn) {
+      const circ = r => `M${f1(960 - r)} 540a${f1(r)} ${f1(r)} 0 1 0 ${f1(2 * r)} 0a${f1(r)} ${f1(r)} 0 1 0 ${f1(-2 * r)} 0Z`;
+      const Rs = R * 44 / 43, Rb = R * 54 / 43, big = 'M-10 -10H1930V1090H-10Z';
+      setA(H.ftRim[0], 'd', circ(Rs) + circ(R)); setA(H.ftRim[1], 'd', circ(Rb) + circ(Rs));
+      setA(H.ftRim[2], 'd', big + circ(Rb));
+      // Filz des Gehäuses in KURTs eigenen Koordinaten, damit das Muster genauso groß ist wie in der Halle
+      setT(H.ftRimFelt, `translate(960,540) scale(${f3(14.4 * R / R0)}) translate(-115,-128)`);
+      const k = R / R0;
+      setA(H.ftHi, 'cx', f1(960 + 17 * 14.4 * k)); setA(H.ftHi, 'cy', f1(540 - 24 * 14.4 * k)); setA(H.ftHi, 'r', f1(57.6 * k));
+      setA(H.ftHi, 'opacity', f3(0.18 * (1 - smooth(u / 0.5))));
+    }
+    // Die Fahrt läuft weiter: Karte von 1.25 auf 1; großer Titel schaltet sich wie eine Röhre ein
+    const sc = lerp(1.25, 1, ease('out', u / 0.6));
+    setT(H.ftG, `translate(960,540) scale(${f3(sc)}) translate(-960,-540)`);
+    const fl = lerp(1, 0.92 + 0.05 * Math.sin(t * 11.3) + 0.03 * Math.sin(t * 27.1), smooth(u / 0.5));   // Röhrenflimmern, stetig
+    setA(H.ft1, 'opacity', f3(fl));
+    const on = clamp((u - 0.15) / 0.18, 0, 1);
+    show(H.ft2, on > 0);
+    setA(H.ft2, 'opacity', f3(fl));
+    setT(H.ft2, `translate(960,590) scale(${f3(lerp(1.06, 1, ease('out', on)))},${f3(lerp(0.05, 1, ease('out', on)))}) translate(-960,-590)`);
+    setA(H.ftGlow, 'opacity', f3(lerp(1, 0.6 + 0.15 * Math.sin(t * 3.1), smooth(u / 0.8))));
+    setA(H.ftScan, 'opacity', f3(0.6 * smooth(u / 0.4)));
   }
   if (scene === 'bahnhof') {
-    const bt = st('board', 'text', t, 'leer');
-    const rows = {
-      leer: ['--:--  ----------', '', ''],
-      kruemel: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'pünktlich'],
-      kruemel2: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'Abfahrt bei ausreichend Krümeln'],
-      einfahrt: ['08:15  Krümelstadt', 'über Brösel-Allee, Taubenmarkt', 'fährt ein · Vorsicht!']
-    }[bt];
-    H.b1.textContent = rows[0]; H.b2.textContent = rows[1]; H.b3.textContent = rows[2];
+    // Anzeigetafel als Fallblatt: jedes geänderte Zeichen blättert, bis es (von links, Zeile für Zeile) steht
+    const BL = (TL.states.board && TL.states.board.text) || [], kb = lastLE(BL, t + 1e-6, e => e[0]);
+    const bt = kb >= 0 ? BL[kb][1] : 'leer', bOld = kb > 0 ? BL[kb - 1][1] : '', bt0 = kb >= 0 ? BL[kb][0] : -1e9;
+    const rows = BOARD[bt] || BOARD.leer, old = BOARD[bOld] || ['', '', ''];
+    [H.b1, H.b2, H.b3].forEach((el, ri) => {
+      const nw = rows[ri], od = old[ri], n = Math.max(nw.length, od.length);
+      let out = '';
+      for (let c = 0; c < n; c++) {
+        const ch = nw[c] || ' ', oc = od[c] || ' ';
+        out += t < bt0 + 0.1 + 0.022 * c + 0.12 * ri && ch !== oc ? FLAPS[Math.floor(hash(c + 40 * ri, Math.floor(t * 30)) * FLAPS.length)] : ch;
+      }
+      if (el.textContent !== out) el.textContent = out;
+    });
     setA(H.b3, 'opacity', bt === 'kruemel2' || bt === 'einfahrt' ? (((t * 1.25) % 1) < 0.65 ? 1 : 0.3) : 1);
-    setT(H.secHand, `rotate(${((t * 6) % 360).toFixed(1)},1020,150)`);
-    const a = mouth('A', t).o;
+    const sec = t % 60, sa = sec < 58.5 ? sec / 58.5 * 360 : 0, mu = sec / 0.12;
+    setT(H.secHand, `rotate(${f1(sa)},1020,150)`);
+    setT(H.clockMin, `rotate(${f1(6 * (12 + Math.floor(t / 60) - 1 + ease('back', mu)))},1020,150)`);
+    const a = ampS('A', t);
     setT(H.horn, `translate(1812,200) scale(${(1 + a * 0.06).toFixed(3)}) translate(-1812,-200)`);
-    show(H.hornWaves, a > 0.02);
+    H.hornW.forEach((w, k) => {
+      const u = (t * 1.8 + k / 2) % 1, op = (1 - u) * smooth(u / 0.15) * Math.min(1, 2.5 * a);
+      show(w, op > 0.01);
+      if (op > 0.01) { setT(w, `translate(${f1(-36 * u)},0) translate(1730,205) scale(${f3(1 + 0.4 * u)}) translate(-1730,-205)`); setA(w, 'opacity', f2(op)); }
+    });
   }
   if (scene === 'zug') {
-    const view = st('outside', 'view', t, 'land');
-    show(H.outLand, view === 'land'); show(H.outBakery, view === 'bakery'); show(H.outClouds, view === 'clouds' || view === 'circle');
+    const view = st('outside', 'view', t, 'land'), air = view === 'clouds' || view === 'circle';
+    show(H.outLand, !air); show(H.outClouds, air);
+    setT(H.outside, `translate(0,${f2(-0.9 * rkY)})`);
     const off = integ('land', t);
     setT(H.landFar, `translate(${(-(off * 0.3) % 1200).toFixed(1)},0)`);
     setT(H.landNear, `translate(${(-(off * 0.8) % 1200).toFixed(1)},0)`);
     setT(H.poles, `translate(${(-(off * 2.2) % 600).toFixed(1)},0)`);
+    // Masten verwischen mit dem Tempo (Breite ~ Weg pro Bild, Deckkraft flächengleich)
+    const pv = 2.2 * 520 * Math.abs(num('outside', 'v', t)), pw = 14 + 0.8 * pv / TL.fps;
+    for (const pr of H.poleRects) { setA(pr, 'x', f1(pr._x - pw / 2)); setA(pr, 'width', f1(pw)); setA(pr, 'opacity', f2(Math.max(0.45, 14 / pw))); }
+    // Bäckerei: liegt an der Strecke und kommt genau dort zum Stehen, wo der Zug hält
+    let bdx = 1e9;
+    for (const tS of STOPS) { const d = -(off - integ('land', tS)); if (Math.abs(d) < Math.abs(bdx)) bdx = d; }
+    show(H.outBakery, !air && Math.abs(bdx) < 2600);
+    if (Math.abs(bdx) < 2600) setT(H.outBakery, `translate(${f1(bdx)},0)`);
+    setT(H.speaker, `translate(1780,100) scale(${f3(1 + 0.08 * ampS('A', t))}) translate(-1780,-100)`);
     if (view === 'clouds' || view === 'circle') {
       setT(H.cloudRow, `translate(${(-(t * 420) % 600).toFixed(1)},${view === 'circle' ? (Math.sin(t * 1.2) * 60).toFixed(1) : 0})`);
       const bx = view === 'circle' ? 2200 - ((t * 500) % 2600) : 4000;
@@ -1742,26 +2289,40 @@ function render(frame) {
   }
   if (scene === 'himmel') {
     setT(H.sunRays, `rotate(${(t * 10 % 360).toFixed(1)},1620,190)`);
-    H.clouds.forEach((c) => { const k = c._k, sp = 60 + (k % 3) * 50, x = ((k * 330 - t * sp) % 2400 + 2400) % 2400 - 300; setT(c, `translate(${x.toFixed(1)},${(140 + (k * 97) % 560)}) scale(${(0.7 + (k % 3) * 0.25).toFixed(2)})`); });
+    // Wolken ziehen nach rechts (der Zug fliegt nach links); beim Rückwärtsfliegen dreht der Wind um
+    const co = integ('cloud', t);
+    H.clouds.forEach(c => { const x = ((c._k * 330 + co * c._sp) % 2400 + 2400) % 2400 - 300; setT(c, `translate(${f1(x)},${140 + (c._k * 97) % 560}) scale(${c._sc})`); });
+    H.fgClouds.forEach(c => { const x = ((c._k * 3000 + co * 420) % 6000 + 6000) % 6000 - 700; setT(c, `translate(${f1(x)},${c._k ? 180 : 900}) scale(1.8)`); });
     const sw = st('swarm', 'on', t, 0);
     show(H.swarm, sw);
-    if (sw) H.minis.forEach((m, i) => {
-      const a = t * 0.9 + i * Math.PI * 2 / H.minis.length;
-      const x = 960 + Math.cos(a) * 640, y = 520 + Math.sin(a) * 300, dir = -Math.sin(a) >= 0 ? 1 : -1;
-      setT(m.g, `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(dir * (0.8 + 0.25 * Math.sin(a))).toFixed(3)},${(0.8 + 0.25 * Math.sin(a)).toFixed(3)})`);
-      setT(m.w, `rotate(${(Math.sin(t * 9 + i) * 20).toFixed(1)},0,-30)`);
-      m.g.parentNode.appendChild && (Math.sin(a) > 0 ? H.swarm.appendChild(m.g) : H.swarm.insertBefore(m.g, H.brezel));
-    });
+    if (sw) {
+      setT(H.brezel, `translate(860,${f1(560 + 10 * Math.sin(0.8 * t))}) rotate(${f2(2 * Math.sin(0.5 * t))})`);
+      const A = integ('swarmA', t);
+      H.minis.forEach((m, i) => {   // kreisen um die Brezel; Blick bleibt "vorwärts", auch wenn der Schwarm rückwärts fliegt
+        const a = A + i * Math.PI * 2 / H.minis.length, rk = 1 + 0.1 * Math.sin(i * 2.3), dep = 0.8 + 0.25 * Math.sin(a);
+        const x = 960 + Math.cos(a) * 640 * rk, y = 520 + Math.sin(a) * 300 * rk + 14 * Math.sin(1.7 * t + i);
+        const face = -Math.sin(a), fx = (face < 0 ? -1 : 1) * Math.max(0.25, Math.abs(face));
+        const dA = (integ('swarmA', t + 1 / 120) - integ('swarmA', t - 1 / 120)) * 60;   // Kreistempo [rad/s]
+        const vx = -Math.sin(a) * 640 * rk * dA, vy = Math.cos(a) * 300 * rk * dA + 23.8 * Math.cos(1.7 * t + i);
+        setT(m.g, `${smearT(vx, vy, 1 / 6000, 0.12, x, y)}translate(${f1(x)},${f1(y)}) rotate(${f2(10 * Math.cos(a))}) scale(${f3(fx * dep)},${f3(dep)})`);
+        setT(m.w, `rotate(${f1(Math.sin(t * (8 + 2 * i) + i) * 20)},0,-30)`);
+        const front = Math.sin(a) > 0;   // vordere Hälfte vor der Brezel; nur beim Wechsel umhängen
+        if (m._front !== front) { m._front = front; if (front) H.swarm.appendChild(m.g); else H.swarm.insertBefore(m.g, H.brezel); }
+      });
+    }
   }
   if (scene === 'endcard') {
     const u = t - s0;
-    H.endFussel.update(poseEndFussel(t));
-    setT(H.endTitle, `translate(0,${((1 - smooth(u / 0.6)) * 300).toFixed(0)})`);
+    H.endFussel.update(poseEndFussel(t, u));
+    setT(H.endTitle, `translate(0,${f1((1 - ease('back', u / 0.6)) * 300)})`);
+    setA(H.endFrame, 'stroke-dashoffset', f1(-t * 30));   // Lauflicht-Rahmen
+    setT(H.endDots, `translate(${f2((t * 12) % 32)},${f2((t * 6) % 32)})`);
   }
 
   // Iris und Abblende
-  const ir = num('iris', 'r', t);
-  if (ir < 1150) { setA(irisPath, 'd', `M0 0H1920V1080H0Z M${960 - ir} 540a${ir} ${ir} 0 1 0 ${2 * ir} 0a${ir} ${ir} 0 1 0 ${-2 * ir} 0Z`); show(irisPath, true); }
+  const ir = num('iris', 'r', t), ix = num('iris', 'x', t), iy = num('iris', 'y', t);
+  const cover = Math.hypot(Math.max(ix, 1920 - ix), Math.max(iy, 1080 - iy));   // Kreis deckt alle Ecken: aus
+  if (ir < cover) { setA(irisPath, 'd', `M0 0H1920V1080H0Z M${f1(ix - ir)} ${f1(iy)}a${f1(ir)} ${f1(ir)} 0 1 0 ${f1(2 * ir)} 0a${f1(ir)} ${f1(ir)} 0 1 0 ${f1(-2 * ir)} 0Z`); show(irisPath, true); }
   else show(irisPath, false);
   setA(fadeRect, 'opacity', num('fade', 'a', t).toFixed(3));
 }

@@ -176,16 +176,36 @@ DEFAULTS = {
     "gurrmann": dict(x=2200, y=900, s=1.3, r=0, flip=-1, lid=0.2, wing=0, brow=0),
     "train": dict(x=3000, y=740, s=1, r=0, doors=0),
     "ball": dict(x=0, y=0, s=1),
-    "iris": dict(r=1200),
+    "iris": dict(r=1200, x=960, y=540),
     "fade": dict(a=0),
     "logo": dict(p=0),
     "outside": dict(v=1),
 }
 
 
+EASES = ("lin", "in", "out", "io", "io5", "back", "brake")
+
+
 def ease_ok(e):
-    assert e in ("lin", "in", "out", "io"), e
+    assert e in EASES, e
     return e
+
+
+def ease_fn(e, u):
+    """Wie ease() in stage.js: io = smoothstep, io5 = smootherstep, back = Überschwingen ~7 %, brake = ~3 %."""
+    u = min(1.0, max(0.0, u))
+    if e == "lin":
+        return u
+    if e == "in":
+        return u * u
+    if e == "out":
+        return 1 - (1 - u) ** 2
+    if e == "io5":
+        return u * u * u * (u * (6 * u - 15) + 10)
+    if e in ("back", "brake"):
+        c, v = (1.4 if e == "back" else 0.9), u - 1
+        return 1 + (c + 1) * v ** 3 + c * v * v
+    return u * u * (3 - 2 * u)
 
 
 class TL:
@@ -197,13 +217,17 @@ class TL:
 
     # -- Werkzeuge ---------------------------------------------------------
     def _value_at(self, actor, prop, t):
+        """Wert einer Spur zur Zeit t, genau wie num() in stage.js (mit Easing; Kamera-Zoom logarithmisch)."""
         segs = self.tracks.get(actor, {}).get(prop, [])
         val = DEFAULTS.get(actor, {}).get(prop, 0)
         for s in sorted(segs, key=lambda s: s[0]):
             if s[0] <= t:
                 if t < s[1]:
-                    u = (t - s[0]) / (s[1] - s[0])
-                    val = s[2] + (s[3] - s[2]) * u
+                    u = ease_fn(s[4], (t - s[0]) / (s[1] - s[0]))
+                    if actor == "cam" and prop == "z":
+                        val = s[2] * (s[3] / s[2]) ** u
+                    else:
+                        val = s[2] + (s[3] - s[2]) * u
                 else:
                     val = s[3]
         return val
@@ -223,14 +247,25 @@ class TL:
         y0 = self._value_at(actor, "y", t0)
         apex = min(y0, y) - h
         a, b = np.sqrt(y0 - apex), np.sqrt(y - apex)
-        tu = dur * a / (a + b)
+        tu = round(float(dur * a / (a + b)), 3)   # auf ms gerundet: Scheitel-Segmente stoßen exakt aneinander
         self.key(actor, dur=dur, off=off, ease="lin", x=x)
         self.key(actor, dur=tu, off=off, ease="out", y=apex)
-        self.key(actor, dur=dur - tu, off=off + tu, ease="in", y=y)
+        self.key(actor, dur=dur - tu, off=t0 + tu - self.t, ease="in", y=y)
         if extra:
             self.key(actor, dur=dur, off=off, ease="io", **extra)
 
     def shot(self, x, y, z, dur=0.0, ease="io", off=0.0):
+        """Kameraeinstellung. dur = 0 ist ein Schnitt. Schwenks dauern mindestens 0.3 s + Bildweg/1600 px/s
+        (Bildweg beim kleineren Zoom; Zoomfahrten wirken radial und bleiben frei) und beginnen 0.15 s früher
+        (landen, wenn der Sprecher einsetzt), aber nie vor dem letzten Szenenwechsel oder vor dem Ende der
+        vorigen Kamerafahrt. Ändert tl.t nicht."""
+        if dur > 0:
+            t0 = self.t + off
+            x0, y0, z0 = (self._value_at("cam", p, t0) for p in ("x", "y", "z"))
+            dur = max(dur, 0.3 + np.hypot(x - x0, y - y0) * min(z, z0) / 1600)
+            busy = max([s[1] for p in ("x", "y", "z") for s in self.tracks.get("cam", {}).get(p, [])] + [0])
+            floor_t = max(busy, self.scenes[-1][0] if self.scenes else 0)
+            off -= min(0.15, max(0.0, t0 - floor_t))
         self.key("cam", dur=dur, off=off, ease=ease, x=x, y=y, z=z)
 
     def st(self, actor, off=0.0, **props):
