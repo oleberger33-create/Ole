@@ -80,14 +80,43 @@ def trim(x, thr=0.012, pre=0.03, post=0.08):
     return x[a:b]
 
 
+# Externe Stimmen (z. B. ElevenLabs oder Google, siehe stimmen_extern.py) ersetzen die
+# lokalen Piper-Stimmen, sobald STIMMEN_EXTERN auf ihren Ordner zeigt. Echte Stimmen
+# bekommen nur eine leichte Nachbearbeitung.
+EXTERN = os.environ.get("STIMMEN_EXTERN")
+EXTERN_FX = {
+    "F": dict(pitch=1.06, formant="preserved", chain="highpass=f=120"),
+    "K": dict(pitch=0.97, formant="preserved", chain="highpass=f=80", robot=True),
+    "B": dict(pitch=1.0, formant="preserved", chain=""),
+    "G": dict(pitch=1.0, formant="preserved", chain=""),
+    "A": dict(pitch=1.0, formant="preserved", chain="highpass=f=250,lowpass=f=5000,aecho=0.8:0.3:70:0.15"),
+}
+
+
+def extern_file(who, say):
+    if not EXTERN:
+        return None
+    import stimmen_extern
+    k = stimmen_extern.key_for(who, say)
+    for ext in (".wav", ".mp3"):
+        p = os.path.join(EXTERN, f"{who}_{k}{ext}")
+        if os.path.exists(p):
+            return p
+    return None
+
+
 def voice(who, say, fx=None):
-    v = VOICES[who]
+    ext = extern_file(who, say)
+    v = dict(EXTERN_FX[who], extern=os.path.basename(ext), mtime=os.path.getmtime(ext)) if ext else VOICES[who]
     key = hashlib.sha1(json.dumps([v, say, fx, 3]).encode()).hexdigest()[:16]
     path = os.path.join(OUT, "stimmen", f"{who}_{key}.wav")
     if not os.path.exists(path):
-        a = tts_engine(v["model"]).generate(say, sid=v["sid"], speed=v["speed"])
-        raw = path + ".raw.wav"
-        write_wav(raw, np.array(a.samples, dtype=np.float32), a.sample_rate)
+        if ext:
+            raw = ext
+        else:
+            a = tts_engine(v["model"]).generate(say, sid=v["sid"], speed=v["speed"])
+            raw = path + ".raw.wav"
+            write_wav(raw, np.array(a.samples, dtype=np.float32), a.sample_rate)
         chain = f"rubberband=pitch={v['pitch']}:formant={v['formant']},aresample={SR}"
         if v.get("chain"):
             chain += "," + v["chain"]
@@ -96,7 +125,8 @@ def voice(who, say, fx=None):
         if fx == "off":     # aus dem Off, hinter der Tür
             chain += ",lowpass=f=2200,aecho=0.8:0.35:60:0.25"
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", raw, "-af", chain, "-ac", "1", path], check=True)
-        os.remove(raw)
+        if not ext:
+            os.remove(raw)
         x, _ = read_wav(path)
         x = trim(x)
         if v.get("robot"):
