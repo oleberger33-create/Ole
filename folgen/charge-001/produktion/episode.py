@@ -528,7 +528,7 @@ def write(tl):
     tl.line("G", "Von hier oben sieht alles aus wie ein Krümel.", gap=0.6)
     tl.st("fussel", eyes="normal")
     ansage(tl, "Gurr. Wir befinden uns jetzt im Schwarmverkehr. Bitte halten Sie sich an einer Feder fest. Gurr.")
-    tl.shot(540, 650, 1.75)
+    tl.shot(540, 650, 1.85)                  # enger: der Wagen schaukelt hier stärker, sonst ragt Gurrmanns Schnabel ins Bild
     tl.st("fussel", brow="sad")
     tl.line("F", "Ich hab keine Arme!", gap=0.6)
     tl.st("fussel", brow="none")

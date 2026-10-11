@@ -1852,17 +1852,22 @@ function crowdPose(i, t, rec, noVel) {
       o.peck = lerp(o.peck, ul > 1.8 ? pk : 0, v);
     }
     if (mode === 'board') {   // einsteigen: im Bogen bis vor die Mitte der nächsten Tür, dann darin kleiner werden
-      const d = 0.07 * i + 0.2 * hash(i, 21), uu = clamp((u - d) / 1.4, 0, 1);
+      // Staffelung so knapp, dass alle drin sind, bevor Fussel (links, ~1.6 s nach dem Start) und Gurrmann
+      // (rechts, ~2 s) selbst in die Türen hüpfen: niemand drängelt sich mit ihnen in den Türspalt
+      const left = PLAT_POS[i][0] < 960;
+      const d = left ? 0.03 * i + 0.1 * hash(i, 21) : 0.04 * i + 0.1 * hash(i, 21), uu = clamp((u - d) / (left ? 1.2 : 1.3), 0, 1);
       if (uu > 0) {   // Start und Ankunft mit Tempo 0 (io), Kopf/Picken blenden weich aus
-        const s0 = crowdPose(i, m0 + d, rec.prev, true), left = PLAT_POS[i][0] < 960, w = smooth(uu / 0.15);
+        const s0 = crowdPose(i, m0 + d, rec.prev, true), w = smooth(uu / 0.15);
         const ua = clamp(uu / 0.78, 0, 1), e = ease('io', ua), ui = clamp((uu - 0.78) / 0.22, 0, 1);
         const tx = num('train', 'x', t) + (left ? -280 : 280) * num('train', 's', t), ty = 640;
         o.x = lerp(s0.x, tx, e); o.y = lerp(s0.y, ty, e) - 160 * Math.sin(Math.PI * e) - 20 * ui;
         o.fly = smooth(uu / 0.08); o.s = s0.s * lerp(1, 0.8, e) * (1 - ease('in', ui));
         o.peck = lerp(s0.peck, 0, w); o.head = lerp(s0.head, 0, w); o.walkAmt = lerp(s0.walkAmt, 0, w); o.face = s0.face;
         o.dir = tx > s0.x ? 1 : -1; o.boarding = true;
-        // Tür-Ausschnitt erst, wenn die Taube ganz in der Türöffnung schwebt (sie ist dort schmaler als der Spalt)
-        o.board = uu >= 0.78;
+        // Tür-Ausschnitt erst, wenn die schrumpfende Taube (halbe Breite ~105 px × s) ganz in den Türspalt passt:
+        // dann schneidet er nichts sichtbar ab, das Umschalten springt also nie (kein harter Schnitt am Türrahmen)
+        const gap = 52 * num('train', 'doors', t) * num('train', 's', t);
+        o.board = uu >= 0.78 && 105 * o.s + Math.abs(o.x - tx) <= gap;
         if (uu >= 1) o.vis = false;
       }
     }
