@@ -458,6 +458,8 @@ def main():
     def mmss(t):
         return f"{int(t // 60)}:{int(t % 60):02d}"
     chap = "\n".join(f"{mmss(t) if i else '0:00'} {n}" for i, (t, n) in enumerate(tl.chapters))
+    credits = ("Stimmen: KI-Sprachsynthese (ElevenLabs Eleven v3)" if EXTERN else
+               "Stimmen: KI-Sprachsynthese (Piper-Stimmen „Thorsten“ (Thorsten-Voice, CC0), „Kerstin“ (CC0), „Karlsson“ und „Eva K“ (M-AILABS-Datensatz))")
     yt = f"""# YouTube-Upload · Charge 001
 
 ## Titel
@@ -477,7 +479,7 @@ Dein Auftrag für KURT? Schreib ihn in die Kommentare. Vielleicht versteht er ih
 Kapitel
 {chap}
 
-Stimmen: KI-Sprachsynthese (Piper-Stimmen „Thorsten“ (Thorsten-Voice, CC0), „Kerstin“ (CC0), „Karlsson“ und „Eva K“ (M-AILABS-Datensatz))
+{credits}
 Musik und Geräusche: selbst erzeugt in der Flausenfabrik
 Ausgedacht in der Flausenfabrik.
 

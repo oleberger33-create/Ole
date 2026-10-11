@@ -1,7 +1,35 @@
 # Neue Stimmen für Charge 001 (ElevenLabs über IMG.LY)
 
-Stand: Animation fertig (60 fps, geprüft). Es fehlen nur noch hochwertige Stimmen.
-Die lokalen Piper-Stimmen sind Platzhalter.
+**Stand: erledigt.** Alle 111 Zeilen liegen als ElevenLabs-Stimmen in `stimmen/`, die Folge ist damit gebaut
+(1920×1080, 60 fps, 9:35, −14 LUFS). Die lokalen Piper-Stimmen bleiben nur als Rückfall, wenn `STIMMEN_EXTERN` fehlt.
+
+## Neu bauen
+
+```sh
+STIMMEN_EXTERN=$PWD/folgen/charge-001/stimmen WORKERS=4 \
+  folgen/charge-001/produktion/produce.sh <arbeitsordner> <tts-modelle> <schriften>
+```
+
+- Mit externen Stimmen werden keine Piper-Modelle geladen; `<tts-modelle>` darf ein leerer Ordner sein. Nötig ist `scipy`.
+- `<schriften>` braucht `BagelFatOne-400.ttf`, `RethinkSans-600.ttf`, `RethinkSans-800.ttf`, `DMMono-400.ttf`, `DMMono-500.ttf`
+  (Google Fonts; Rethink Sans gibt es nur variabel, statisch per `fonttools varLib.instancer RethinkSans[wght].ttf wght=800`).
+- Rendern dauert mit 4 Workern rund 25 Minuten, das fertige MP4 (CRF 18) ist etwa 300 MB groß.
+- `stimmen/elevenlabs.json` hält Stimme und Prompt (samt Audio-Tag) jeder Zeile. Eine Zeile neu erzeugen:
+  Prompt dort ändern, mit `asset_generate` neu generieren, MP3 unter demselben Namen ablegen, neu bauen.
+  Wird der Text einer Zeile in `episode.py` geändert, ändert sich ihr Schlüssel: `stimmen_extern.py liste` neu laufen lassen.
+
+## Ergebnis des Laufs
+
+- Laufzeit 8:07 → 9:35. Die neuen Stimmen sprechen langsamer und mit mehr Pausen; Kapitel, Endcard (ab 9:15),
+  Untertitel und Drehbuch sind neu berechnet.
+- Stichproben mit `elevenlabs/scribe-v2`: Deutsch erkannt, Audio-Tags werden nicht mitgesprochen.
+  KURTs Abbrüche („Auftrag ausgef…“, „Auftrag verst…“) enden wirklich mitten im Wort.
+- `build.py` schreibt die Stimmen-Angabe in `youtube.md` jetzt passend (ElevenLabs statt Piper, sobald `STIMMEN_EXTERN` gesetzt ist).
+- Kosten: 111 Zeilen zu je vorläufig 26,8 Credits, also gut 3.000 Credits (≈ 3 $). Jede Zeile kostet gleich viel, egal wie lang.
+
+---
+
+# Ursprüngliche Anleitung
 
 ## Voraussetzungen in der Cloud-Umgebung
 
@@ -28,4 +56,4 @@ Die lokalen Piper-Stimmen sind Platzhalter.
 | Gurrmann (G) | munterer Zugbegleiter | Charlie | |
 | Durchsage (A) | klar, sachlich | Matilda | Bahnhofshall kommt in `build.py` dazu |
 
-Kosten laut IMG.LY-Doku: etwa 20 Credits pro Satz (1 Credit = 0,001 $), also rund 2–3 $ für die Folge.
+Kosten laut IMG.LY-Doku: etwa 20 Credits pro Satz (1 Credit = 0,001 $), also rund 2–3 $ für die Folge. Tatsächlich: 26,8 Credits pro Zeile, siehe oben.

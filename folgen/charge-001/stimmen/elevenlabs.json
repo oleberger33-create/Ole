@@ -1,0 +1,779 @@
+[
+ {
+  "nr": 0,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Morgen. Bin zu spät. Zug fiel aus.",
+  "datei": "B_9b223f63b393f8f9.mp3"
+ },
+ {
+  "nr": 1,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[surprised] Schon wieder?",
+  "datei": "F_9d4019e4db4ce89c.mp3"
+ },
+ {
+  "nr": 2,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[sighs] Signalstörung. Weichenstörung. Türstörung. Irgendwat is immer jestört.",
+  "datei": "B_9f4e729941bf9878.mp3"
+ },
+ {
+  "nr": 3,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Uuuh! Und was, wenn ... Tauben die Bahn übernehmen?",
+  "datei": "F_a9ea6c4cd6e06a35.mp3"
+ },
+ {
+  "nr": 4,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[flatly] Nee.",
+  "datei": "B_f81dc03522c1f237.mp3"
+ },
+ {
+  "nr": 5,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Kurt! Kurt! Ich hab einen Auftrag!",
+  "datei": "F_000c69de1fda2340.mp3"
+ },
+ {
+  "nr": 6,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Guten Morgen. Hier spricht Kurt, Ihre kurbelbetriebene Unterhaltungs-Rechen-Technik. Bitte werfen Sie Ihre Idee in den Trichter.",
+  "datei": "K_99e4ba8caae73785.mp3"
+ },
+ {
+  "nr": 7,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Wie wirft man denn eine Idee?",
+  "datei": "F_c4d7d27c1f6882e7.mp3"
+ },
+ {
+  "nr": 8,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Zusammenknüllen. Werfen. Hoffen.",
+  "datei": "K_15071147e37d39d3.mp3"
+ },
+ {
+  "nr": 9,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Idee empfangen. Wird geprüft.",
+  "datei": "K_180851b3cfc71f52.mp3"
+ },
+ {
+  "nr": 10,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Tauben. Bahn. Übernehmen. Ich habe drei Rückfragen.",
+  "datei": "K_53fefc3127b9e7ea.mp3"
+ },
+ {
+  "nr": 11,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Okay!",
+  "datei": "F_2dd986b35c077ecd.mp3"
+ },
+ {
+  "nr": 12,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Erstens. Welche Tauben?",
+  "datei": "K_f93b75d83bca7fba.mp3"
+ },
+ {
+  "nr": 13,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Alle!",
+  "datei": "F_877f155fe152f2c2.mp3"
+ },
+ {
+  "nr": 14,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Zweitens. Welche Bahn?",
+  "datei": "K_a173476af46f7a49.mp3"
+ },
+ {
+  "nr": 15,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Die ganze!",
+  "datei": "F_3ab68d4153fab139.mp3"
+ },
+ {
+  "nr": 16,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Drittens. Wer kurbelt?",
+  "datei": "K_f5d34cc21ae322cb.mp3"
+ },
+ {
+  "nr": 17,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Ick hab gleich Feierabend.",
+  "datei": "B_7d623639023e2a9f.mp3"
+ },
+ {
+  "nr": 18,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Es ist acht Uhr zwölf.",
+  "datei": "K_46648de163eced4a.mp3"
+ },
+ {
+  "nr": 19,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Gleich is relativ.",
+  "datei": "B_f1bfa1b8130d87e8.mp3"
+ },
+ {
+  "nr": 20,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[pleading] Bitte, Brösel! Bitte, bitte, bitte!",
+  "datei": "F_16a709390ededa75.mp3"
+ },
+ {
+  "nr": 21,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[sighs] Na jut. Aber nur, weil meine Cousins da mitmachen.",
+  "datei": "B_96ff9b6c12fe4416.mp3"
+ },
+ {
+  "nr": 22,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Deine Cousins?",
+  "datei": "F_1fa884ef1e59a212.mp3"
+ },
+ {
+  "nr": 23,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Halb Berlin is mit mir verwandt. Wir Stadttauben sitzen seit hundert Jahren auf jedem Bahnhof. Wir kennen den Laden besser als die Leute mit den Mützen.",
+  "datei": "B_8f4d605dfc7d94b8.mp3"
+ },
+ {
+  "nr": 24,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Auftrag verstanden.",
+  "datei": "K_c23011dad61cc4a0.mp3"
+ },
+ {
+  "nr": 25,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Und ich will mitfahren!",
+  "datei": "F_e0af70389100b3f7.mp3"
+ },
+ {
+  "nr": 26,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Fahrgast erkannt. Film startet.",
+  "datei": "K_3964cf629c5df67d.mp3"
+ },
+ {
+  "nr": 27,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Film eins. Die Übernahme.",
+  "datei": "K_719885be36eb4bab.mp3"
+ },
+ {
+  "nr": 28,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Willkommen in Brötchenhausen Hauptbahnhof. Ab heute übernehmen wir den Bahnbetrieb. Gurr.",
+  "datei": "A_5cda551d2f865569.mp3"
+ },
+ {
+  "nr": 29,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[amazed] Wow! Die Tauben haben echt übernommen!",
+  "datei": "F_6591d55610f61e32.mp3"
+ },
+ {
+  "nr": 30,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Guten Tag. Gurrmann, Zugbegleiter. Sie wünschen?",
+  "datei": "G_87e0c0a404ddb0c9.mp3"
+ },
+ {
+  "nr": 31,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[thinking] Ich will nach ... äh ... [excited] Krümelstadt!",
+  "datei": "F_5d3ad967326a36f2.mp3"
+ },
+ {
+  "nr": 32,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Krümelstadt. Gleis eins. Abfahrt pünktlich.",
+  "datei": "G_a99d72e2d624603c.mp3"
+ },
+ {
+  "nr": 33,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[surprised] Pünktlich? Wirklich?",
+  "datei": "F_737fcb5d979b5a74.mp3"
+ },
+ {
+  "nr": 34,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Selbstverständlich. Wir Tauben warten nicht auf Züge. Wir sind schon da. Wir sind immer schon da.",
+  "datei": "G_acecd4caae52bb73.mp3"
+ },
+ {
+  "nr": 35,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Und wer fährt den Zug?",
+  "datei": "F_7b2e6dbc46c9234d.mp3"
+ },
+ {
+  "nr": 36,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Lokführerin Gisela. Sie fliegt seit zwölf Jahren unfallfrei. Fahren ist neu für sie.",
+  "datei": "G_9b53146f81557fae.mp3"
+ },
+ {
+  "nr": 37,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Bitte lassen Sie Ihr Gepäck nicht unbeaufsichtigt. Unbeaufsichtigte Brötchen werden sofort gegessen. Gurr.",
+  "datei": "A_32c2e02b3364ddc2.mp3"
+ },
+ {
+  "nr": 38,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Und wann kommt der Zug?",
+  "datei": "F_8f0881f54eb044d5.mp3"
+ },
+ {
+  "nr": 39,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Der Zug kommt, wenn genug Krümel auf dem Bahnsteig liegen.",
+  "datei": "G_7268aad2e91f12c7.mp3"
+ },
+ {
+  "nr": 40,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[surprised] Das steht so im Fahrplan?",
+  "datei": "F_9757b8b30562f2f2.mp3"
+ },
+ {
+  "nr": 41,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Das ist der Fahrplan.",
+  "datei": "G_2f6bb003e10a66ad.mp3"
+ },
+ {
+  "nr": 42,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Det stimmt sogar. Bei uns heißt det Fütterungszeit.",
+  "datei": "B_37e9f25e955112f6.mp3"
+ },
+ {
+  "nr": 43,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Notiert. Frage: Warum sitzen Tauben immer auf Bahnhöfen?",
+  "datei": "K_893fe21938ec9e19.mp3"
+ },
+ {
+  "nr": 44,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Weil da keener merkt, dass wir warten. Da warten alle.",
+  "datei": "B_fd76bd22d7d454b1.mp3"
+ },
+ {
+  "nr": 45,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Ausreichend Krümel erkannt. Der Zug nach Krümelstadt fährt ein. Bitte Vorsicht an der Bahnsteigkante. Gurr.",
+  "datei": "A_3d4e8698c1f312c7.mp3"
+ },
+ {
+  "nr": 46,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Er ist pünktlich! Er ist wirklich pünktlich!",
+  "datei": "F_70a764e19678af7a.mp3"
+ },
+ {
+  "nr": 47,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Gurr. Einsteigen, bitte.",
+  "datei": "G_7318b32eadb927a8.mp3"
+ },
+ {
+  "nr": 48,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Film zwei. Die Reform.",
+  "datei": "K_49214a526858c170.mp3"
+ },
+ {
+  "nr": 49,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Fahrkarten, bitte.",
+  "datei": "G_35f7a4331e6f2f65.mp3"
+ },
+ {
+  "nr": 50,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[nervous] Ich hab keine Fahrkarte. Ich hab nicht mal Arme.",
+  "datei": "F_28b1c150d306acfe.mp3"
+ },
+ {
+  "nr": 51,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Kein Problem. Bei uns bezahlt man mit Krümeln.",
+  "datei": "G_540e241874c5a22a.mp3"
+ },
+ {
+  "nr": 52,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Ein Krümel. Das reicht bis ... zur nächsten Bäckerei.",
+  "datei": "G_a9ba5c4bf7b8b0af.mp3"
+ },
+ {
+  "nr": 53,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Gibt es hier eigentlich Weh Lan?",
+  "datei": "F_43c08572b657dce3.mp3"
+ },
+ {
+  "nr": 54,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Natürlich. Das Passwort ist Gurr. Mit drei R.",
+  "datei": "G_b2456ebfaba44c49.mp3"
+ },
+ {
+  "nr": 55,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[disappointed] Geht nicht.",
+  "datei": "F_7d14eeb7eef23111.mp3"
+ },
+ {
+  "nr": 56,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Dann vier R.",
+  "datei": "G_db7f1fb334df3306.mp3"
+ },
+ {
+  "nr": 57,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Wegen einer Bäckerei an der Strecke halten wir außerplanmäßig. Gurr.",
+  "datei": "A_1694d56a12ed75bf.mp3"
+ },
+ {
+  "nr": 58,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Wegen einer weiteren Bäckerei halten wir schon wieder außerplanmäßig. Gurr.",
+  "datei": "A_49d05debfbd87688.mp3"
+ },
+ {
+  "nr": 59,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Wie viele Bäckereien gibt es denn?",
+  "datei": "F_21aa110192dff4a0.mp3"
+ },
+ {
+  "nr": 60,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] In Deutschland? Zu viele, um pünktlich zu sein.",
+  "datei": "G_e6d3dc01ffc0d136.mp3"
+ },
+ {
+  "nr": 61,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[whispers] Und hier vorne ist der Ruhewagen. Hier wird nur leise gegurrt.",
+  "datei": "G_6460b2dd0e3b46de.mp3"
+ },
+ {
+  "nr": 62,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Unser Bordbistro hat für Sie geöffnet. Heute im Angebot: Krümel. Krümel mit Krümeln. Und Krümel, vegan. Gurr.",
+  "datei": "A_aeaada789d3be4ff.mp3"
+ },
+ {
+  "nr": 63,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, die zuerst da ist. Also für alle. Gurr.",
+  "datei": "A_4a28b8e8aa086e94.mp3"
+ },
+ {
+  "nr": 64,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[annoyed] Hey! Das ist mein Platz!",
+  "datei": "F_c3fdc650ea77ce31.mp3"
+ },
+ {
+  "nr": 65,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[sarcastic] Siehste. Pünktlich halten die genau fünf Minuten durch.",
+  "datei": "B_f89f0950cc2f78a4.mp3"
+ },
+ {
+  "nr": 66,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Verspätung: zwölf Minuten. Ursache: Brötchen.",
+  "datei": "K_0622cf360ed11606.mp3"
+ },
+ {
+  "nr": 67,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[exhausted] Kurt, wie lange dauert det noch? Mein Arm fällt ab.",
+  "datei": "B_71d36f463c307b1d.mp3"
+ },
+ {
+  "nr": 68,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Sie haben keinen Arm. Sie haben einen Flügel.",
+  "datei": "K_035ee8eafc36bf39.mp3"
+ },
+ {
+  "nr": 69,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[annoyed] Mein Flügel fällt ab.",
+  "datei": "B_b11972f2a12966d0.mp3"
+ },
+ {
+  "nr": 70,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Film drei. Die Optimierung.",
+  "datei": "K_d1368fdb6c47e19d.mp3"
+ },
+ {
+  "nr": 71,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Liebe Fahrgäste. Die Bahnleitung hat das größte Hindernis für Pünktlichkeit gefunden.",
+  "datei": "G_92b32a550936ac07.mp3"
+ },
+ {
+  "nr": 72,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Die Bäckereien?",
+  "datei": "F_3adb00f3829713e1.mp3"
+ },
+ {
+  "nr": 73,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Die Schienen.",
+  "datei": "G_8b48388422d15879.mp3"
+ },
+ {
+  "nr": 74,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[shouting] Wir fliegen! Der Zug fliegt!",
+  "datei": "F_965c04dc5cf84f5a.mp3"
+ },
+ {
+  "nr": 75,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Natürlich. Schienen sind was für Leute ohne Flügel.",
+  "datei": "G_9ef23c632b5a1f80.mp3"
+ },
+ {
+  "nr": 76,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[amazed] Da unten ist Brötchenhausen! Es ist winzig!",
+  "datei": "F_72c71712988a47ff.mp3"
+ },
+ {
+  "nr": 77,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Von hier oben sieht alles aus wie ein Krümel.",
+  "datei": "G_d75f23ef31efaf12.mp3"
+ },
+ {
+  "nr": 78,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Wir befinden uns jetzt im Schwarmverkehr. Bitte halten Sie sich an einer Feder fest. Gurr.",
+  "datei": "A_24ef46caf233b0c7.mp3"
+ },
+ {
+  "nr": 79,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[panicked] Ich hab keine Arme!",
+  "datei": "F_431d3267a03e5e86.mp3"
+ },
+ {
+  "nr": 80,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Gleiswechsel. Es gibt zwar keine Gleise mehr. Wir wechseln trotzdem. Gurr.",
+  "datei": "A_15e56c3169ef42c4.mp3"
+ },
+ {
+  "nr": 81,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Nächster Halt: überall. Ausstieg in Fahrtrichtung links. Oder rechts. Oder unten. Gurr.",
+  "datei": "A_50ae2247f9d072cc.mp3"
+ },
+ {
+  "nr": 82,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Aufgrund von Gegenwind verzögert sich die Weiterfahrt. Wir fliegen deshalb rückwärts. Gurr.",
+  "datei": "A_72d802923abd902e.mp3"
+ },
+ {
+  "nr": 83,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[impatient] Wann kommen wir denn in Krümelstadt an?",
+  "datei": "F_8bb57c2edf943092.mp3"
+ },
+ {
+  "nr": 84,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Wir sind schon da. Wir sind immer schon da.",
+  "datei": "G_107a5ec6c616bc26.mp3"
+ },
+ {
+  "nr": 85,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[frustrated] Aber wir fliegen doch nur im Kreis!",
+  "datei": "F_0921ce0e62e0b443.mp3"
+ },
+ {
+  "nr": 86,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[cheerful] Im Kreis fliegen ist das neue Ankommen.",
+  "datei": "G_bc755f060fd99107.mp3"
+ },
+ {
+  "nr": 87,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Berechne Ankunftszeit.",
+  "datei": "K_e92d88cb932d83b5.mp3"
+ },
+ {
+  "nr": 88,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Ankunftszeit: kreisend. Verspätung: unendlich plus zwölf Minuten.",
+  "datei": "K_0c4309f61981aaa0.mp3"
+ },
+ {
+  "nr": 89,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[worried] Kurt? Allet jut bei dir?",
+  "datei": "B_baca1fc932f094b2.mp3"
+ },
+ {
+  "nr": 90,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Verspätung wird berechnet. Verspätung wird berechnet. [stuttering] Verspätung wird ver. ver. ver.",
+  "datei": "K_dc8b605fafc00985.mp3"
+ },
+ {
+  "nr": 91,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Diese Fabrik ist jetzt ein Bahnhof. Bitte zurückbleiben. Gurr.",
+  "datei": "A_3de6f618345c4a49.mp3"
+ },
+ {
+  "nr": 92,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[shouting] Brösel! Die Tauben sind aus dem Film raus!",
+  "datei": "F_e59084b3bef59161.mp3"
+ },
+ {
+  "nr": 93,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[angry] Meine Cousins! Raus hier, aber zackig! Det hier is n Arbeitsplatz!",
+  "datei": "B_34ce6fd3601d54d8.mp3"
+ },
+ {
+  "nr": 94,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[panicked] Die fressen die Stempelkarten!",
+  "datei": "F_724bd95a279ff29c.mp3"
+ },
+ {
+  "nr": 95,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[shouting] Nicht die Stempelkarten! Da stehen meine Überstunden drauf!",
+  "datei": "B_7ff543a5bba290b3.mp3"
+ },
+ {
+  "nr": 96,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[politely] Verzeihung. Wann fährt hier der nächste Zug?",
+  "datei": "G_c6b261786b7b31ac.mp3"
+ },
+ {
+  "nr": 97,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[angry] Hier fährt gar nix! Hier fährt höchstens det Förderband!",
+  "datei": "B_b3e5f96dedd209ac.mp3"
+ },
+ {
+  "nr": 98,
+  "who": "A",
+  "voice": "Matilda",
+  "prompt": "Gurr. Bitte Vorsicht am Förderband. Gurr.",
+  "datei": "A_8b303e8c610770fe.mp3"
+ },
+ {
+  "nr": 99,
+  "who": "G",
+  "voice": "Charlie",
+  "prompt": "[delighted] Endlich mal pünktlich! Gurr!",
+  "datei": "G_135494e035e5ff73.mp3"
+ },
+ {
+  "nr": 100,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Auftrag ausgef—",
+  "datei": "K_3203a6c92561d4c2.mp3"
+ },
+ {
+  "nr": 101,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[hopeful] Brösel? Das war doch ein guter Auftrag, oder?",
+  "datei": "F_8d8366c1acccebf7.mp3"
+ },
+ {
+  "nr": 102,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Die Tauben waren pünktlich. Die Züge sind geflogen. Und keener is anjekommen.",
+  "datei": "B_49e83e94d4da2e74.mp3"
+ },
+ {
+  "nr": 103,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[curious] Also wie immer?",
+  "datei": "F_af6c49ba77ca18af.mp3"
+ },
+ {
+  "nr": 104,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[sighs] Also wie immer.",
+  "datei": "B_de827a41f3ae3748.mp3"
+ },
+ {
+  "nr": 105,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[contentedly] Feierabend.",
+  "datei": "B_d938883f58065ffe.mp3"
+ },
+ {
+  "nr": 106,
+  "who": "F",
+  "voice": "Jessica",
+  "prompt": "[excited] Und was, wenn ... Montag abgeschafft wird?",
+  "datei": "F_0a8e80f67a8dece3.mp3"
+ },
+ {
+  "nr": 107,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[flatly] Nein.",
+  "datei": "B_74d947edcdce9aff.mp3"
+ },
+ {
+  "nr": 108,
+  "who": "K",
+  "voice": "Daniel",
+  "prompt": "[calm] Auftrag verst—",
+  "datei": "K_41ab205302858b65.mp3"
+ },
+ {
+  "nr": 109,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[shouting] Kurt!",
+  "datei": "B_bb8c6ae7c3bd14f0.mp3"
+ },
+ {
+  "nr": 110,
+  "who": "B",
+  "voice": "Bill",
+  "prompt": "[tired] Abonnieren und tschüss. Ick hab Feierabend.",
+  "datei": "B_5380b13d7594b8e7.mp3"
+ }
+]

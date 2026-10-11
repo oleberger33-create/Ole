@@ -1,6 +1,6 @@
 # Charge 001 · Und was, wenn Tauben die Bahn übernehmen?
 
-Laufzeit 8:07 · 111 Dialogzeilen · Figuren: Fussel, KURT, Brösel, Zugbegleiter Gurrmann, Bahnhofsdurchsage
+Laufzeit 9:35 · 111 Dialogzeilen · Figuren: Fussel, KURT, Brösel, Zugbegleiter Gurrmann, Bahnhofsdurchsage
 
 Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 
@@ -12,13 +12,13 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **Fussel:** Ooooh! Und was, wenn … Tauben die Bahn übernehmen?  
 **Brösel:** Nee.  
 
-### 00:19 · SOUND-LOGO
+### 00:24 · SOUND-LOGO
 
 
-### 00:24 · TITEL
+### 00:29 · TITEL
 
 
-### 00:28 · HALLE
+### 00:33 · HALLE
 
 **Fussel:** Kurt! Kurt! Ich hab einen Auftrag!  
 **KURT:** Guten Morgen. Hier spricht Kurt, Ihre kurbelbetriebene Unterhaltungs-Rechen-Technik. Bitte werfen Sie Ihre Idee in den Trichter.  
@@ -43,11 +43,11 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **Fussel:** Und ich will mitfahren!  
 **KURT:** Fahrgast erkannt. Film startet.  
 
-### 01:39 · FILMTITEL (KURTs Bildschirm)
+### 02:01 · FILMTITEL (KURTs Bildschirm)
 
 **KURT:** Film 1. Die Übernahme.  
 
-### 01:42 · FILM · BAHNHOF BRÖTCHENHAUSEN
+### 02:05 · FILM · BAHNHOF BRÖTCHENHAUSEN
 
 **Durchsage:** Gurr. Willkommen in Brötchenhausen Hauptbahnhof. Ab heute übernehmen wir den Bahnbetrieb. Gurr.  
 **Fussel:** Wow! Die Tauben haben echt übernommen!  
@@ -64,26 +64,26 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **Fussel:** Das steht so im Fahrplan?  
 **Gurrmann:** Das ist der Fahrplan.  
 
-### 02:38 · HALLE
+### 03:16 · HALLE
 
 **Brösel:** Det stimmt sogar. Bei uns heißt det Fütterungszeit.  
 **KURT:** Notiert. Frage: Warum sitzen Tauben immer auf Bahnhöfen?  
 **Brösel:** Weil da keener merkt, dass wir warten. Da warten alle.  
 
-### 02:50 · FILM · BAHNHOF BRÖTCHENHAUSEN
+### 03:31 · FILM · BAHNHOF BRÖTCHENHAUSEN
 
 **Durchsage:** Gurr. Ausreichend Krümel erkannt. Der Zug nach Krümelstadt fährt ein. Bitte Vorsicht an der Bahnsteigkante. Gurr.  
 **Fussel:** Er ist pünktlich! Er ist wirklich pünktlich!  
 **Gurrmann:** Gurr. Einsteigen, bitte.  
 
-### 03:21 · HALLE
+### 04:03 · HALLE
 
 
-### 03:22 · FILMTITEL (KURTs Bildschirm)
+### 04:04 · FILMTITEL (KURTs Bildschirm)
 
 **KURT:** Film 2. Die Reform.  
 
-### 03:25 · FILM · IM ZUG
+### 04:08 · FILM · IM ZUG
 
 **Gurrmann:** Fahrkarten, bitte.  
 **Fussel:** Ich hab keine Fahrkarte. Ich hab nicht mal Arme.  
@@ -102,7 +102,7 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **Durchsage:** Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, die zuerst da ist. Also für alle. Gurr.  
 **Fussel:** Hey! Das ist mein Platz!  
 
-### 04:46 · HALLE
+### 05:41 · HALLE
 
 **Brösel:** Siehste. Pünktlich halten die genau fünf Minuten durch.  
 **KURT:** Verspätung: zwölf Minuten. Ursache: Brötchen.  
@@ -110,21 +110,21 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **KURT:** Sie haben keinen Arm. Sie haben einen Flügel.  
 **Brösel:** Mein Flügel fällt ab.  
 
-### 05:04 · FILMTITEL (KURTs Bildschirm)
+### 06:04 · FILMTITEL (KURTs Bildschirm)
 
 **KURT:** Film 3. Die Optimierung.  
 
-### 05:07 · FILM · IM ZUG
+### 06:07 · FILM · IM ZUG
 
 **Gurrmann:** Liebe Fahrgäste. Die Bahnleitung hat das größte Hindernis für Pünktlichkeit gefunden.  
 **Fussel:** Die Bäckereien?  
 **Gurrmann:** Die Schienen.  
 
-### 05:15 · FILM · ÜBER DEN WOLKEN
+### 06:17 · FILM · ÜBER DEN WOLKEN
 
 **Fussel:** Wir fliegen! Der Zug fliegt!  
 
-### 05:21 · FILM · IM ZUG
+### 06:24 · FILM · IM ZUG
 
 **Gurrmann:** Natürlich. Schienen sind was für Leute ohne Flügel.  
 **Fussel:** Da unten ist Brötchenhausen! Es ist winzig!  
@@ -133,19 +133,19 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **Fussel:** Ich hab keine Arme!  
 **Durchsage:** Gurr. Gleiswechsel. Es gibt zwar keine Gleise mehr. Wir wechseln trotzdem. Gurr.  
 
-### 05:49 · FILM · ÜBER DEN WOLKEN
+### 06:54 · FILM · ÜBER DEN WOLKEN
 
 **Durchsage:** Gurr. Nächster Halt: überall. Ausstieg in Fahrtrichtung links. Oder rechts. Oder unten. Gurr.  
 **Durchsage:** Gurr. Aufgrund von Gegenwind verzögert sich die Weiterfahrt. Wir fliegen deshalb rückwärts. Gurr.  
 
-### 06:07 · FILM · IM ZUG
+### 07:14 · FILM · IM ZUG
 
 **Fussel:** Wann kommen wir denn in Krümelstadt an?  
 **Gurrmann:** Wir sind schon da. Wir sind immer schon da.  
 **Fussel:** Aber wir fliegen doch nur im Kreis!  
 **Gurrmann:** Im Kreis fliegen ist das neue Ankommen.  
 
-### 06:17 · HALLE
+### 07:26 · HALLE
 
 **KURT:** Berechne Ankunftszeit.  
 **KURT:** Ankunftszeit: kreisend. Verspätung: unendlich plus zwölf Minuten.  
@@ -171,6 +171,6 @@ Zeitangaben in Minuten:Sekunden, so wie sie im fertigen Video stehen.
 **KURT:** Auftrag verst…  
 **Brösel (aus dem Off):** Kurt!  
 
-### 07:47 · ENDCARD
+### 09:15 · ENDCARD
 
 **Brösel:** Abonnieren und tschüss. Ick hab Feierabend.  

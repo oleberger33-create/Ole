@@ -1,0 +1,779 @@
+[
+ {
+  "who": "B",
+  "text": "Morgen. Bin zu spät. Zug fiel aus.",
+  "say": "Morgen. Bin zu spät. Zug fiel aus.",
+  "fx": null,
+  "key": "9b223f63b393f8f9"
+ },
+ {
+  "who": "F",
+  "text": "Schon wieder?",
+  "say": "Schon wieder?",
+  "fx": null,
+  "key": "9d4019e4db4ce89c"
+ },
+ {
+  "who": "B",
+  "text": "Signalstörung. Weichenstörung. Türstörung. Irgendwat is immer jestört.",
+  "say": "Signalstörung. Weichenstörung. Türstörung. Irgendwat is immer jestört.",
+  "fx": null,
+  "key": "9f4e729941bf9878"
+ },
+ {
+  "who": "F",
+  "text": "Ooooh! Und was, wenn … Tauben die Bahn übernehmen?",
+  "say": "Uuuh! Und was, wenn ... Tauben die Bahn übernehmen?",
+  "fx": null,
+  "key": "a9ea6c4cd6e06a35"
+ },
+ {
+  "who": "B",
+  "text": "Nee.",
+  "say": "Nee.",
+  "fx": null,
+  "key": "f81dc03522c1f237"
+ },
+ {
+  "who": "F",
+  "text": "Kurt! Kurt! Ich hab einen Auftrag!",
+  "say": "Kurt! Kurt! Ich hab einen Auftrag!",
+  "fx": null,
+  "key": "000c69de1fda2340"
+ },
+ {
+  "who": "K",
+  "text": "Guten Morgen. Hier spricht Kurt, Ihre kurbelbetriebene Unterhaltungs-Rechen-Technik. Bitte werfen Sie Ihre Idee in den Trichter.",
+  "say": "Guten Morgen. Hier spricht Kurt, Ihre kurbelbetriebene Unterhaltungs-Rechen-Technik. Bitte werfen Sie Ihre Idee in den Trichter.",
+  "fx": null,
+  "key": "99e4ba8caae73785"
+ },
+ {
+  "who": "F",
+  "text": "Wie wirft man denn eine Idee?",
+  "say": "Wie wirft man denn eine Idee?",
+  "fx": null,
+  "key": "c4d7d27c1f6882e7"
+ },
+ {
+  "who": "K",
+  "text": "Zusammenknüllen. Werfen. Hoffen.",
+  "say": "Zusammenknüllen. Werfen. Hoffen.",
+  "fx": null,
+  "key": "15071147e37d39d3"
+ },
+ {
+  "who": "K",
+  "text": "Idee empfangen. Wird geprüft.",
+  "say": "Idee empfangen. Wird geprüft.",
+  "fx": null,
+  "key": "180851b3cfc71f52"
+ },
+ {
+  "who": "K",
+  "text": "Tauben. Bahn. Übernehmen. Ich habe drei Rückfragen.",
+  "say": "Tauben. Bahn. Übernehmen. Ich habe drei Rückfragen.",
+  "fx": null,
+  "key": "53fefc3127b9e7ea"
+ },
+ {
+  "who": "F",
+  "text": "Okay!",
+  "say": "Okay!",
+  "fx": null,
+  "key": "2dd986b35c077ecd"
+ },
+ {
+  "who": "K",
+  "text": "Erstens. Welche Tauben?",
+  "say": "Erstens. Welche Tauben?",
+  "fx": null,
+  "key": "f93b75d83bca7fba"
+ },
+ {
+  "who": "F",
+  "text": "Alle!",
+  "say": "Alle!",
+  "fx": null,
+  "key": "877f155fe152f2c2"
+ },
+ {
+  "who": "K",
+  "text": "Zweitens. Welche Bahn?",
+  "say": "Zweitens. Welche Bahn?",
+  "fx": null,
+  "key": "a173476af46f7a49"
+ },
+ {
+  "who": "F",
+  "text": "Die ganze!",
+  "say": "Die ganze!",
+  "fx": null,
+  "key": "3ab68d4153fab139"
+ },
+ {
+  "who": "K",
+  "text": "Drittens. Wer kurbelt?",
+  "say": "Drittens. Wer kurbelt?",
+  "fx": null,
+  "key": "f5d34cc21ae322cb"
+ },
+ {
+  "who": "B",
+  "text": "Ick hab gleich Feierabend.",
+  "say": "Ick hab gleich Feierabend.",
+  "fx": null,
+  "key": "7d623639023e2a9f"
+ },
+ {
+  "who": "K",
+  "text": "Es ist acht Uhr zwölf.",
+  "say": "Es ist acht Uhr zwölf.",
+  "fx": null,
+  "key": "46648de163eced4a"
+ },
+ {
+  "who": "B",
+  "text": "Gleich is relativ.",
+  "say": "Gleich is relativ.",
+  "fx": null,
+  "key": "f1bfa1b8130d87e8"
+ },
+ {
+  "who": "F",
+  "text": "Bitte, Brösel! Bitte, bitte, bitte!",
+  "say": "Bitte, Brösel! Bitte, bitte, bitte!",
+  "fx": null,
+  "key": "16a709390ededa75"
+ },
+ {
+  "who": "B",
+  "text": "Na jut. Aber nur, weil meine Cousins da mitmachen.",
+  "say": "Na jut. Aber nur, weil meine Cousins da mitmachen.",
+  "fx": null,
+  "key": "96ff9b6c12fe4416"
+ },
+ {
+  "who": "F",
+  "text": "Deine Cousins?",
+  "say": "Deine Cousins?",
+  "fx": null,
+  "key": "1fa884ef1e59a212"
+ },
+ {
+  "who": "B",
+  "text": "Halb Berlin is mit mir verwandt. Wir Stadttauben sitzen seit hundert Jahren auf jedem Bahnhof. Wir kennen den Laden besser als die Leute mit den Mützen.",
+  "say": "Halb Berlin is mit mir verwandt. Wir Stadttauben sitzen seit hundert Jahren auf jedem Bahnhof. Wir kennen den Laden besser als die Leute mit den Mützen.",
+  "fx": null,
+  "key": "8f4d605dfc7d94b8"
+ },
+ {
+  "who": "K",
+  "text": "Auftrag verstanden.",
+  "say": "Auftrag verstanden.",
+  "fx": null,
+  "key": "c23011dad61cc4a0"
+ },
+ {
+  "who": "F",
+  "text": "Und ich will mitfahren!",
+  "say": "Und ich will mitfahren!",
+  "fx": null,
+  "key": "e0af70389100b3f7"
+ },
+ {
+  "who": "K",
+  "text": "Fahrgast erkannt. Film startet.",
+  "say": "Fahrgast erkannt. Film startet.",
+  "fx": null,
+  "key": "3964cf629c5df67d"
+ },
+ {
+  "who": "K",
+  "text": "Film 1. Die Übernahme.",
+  "say": "Film eins. Die Übernahme.",
+  "fx": null,
+  "key": "719885be36eb4bab"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Willkommen in Brötchenhausen Hauptbahnhof. Ab heute übernehmen wir den Bahnbetrieb. Gurr.",
+  "say": "Gurr. Willkommen in Brötchenhausen Hauptbahnhof. Ab heute übernehmen wir den Bahnbetrieb. Gurr.",
+  "fx": null,
+  "key": "5cda551d2f865569"
+ },
+ {
+  "who": "F",
+  "text": "Wow! Die Tauben haben echt übernommen!",
+  "say": "Wow! Die Tauben haben echt übernommen!",
+  "fx": null,
+  "key": "6591d55610f61e32"
+ },
+ {
+  "who": "G",
+  "text": "Guten Tag. Gurrmann, Zugbegleiter. Sie wünschen?",
+  "say": "Guten Tag. Gurrmann, Zugbegleiter. Sie wünschen?",
+  "fx": null,
+  "key": "87e0c0a404ddb0c9"
+ },
+ {
+  "who": "F",
+  "text": "Ich will nach … äh … Krümelstadt!",
+  "say": "Ich will nach ... äh ... Krümelstadt!",
+  "fx": null,
+  "key": "5d3ad967326a36f2"
+ },
+ {
+  "who": "G",
+  "text": "Krümelstadt. Gleis eins. Abfahrt pünktlich.",
+  "say": "Krümelstadt. Gleis eins. Abfahrt pünktlich.",
+  "fx": null,
+  "key": "a99d72e2d624603c"
+ },
+ {
+  "who": "F",
+  "text": "Pünktlich? Wirklich?",
+  "say": "Pünktlich? Wirklich?",
+  "fx": null,
+  "key": "737fcb5d979b5a74"
+ },
+ {
+  "who": "G",
+  "text": "Selbstverständlich. Wir Tauben warten nicht auf Züge. Wir sind schon da. Wir sind immer schon da.",
+  "say": "Selbstverständlich. Wir Tauben warten nicht auf Züge. Wir sind schon da. Wir sind immer schon da.",
+  "fx": null,
+  "key": "acecd4caae52bb73"
+ },
+ {
+  "who": "F",
+  "text": "Und wer fährt den Zug?",
+  "say": "Und wer fährt den Zug?",
+  "fx": null,
+  "key": "7b2e6dbc46c9234d"
+ },
+ {
+  "who": "G",
+  "text": "Lokführerin Gisela. Sie fliegt seit zwölf Jahren unfallfrei. Fahren ist neu für sie.",
+  "say": "Lokführerin Gisela. Sie fliegt seit zwölf Jahren unfallfrei. Fahren ist neu für sie.",
+  "fx": null,
+  "key": "9b53146f81557fae"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Bitte lassen Sie Ihr Gepäck nicht unbeaufsichtigt. Unbeaufsichtigte Brötchen werden sofort gegessen. Gurr.",
+  "say": "Gurr. Bitte lassen Sie Ihr Gepäck nicht unbeaufsichtigt. Unbeaufsichtigte Brötchen werden sofort gegessen. Gurr.",
+  "fx": null,
+  "key": "32c2e02b3364ddc2"
+ },
+ {
+  "who": "F",
+  "text": "Und wann kommt der Zug?",
+  "say": "Und wann kommt der Zug?",
+  "fx": null,
+  "key": "8f0881f54eb044d5"
+ },
+ {
+  "who": "G",
+  "text": "Der Zug kommt, wenn genug Krümel auf dem Bahnsteig liegen.",
+  "say": "Der Zug kommt, wenn genug Krümel auf dem Bahnsteig liegen.",
+  "fx": null,
+  "key": "7268aad2e91f12c7"
+ },
+ {
+  "who": "F",
+  "text": "Das steht so im Fahrplan?",
+  "say": "Das steht so im Fahrplan?",
+  "fx": null,
+  "key": "9757b8b30562f2f2"
+ },
+ {
+  "who": "G",
+  "text": "Das ist der Fahrplan.",
+  "say": "Das ist der Fahrplan.",
+  "fx": null,
+  "key": "2f6bb003e10a66ad"
+ },
+ {
+  "who": "B",
+  "text": "Det stimmt sogar. Bei uns heißt det Fütterungszeit.",
+  "say": "Det stimmt sogar. Bei uns heißt det Fütterungszeit.",
+  "fx": null,
+  "key": "37e9f25e955112f6"
+ },
+ {
+  "who": "K",
+  "text": "Notiert. Frage: Warum sitzen Tauben immer auf Bahnhöfen?",
+  "say": "Notiert. Frage: Warum sitzen Tauben immer auf Bahnhöfen?",
+  "fx": null,
+  "key": "893fe21938ec9e19"
+ },
+ {
+  "who": "B",
+  "text": "Weil da keener merkt, dass wir warten. Da warten alle.",
+  "say": "Weil da keener merkt, dass wir warten. Da warten alle.",
+  "fx": null,
+  "key": "fd76bd22d7d454b1"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Ausreichend Krümel erkannt. Der Zug nach Krümelstadt fährt ein. Bitte Vorsicht an der Bahnsteigkante. Gurr.",
+  "say": "Gurr. Ausreichend Krümel erkannt. Der Zug nach Krümelstadt fährt ein. Bitte Vorsicht an der Bahnsteigkante. Gurr.",
+  "fx": null,
+  "key": "3d4e8698c1f312c7"
+ },
+ {
+  "who": "F",
+  "text": "Er ist pünktlich! Er ist wirklich pünktlich!",
+  "say": "Er ist pünktlich! Er ist wirklich pünktlich!",
+  "fx": null,
+  "key": "70a764e19678af7a"
+ },
+ {
+  "who": "G",
+  "text": "Gurr. Einsteigen, bitte.",
+  "say": "Gurr. Einsteigen, bitte.",
+  "fx": null,
+  "key": "7318b32eadb927a8"
+ },
+ {
+  "who": "K",
+  "text": "Film 2. Die Reform.",
+  "say": "Film zwei. Die Reform.",
+  "fx": null,
+  "key": "49214a526858c170"
+ },
+ {
+  "who": "G",
+  "text": "Fahrkarten, bitte.",
+  "say": "Fahrkarten, bitte.",
+  "fx": null,
+  "key": "35f7a4331e6f2f65"
+ },
+ {
+  "who": "F",
+  "text": "Ich hab keine Fahrkarte. Ich hab nicht mal Arme.",
+  "say": "Ich hab keine Fahrkarte. Ich hab nicht mal Arme.",
+  "fx": null,
+  "key": "28b1c150d306acfe"
+ },
+ {
+  "who": "G",
+  "text": "Kein Problem. Bei uns bezahlt man mit Krümeln.",
+  "say": "Kein Problem. Bei uns bezahlt man mit Krümeln.",
+  "fx": null,
+  "key": "540e241874c5a22a"
+ },
+ {
+  "who": "G",
+  "text": "Ein Krümel. Das reicht bis … zur nächsten Bäckerei.",
+  "say": "Ein Krümel. Das reicht bis ... zur nächsten Bäckerei.",
+  "fx": null,
+  "key": "a9ba5c4bf7b8b0af"
+ },
+ {
+  "who": "F",
+  "text": "Gibt es hier eigentlich WLAN?",
+  "say": "Gibt es hier eigentlich Weh Lan?",
+  "fx": null,
+  "key": "43c08572b657dce3"
+ },
+ {
+  "who": "G",
+  "text": "Natürlich. Das Passwort ist Gurr. Mit drei R.",
+  "say": "Natürlich. Das Passwort ist Gurr. Mit drei R.",
+  "fx": null,
+  "key": "b2456ebfaba44c49"
+ },
+ {
+  "who": "F",
+  "text": "Geht nicht.",
+  "say": "Geht nicht.",
+  "fx": null,
+  "key": "7d14eeb7eef23111"
+ },
+ {
+  "who": "G",
+  "text": "Dann vier R.",
+  "say": "Dann vier R.",
+  "fx": null,
+  "key": "db7f1fb334df3306"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Wegen einer Bäckerei an der Strecke halten wir außerplanmäßig. Gurr.",
+  "say": "Gurr. Wegen einer Bäckerei an der Strecke halten wir außerplanmäßig. Gurr.",
+  "fx": null,
+  "key": "1694d56a12ed75bf"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Wegen einer weiteren Bäckerei halten wir schon wieder außerplanmäßig. Gurr.",
+  "say": "Gurr. Wegen einer weiteren Bäckerei halten wir schon wieder außerplanmäßig. Gurr.",
+  "fx": null,
+  "key": "49d05debfbd87688"
+ },
+ {
+  "who": "F",
+  "text": "Wie viele Bäckereien gibt es denn?",
+  "say": "Wie viele Bäckereien gibt es denn?",
+  "fx": null,
+  "key": "21aa110192dff4a0"
+ },
+ {
+  "who": "G",
+  "text": "In Deutschland? Zu viele, um pünktlich zu sein.",
+  "say": "In Deutschland? Zu viele, um pünktlich zu sein.",
+  "fx": null,
+  "key": "e6d3dc01ffc0d136"
+ },
+ {
+  "who": "G",
+  "text": "Und hier vorne ist der Ruhewagen. Hier wird nur leise gegurrt.",
+  "say": "Und hier vorne ist der Ruhewagen. Hier wird nur leise gegurrt.",
+  "fx": null,
+  "key": "6460b2dd0e3b46de"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Unser Bordbistro hat für Sie geöffnet. Heute im Angebot: Krümel. Krümel mit Krümeln. Und Krümel, vegan. Gurr.",
+  "say": "Gurr. Unser Bordbistro hat für Sie geöffnet. Heute im Angebot: Krümel. Krümel mit Krümeln. Und Krümel, vegan. Gurr.",
+  "fx": null,
+  "key": "aeaada789d3be4ff"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, die zuerst da ist. Also für alle. Gurr.",
+  "say": "Gurr. Information zur Sitzplatzreservierung. Reservierte Plätze gelten für die Taube, die zuerst da ist. Also für alle. Gurr.",
+  "fx": null,
+  "key": "4a28b8e8aa086e94"
+ },
+ {
+  "who": "F",
+  "text": "Hey! Das ist mein Platz!",
+  "say": "Hey! Das ist mein Platz!",
+  "fx": null,
+  "key": "c3fdc650ea77ce31"
+ },
+ {
+  "who": "B",
+  "text": "Siehste. Pünktlich halten die genau fünf Minuten durch.",
+  "say": "Siehste. Pünktlich halten die genau fünf Minuten durch.",
+  "fx": null,
+  "key": "f89f0950cc2f78a4"
+ },
+ {
+  "who": "K",
+  "text": "Verspätung: zwölf Minuten. Ursache: Brötchen.",
+  "say": "Verspätung: zwölf Minuten. Ursache: Brötchen.",
+  "fx": null,
+  "key": "0622cf360ed11606"
+ },
+ {
+  "who": "B",
+  "text": "Kurt, wie lange dauert det noch? Mein Arm fällt ab.",
+  "say": "Kurt, wie lange dauert det noch? Mein Arm fällt ab.",
+  "fx": null,
+  "key": "71d36f463c307b1d"
+ },
+ {
+  "who": "K",
+  "text": "Sie haben keinen Arm. Sie haben einen Flügel.",
+  "say": "Sie haben keinen Arm. Sie haben einen Flügel.",
+  "fx": null,
+  "key": "035ee8eafc36bf39"
+ },
+ {
+  "who": "B",
+  "text": "Mein Flügel fällt ab.",
+  "say": "Mein Flügel fällt ab.",
+  "fx": null,
+  "key": "b11972f2a12966d0"
+ },
+ {
+  "who": "K",
+  "text": "Film 3. Die Optimierung.",
+  "say": "Film drei. Die Optimierung.",
+  "fx": null,
+  "key": "d1368fdb6c47e19d"
+ },
+ {
+  "who": "G",
+  "text": "Liebe Fahrgäste. Die Bahnleitung hat das größte Hindernis für Pünktlichkeit gefunden.",
+  "say": "Liebe Fahrgäste. Die Bahnleitung hat das größte Hindernis für Pünktlichkeit gefunden.",
+  "fx": null,
+  "key": "92b32a550936ac07"
+ },
+ {
+  "who": "F",
+  "text": "Die Bäckereien?",
+  "say": "Die Bäckereien?",
+  "fx": null,
+  "key": "3adb00f3829713e1"
+ },
+ {
+  "who": "G",
+  "text": "Die Schienen.",
+  "say": "Die Schienen.",
+  "fx": null,
+  "key": "8b48388422d15879"
+ },
+ {
+  "who": "F",
+  "text": "Wir fliegen! Der Zug fliegt!",
+  "say": "Wir fliegen! Der Zug fliegt!",
+  "fx": null,
+  "key": "965c04dc5cf84f5a"
+ },
+ {
+  "who": "G",
+  "text": "Natürlich. Schienen sind was für Leute ohne Flügel.",
+  "say": "Natürlich. Schienen sind was für Leute ohne Flügel.",
+  "fx": null,
+  "key": "9ef23c632b5a1f80"
+ },
+ {
+  "who": "F",
+  "text": "Da unten ist Brötchenhausen! Es ist winzig!",
+  "say": "Da unten ist Brötchenhausen! Es ist winzig!",
+  "fx": null,
+  "key": "72c71712988a47ff"
+ },
+ {
+  "who": "G",
+  "text": "Von hier oben sieht alles aus wie ein Krümel.",
+  "say": "Von hier oben sieht alles aus wie ein Krümel.",
+  "fx": null,
+  "key": "d75f23ef31efaf12"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Wir befinden uns jetzt im Schwarmverkehr. Bitte halten Sie sich an einer Feder fest. Gurr.",
+  "say": "Gurr. Wir befinden uns jetzt im Schwarmverkehr. Bitte halten Sie sich an einer Feder fest. Gurr.",
+  "fx": null,
+  "key": "24ef46caf233b0c7"
+ },
+ {
+  "who": "F",
+  "text": "Ich hab keine Arme!",
+  "say": "Ich hab keine Arme!",
+  "fx": null,
+  "key": "431d3267a03e5e86"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Gleiswechsel. Es gibt zwar keine Gleise mehr. Wir wechseln trotzdem. Gurr.",
+  "say": "Gurr. Gleiswechsel. Es gibt zwar keine Gleise mehr. Wir wechseln trotzdem. Gurr.",
+  "fx": null,
+  "key": "15e56c3169ef42c4"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Nächster Halt: überall. Ausstieg in Fahrtrichtung links. Oder rechts. Oder unten. Gurr.",
+  "say": "Gurr. Nächster Halt: überall. Ausstieg in Fahrtrichtung links. Oder rechts. Oder unten. Gurr.",
+  "fx": null,
+  "key": "50ae2247f9d072cc"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Aufgrund von Gegenwind verzögert sich die Weiterfahrt. Wir fliegen deshalb rückwärts. Gurr.",
+  "say": "Gurr. Aufgrund von Gegenwind verzögert sich die Weiterfahrt. Wir fliegen deshalb rückwärts. Gurr.",
+  "fx": null,
+  "key": "72d802923abd902e"
+ },
+ {
+  "who": "F",
+  "text": "Wann kommen wir denn in Krümelstadt an?",
+  "say": "Wann kommen wir denn in Krümelstadt an?",
+  "fx": null,
+  "key": "8bb57c2edf943092"
+ },
+ {
+  "who": "G",
+  "text": "Wir sind schon da. Wir sind immer schon da.",
+  "say": "Wir sind schon da. Wir sind immer schon da.",
+  "fx": null,
+  "key": "107a5ec6c616bc26"
+ },
+ {
+  "who": "F",
+  "text": "Aber wir fliegen doch nur im Kreis!",
+  "say": "Aber wir fliegen doch nur im Kreis!",
+  "fx": null,
+  "key": "0921ce0e62e0b443"
+ },
+ {
+  "who": "G",
+  "text": "Im Kreis fliegen ist das neue Ankommen.",
+  "say": "Im Kreis fliegen ist das neue Ankommen.",
+  "fx": null,
+  "key": "bc755f060fd99107"
+ },
+ {
+  "who": "K",
+  "text": "Berechne Ankunftszeit.",
+  "say": "Berechne Ankunftszeit.",
+  "fx": null,
+  "key": "e92d88cb932d83b5"
+ },
+ {
+  "who": "K",
+  "text": "Ankunftszeit: kreisend. Verspätung: unendlich plus zwölf Minuten.",
+  "say": "Ankunftszeit: kreisend. Verspätung: unendlich plus zwölf Minuten.",
+  "fx": null,
+  "key": "0c4309f61981aaa0"
+ },
+ {
+  "who": "B",
+  "text": "Kurt? Allet jut bei dir?",
+  "say": "Kurt? Allet jut bei dir?",
+  "fx": null,
+  "key": "baca1fc932f094b2"
+ },
+ {
+  "who": "K",
+  "text": "Verspätung wird berechnet. Verspätung wird berechnet. Verspätung wird ver… ver… ver…",
+  "say": "Verspätung wird berechnet. Verspätung wird berechnet. Verspätung wird ver. ver. ver.",
+  "fx": null,
+  "key": "dc8b605fafc00985"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Diese Fabrik ist jetzt ein Bahnhof. Bitte zurückbleiben. Gurr.",
+  "say": "Gurr. Diese Fabrik ist jetzt ein Bahnhof. Bitte zurückbleiben. Gurr.",
+  "fx": "kurt",
+  "key": "3de6f618345c4a49"
+ },
+ {
+  "who": "F",
+  "text": "Brösel! Die Tauben sind aus dem Film raus!",
+  "say": "Brösel! Die Tauben sind aus dem Film raus!",
+  "fx": null,
+  "key": "e59084b3bef59161"
+ },
+ {
+  "who": "B",
+  "text": "Meine Cousins! Raus hier, aber zackig! Det hier is 'n Arbeitsplatz!",
+  "say": "Meine Cousins! Raus hier, aber zackig! Det hier is n Arbeitsplatz!",
+  "fx": null,
+  "key": "34ce6fd3601d54d8"
+ },
+ {
+  "who": "F",
+  "text": "Die fressen die Stempelkarten!",
+  "say": "Die fressen die Stempelkarten!",
+  "fx": null,
+  "key": "724bd95a279ff29c"
+ },
+ {
+  "who": "B",
+  "text": "Nicht die Stempelkarten! Da stehen meine Überstunden drauf!",
+  "say": "Nicht die Stempelkarten! Da stehen meine Überstunden drauf!",
+  "fx": null,
+  "key": "7ff543a5bba290b3"
+ },
+ {
+  "who": "G",
+  "text": "Verzeihung. Wann fährt hier der nächste Zug?",
+  "say": "Verzeihung. Wann fährt hier der nächste Zug?",
+  "fx": null,
+  "key": "c6b261786b7b31ac"
+ },
+ {
+  "who": "B",
+  "text": "Hier fährt gar nix! Hier fährt höchstens det Förderband!",
+  "say": "Hier fährt gar nix! Hier fährt höchstens det Förderband!",
+  "fx": null,
+  "key": "b3e5f96dedd209ac"
+ },
+ {
+  "who": "A",
+  "text": "Gurr. Bitte Vorsicht am Förderband. Gurr.",
+  "say": "Gurr. Bitte Vorsicht am Förderband. Gurr.",
+  "fx": "kurt",
+  "key": "8b303e8c610770fe"
+ },
+ {
+  "who": "G",
+  "text": "Endlich mal pünktlich! Gurr!",
+  "say": "Endlich mal pünktlich! Gurr!",
+  "fx": null,
+  "key": "135494e035e5ff73"
+ },
+ {
+  "who": "K",
+  "text": "Auftrag ausgef…",
+  "say": "Auftrag ausgef",
+  "fx": null,
+  "key": "3203a6c92561d4c2"
+ },
+ {
+  "who": "F",
+  "text": "Brösel? Das war doch ein guter Auftrag, oder?",
+  "say": "Brösel? Das war doch ein guter Auftrag, oder?",
+  "fx": null,
+  "key": "8d8366c1acccebf7"
+ },
+ {
+  "who": "B",
+  "text": "Die Tauben waren pünktlich. Die Züge sind geflogen. Und keener is anjekommen.",
+  "say": "Die Tauben waren pünktlich. Die Züge sind geflogen. Und keener is anjekommen.",
+  "fx": null,
+  "key": "49e83e94d4da2e74"
+ },
+ {
+  "who": "F",
+  "text": "Also wie immer?",
+  "say": "Also wie immer?",
+  "fx": null,
+  "key": "af6c49ba77ca18af"
+ },
+ {
+  "who": "B",
+  "text": "Also wie immer.",
+  "say": "Also wie immer.",
+  "fx": null,
+  "key": "de827a41f3ae3748"
+ },
+ {
+  "who": "B",
+  "text": "Feierabend.",
+  "say": "Feierabend.",
+  "fx": null,
+  "key": "d938883f58065ffe"
+ },
+ {
+  "who": "F",
+  "text": "Und was, wenn … Montag abgeschafft wird?",
+  "say": "Und was, wenn ... Montag abgeschafft wird?",
+  "fx": null,
+  "key": "0a8e80f67a8dece3"
+ },
+ {
+  "who": "B",
+  "text": "Nein.",
+  "say": "Nein.",
+  "fx": "off",
+  "key": "74d947edcdce9aff"
+ },
+ {
+  "who": "K",
+  "text": "Auftrag verst…",
+  "say": "Auftrag verst",
+  "fx": null,
+  "key": "41ab205302858b65"
+ },
+ {
+  "who": "B",
+  "text": "Kurt!",
+  "say": "Kurt!",
+  "fx": "off",
+  "key": "bb8c6ae7c3bd14f0"
+ },
+ {
+  "who": "B",
+  "text": "Abonnieren und tschüss. Ick hab Feierabend.",
+  "say": "Abonnieren und tschüss. Ick hab Feierabend.",
+  "fx": null,
+  "key": "5380b13d7594b8e7"
+ }
+]
