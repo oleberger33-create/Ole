@@ -23,8 +23,12 @@ Der Zombie steht auf einem Block, den ein Klebriger Kolben (gesteuert von einem 
 Tagsüber steht er einen Block höher und schaut über die Glaskante – die Dorfbewohner sehen ihn, geraten in
 Panik und rufen Golems. Nachts sackt er ab und ist rundum von Glas umgeben: keine Panik, alle schlafen.
 Ohne Schlaf in den letzten 20 Minuten rufen Dorfbewohner keine Golems.
+Der Sensor speist den Kolben über 8 Felder Redstone-Staub (je Feld eine Stärke weniger): Der Zombie steht nur
+oben, solange der Sensor mindestens 8 zeigt, und verschwindet schon am späten Nachmittag (ca. Tageszeit 11000).
+So liegen die Dorfbewohner im Bett (ab 12000), bevor Spieler die Nacht überspringen können (ab 12542).
 
-Versionen (#gebaut): 1 = ohne Wasser, 2 = Wasser, 3 = hochgesetzt mit Zäunen, 4 = Nachtsperre (aktuell).
+Versionen (#gebaut): 1 = ohne Wasser, 2 = Wasser, 3 = hochgesetzt mit Zäunen, 4 = Zombie-Aufzug,
+5 = Aufzug mit Schwelle (aktuell).
 Ältere Stände werden nachgerüstet; danach testet das Pack sich selbst (Scoreboard ef.test).
 """
 import json
@@ -132,7 +136,19 @@ def entwurf(h, version):
         b[(4, v + 3, 0)] = "glowstone"
         b[(4, v - 1, 0)] = "stone"                     # Stand des Zombies (nachts hier, tagsüber eins höher)
         b[(4, v - 2, 0)] = "sticky_piston[facing=up,extended=false]"
-        b[(5, v - 2, 0)] = "daylight_detector[inverted=false]"
+        if version >= 5:
+            # Staubkette: Sensor bei z = -7, acht Felder bis zum Kolben → Kolben nur bei Stärke ≥ 8
+            kette = [(5, 0), (6, 0)] + [(6, z) for z in range(-1, -7, -1)]
+            for x, z in kette:
+                b[(x, v - 3, z)] = "smooth_stone"
+            b[(5, v - 2, 0)] = "redstone_wire[east=side,west=side,north=none,south=none,power=0]"
+            b[(6, v - 2, 0)] = "redstone_wire[east=none,west=side,north=side,south=none,power=0]"
+            for z in range(-1, -7, -1):
+                b[(6, v - 2, z)] = "redstone_wire[east=none,west=none,north=side,south=side,power=0]"
+            b[(6, v - 3, -7)] = "smooth_stone"
+            b[(6, v - 2, -7)] = "daylight_detector[inverted=false]"
+        else:
+            b[(5, v - 2, 0)] = "daylight_detector[inverted=false]"
     if version < 3:
         box(3, v, -1, 4, v + 1, 1, "glass")
         b[(3, v, 0)] = b[(3, v + 1, 0)] = "air"
@@ -148,7 +164,7 @@ def rang(blk):
     if blk in ("lava", "water"):
         return 3
     if blk.startswith(("hopper", "chest", "white_bed", "oak_wall_sign", "oak_fence", "sticky_piston",
-                       "daylight_detector")):
+                       "daylight_detector", "redstone_wire")):
         return 2
     return 0 if blk != "air" else 1
 
@@ -161,7 +177,7 @@ def setzbefehle(bloecke):
     return out
 
 
-neu, V = entwurf(H, 4)
+neu, V = entwurf(H, 5)
 alt, V_ALT = entwurf(0, 2)
 
 
@@ -202,43 +218,57 @@ LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (mi
 funktion("load", [
     "scoreboard objectives add ef.zustand dummy",
     "scoreboard objectives add ef.test dummy",
-    "# #gebaut: 1 = ohne Wasser, 2 = mit Wasser, 3 = hochgesetzt, 4 = mit Nachtsperre (aktuell)",
+    "# #gebaut: 1 = ohne Wasser, 2 = mit Wasser, 3 = hochgesetzt, 4 = Zombie-Aufzug, 5 = mit Schwelle (aktuell)",
     f"execute unless score #gebaut ef.zustand matches 1.. unless score #stufe ef.zustand matches 1.. run function {NS}:start",
     f"execute if score #gebaut ef.zustand matches 1..2 unless score #stufe ef.zustand matches 1.. run function {NS}:start_umbau",
     f"execute if score #gebaut ef.zustand matches 3 unless score #stufe ef.zustand matches 1.. run function {NS}:start_sperre",
+    f"execute if score #gebaut ef.zustand matches 4 unless score #stufe ef.zustand matches 1.. run function {NS}:start_schwelle",
 ])
 funktion("tick", [f"execute if score #stufe ef.zustand matches 1 {LADEN} run function {NS}:bauen",
                   f"execute if score #stufe ef.zustand matches 3 {LADEN} run function {NS}:umbau",
-                  f"execute if score #stufe ef.zustand matches 4 {LADEN} run function {NS}:sperre"])
+                  f"execute if score #stufe ef.zustand matches 4 {LADEN} run function {NS}:sperre",
+                  f"execute if score #stufe ef.zustand matches 5 {LADEN} run function {NS}:schwelle"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 1"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 3"])
 funktion("start_sperre", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 4"])
-fertig = ["scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 4",
+funktion("start_schwelle", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 5"])
+fertig = ["scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 5",
           f"schedule function {NS}:test/s1 40t", f"schedule function {NS}:test/t1 100t"]
 funktion("bauen", bauen + fertig)
 funktion("umbau", umbau + fertig)
-v3, _ = entwurf(H, 3)
-aenderung = {p: blk for p, blk in neu.items() if v3.get(p) != blk}
-aenderung.update({p: "air" for p in v3 if p not in neu})
-funktion("sperre", ["# Version 3 → 4: Zombie-Aufzug mit Tageslichtsensor"] + setzbefehle(aenderung) + fertig)
+def differenz(vorher):
+    d = {p: blk for p, blk in neu.items() if vorher.get(p) != blk}
+    d.update({p: "air" for p in vorher if p not in neu})
+    return setzbefehle(d)
+
+
+funktion("sperre", ["# Version 3 → 5: Zombie-Aufzug mit Tageslichtsensor und Schwelle"]
+         + differenz(entwurf(H, 3)[0]) + fertig)
+funktion("schwelle", ["# Version 4 → 5: Sensor über 8 Staubfelder (Zombie verschwindet ab Stärke < 8)"]
+         + differenz(entwurf(H, 4)[0]) + fertig)
 
 # Test des Zombie-Aufzugs: Zustand jetzt, dann Kolben per Redstone-Block auf „Tag“ zwingen
 sx, sy, sz = welt(4, V, 0)
 zombie_oben = f"if entity @e[type=minecraft:zombie,tag=ef.zombie,x={sx},y={sy + 1},z={sz},dx=0,dy=0,dz=0]"
-funktion("test/s1", [
-    f"execute store success score #nacht ef.test if block {sx + 1} {sy - 2} {sz} minecraft:daylight_detector[power=0]",
+dx_, dy_, dz_ = welt(6, V - 2, -7)
+kolben_aus = f"if block {sx} {sy - 2} {sz} minecraft:sticky_piston[extended=true]"
+funktion("test/s1", ["# Sensorstärke jetzt, Kolbenstand, Zombie oben?"]
+         + [f"execute if block {dx_} {dy_} {dz_} minecraft:daylight_detector[power={n}] "
+            f"run scoreboard players set #sensor ef.test {n}" for n in range(16)] + [
+    f"execute store success score #kolben_aus ef.test {kolben_aus}",
     f"execute store success score #zombie_oben_jetzt ef.test {zombie_oben}",
-    f"setblock {sx} {sy - 2} {sz + 1} minecraft:redstone_block",
+    "# Dunkelheit spielen: Sensor kurz weg → Kolben muss einfahren",
+    f"setblock {dx_} {dy_} {dz_} minecraft:air",
     f"schedule function {NS}:test/s2 20t",
 ])
 funktion("test/s2", [
-    f"execute store success score #aufzug_tag ef.test if block {sx} {sy} {sz} minecraft:stone "
-    f"if block {sx} {sy - 2} {sz} minecraft:sticky_piston[extended=true]",
-    f"execute store success score #zombie_oben_tag ef.test {zombie_oben}",
-    f"setblock {sx} {sy - 2} {sz + 1} minecraft:glass",
-    f"schedule function {NS}:test/s3 20t",
+    f"execute store success score #kolben_dunkel_ein ef.test unless block {sx} {sy - 2} {sz} minecraft:sticky_piston[extended=true]",
+    f"execute store success score #zombie_dunkel_unten ef.test unless entity @e[type=minecraft:zombie,tag=ef.zombie,x={sx},y={sy + 1},z={sz},dx=0,dy=0,dz=0]",
+    f"setblock {dx_} {dy_} {dz_} minecraft:daylight_detector[inverted=false]",
+    f"schedule function {NS}:test/s3 40t",
 ])
 funktion("test/s3", [
+    f"execute store success score #kolben_danach_aus ef.test {kolben_aus}",
     f"execute store success score #zombie_oben_danach ef.test {zombie_oben}",
     "execute store result score #zombie_lebt ef.test if entity @e[type=minecraft:zombie,tag=ef.zombie]",
 ])
