@@ -12,8 +12,8 @@ import sys
 import zipfile
 
 import bauplan
-from bauplan import F, SPAWN, BIB, FLUCH, LANDUNG, BEREICH, AMBOSSE, BLUMEN
-from haendler import HAENDLER, NUR_NEU, ROEMISCH, preis
+from bauplan import F, SPAWN, BIB, FLUCH, LANDUNG, BEREICH, AMBOSSE, BLUMEN, MARKT, PAVILLON
+from haendler import ANKAUF, BLICK, HAENDLER, NUR_NEU, ROEMISCH, preis
 
 NS = "himmelsinsel"
 LEGACY = "legacy_1_21_5"       # Overlay für 1.21.5 bis 1.21.10
@@ -196,13 +196,41 @@ def haendler_befehle(h, neu):
     return [f"# {h['name']}", villager, anzeige(*schild, zeilen, 170)]
 
 
+def ware_name(item):
+    """Übersetzungsschlüssel eines Gegenstands (Blöcke wie Stämme heißen block.minecraft.…)."""
+    block = item.endswith(("_log", "_stem")) or item in ("pumpkin", "melon", "sugar_cane")
+    return f"{'block' if block else 'item'}.minecraft.{item}"
+
+
+def ankauf_befehle(h):
+    fx, fz, yaw = BLICK[h["blick"]]
+    name = txt({"text": h["name"], "color": h["farbe"], "bold": True})
+    angebote = ",".join(
+        "{buy:{id:\"minecraft:%s\",count:%d},sell:{id:\"minecraft:emerald\",count:%d},maxUses:2147483647,"
+        "uses:0,rewardExp:1b,xp:0,priceMultiplier:0.0f,specialPrice:0,demand:0}" % w for w in h["waren"])
+    villager = (f"summon minecraft:villager {h['x'] + 0.5} {F + 1} {h['z'] + 0.5} "
+                f"{{NoAI:1b,Invulnerable:1b,PersistenceRequired:1b,CanPickUpLoot:0b,"
+                f"Rotation:[{yaw}.0f,0.0f],Tags:[\"hs.wesen\",\"hs.haendler\"],CustomName:{name},"
+                f"VillagerData:{{profession:\"minecraft:{h['beruf']}\",level:5,type:\"minecraft:{h['typ']}\"}},"
+                f"VillagerDataFinalized:1b,Xp:250,Offers:{{Recipes:[{angebote}]}}}}")
+    zeilen = ["", {"text": h["name"], "color": h["farbe"], "bold": True},
+              {"text": "\nkauft für Smaragde", "color": "gray", "italic": True}]
+    for item, anzahl, smaragde in h["waren"]:
+        zeilen += [{"text": f"\n{anzahl} ", "color": "white"}, {"translate": ware_name(item), "color": "white"},
+                   {"text": f"  → {smaragde}", "color": "green"}]
+    return [f"# {h['name']}", villager, anzeige(h["x"] + 0.5, F + 5.2, h["z"] + 0.5, zeilen, 170)]
+
+
 def schilder():
+    mx, mz = MARKT
+    px, pz = PAVILLON
     return [
         "# Schwebende Schilder auf der Insel",
         anzeige(0.5, F + 2.1, 3.9, ["", {"text": "✦ Himmelsinsel ✦", "color": "light_purple", "bold": True},
                                     {"text": "\nWillkommen!", "color": "white"},
                                     {"text": "\n\nNorden: Zauberbibliothek – alle Bücher", "color": "gray"},
                                     {"text": "\nOsten: Werkstatt – Zaubertisch & Ambosse", "color": "gray"},
+                                    {"text": "\nNordosten: Marktinsel – Smaragde verdienen", "color": "gray"},
                                     {"text": "\nSüden: Absprung in die Welt", "color": "gray"},
                                     {"text": "\n\nZurück zur Insel: ", "color": "gray"},
                                     {"text": "/trigger spawn", "color": "aqua"}], 230),
@@ -217,6 +245,14 @@ def schilder():
                 ["", {"text": "↓ Absprung ↓", "color": "aqua", "bold": True},
                  {"text": "\nFallschirm inklusive", "color": "white"},
                  {"text": "\nZurück: /trigger spawn oder Himmelstor", "color": "gray"}]),
+        anzeige(px + 0.5, F + 2.3, pz + 0.5,
+                ["", {"text": "↑ Marktinsel ↑", "color": "green", "bold": True},
+                 {"text": "\nErnte, Erze, Holz und Monsterbeute", "color": "white"},
+                 {"text": "\ngegen Smaragde verkaufen", "color": "white"}]),
+        anzeige(mx + 0.5, F + 2.4, mz + 0.5,
+                ["", {"text": "✦ Marktplatz ✦", "color": "green", "bold": True},
+                 {"text": "\nHier gibt es Smaragde für deine Waren.", "color": "white"},
+                 {"text": "\nAusgeben in der Zauberbibliothek!", "color": "gray", "italic": True}]),
     ]
 
 
@@ -233,6 +269,20 @@ BODENSCHILD = "@e[type=minecraft:text_display,tag=hs.bodenschild,limit=1]"
 STATION_MITTE = "positioned ~-0.5 ~-4.5 ~3.5 align xyz"
 STATION_SCHUTZ = ("positioned ~-8 ~-10.7 ~-4", "dx=15,dy=16,dz=15")  # Fundament bis Laternen, mit Rand
 SX, SY, SZ = SPAWN
+AUSBAU = 1  # Stand der Erweiterungen; höher setzen, wenn bestehende Welten etwas nachbauen sollen
+KLICK_HOME = {"text": "/trigger home", "color": "aqua", "underlined": True,
+              "click_event": {"action": "run_command", "command": "/trigger home"},
+              "hover_event": {"action": "show_text", "value": "Klicken, um nach Hause zu reisen"}}
+KLICK_SETHOME = {"text": "/trigger sethome", "color": "aqua", "underlined": True,
+                 "click_event": {"action": "run_command", "command": "/trigger sethome"},
+                 "hover_event": {"action": "show_text", "value": "Klicken, um hier dein Zuhause zu setzen"}}
+NEUIGKEITEN = ["", {"text": "✦ Neu auf dem Server ✦", "color": "gold", "bold": True},
+               {"text": "\n• Marktinsel im Nordosten des Spawns: Ernte, Erze, Holz und Monsterbeute gegen Smaragde",
+                "color": "white"},
+               {"text": "\n• Eigenes Zuhause: ", "color": "white"}, KLICK_SETHOME,
+               {"text": " setzen, mit ", "color": "white"}, KLICK_HOME, {"text": " zurückreisen", "color": "white"},
+               {"text": "\n• Nach dem Tod stehen die Koordinaten im Chat", "color": "white"},
+               {"text": "\n• Eine Person im Bett reicht, um die Nacht zu überspringen", "color": "white"}]
 ROT = {"color": "red"}
 WARTET = ["", {"text": "[Himmelsinsel] ", "color": "light_purple"},
           {"text": "Bestehende Welt erkannt – es wurde noch nichts gebaut. Ein Admin startet den Bau mit ",
@@ -247,7 +297,7 @@ MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", 
            "piglin_brute", "guardian", "parched", "camel_husk", "zombie_nautilus"]
 
 
-def feste_funktionen(lichtpunkte, n_teile):
+def feste_funktionen(lichtpunkte, n_teile, n_ausbau):
     x1, z1, x2, z2 = BEREICH
     funktion("load", [
         "# Wird bei jedem Serverstart und /reload ausgeführt",
@@ -257,6 +307,18 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard objectives add spawn trigger \"Zum Spawn\"",
         "scoreboard objectives add hs.tod deathCount",
         "scoreboard objectives add hs.weg minecraft.custom:minecraft.leave_game",
+        "scoreboard objectives add home trigger \"Nach Hause\"",
+        "scoreboard objectives add sethome trigger \"Zuhause setzen\"",
+        "scoreboard objectives add hs.hx dummy",
+        "scoreboard objectives add hs.hy dummy",
+        "scoreboard objectives add hs.hz dummy",
+        "scoreboard objectives add hs.hr dummy",
+        "scoreboard objectives add hs.hd dummy",
+        "scoreboard objectives add hs.tx dummy",
+        "scoreboard objectives add hs.ty dummy",
+        "scoreboard objectives add hs.tz dummy",
+        f"scoreboard objectives add hs.herz health {txt({'text': '❤', 'color': 'red'})}",
+        "scoreboard objectives modify hs.herz rendertype hearts",
         "execute unless score #stufe hs.state = #stufe hs.state run scoreboard players set #stufe hs.state 0",
         f"execute if score #stufe hs.state matches -1 run tellraw @a {txt(WARTET)}",
         "# Einstellungen – werden nur beim allerersten Laden gesetzt (siehe README)",
@@ -267,6 +329,13 @@ def feste_funktionen(lichtpunkte, n_teile):
         "execute unless score #bodenstation hs.config = #bodenstation hs.config run scoreboard players set #bodenstation hs.config 1",
         "execute unless score #login_spawn hs.config = #login_spawn hs.config run scoreboard players set #login_spawn hs.config 1",
         "execute unless score #starterpaket hs.config = #starterpaket hs.config run scoreboard players set #starterpaket hs.config 1",
+        "execute unless score #homes hs.config = #homes hs.config run scoreboard players set #homes hs.config 1",
+        "execute unless score #todespunkt hs.config = #todespunkt hs.config run scoreboard players set #todespunkt hs.config 1",
+        "execute unless score #herzen hs.config = #herzen hs.config run scoreboard players set #herzen hs.config 1",
+        "execute if score #herzen hs.config matches 1 run scoreboard objectives setdisplay list hs.herz",
+        "# Einmalig: eine Person im Bett reicht, um die Nacht zu überspringen (danach frei per /gamerule)",
+        f"execute unless score #schlafen hs.state matches 1 run function {NS}:version/schlafen",
+        "scoreboard players set #schlafen hs.state 1",
         f"schedule function {NS}:spiel/sekunde 20t",
         f"schedule function {NS}:spiel/halbsekunde 10t",
     ])
@@ -325,6 +394,8 @@ def feste_funktionen(lichtpunkte, n_teile):
     funktion("bau/schritt", schritt)
     funktion("bau/fertig", [
         f"function {NS}:bau/wesen",
+        "# Der volle Bau enthält schon alle Erweiterungen",
+        f"scoreboard players set #ausbau hs.state {AUSBAU}",
         f"function {NS}:version/spawnpunkt",
         f"forceload remove {x1} {z1} {x2} {z2}",
         "scoreboard players set #fertig hs.state 1",
@@ -338,14 +409,21 @@ def feste_funktionen(lichtpunkte, n_teile):
     wesen = ["# Händler und Schilder (alte vorher entfernen)",
              "kill @e[tag=hs.wesen,type=!minecraft:player]"]
     wesen += [f"function {NS}:haendler/{h['id']}" for h in HAENDLER]
+    wesen += [f"function {NS}:markt/{h['id']}" for h in ANKAUF]
     wesen.append(f"function {NS}:schilder")
     funktion("bau/wesen", wesen)
 
     # ---- Spielbetrieb
     funktion("spiel/tick", [
-        "# /trigger spawn",
+        "# /trigger spawn, /trigger home, /trigger sethome",
         "scoreboard players enable @a spawn",
         f"execute as @a[scores={{spawn=1..}}] run function {NS}:spiel/spawn_befehl",
+        "scoreboard players enable @a home",
+        "scoreboard players enable @a sethome",
+        f"execute as @a[scores={{sethome=1..}}] run function {NS}:spiel/home_setzen",
+        f"execute as @a[scores={{home=1..}}] run function {NS}:spiel/home_befehl",
+        "# Erweiterungen in bestehenden Welten nachbauen",
+        f"execute if score #ausbau_stufe hs.state matches 1.. run function {NS}:ausbau/tick",
         "# Schutzzone: auf der Insel wird aus Überleben Abenteuer",
         f"execute if score #schutz hs.config matches 1 run function {NS}:spiel/schutz",
         f"execute unless score #schutz hs.config matches 1 as @a[tag=hs.adv] run function {NS}:spiel/schutz_raus",
@@ -361,6 +439,7 @@ def feste_funktionen(lichtpunkte, n_teile):
     funktion("spiel/nach_tod", [
         "# Wiederbelebt am Weltspawn, aber unten gelandet? Dann nach oben. Wer ein eigenes Bett hat, bleibt dort.",
         "scoreboard players set @s hs.tod 0",
+        f"execute if score #todespunkt hs.config matches 1 run function {NS}:spiel/todespunkt",
         f"execute unless data entity @s respawn if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
     ])
     funktion("spiel/nach_login", [
@@ -400,6 +479,10 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard players remove @a[scores={hs.cd=1..}] hs.cd 1",
         f"execute if score #fertig hs.state matches 1 run function {NS}:spiel/pflege",
         f"execute if score #fertig hs.state matches 1 as @a[tag=!hs.gesehen] run function {NS}:spiel/willkommen",
+        f"execute if score #fertig hs.state matches 1 as @a[tag=hs.gesehen,tag=!hs.neu1] run function {NS}:spiel/neuigkeiten",
+        f"execute if score #fertig hs.state matches 1 if score #stufe hs.state matches 0 "
+        f"unless score #ausbau hs.state matches {AUSBAU}.. unless score #ausbau_stufe hs.state matches 1.. "
+        f"run function {NS}:ausbau/start",
         f"execute if score #starterpaket hs.config matches 1 as @e[type=minecraft:player,tag=!hs.starter] "
         f"run function {NS}:spiel/starterpaket",
         f"execute if score #starterpaket hs.config matches 1 as @e[type=minecraft:player,tag=hs.starter,tag=!hs.werkzeug] "
@@ -439,8 +522,96 @@ def feste_funktionen(lichtpunkte, n_teile):
              "hover_event": {"action": "show_text", "value": "Klicken, um zum Spawn zu reisen"}}
     funktion("spiel/willkommen", [
         "tag @s add hs.gesehen",
+        "tag @s add hs.neu1",
         f"execute if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
-        f"tellraw @s {txt(['', {'text': '✦ Willkommen auf der Himmelsinsel! ✦', 'color': 'light_purple', 'bold': True}, {'text': chr(10) + 'In der Zauberbibliothek im Norden gibt es alle Verzauberungsbücher.', 'color': 'gray'}, {'text': chr(10) + 'Runter in die Welt geht es über das Sprungbrett im Süden – mit Fallschirm.', 'color': 'gray'}, {'text': chr(10) + 'Zurück zur Insel: ', 'color': 'gray'}, klick])}",
+        f"tellraw @s {txt(['', {'text': '✦ Willkommen auf der Himmelsinsel! ✦', 'color': 'light_purple', 'bold': True}, {'text': chr(10) + 'In der Zauberbibliothek im Norden gibt es alle Verzauberungsbücher.', 'color': 'gray'}, {'text': chr(10) + 'Runter in die Welt geht es über das Sprungbrett im Süden – mit Fallschirm.', 'color': 'gray'}, {'text': chr(10) + 'Zurück zur Insel: ', 'color': 'gray'}, klick, {'text': chr(10) + 'Eigenes Zuhause: ', 'color': 'gray'}, KLICK_SETHOME, {'text': ', dann ', 'color': 'gray'}, KLICK_HOME])}",
+    ])
+    funktion("spiel/neuigkeiten", [
+        "# Einmal für alle, die schon vor den Erweiterungen da waren",
+        "tag @s add hs.neu1",
+        f"tellraw @s {txt(NEUIGKEITEN)}",
+    ])
+    # ---- Zuhause
+    funktion("spiel/home_setzen", [
+        "scoreboard players set @s sethome 0",
+        f"execute if score #homes hs.config matches 0 run tellraw @s {txt(dict(text='Homes sind auf diesem Server ausgeschaltet.', **ROT))}",
+        f"execute if score #homes hs.config matches 1 run function {NS}:spiel/home_speichern",
+    ])
+    funktion("spiel/home_speichern", [
+        "# Position auf ein Hundertstel genau, dazu Blickrichtung und Dimension",
+        "execute store result score @s hs.hx run data get entity @s Pos[0] 100",
+        "execute store result score @s hs.hy run data get entity @s Pos[1] 100",
+        "execute store result score @s hs.hz run data get entity @s Pos[2] 100",
+        "execute store result score @s hs.hr run data get entity @s Rotation[0]",
+        "scoreboard players set @s hs.hd 0",
+        "execute if dimension minecraft:the_nether run scoreboard players set @s hs.hd 1",
+        "execute if dimension minecraft:the_end run scoreboard players set @s hs.hd 2",
+        f"tellraw @s {txt(['', {'text': '⌂ Zuhause gesetzt! ', 'color': 'gold', 'bold': True}, {'text': 'Zurück kommst du jederzeit mit ', 'color': 'gray'}, KLICK_HOME])}",
+        "execute at @s run playsound minecraft:block.note_block.chime player @s ~ ~ ~ 0.8 1.4",
+    ])
+    funktion("spiel/home_befehl", [
+        "scoreboard players set @s home 0",
+        f"execute if score #homes hs.config matches 0 run tellraw @s {txt(dict(text='Homes sind auf diesem Server ausgeschaltet.', **ROT))}",
+        f"execute if score #homes hs.config matches 1 unless score @s hs.hd matches 0.. run tellraw @s "
+        f"{txt(['', dict(text='Du hast noch kein Zuhause. Stell dich an die Stelle und nutze ', **ROT), KLICK_SETHOME])}",
+        f"execute if score #homes hs.config matches 1 if score @s hs.hd matches 0.. if score @s hs.cd matches 1.. run tellraw @s "
+        f"{txt(['', dict(text='Bitte warte noch ', **ROT), {'score': {'name': '@s', 'objective': 'hs.cd'}, 'color': 'yellow'}, dict(text=' Sekunden.', **ROT)])}",
+        f"execute if score #homes hs.config matches 1 if score @s hs.hd matches 0.. unless score @s hs.cd matches 1.. "
+        f"run function {NS}:spiel/home_reisen",
+    ])
+    funktion("spiel/home_reisen", [
+        f"execute store result storage {NS}:home x double 0.01 run scoreboard players get @s hs.hx",
+        f"execute store result storage {NS}:home y double 0.01 run scoreboard players get @s hs.hy",
+        f"execute store result storage {NS}:home z double 0.01 run scoreboard players get @s hs.hz",
+        f"execute store result storage {NS}:home yaw float 1 run scoreboard players get @s hs.hr",
+        f"data modify storage {NS}:home dim set value \"minecraft:overworld\"",
+        f"execute if score @s hs.hd matches 1 run data modify storage {NS}:home dim set value \"minecraft:the_nether\"",
+        f"execute if score @s hs.hd matches 2 run data modify storage {NS}:home dim set value \"minecraft:the_end\"",
+        "execute at @s run particle minecraft:portal ~ ~1 ~ 0.4 0.8 0.4 0.5 40",
+        f"function {NS}:spiel/home_tp with storage {NS}:home",
+        "scoreboard players operation @s hs.cd = #abklingzeit hs.config",
+        "execute at @s run playsound minecraft:entity.enderman.teleport player @s ~ ~ ~ 0.7 1.1",
+        "execute at @s run particle minecraft:portal ~ ~1 ~ 0.4 0.8 0.4 0.5 40",
+        f"tellraw @s {txt({'text': '⌂ Willkommen zu Hause!', 'color': 'gold'})}",
+    ])
+    funktion("spiel/home_tp", [
+        "# Makro: Werte kommen aus storage himmelsinsel:home",
+        "$execute in $(dim) run tp @s $(x) $(y) $(z) $(yaw) 0",
+    ])
+    # ---- Todespunkt
+    todes_text = ['', {'text': '☠ Gestorben bei ', 'color': 'gray'},
+                  {'score': {'name': '@s', 'objective': 'hs.tx'}, 'color': 'yellow'}, {'text': ' / ', 'color': 'gray'},
+                  {'score': {'name': '@s', 'objective': 'hs.ty'}, 'color': 'yellow'}, {'text': ' / ', 'color': 'gray'},
+                  {'score': {'name': '@s', 'objective': 'hs.tz'}, 'color': 'yellow'}]
+    todespunkt = ["# Koordinaten aus LastDeathLocation, damit man seine Sachen wiederfindet",
+                  "execute store result score @s hs.tx run data get entity @s LastDeathLocation.pos[0]",
+                  "execute store result score @s hs.ty run data get entity @s LastDeathLocation.pos[1]",
+                  "execute store result score @s hs.tz run data get entity @s LastDeathLocation.pos[2]"]
+    for dim, name in [("overworld", "in der Oberwelt"), ("the_nether", "im Nether"), ("the_end", "im End")]:
+        todespunkt.append(f"execute if data entity @s LastDeathLocation{{dimension:\"minecraft:{dim}\"}} run tellraw @s "
+                          f"{txt(todes_text + [{'text': ' ' + name + '. Deine Sachen liegen dort noch 5 Minuten.', 'color': 'gray'}])}")
+    funktion("spiel/todespunkt", todespunkt)
+    # ---- Ausbau bestehender Welten
+    funktion("ausbau/start", [
+        "# Neue Teile der Insel (z. B. die Marktinsel) in einer schon gebauten Welt nachrüsten",
+        f"forceload add {x1} {z1} {x2} {z2}",
+        "scoreboard players set #ausbau_stufe hs.state 1",
+        f"tellraw @a {txt({'text': '[Himmelsinsel] Baue Erweiterungen an …', 'color': 'light_purple'})}",
+    ])
+    funktion("ausbau/tick", [f"execute {LADE_PRUEFUNG} run function {NS}:ausbau/schritt"])
+    ausbau = ["# Ein Teil pro Tick"]
+    for i in range(1, n_ausbau + 1):
+        ausbau.append(f"execute if score #ausbau_stufe hs.state matches {i} run function {NS}:ausbau/teil_{i:02d}")
+    ausbau += ["scoreboard players add #ausbau_stufe hs.state 1",
+               "# Danach 2 Sekunden warten, bis alle Wesen der geladenen Chunks da sind",
+               f"execute if score #ausbau_stufe hs.state matches {n_ausbau + 41}.. run function {NS}:ausbau/fertig"]
+    funktion("ausbau/schritt", ausbau)
+    funktion("ausbau/fertig", [
+        f"function {NS}:bau/wesen",
+        f"forceload remove {x1} {z1} {x2} {z2}",
+        "scoreboard players set #ausbau_stufe hs.state 0",
+        f"scoreboard players set #ausbau hs.state {AUSBAU}",
+        f"tellraw @a {txt(['', {'text': '[Himmelsinsel] ', 'color': 'light_purple'}, {'text': 'Neu: die Marktinsel im Nordosten der Spawn-Insel!', 'color': 'white'}])}",
     ])
     ruestung = [("armor.head", "iron_helmet"), ("armor.chest", "iron_chestplate"),
                 ("armor.legs", "iron_leggings"), ("armor.feet", "iron_boots"), ("weapon.offhand", "shield")]
@@ -502,7 +673,10 @@ def feste_funktionen(lichtpunkte, n_teile):
                       ("fallschirm", "Sanfter Fall beim Absprung (1/0)"),
                       ("bodenstation", "Bodenstation beim ersten Bau (1/0)"),
                       ("login_spawn", "Beim Login auf die Insel: 0 nie, 1 wer unten steht, 2 immer"),
-                      ("starterpaket", "Starterpaket beim ersten Join (1/0)")]:
+                      ("starterpaket", "Starterpaket beim ersten Join (1/0)"),
+                      ("homes", "/trigger sethome und /trigger home erlaubt (1/0)"),
+                      ("todespunkt", "Koordinaten nach dem Tod im Chat (1/0)"),
+                      ("herzen", "Herzen in der Spielerliste (1/0)")]:
         info += [{"text": f"\n#{key} = ", "color": "gray"},
                  {"score": {"name": f"#{key}", "objective": "hs.config"}, "color": "yellow"},
                  {"text": f"  {erkl}", "color": "dark_gray"}]
@@ -525,6 +699,7 @@ def feste_funktionen(lichtpunkte, n_teile):
         "tag @a remove hs.in",
         "tag @a remove hs.fall",
         "tag @a remove hs.gesehen",
+        "tag @a remove hs.neu1",
         f"forceload remove {x1} {z1} {x2} {z2}",
         "scoreboard objectives remove hs.state",
         "scoreboard objectives remove hs.config",
@@ -532,6 +707,17 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard objectives remove spawn",
         "scoreboard objectives remove hs.tod",
         "scoreboard objectives remove hs.weg",
+        "scoreboard objectives remove home",
+        "scoreboard objectives remove sethome",
+        "scoreboard objectives remove hs.hx",
+        "scoreboard objectives remove hs.hy",
+        "scoreboard objectives remove hs.hz",
+        "scoreboard objectives remove hs.hr",
+        "scoreboard objectives remove hs.hd",
+        "scoreboard objectives remove hs.tx",
+        "scoreboard objectives remove hs.ty",
+        "scoreboard objectives remove hs.tz",
+        "scoreboard objectives remove hs.herz",
         f"tellraw @s {txt({'text': 'Himmelsinsel deaktiviert. Jetzt noch das Datapack abschalten: /datapack list zeigt den Namen, dann /datapack disable <name>', 'color': 'yellow'})}",
     ])
     # ---- Versionsabhängiges
@@ -540,6 +726,8 @@ def feste_funktionen(lichtpunkte, n_teile):
         f"setworldspawn {SX} {SY} {SZ} 180 0",
         "gamerule respawn_radius 0",
     ])
+    funktion("version/schlafen", ["gamerule players_sleeping_percentage 1"])
+    funktion("version/schlafen", ["gamerule playersSleepingPercentage 1"], overlay=LEGACY)
     funktion("version/spawnpunkt", [
         "# Minecraft 1.21.5 bis 1.21.10",
         f"setworldspawn {SX} {SY} {SZ}",
@@ -602,13 +790,26 @@ def main():
         reparatur.append(f"execute unless block {pos} minecraft:end_gateway run setblock {pos} {tor}")
     funktion("spiel/bodenstation", reparatur)
 
+    # Ausbau: nur die Blöcke, in denen sich die Insel mit Erweiterungen von der alten unterscheidet
+    alt, _ = bauplan.himmelsinsel(mit_markt=False)
+    weg = sorted((p for p in alt.b if p not in insel.b), key=lambda p: (-p[1], p[0], p[2]))
+    neu = bauplan.Modell()
+    neu.b = {p: b for p, b in insel.b.items() if alt.b.get(p) != b}
+    ausbau = [(f"setblock {x} {y} {z} minecraft:air", 1) for x, y, z in weg] + befehle(neu)
+    ausbau_teile = in_teile(ausbau)
+    for i, t in enumerate(ausbau_teile, 1):
+        funktion(f"ausbau/teil_{i:02d}", t)
+    print(f"Ausbau für bestehende Welten: {len(weg)} Blöcke weg, {len(neu.b)} neu, {len(ausbau_teile)} Teile")
+
     lichtpunkte = [(x, z) for x in range(-30, 31, 10) for z in range(-30, 31, 10) if math.hypot(x, z) <= 34]
-    feste_funktionen(lichtpunkte, len(teile))
+    feste_funktionen(lichtpunkte, len(teile), len(ausbau_teile))
 
     for h in HAENDLER:
         funktion(f"haendler/{h['id']}", haendler_befehle(h, neu=True))
         if any(e in NUR_NEU for e, _ in h["buecher"]):
             funktion(f"haendler/{h['id']}", haendler_befehle(h, neu=False), overlay=LEGACY)
+    for h in ANKAUF:
+        funktion(f"markt/{h['id']}", ankauf_befehle(h))
     funktion("schilder", schilder())
 
     if ORDNER:

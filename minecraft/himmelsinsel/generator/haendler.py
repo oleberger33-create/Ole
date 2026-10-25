@@ -71,3 +71,35 @@ HAENDLER = [
 ]
 
 ROEMISCH = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V"}
+
+
+# Händler auf der Marktinsel: Sie kaufen Waren und zahlen in Smaragden.
+# x, z = Standplatz des Händlers, blick = Richtung zum Marktplatz,
+# waren = (Gegenstand, Anzahl, Smaragde).
+ANKAUF = [
+    dict(id="bauer", name="Bauer & Fischer", farbe="green", beruf="farmer", typ="plains",
+         x=34, z=-35, blick="south", wolle=("lime", "white"), theke="composter", deko="hay_block[axis=y]",
+         waren=[("wheat", 20, 1), ("carrot", 22, 1), ("potato", 26, 1), ("beetroot", 15, 1),
+                ("pumpkin", 6, 1), ("melon", 4, 1), ("sugar_cane", 24, 1), ("sweet_berries", 24, 1),
+                ("cod", 12, 1), ("salmon", 8, 1)]),
+    dict(id="bergmann", name="Bergmann", farbe="gold", beruf="toolsmith", typ="desert",
+         x=40, z=-35, blick="south", wolle=("orange", "white"), theke="smithing_table",
+         deko="blast_furnace[facing=south]",
+         waren=[("coal", 15, 1), ("copper_ingot", 12, 1), ("iron_ingot", 4, 1), ("gold_ingot", 3, 1),
+                ("redstone", 24, 1), ("lapis_lazuli", 12, 1), ("quartz", 12, 1),
+                ("amethyst_shard", 12, 1), ("diamond", 1, 2)]),
+    dict(id="jaeger", name="Monsterjäger", farbe="red", beruf="cleric", typ="swamp",
+         x=31, z=-29, blick="east", wolle=("red", "black"), theke="barrel[facing=up]",
+         deko="target",
+         waren=[("rotten_flesh", 32, 1), ("bone", 16, 1), ("string", 16, 1), ("gunpowder", 8, 1),
+                ("spider_eye", 10, 1), ("slime_ball", 8, 1), ("ender_pearl", 3, 1), ("blaze_rod", 4, 1),
+                ("phantom_membrane", 4, 1), ("ghast_tear", 1, 1)]),
+    dict(id="holz", name="Holzfäller", farbe="#C08040", beruf="fletcher", typ="taiga",
+         x=43, z=-29, blick="west", wolle=("brown", "white"), theke="fletching_table",
+         deko="oak_log[axis=y]",
+         waren=[("oak_log", 32, 1), ("spruce_log", 32, 1), ("birch_log", 32, 1), ("jungle_log", 32, 1),
+                ("acacia_log", 32, 1), ("dark_oak_log", 32, 1), ("mangrove_log", 32, 1),
+                ("cherry_log", 32, 1), ("pale_oak_log", 32, 1), ("crimson_stem", 32, 1),
+                ("warped_stem", 32, 1)]),
+]
+BLICK = {"south": (0, 1, 0), "north": (0, -1, 180), "east": (1, 0, -90), "west": (-1, 0, 90)}

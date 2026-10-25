@@ -5,7 +5,7 @@ Braucht die Zusammenfassungen aus github.com/misode/mcmeta (Zweige <version>-sum
 
 Aufruf:  python3 pruefen.py <datapack-ordner> <mcmeta-elternordner>
 
-Geprüft wird jede Zeile jeder Funktion: Befehlsaufbau entlang des echten Befehlsbaums,
+Geprüft wird jede Zeile jeder Funktion (Makrozeilen mit Beispielwerten): Befehlsaufbau entlang des echten Befehlsbaums,
 Blockzustände (Name, Eigenschaften, Werte), Register-IDs (Wesen, Effekte, Partikel, Geräusche,
 Verzauberungen, Berufe, Gegenstände), Zielauswahl-Parameter, Textkomponenten und Funktionsaufrufe.
 """
@@ -71,6 +71,7 @@ class Pruefer:
         self.baum = json.load(open(os.path.join(basis, "commands", "data.json")))
         self.bloecke = json.load(open(os.path.join(basis, "blocks", "data.json")))
         self.reg = {k: set(v) for k, v in json.load(open(os.path.join(basis, "registries", "data.json"))).items()}
+        self.lang = set(json.load(open(os.path.join(basis, "assets", "lang", "data.json")))["en_us"])
         self.funktionen = funktionen
         self.tags = tags
         self.fehler = []
@@ -152,6 +153,9 @@ class Pruefer:
         if "translate" in obj and obj["translate"].startswith("enchantment.minecraft."):
             if not self.id_ok("enchantment", obj["translate"].rsplit(".", 1)[1]):
                 return f"Übersetzungsschlüssel {obj['translate']}: Verzauberung fehlt in {self.version}"
+        if "translate" in obj and obj["translate"].startswith(("item.minecraft.", "block.minecraft.")):
+            if obj["translate"] not in self.lang:
+                return f"Übersetzungsschlüssel {obj['translate']} gibt es in {self.version} nicht"
         if "click_event" in obj:
             ce = obj["click_event"]
             if ce.get("action") != "run_command" or "command" not in ce:
@@ -259,7 +263,7 @@ class Pruefer:
         elif p == "minecraft:time":
             return (1, None) if re.match(r"^\d+(\.\d+)?[tsd]?$", k) else (None, f"Zeit {k} ungültig")
         elif p == "minecraft:objective_criteria":
-            if k in ("dummy", "trigger", "deathCount"):
+            if k in ("dummy", "trigger", "deathCount", "health"):
                 return 1, None
             m = re.match(r"^minecraft\.custom:minecraft\.([a-z_]+)$", k)
             if m and m.group(1) in self.reg.get("custom_stat", set()):
@@ -312,6 +316,10 @@ class Pruefer:
         return False
 
     def zeile(self, text):
+        if text.startswith("$"):
+            # Makrozeile: Platzhalter durch Beispielwerte ersetzen
+            text = re.sub(r"\$\(dim\)", "minecraft:overworld", text[1:])
+            text = re.sub(r"\$\([a-z_]+\)", "0", text)
         toks = tokens(text)
         fehler = []
         if not self.passt(self.baum, toks, 0, fehler):

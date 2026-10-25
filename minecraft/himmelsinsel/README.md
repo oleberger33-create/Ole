@@ -3,6 +3,9 @@
 Ein Datapack für **Minecraft Java 1.21.5 bis 26.3** (Vanilla-Server, Paper und Einzelspieler).
 Beim ersten Start einer neuen Welt baut es über der Weltmitte eine schwebende Spawn-Insel. Dort gibt es
 Händler, die **jedes Verzauberungsbuch auf Höchststufe** verkaufen, an alle Spieler und ohne Ende.
+Auf der Marktinsel daneben verdient man sich die Smaragde dafür, dazu kommen ein paar Komfortfunktionen
+für Survival-Server: eigenes Zuhause, Todeskoordinaten, Herzen in der Spielerliste, und eine Person im
+Bett reicht, um die Nacht zu überspringen.
 
 ![Vorschau](vorschau.png)
 
@@ -17,6 +20,7 @@ Händler, die **jedes Verzauberungsbuch auf Höchststufe** verkaufen, an alle Sp
 | **Absprung** (Süden) | Sprungbrett über den Inselrand. Wer springt, bekommt automatisch Sanften Fall und landet heil |
 | **Himmelstor** (am Boden) | Landeplatz unter dem Sprungbrett mit einem Endtransitportal: einmal hineinlaufen, schon ist man zurück auf der Insel |
 | **Aussichtspunkt** (Westen) | Holzbalkon über dem Abgrund |
+| **Marktinsel** (Nordosten) | Eigene schwebende Insel, über eine Holzbrücke mit Pavillon erreichbar. Vier Marktstände kaufen Waren gegen Smaragde, in der Mitte hängt die Marktglocke |
 | **Mini-Inseln** | Zwei kleine Felsinseln daneben, nur zur Deko |
 
 Die Unterseite der Insel hat hängende Felszapfen mit Tropfstein, Amethyst, Leuchtflechten und
@@ -74,6 +78,19 @@ ein Schild mit seinen Büchern und Preisen, in der Sprache des jeweiligen Spiele
 Das sind alle 43 Verzauberungen des Spiels, jeweils auf Höchststufe.
 Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20, Flüche 1.
 
+## Marktinsel: Waren gegen Smaragde
+
+Die Händler auf der Marktinsel kaufen ohne Ende zu festen Preisen. Über jedem Stand schwebt die Preisliste.
+
+| Stand | Kauft (Anzahl → Smaragde) |
+| --- | --- |
+| **Bauer & Fischer** | 20 Weizen · 22 Karotten · 26 Kartoffeln · 15 Rote Bete · 6 Kürbisse · 4 Melonen · 24 Zuckerrohr · 24 Süßbeeren · 12 Kabeljau · 8 Lachs → je 1 |
+| **Bergmann** | 15 Kohle · 12 Kupferbarren · 4 Eisenbarren · 3 Goldbarren · 24 Redstone · 12 Lapislazuli · 12 Netherquarz · 12 Amethystscherben → je 1 · 1 Diamant → 2 |
+| **Monsterjäger** | 32 Verrottetes Fleisch · 16 Knochen · 16 Faden · 8 Schwarzpulver · 10 Spinnenaugen · 8 Schleimbälle · 3 Enderperlen · 4 Lohenruten · 4 Phantomhäute · 1 Ghast-Träne → je 1 |
+| **Holzfäller** | je 32 Stämme aller Holzarten (Eiche, Fichte, Birke, Tropenbaum, Akazie, Schwarzeiche, Mangrove, Kirsche, Blasseiche) sowie Karmesin- und Wirrstiele → je 1 |
+
+Die Preise stehen in `generator/haendler.py` (Liste `ANKAUF`).
+
 ## Für alle Spieler
 
 - **Starterpaket:** Beim ersten Join bekommt jeder einmalig volle Eisenrüstung und einen Schild (direkt
@@ -87,6 +104,14 @@ Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20,
 - **Hoch auf die Insel:** am Landeplatz ins lila Himmelstor laufen, `/trigger spawn` benutzen oder sterben.
 - Wer unter der Insel stirbt (ohne eigenes Bett) oder sich dort ausloggt, landet beim nächsten Mal
   automatisch oben. Mit `#login_spawn = 2` kommt jeder bei jedem Login auf die Insel.
+- **Eigenes Zuhause:** `/trigger sethome` merkt sich die aktuelle Stelle (auch im Nether und im End),
+  `/trigger home` bringt dich dorthin zurück. Es gilt dieselbe Wartezeit wie bei `/trigger spawn`.
+- **Todespunkt:** Nach dem Tod stehen die Koordinaten und die Dimension im Chat.
+- **Herzen in der Spielerliste** (Tab-Taste).
+- **Schlafen:** Eine Person im Bett reicht, um die Nacht zu überspringen. Das Pack setzt dafür einmalig
+  die Gamerule `players_sleeping_percentage` (bis 1.21.10 `playersSleepingPercentage`) auf 1. Wer es
+  anders möchte, ändert die Gamerule einfach, das Pack fasst sie danach nicht mehr an.
+- Spieler, die schon vor diesen Neuerungen da waren, bekommen beim nächsten Login einmal eine Übersicht.
 
 ## Schutz der Insel
 
@@ -125,6 +150,9 @@ Einstellungen ändern mit `/scoreboard players set #<name> hs.config <wert>`:
 | `bodenstation` | 1 | Bodenstation beim ersten Bau errichten (0 = nicht bauen) |
 | `starterpaket` | 1 | Starterpaket beim ersten Join (0 = aus) |
 | `login_spawn` | 1 | Beim Einloggen auf die Insel: 0 = nie, 1 = wer unter der Insel steht, 2 = jeder immer |
+| `homes` | 1 | `/trigger sethome` und `/trigger home` erlaubt (0 = aus) |
+| `todespunkt` | 1 | Koordinaten nach dem Tod im Chat (0 = aus) |
+| `herzen` | 1 | Herzen in der Spielerliste (0 = aus; danach `/scoreboard objectives setdisplay list` zum Ausblenden) |
 
 ## Selbst anpassen
 
@@ -142,13 +170,22 @@ python3 vorschau.py ../vorschau.png      # zeichnet das Vorschaubild (braucht Pi
 - `pruefen.py`: prüft jeden erzeugten Befehl gegen die offiziellen Befehlsbäume und Register von
   Minecraft 1.21.5, 1.21.10, 1.21.11 und 26.3 (Daten von [misode/mcmeta](https://github.com/misode/mcmeta))
 
-Nach einer Änderung die neue Zip in den Weltordner legen, `/reload` ausführen und
-`/function himmelsinsel:admin/neu_bauen` aufrufen.
+Nach einer Änderung an der Spiellogik reicht es, die neue Zip in den Weltordner zu legen und `/reload`
+auszuführen (oder den Server neu zu starten). Für Änderungen an der Insel selbst gibt es zwei Wege:
+
+- `/function himmelsinsel:admin/neu_bauen` baut alles neu.
+- **Automatischer Ausbau:** Das Pack vergleicht den Bauplan mit und ohne Erweiterungen und baut in einer
+  schon fertigen Welt nur die Blöcke nach, die sich unterscheiden (so ist die Marktinsel in bestehende
+  Welten gekommen). Für eine weitere Erweiterung `AUSBAU` in `datapack.py` hochzählen und den Vergleich
+  in `main()` anpassen.
 
 ## Technisches
 
 - Die Insel liegt bei **x 0 / z 0**, die Oberfläche auf **Höhe 224**. Der Spawnpunkt ist **0 225 6**.
-- Gebaut wird in 44 Häppchen, eins pro Tick (rund 9 400 Befehle, etwa 43 000 Blöcke). Der Bauplatz wird
+- Gebaut wird in 48 Häppchen, eins pro Tick (rund 10 200 Befehle, etwa 46 000 Blöcke). Der Bauplatz wird
   dafür kurz per `forceload` geladen und danach wieder freigegeben.
+- Die Marktinsel liegt bei **x 37 / z −29**, der Pavillon an der Brücke bei **x 37 / z −10**.
+- `/trigger home` speichert die Position in Scoreboards und teleportiert über eine Makro-Funktion
+  (`spiel/home_tp`).
 - Ab 1.21.11 heißen die Gamerules anders und es gibt die Verzauberung Ausfallschritt. Für 1.21.5 bis 1.21.10
   liegt deshalb ein Overlay im Pack, Minecraft wählt automatisch die passende Variante.
