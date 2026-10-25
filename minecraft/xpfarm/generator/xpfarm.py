@@ -74,15 +74,16 @@ def modell(FALL):
                     setze(x, 0, z, "water")                           # Quelle am Kanalende
             else:
                 setze(x, 0, z, W)                                     # Plattform
-    # Falltüren (offen) über den Kanalrändern: Mobs halten sie für Boden und laufen ins Wasser
+    # Falltüren (offen) über den Kanälen, die Klappe zur Kanalmitte: Mobs halten das Feld für Boden und fallen ins Wasser.
+    # Hängt die Klappe an der Plattformkante, ist sie eine Wand (Version 2 hatte das, per Konsole umgedreht).
     for x in range(-8, 10):
         for z in range(-8, 10):
             if not kanal(x, z) or (x, z) in LOCH:
                 continue
             if z in (0, 1) and not (x in (0, 1)):
-                setze(x, 1, z, f"oak_trapdoor[facing={'south' if z == 0 else 'north'},half=bottom,open=true]")
+                setze(x, 1, z, f"oak_trapdoor[facing={'north' if z == 0 else 'south'},half=bottom,open=true]")
             elif x in (0, 1) and not (z in (0, 1)):
-                setze(x, 1, z, f"oak_trapdoor[facing={'east' if x == 0 else 'west'},half=bottom,open=true]")
+                setze(x, 1, z, f"oak_trapdoor[facing={'west' if x == 0 else 'east'},half=bottom,open=true]")
     # Fallschacht 2 × 2, Wände ringsum
     for y in range(-FALL + 1, -1):
         for x in range(-1, 3):
