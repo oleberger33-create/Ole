@@ -76,6 +76,8 @@ Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20,
 
 ## Für alle Spieler
 
+- **Starterpaket:** Beim ersten Join bekommt jeder einmalig volle Eisenrüstung und einen Schild (direkt
+  angelegt, wenn die Plätze frei sind), einen Bogen mit 32 Pfeilen, 16 Steaks und 64 Smaragde.
 - **`/trigger spawn`** bringt dich aus jeder Dimension zurück auf die Insel (30 Sekunden Wartezeit).
   Neue Spieler bekommen beim ersten Betreten einen anklickbaren Link dazu.
 - **Runter in die Welt:** vom Sprungbrett springen. Unter der Insel öffnet sich ein „Fallschirm“
@@ -116,6 +118,7 @@ Einstellungen ändern mit `/scoreboard players set #<name> hs.config <wert>`:
 | `schutz` | 1 | Abenteuermodus auf der Insel (0 = aus) |
 | `fallschirm` | 1 | Sanfter Fall beim Absprung (0 = aus) |
 | `bodenstation` | 1 | Bodenstation beim ersten Bau errichten (0 = nicht bauen) |
+| `starterpaket` | 1 | Starterpaket beim ersten Join (0 = aus) |
 | `login_spawn` | 1 | Beim Einloggen auf die Insel: 0 = nie, 1 = wer unter der Insel steht, 2 = jeder immer |
 
 ## Selbst anpassen

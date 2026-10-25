@@ -261,6 +261,7 @@ def feste_funktionen(lichtpunkte, n_teile):
         "execute unless score #fallschirm hs.config = #fallschirm hs.config run scoreboard players set #fallschirm hs.config 1",
         "execute unless score #bodenstation hs.config = #bodenstation hs.config run scoreboard players set #bodenstation hs.config 1",
         "execute unless score #login_spawn hs.config = #login_spawn hs.config run scoreboard players set #login_spawn hs.config 1",
+        "execute unless score #starterpaket hs.config = #starterpaket hs.config run scoreboard players set #starterpaket hs.config 1",
         f"schedule function {NS}:spiel/sekunde 20t",
         f"schedule function {NS}:spiel/halbsekunde 10t",
     ])
@@ -393,6 +394,8 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard players remove @a[scores={hs.cd=1..}] hs.cd 1",
         f"execute if score #fertig hs.state matches 1 run function {NS}:spiel/pflege",
         f"execute if score #fertig hs.state matches 1 as @a[tag=!hs.gesehen] run function {NS}:spiel/willkommen",
+        f"execute if score #starterpaket hs.config matches 1 as @e[type=minecraft:player,tag=!hs.starter] "
+        f"run function {NS}:spiel/starterpaket",
         f"schedule function {NS}:spiel/sekunde 20t",
     ])
     ax, ay, az = AMBOSSE[0]
@@ -428,6 +431,22 @@ def feste_funktionen(lichtpunkte, n_teile):
         f"execute if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
         f"tellraw @s {txt(['', {'text': '✦ Willkommen auf der Himmelsinsel! ✦', 'color': 'light_purple', 'bold': True}, {'text': chr(10) + 'In der Zauberbibliothek im Norden gibt es alle Verzauberungsbücher.', 'color': 'gray'}, {'text': chr(10) + 'Runter in die Welt geht es über das Sprungbrett im Süden – mit Fallschirm.', 'color': 'gray'}, {'text': chr(10) + 'Zurück zur Insel: ', 'color': 'gray'}, klick])}",
     ])
+    ruestung = [("armor.head", "iron_helmet"), ("armor.chest", "iron_chestplate"),
+                ("armor.legs", "iron_leggings"), ("armor.feet", "iron_boots"), ("weapon.offhand", "shield")]
+    starter = ["# Einmal pro Spieler. Rüstung und Schild werden direkt angelegt, wenn der Platz frei ist,",
+               "# sonst landen sie im Inventar (bei vollem Inventar fallen Sachen vor die Füße).",
+               "tag @s add hs.starter"]
+    for slot, item in ruestung:
+        starter.append(f"execute unless items entity @s {slot} * run item replace entity @s {slot} with minecraft:{item}")
+        starter.append(f"execute if items entity @s {slot} * unless items entity @s {slot} minecraft:{item} "
+                       f"run give @s minecraft:{item}")
+    starter += ["give @s minecraft:emerald 64",
+                "give @s minecraft:bow",
+                "give @s minecraft:arrow 32",
+                "give @s minecraft:cooked_beef 16",
+                f"tellraw @s {txt(['', {'text': '✦ Starterpaket erhalten: ', 'color': 'gold', 'bold': True}, {'text': 'Eisenrüstung, Schild, Bogen mit 32 Pfeilen, 16 Steaks und 64 Smaragde für die Zauberbibliothek!', 'color': 'yellow'}])}",
+                "execute at @s run playsound minecraft:entity.player.levelup player @s ~ ~ ~ 0.8 1.2"]
+    funktion("spiel/starterpaket", starter)
     # ---- Admin
     funktion("admin/bauen", [
         "# Startet den Bau in einer bestehenden Welt (in neuen Welten passiert das automatisch)",
@@ -446,7 +465,8 @@ def feste_funktionen(lichtpunkte, n_teile):
                       ("schutz", "Insel im Abenteuermodus schützen (1/0)"),
                       ("fallschirm", "Sanfter Fall beim Absprung (1/0)"),
                       ("bodenstation", "Bodenstation beim ersten Bau (1/0)"),
-                      ("login_spawn", "Beim Login auf die Insel: 0 nie, 1 wer unten steht, 2 immer")]:
+                      ("login_spawn", "Beim Login auf die Insel: 0 nie, 1 wer unten steht, 2 immer"),
+                      ("starterpaket", "Starterpaket beim ersten Join (1/0)")]:
         info += [{"text": f"\n#{key} = ", "color": "gray"},
                  {"score": {"name": f"#{key}", "objective": "hs.config"}, "color": "yellow"},
                  {"text": f"  {erkl}", "color": "dark_gray"}]

@@ -227,6 +227,11 @@ class Pruefer:
             if k.startswith("#"):
                 return 1, None
             return (1, None) if self.id_ok(reg, k) else (None, f"{k} fehlt im Register {reg}")
+        elif p in ("minecraft:item_stack", "minecraft:item_predicate"):
+            if k == "*" or k.startswith("#"):
+                return 1, None
+            name = re.match(r"^[a-z0-9_.:/-]+", k).group(0)
+            return (1, None) if self.id_ok("item", name) else (None, f"Gegenstand {name} unbekannt")
         elif p == "minecraft:particle":
             return (1, None) if self.id_ok("particle_type", k) else (None, f"Partikel {k} unbekannt")
         elif p == "minecraft:component":
