@@ -77,7 +77,8 @@ Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20,
 ## Für alle Spieler
 
 - **Starterpaket:** Beim ersten Join bekommt jeder einmalig volle Eisenrüstung und einen Schild (direkt
-  angelegt, wenn die Plätze frei sind), einen Bogen mit 32 Pfeilen, 16 Steaks und 64 Smaragde.
+  angelegt, wenn die Plätze frei sind), Eisenschwert, -spitzhacke, -axt und -schaufel, einen Bogen mit
+  32 Pfeilen, 16 Steaks und 64 Smaragde.
 - **`/trigger spawn`** bringt dich aus jeder Dimension zurück auf die Insel (30 Sekunden Wartezeit).
   Neue Spieler bekommen beim ersten Betreten einen anklickbaren Link dazu.
 - **Runter in die Welt:** vom Sprungbrett springen. Unter der Insel öffnet sich ein „Fallschirm“
