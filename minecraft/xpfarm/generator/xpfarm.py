@@ -111,9 +111,10 @@ def modell(FALL):
     setze(1, K - 1, 1, "hopper[facing=east]")
     setze(2, K - 1, 1, "hopper[facing=south]")
     setze(2, K - 1, 2, "hopper[facing=south]")
-    # Sichtschlitz: untere Stufe vor den Mobs, darüber Stein
+    # Sichtschlitz: geschlossene Falltür vor den Mobs, darüber Stein. Der Spalt ist 13/16 hoch: Groß genug für
+    # Schläge und XP-Kugeln (eine untere Stufe ließ nur einen halben Block), zu klein für Babyzombies (0,98).
     for x in (0, 1):
-        setze(x, K, 2, "cobblestone_slab[type=bottom]")
+        setze(x, K, 2, "oak_trapdoor[facing=south,half=bottom,open=false]")
         setze(x, K + 1, 2, W)
         setze(x, K - 1, 2, W)
     # Spielerraum südlich: x -1..3, z 3..4, y K-1..K (2 hoch), Boden K-2
@@ -135,6 +136,10 @@ def modell(FALL):
     box(-1, K + 1, 3, 3, K + 1, 4, W)                           # Decke Spielerraum
     setze(-1, K - 1, 5, "air"); setze(-1, K, 5, "air")           # Eingang (Süden)
     setze(3, K, 4, "wall_torch[facing=north]")
+    # AFK-Mulde einen Block tiefer: Dort sind die Füße 24 unter der Spawn-Ebene, also spawnt überall etwas
+    # (im Spielerraum fehlt sonst ein Kreis von etwa 7 Blöcken direkt darüber)
+    for z in (3, 4):
+        setze(-1, K - 2, z, "air"); setze(-1, K - 3, z, W)
     for x in range(-2, 5):
         for z in range(-1, 6):
             if (x, K - 1, z) in b and b[(x, K - 1, z)] == "air" and (x, K - 2, z) not in b:
@@ -154,7 +159,7 @@ def modell(FALL):
     for x in range(-1, 4):
         for z in (3, 4):
             luft.add((x, K - 1, z)); luft.add((x, K, z))
-    luft |= {(-1, K - 1, 5), (-1, K, 5)}
+    luft |= {(-1, K - 1, 5), (-1, K, 5), (-1, K - 2, 3), (-1, K - 2, 4)}
     luft = {p for p in luft if b.get(p, "air") == "air"}
     return b, luft, K
 
@@ -215,6 +220,9 @@ zs = [welt(*p)[2] for p in alle] + [Z0 - 8, Z0 + 10]
 FL = f"{min(xs)} {min(zs)} {max(xs)} {max(zs)}"
 LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (min(zs), max(zs)))
 
+sx, sy, sz = welt(-8, 0, -8)
+SPAWN = f"x={sx},y={sy},z={sz},dx=17,dy=2,dz=17"
+ZELLE = " ".join(f"{v}.0" for v in welt(1, K, 1))
 funktion("load", [
     "scoreboard objectives add xp.zustand dummy",
     "scoreboard objectives add xp.test dummy",
@@ -224,7 +232,11 @@ funktion("load", [
 ])
 funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run function {NS}:licht",
                   f"execute if score #stufe xp.zustand matches 2 {LADEN} run function {NS}:bauen",
-                  f"execute if score #stufe xp.zustand matches 3 {LADEN} run function {NS}:umbau"])
+                  f"execute if score #stufe xp.zustand matches 3 {LADEN} run function {NS}:umbau",
+                  "# Spinnen passen nicht in die Kanäle und blieben für immer oben (sie belegen Mob-Plätze). Im Schacht klettern",
+                  "# sie an den Wänden hoch, deshalb kommen sie direkt in die Tötungszelle, mit 1 Herz wie die anderen.",
+                  f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:spider,{SPAWN}] run function {NS}:spinne"])
+funktion("spinne", ["data modify entity @s Health set value 2.0f", f"tp @s {ZELLE}"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 3"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 1"])
 funktion("licht", lichter + ["scoreboard players set #stufe xp.zustand 2"])
