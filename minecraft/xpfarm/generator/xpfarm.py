@@ -43,117 +43,126 @@ def funktion(name, zeilen):
 
 
 # ---------------------------------------------------------------- Modell (relativ)
-b = {}
-def setze(x, y, z, blk): b[(x, y, z)] = blk
-def box(x1, y1, z1, x2, y2, z2, blk):
-    for x in range(x1, x2 + 1):
-        for y in range(y1, y2 + 1):
-            for z in range(z1, z2 + 1):
-                b[(x, y, z)] = blk
-FALL = 22
-W = "cobblestone"
-LOCH = {(0, 0), (1, 0), (0, 1), (1, 1)}
-def kanal(x, z):
-    return (z in (0, 1) and -8 <= x <= 9) or (x in (0, 1) and -8 <= z <= 9)
-# Spawn-Ebene: Innenraum x/z -8..9, Wände bei -9 und 10
-for x in range(-9, 11):
-    for z in range(-9, 11):
-        rand = x in (-9, 10) or z in (-9, 10)
-        if rand:
-            box(x, -1, z, x, 2, z, W)
-            setze(x, 3, z, "cobblestone_slab[type=bottom]")
-            continue
-        setze(x, 3, z, "cobblestone_slab[type=bottom]")            # Decke: auf Stufen spawnt nichts
-        if (x, z) in LOCH:
-            continue
-        if kanal(x, z):
-            setze(x, -1, z, W)                                    # Kanalboden
-            ende = x in (-8, 9) or z in (-8, 9)
-            if ende:
-                setze(x, 0, z, "water")                           # Quelle am Kanalende
-        else:
-            setze(x, 0, z, W)                                     # Plattform
-# Falltüren (offen) über den Kanalrändern: Mobs halten sie für Boden und laufen ins Wasser
-for x in range(-8, 10):
-    for z in range(-8, 10):
-        if not kanal(x, z) or (x, z) in LOCH:
-            continue
-        if z in (0, 1) and not (x in (0, 1)):
-            setze(x, 1, z, f"oak_trapdoor[facing={'south' if z == 0 else 'north'},half=bottom,open=true]")
-        elif x in (0, 1) and not (z in (0, 1)):
-            setze(x, 1, z, f"oak_trapdoor[facing={'east' if x == 0 else 'west'},half=bottom,open=true]")
-# Fallschacht 2 × 2, Wände ringsum
-for y in range(-FALL + 1, -1):
+def modell(FALL):
+    """Alle Blöcke und die frei zu räumende Luft; FALL = Höhe von der Wasserebene bis zum Trichter."""
+    b = {}
+    def setze(x, y, z, blk): b[(x, y, z)] = blk
+    def box(x1, y1, z1, x2, y2, z2, blk):
+        for x in range(x1, x2 + 1):
+            for y in range(y1, y2 + 1):
+                for z in range(z1, z2 + 1):
+                    b[(x, y, z)] = blk
+    W = "cobblestone"
+    LOCH = {(0, 0), (1, 0), (0, 1), (1, 1)}
+    def kanal(x, z):
+        return (z in (0, 1) and -8 <= x <= 9) or (x in (0, 1) and -8 <= z <= 9)
+    # Spawn-Ebene: Innenraum x/z -8..9, Wände bei -9 und 10
+    for x in range(-9, 11):
+        for z in range(-9, 11):
+            rand = x in (-9, 10) or z in (-9, 10)
+            if rand:
+                box(x, -1, z, x, 2, z, W)
+                setze(x, 3, z, "cobblestone_slab[type=bottom]")
+                continue
+            setze(x, 3, z, "cobblestone_slab[type=bottom]")            # Decke: auf Stufen spawnt nichts
+            if (x, z) in LOCH:
+                continue
+            if kanal(x, z):
+                setze(x, -1, z, W)                                    # Kanalboden
+                ende = x in (-8, 9) or z in (-8, 9)
+                if ende:
+                    setze(x, 0, z, "water")                           # Quelle am Kanalende
+            else:
+                setze(x, 0, z, W)                                     # Plattform
+    # Falltüren (offen) über den Kanalrändern: Mobs halten sie für Boden und laufen ins Wasser
+    for x in range(-8, 10):
+        for z in range(-8, 10):
+            if not kanal(x, z) or (x, z) in LOCH:
+                continue
+            if z in (0, 1) and not (x in (0, 1)):
+                setze(x, 1, z, f"oak_trapdoor[facing={'south' if z == 0 else 'north'},half=bottom,open=true]")
+            elif x in (0, 1) and not (z in (0, 1)):
+                setze(x, 1, z, f"oak_trapdoor[facing={'east' if x == 0 else 'west'},half=bottom,open=true]")
+    # Fallschacht 2 × 2, Wände ringsum
+    for y in range(-FALL + 1, -1):
+        for x in range(-1, 3):
+            for z in range(-1, 3):
+                if (x, z) not in LOCH:
+                    setze(x, y, z, W)
     for x in range(-1, 3):
         for z in range(-1, 3):
             if (x, z) not in LOCH:
-                setze(x, y, z, W)
-for x in range(-1, 3):
-    for z in range(-1, 3):
-        if (x, z) not in LOCH:
-            setze(x, -1, z, W)
-# Tötungszelle: Mobs stehen auf y=-22 (auf Trichtern bei -23)
-K = -FALL
-for x in range(-1, 3):
-    for z in range(-1, 3):
-        if (x, z) not in LOCH:
-            setze(x, K, z, W)
-            setze(x, K + 1, z, W)
-for x in range(-1, 3):                                       # Ring auf Trichterhöhe
-    for z in range(-1, 3):
-        if (x, z) not in LOCH:
-            setze(x, K - 1, z, W)
-setze(0, K - 1, 0, "hopper[facing=east]")
-setze(1, K - 1, 0, "hopper[facing=south]")
-setze(0, K - 1, 1, "hopper[facing=east]")
-setze(1, K - 1, 1, "hopper[facing=east]")
-setze(2, K - 1, 1, "hopper[facing=south]")
-setze(2, K - 1, 2, "hopper[facing=south]")
-# Sichtschlitz: untere Stufe vor den Mobs, darüber Stein
-for x in (0, 1):
-    setze(x, K, 2, "cobblestone_slab[type=bottom]")
-    setze(x, K + 1, 2, W)
-    setze(x, K - 1, 2, W)
-# Spielerraum südlich: x -1..3, z 3..4, y K-1..K (2 hoch), Boden K-2
-box(-2, K - 2, -1, 4, K - 2, 5, W)                          # Fundament
-for x in range(-2, 5):
-    for z in range(-1, 6):
-        innen = -1 <= x <= 3 and 3 <= z <= 4
-        if innen:
-            continue
-        if (x, z) in LOCH or (-1 <= x <= 2 and -1 <= z <= 2):
-            continue
-        box(x, K - 1, z, x, K + 1, z, W)
-for x in (-1, 0, 1, 3):
-    for z in (3, 4):
-        setze(x, K - 1, z, "air"); setze(x, K, z, "air")
-setze(2, K - 1, 3, "chest[facing=north,type=left]")
-setze(3, K - 1, 3, "chest[facing=north,type=right]")
-setze(2, K, 3, "air"); setze(2, K, 4, "air"); setze(2, K - 1, 4, "air")
-box(-1, K + 1, 3, 3, K + 1, 4, W)                           # Decke Spielerraum
-setze(-1, K - 1, 5, "air"); setze(-1, K, 5, "air")           # Eingang (Süden)
-setze(3, K, 4, "wall_torch[facing=north]")
-for x in range(-2, 5):
-    for z in range(-1, 6):
-        if (x, K - 1, z) in b and b[(x, K - 1, z)] == "air" and (x, K - 2, z) not in b:
-            setze(x, K - 2, z, W)
+                setze(x, -1, z, W)
+    # Tötungszelle: Mobs stehen auf y=-22 (auf Trichtern bei -23)
+    K = -FALL
+    for x in range(-1, 3):
+        for z in range(-1, 3):
+            if (x, z) not in LOCH:
+                setze(x, K, z, W)
+                setze(x, K + 1, z, W)
+    for x in range(-1, 3):                                       # Ring auf Trichterhöhe
+        for z in range(-1, 3):
+            if (x, z) not in LOCH:
+                setze(x, K - 1, z, W)
+    setze(0, K - 1, 0, "hopper[facing=east]")
+    setze(1, K - 1, 0, "hopper[facing=south]")
+    setze(0, K - 1, 1, "hopper[facing=east]")
+    setze(1, K - 1, 1, "hopper[facing=east]")
+    setze(2, K - 1, 1, "hopper[facing=south]")
+    setze(2, K - 1, 2, "hopper[facing=south]")
+    # Sichtschlitz: untere Stufe vor den Mobs, darüber Stein
+    for x in (0, 1):
+        setze(x, K, 2, "cobblestone_slab[type=bottom]")
+        setze(x, K + 1, 2, W)
+        setze(x, K - 1, 2, W)
+    # Spielerraum südlich: x -1..3, z 3..4, y K-1..K (2 hoch), Boden K-2
+    box(-2, K - 2, -1, 4, K - 2, 5, W)                          # Fundament
+    for x in range(-2, 5):
+        for z in range(-1, 6):
+            innen = -1 <= x <= 3 and 3 <= z <= 4
+            if innen:
+                continue
+            if (x, z) in LOCH or (-1 <= x <= 2 and -1 <= z <= 2):
+                continue
+            box(x, K - 1, z, x, K + 1, z, W)
+    for x in (-1, 0, 1, 3):
+        for z in (3, 4):
+            setze(x, K - 1, z, "air"); setze(x, K, z, "air")
+    setze(2, K - 1, 3, "chest[facing=north,type=left]")
+    setze(3, K - 1, 3, "chest[facing=north,type=right]")
+    setze(2, K, 3, "air"); setze(2, K, 4, "air"); setze(2, K - 1, 4, "air")
+    box(-1, K + 1, 3, 3, K + 1, 4, W)                           # Decke Spielerraum
+    setze(-1, K - 1, 5, "air"); setze(-1, K, 5, "air")           # Eingang (Süden)
+    setze(3, K, 4, "wall_torch[facing=north]")
+    for x in range(-2, 5):
+        for z in range(-1, 6):
+            if (x, K - 1, z) in b and b[(x, K - 1, z)] == "air" and (x, K - 2, z) not in b:
+                setze(x, K - 2, z, W)
 
-# Luft, die vor dem Bau frei sein muss (Gelände, Gras, Pflanzen)
-luft = set()
-for x in range(-8, 10):
-    for z in range(-8, 10):
-        for y in (1, 2):
+    # Luft, die vor dem Bau frei sein muss (Gelände, Gras, Pflanzen)
+    luft = set()
+    for x in range(-8, 10):
+        for z in range(-8, 10):
+            for y in (1, 2):
+                luft.add((x, y, z))
+            if kanal(x, z) and (x, z) not in LOCH:
+                luft.add((x, 0, z))
+    for x, z in LOCH:
+        for y in range(K, 1):
             luft.add((x, y, z))
-        if kanal(x, z) and (x, z) not in LOCH:
-            luft.add((x, 0, z))
-for x, z in LOCH:
-    for y in range(K, 1):
-        luft.add((x, y, z))
-for x in range(-1, 4):
-    for z in (3, 4):
-        luft.add((x, K - 1, z)); luft.add((x, K, z))
-luft |= {(-1, K - 1, 5), (-1, K, 5)}
-luft = {p for p in luft if b.get(p, "air") == "air"}
+    for x in range(-1, 4):
+        for z in (3, 4):
+            luft.add((x, K - 1, z)); luft.add((x, K, z))
+    luft |= {(-1, K - 1, 5), (-1, K, 5)}
+    luft = {p for p in luft if b.get(p, "air") == "air"}
+    return b, luft, K
+
+
+LOCH = {(0, 0), (1, 0), (0, 1), (1, 1)}
+# Fallhöhe 21: Die Mobs landen in der Trichtermulde (11/16 Block tief), also fallen sie 21,3 Blöcke
+# → 19 Schaden, 1 Herz bleibt. Version 1 hatte 22 (= 20 Schaden, die Mobs starben ohne XP).
+b, luft, K = modell(21)
+b_alt, luft_alt, K_alt = modell(22)
 
 
 def welt(x, y, z):
@@ -187,7 +196,19 @@ for dx in (-8, -3, 2, 7, 10):
         lichter.append(f"execute positioned {X0 + dx} 0 {Z0 + dz} positioned over motion_blocking_no_leaves "
                        f"if block ~ ~ ~ minecraft:air run setblock ~ ~ ~ minecraft:light[level=15]")
 
-alle = list(b) + list(luft)
+# Umbau von Version 1 (Fall 22): Tötungszelle und Spielerraum einen Block höher
+umbau_b = {p: blk for p, blk in b.items() if b_alt.get(p) != blk}
+for p in b_alt:
+    if p not in b and p[1] >= K - 2:
+        umbau_b[p] = "air"
+for p in luft:
+    umbau_b.setdefault(p, "air")
+umbau = []
+for (x, y, z), blk in sorted(umbau_b.items(), key=lambda e: (e[1] != "air", rang(e[1]), e[0][1], e[0][0], e[0][2])):
+    wx, wy, wz = welt(x, y, z)
+    umbau.append(f"setblock {wx} {wy} {wz} minecraft:{blk}")
+
+alle = list(b) + list(luft) + list(b_alt)
 xs = [welt(*p)[0] for p in alle] + [X0 - 8, X0 + 10]
 zs = [welt(*p)[2] for p in alle] + [Z0 - 8, Z0 + 10]
 FL = f"{min(xs)} {min(zs)} {max(xs)} {max(zs)}"
@@ -196,31 +217,30 @@ LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (mi
 funktion("load", [
     "scoreboard objectives add xp.zustand dummy",
     "scoreboard objectives add xp.test dummy",
+    "# #gebaut: 1 = Fall 22 (Mobs starben beim Aufprall), 2 = Fall 21 (aktuell)",
     f"execute unless score #gebaut xp.zustand matches 1.. unless score #stufe xp.zustand matches 1.. run function {NS}:start",
+    f"execute if score #gebaut xp.zustand matches 1 unless score #stufe xp.zustand matches 1.. run function {NS}:start_umbau",
 ])
 funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run function {NS}:licht",
-                  f"execute if score #stufe xp.zustand matches 2 {LADEN} run function {NS}:bauen"])
+                  f"execute if score #stufe xp.zustand matches 2 {LADEN} run function {NS}:bauen",
+                  f"execute if score #stufe xp.zustand matches 3 {LADEN} run function {NS}:umbau"])
+funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 3"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 1"])
 funktion("licht", lichter + ["scoreboard players set #stufe xp.zustand 2"])
-funktion("bauen", befehle + [
-    "scoreboard players set #stufe xp.zustand 0",
-    "scoreboard players set #gebaut xp.zustand 1",
-    f"schedule function {NS}:test/t1 100t",
-])
+fertig = ["scoreboard players set #stufe xp.zustand 0", "scoreboard players set #gebaut xp.zustand 2",
+          f"schedule function {NS}:test/t1 100t"]
+funktion("bauen", befehle + fertig)
+funktion("umbau", ["# Version 1 → 2: Fall 22 → 21"] + umbau + fertig)
 
 # Selbsttest
 kx, ky, kz = welt(0, K, 0)
 def wpos(x, y, z):
     return " ".join(map(str, welt(x, y, z)))
-dunkel = " ".join(f"positioned {wpos(x, 1, z)} if predicate {NS}:dunkel" for x, z in [(-6, -6), (7, -6), (-6, 7), (7, 7)])
-datei(f"data/{NS}/predicate/dunkel.json", json.dumps(
-    {"condition": "minecraft:location_check", "predicate": {"light": {"light": {"max": 0}}}}, indent=2))
 funktion("test/t1", [
     "# Zombie direkt in einen Kanal (Wasser), zwei weitere auf Plattformen",
     f"summon minecraft:zombie {X0 - 6}.5 {P} {Z0}.5 {{Tags:[\"xp.test\",\"xp.kanal\"],PersistenceRequired:1b,IsBaby:0b}}",
     f"summon minecraft:zombie {X0 - 5}.5 {P + 1} {Z0 - 5}.5 {{Tags:[\"xp.test\"],PersistenceRequired:1b,IsBaby:0b}}",
     f"summon minecraft:zombie {X0 + 6}.5 {P + 1} {Z0 + 6}.5 {{Tags:[\"xp.test\"],PersistenceRequired:1b,IsBaby:0b}}",
-    f"execute store success score #dunkel xp.test {dunkel} run scoreboard players set #dummy xp.test 1",
     f"execute store success score #wasser xp.test if block {wpos(-8, 0, 0)} minecraft:water if block {wpos(9, 0, 1)} minecraft:water "
     f"if block {wpos(0, 0, -8)} minecraft:water if block {wpos(1, 0, 9)} minecraft:water",
     f"schedule function {NS}:test/t2 600t",
