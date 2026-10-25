@@ -398,6 +398,8 @@ def feste_funktionen(lichtpunkte, n_teile):
         f"run function {NS}:spiel/starterpaket",
         f"execute if score #starterpaket hs.config matches 1 as @e[type=minecraft:player,tag=hs.starter,tag=!hs.werkzeug] "
         f"run function {NS}:spiel/werkzeug_nachreichen",
+        f"execute if score #starterpaket hs.config matches 1 as @e[type=minecraft:player,tag=hs.starter,tag=!hs.apfel] "
+        f"run function {NS}:spiel/apfel_nachreichen",
         f"schedule function {NS}:spiel/sekunde 20t",
     ])
     ax, ay, az = AMBOSSE[0]
@@ -443,11 +445,12 @@ def feste_funktionen(lichtpunkte, n_teile):
         starter.append(f"execute if items entity @s {slot} * unless items entity @s {slot} minecraft:{item} "
                        f"run give @s minecraft:{item}")
     starter += [f"function {NS}:spiel/werkzeug_geben",
+                f"function {NS}:spiel/apfel_geben",
                 "give @s minecraft:emerald 64",
                 "give @s minecraft:bow",
                 "give @s minecraft:arrow 32",
                 "give @s minecraft:cooked_beef 16",
-                f"tellraw @s {txt(['', {'text': '✦ Starterpaket erhalten: ', 'color': 'gold', 'bold': True}, {'text': 'Eisenrüstung, Schild, Eisenwerkzeuge, Bogen mit 32 Pfeilen, 16 Steaks und 64 Smaragde für die Zauberbibliothek!', 'color': 'yellow'}])}",
+                f"tellraw @s {txt(['', {'text': '✦ Starterpaket erhalten: ', 'color': 'gold', 'bold': True}, {'text': 'Eisenrüstung, Schild, Eisenwerkzeuge, Bogen mit 32 Pfeilen, 16 Steaks, ein verzauberter goldener Apfel und 64 Smaragde für die Zauberbibliothek!', 'color': 'yellow'}])}",
                 "execute at @s run playsound minecraft:entity.player.levelup player @s ~ ~ ~ 0.8 1.2"]
     funktion("spiel/starterpaket", starter)
     funktion("spiel/werkzeug_geben", [
@@ -461,6 +464,16 @@ def feste_funktionen(lichtpunkte, n_teile):
         "# Für alle, die das Starterpaket schon vor den Werkzeugen bekommen haben",
         f"function {NS}:spiel/werkzeug_geben",
         f"tellraw @s {txt(['', {'text': '✦ Nachlieferung zum Starterpaket: ', 'color': 'gold', 'bold': True}, {'text': 'Eisenschwert, -spitzhacke, -axt und -schaufel!', 'color': 'yellow'}])}",
+        "execute at @s run playsound minecraft:entity.player.levelup player @s ~ ~ ~ 0.8 1.2",
+    ])
+    funktion("spiel/apfel_geben", [
+        "tag @s add hs.apfel",
+        "give @s minecraft:enchanted_golden_apple",
+    ])
+    funktion("spiel/apfel_nachreichen", [
+        "# Für alle, die das Starterpaket schon vor dem Apfel bekommen haben",
+        f"function {NS}:spiel/apfel_geben",
+        f"tellraw @s {txt(['', {'text': '✦ Nachlieferung zum Starterpaket: ', 'color': 'gold', 'bold': True}, {'text': 'ein verzauberter goldener Apfel!', 'color': 'yellow'}])}",
         "execute at @s run playsound minecraft:entity.player.levelup player @s ~ ~ ~ 0.8 1.2",
     ])
     # ---- Admin
