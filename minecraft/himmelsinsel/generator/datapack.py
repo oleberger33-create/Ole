@@ -225,6 +225,8 @@ def schilder():
 LADE_PRUEFUNG = " ".join(f"if loaded {x} 0 {z}" for x in range(-40, 41, 16) for z in range(-40, 41, 16))
 ZONE = "x=-48,y=184,z=-48,dx=96,dy=90,dz=96"        # Schutzbereich (Abenteuermodus)
 FALLBAND = "x=-48,y=184,z=-48,dx=96,dy=36,dz=96"    # Luft unter der Insel
+UNTER_INSEL = "x=-36,y=-64,z=-36,dx=72,dy=247,dz=72"  # Boden unterhalb der Insel
+TOR_BEREICH = "x=-3,y=-64,z=33,dx=6,dy=247,dz=8"     # rund um das Himmelstor der Bodenstation
 SX, SY, SZ = SPAWN
 ROT = {"color": "red"}
 WARTET = ["", {"text": "[Himmelsinsel] ", "color": "light_purple"},
@@ -248,6 +250,8 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard objectives add hs.config dummy",
         "scoreboard objectives add hs.cd dummy",
         "scoreboard objectives add spawn trigger \"Zum Spawn\"",
+        "scoreboard objectives add hs.tod deathCount",
+        "scoreboard objectives add hs.weg minecraft.custom:minecraft.leave_game",
         "execute unless score #stufe hs.state = #stufe hs.state run scoreboard players set #stufe hs.state 0",
         f"execute if score #stufe hs.state matches -1 run tellraw @a {txt(WARTET)}",
         "# Einstellungen – werden nur beim allerersten Laden gesetzt (siehe README)",
@@ -256,6 +260,7 @@ def feste_funktionen(lichtpunkte, n_teile):
         "execute unless score #schutz hs.config = #schutz hs.config run scoreboard players set #schutz hs.config 1",
         "execute unless score #fallschirm hs.config = #fallschirm hs.config run scoreboard players set #fallschirm hs.config 1",
         "execute unless score #bodenstation hs.config = #bodenstation hs.config run scoreboard players set #bodenstation hs.config 1",
+        "execute unless score #login_spawn hs.config = #login_spawn hs.config run scoreboard players set #login_spawn hs.config 1",
         f"schedule function {NS}:spiel/sekunde 20t",
         f"schedule function {NS}:spiel/halbsekunde 10t",
     ])
@@ -341,6 +346,22 @@ def feste_funktionen(lichtpunkte, n_teile):
         "# Fallschirm für alle, die von der Insel springen",
         f"execute if score #fallschirm hs.config matches 1 as @a[{FALLBAND},tag=!hs.fall] "
         f"run function {NS}:spiel/fallschirm_an",
+        "# Himmelstor: wer im Portal steht, kommt hoch (auch falls das Endtransitportal selbst nicht teleportiert)",
+        f"execute as @a[{TOR_BEREICH}] at @s if block ~ ~ ~ minecraft:end_gateway run function {NS}:spiel/zum_spawn_still",
+        "# Nach dem Tod und beim Einloggen: wer unten unter der Insel steht, kommt hoch",
+        f"execute as @e[type=minecraft:player,scores={{hs.tod=1..}}] run function {NS}:spiel/nach_tod",
+        f"execute as @a[scores={{hs.weg=1..}}] run function {NS}:spiel/nach_login",
+    ])
+    funktion("spiel/nach_tod", [
+        "# Wiederbelebt am Weltspawn, aber unten gelandet? Dann nach oben. Wer ein eigenes Bett hat, bleibt dort.",
+        "scoreboard players set @s hs.tod 0",
+        f"execute unless data entity @s respawn if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
+    ])
+    funktion("spiel/nach_login", [
+        "# #login_spawn: 0 = nie, 1 = wer sich unter der Insel ausgeloggt hat, 2 = jeder bei jedem Login",
+        "scoreboard players set @s hs.weg 0",
+        f"execute if score #login_spawn hs.config matches 2 run function {NS}:spiel/zum_spawn_still",
+        f"execute if score #login_spawn hs.config matches 1 if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
     ])
     funktion("spiel/schutz", [
         "tag @a remove hs.in",
@@ -404,6 +425,7 @@ def feste_funktionen(lichtpunkte, n_teile):
              "hover_event": {"action": "show_text", "value": "Klicken, um zum Spawn zu reisen"}}
     funktion("spiel/willkommen", [
         "tag @s add hs.gesehen",
+        f"execute if entity @s[{UNTER_INSEL}] run function {NS}:spiel/zum_spawn_still",
         f"tellraw @s {txt(['', {'text': '✦ Willkommen auf der Himmelsinsel! ✦', 'color': 'light_purple', 'bold': True}, {'text': chr(10) + 'In der Zauberbibliothek im Norden gibt es alle Verzauberungsbücher.', 'color': 'gray'}, {'text': chr(10) + 'Runter in die Welt geht es über das Sprungbrett im Süden – mit Fallschirm.', 'color': 'gray'}, {'text': chr(10) + 'Zurück zur Insel: ', 'color': 'gray'}, klick])}",
     ])
     # ---- Admin
@@ -423,12 +445,21 @@ def feste_funktionen(lichtpunkte, n_teile):
                       ("abklingzeit", "Sekunden zwischen zwei /trigger spawn"),
                       ("schutz", "Insel im Abenteuermodus schützen (1/0)"),
                       ("fallschirm", "Sanfter Fall beim Absprung (1/0)"),
-                      ("bodenstation", "Bodenstation beim ersten Bau (1/0)")]:
+                      ("bodenstation", "Bodenstation beim ersten Bau (1/0)"),
+                      ("login_spawn", "Beim Login auf die Insel: 0 nie, 1 wer unten steht, 2 immer")]:
         info += [{"text": f"\n#{key} = ", "color": "gray"},
                  {"score": {"name": f"#{key}", "objective": "hs.config"}, "color": "yellow"},
                  {"text": f"  {erkl}", "color": "dark_gray"}]
     info.append({"text": "\nÄndern: /scoreboard players set #<name> hs.config <wert>", "color": "gray"})
-    funktion("admin/info", [f"tellraw @s {txt([''] + info)}"])
+    info += [{"text": "\n\nBau fertig: ", "color": "gray"},
+             {"score": {"name": "#fertig", "objective": "hs.state"}, "color": "yellow"},
+             {"text": "   Insel am Spawn gefunden: ", "color": "gray"},
+             {"score": {"name": "#insel", "objective": "hs.state"}, "color": "yellow"},
+             {"text": "  (1 = ja)", "color": "dark_gray"}]
+    funktion("admin/info", [
+        f"execute store success score #insel hs.state if block {SX} {SY - 1} {SZ} minecraft:polished_andesite",
+        f"tellraw @s {txt([''] + info)}",
+    ])
     funktion("admin/deinstallieren", [
         "# Schaltet alles ab. Insel, Händler und Schilder bleiben stehen.",
         f"schedule clear {NS}:spiel/sekunde",
@@ -443,6 +474,8 @@ def feste_funktionen(lichtpunkte, n_teile):
         "scoreboard objectives remove hs.config",
         "scoreboard objectives remove hs.cd",
         "scoreboard objectives remove spawn",
+        "scoreboard objectives remove hs.tod",
+        "scoreboard objectives remove hs.weg",
         f"tellraw @s {txt({'text': 'Himmelsinsel deaktiviert. Jetzt noch das Datapack abschalten: /datapack list zeigt den Namen, dann /datapack disable <name>', 'color': 'yellow'})}",
     ])
     # ---- Versionsabhängiges

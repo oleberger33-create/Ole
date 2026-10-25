@@ -81,6 +81,8 @@ Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20,
 - **Runter in die Welt:** vom Sprungbrett springen. Unter der Insel öffnet sich ein „Fallschirm“
   (Sanfter Fall), bis du landest.
 - **Hoch auf die Insel:** am Landeplatz ins lila Himmelstor laufen, `/trigger spawn` benutzen oder sterben.
+- Wer unter der Insel stirbt (ohne eigenes Bett) oder sich dort ausloggt, landet beim nächsten Mal
+  automatisch oben. Mit `#login_spawn = 2` kommt jeder bei jedem Login auf die Insel.
 
 ## Schutz der Insel
 
@@ -100,7 +102,7 @@ Außerdem kümmert sich das Pack automatisch um Folgendes:
 
 | Befehl | Wirkung |
 | --- | --- |
-| `/function himmelsinsel:admin/info` | Zeigt alle Einstellungen |
+| `/function himmelsinsel:admin/info` | Zeigt alle Einstellungen und ob die Insel fertig gebaut ist |
 | `/function himmelsinsel:admin/bauen` | Startet den Bau in einer bestehenden Welt |
 | `/function himmelsinsel:admin/neu_bauen` | Baut Insel, Händler und Schilder komplett neu, z. B. wenn etwas kaputt ist |
 | `/function himmelsinsel:admin/deinstallieren` | Schaltet alles ab, die Insel bleibt stehen. Danach `/datapack disable "file/Himmelsinsel-Spawn.zip"` |
@@ -114,6 +116,7 @@ Einstellungen ändern mit `/scoreboard players set #<name> hs.config <wert>`:
 | `schutz` | 1 | Abenteuermodus auf der Insel (0 = aus) |
 | `fallschirm` | 1 | Sanfter Fall beim Absprung (0 = aus) |
 | `bodenstation` | 1 | Bodenstation beim ersten Bau errichten (0 = nicht bauen) |
+| `login_spawn` | 1 | Beim Einloggen auf die Insel: 0 = nie, 1 = wer unter der Insel steht, 2 = jeder immer |
 
 ## Selbst anpassen
 

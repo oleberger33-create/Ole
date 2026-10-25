@@ -254,7 +254,12 @@ class Pruefer:
         elif p == "minecraft:time":
             return (1, None) if re.match(r"^\d+(\.\d+)?[tsd]?$", k) else (None, f"Zeit {k} ungültig")
         elif p == "minecraft:objective_criteria":
-            return (1, None) if k in ("dummy", "trigger") else (None, f"Kriterium {k} nicht geprüft")
+            if k in ("dummy", "trigger", "deathCount"):
+                return 1, None
+            m = re.match(r"^minecraft\.custom:minecraft\.([a-z_]+)$", k)
+            if m and m.group(1) in self.reg.get("custom_stat", set()):
+                return 1, None
+            return None, f"Kriterium {k} unbekannt"
         elif p == "minecraft:objective":
             return (1, None) if re.match(r"^[A-Za-z0-9_.+-]{1,16}$", k) else (None, f"Ziel {k} ungültig")
         elif p == "minecraft:operation":
