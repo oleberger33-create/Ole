@@ -227,6 +227,11 @@ ZONE = "x=-48,y=184,z=-48,dx=96,dy=90,dz=96"        # Schutzbereich (Abenteuermo
 FALLBAND = "x=-48,y=184,z=-48,dx=96,dy=36,dz=96"    # Luft unter der Insel
 UNTER_INSEL = "x=-36,y=-64,z=-36,dx=72,dy=247,dz=72"  # Boden unterhalb der Insel
 TOR_BEREICH = "x=-3,y=-64,z=33,dx=6,dy=247,dz=8"     # rund um das Himmelstor der Bodenstation
+# Die Bodenstation steht je nach Gelände unterschiedlich hoch; gefunden wird sie über ihr Schild,
+# das 0,5 4,7 -3,5 neben ihrem Mittelpunkt schwebt.
+BODENSCHILD = "@e[type=minecraft:text_display,tag=hs.bodenschild,limit=1]"
+STATION_MITTE = "positioned ~-0.5 ~-4.5 ~3.5 align xyz"
+STATION_SCHUTZ = ("positioned ~-8 ~-10.7 ~-4", "dx=15,dy=16,dz=15")  # Fundament bis Laternen, mit Rand
 SX, SY, SZ = SPAWN
 ROT = {"color": "red"}
 WARTET = ["", {"text": "[Himmelsinsel] ", "color": "light_purple"},
@@ -367,13 +372,14 @@ def feste_funktionen(lichtpunkte, n_teile):
     funktion("spiel/schutz", [
         "tag @a remove hs.in",
         f"tag @a[{ZONE}] add hs.in",
+        f"execute at {BODENSCHILD} {STATION_SCHUTZ[0]} run tag @a[{STATION_SCHUTZ[1]}] add hs.in",
         f"execute as @a[tag=hs.in,gamemode=survival] run function {NS}:spiel/schutz_rein",
         f"execute as @a[tag=hs.adv,tag=!hs.in] run function {NS}:spiel/schutz_raus",
     ])
     funktion("spiel/schutz_rein", [
         "gamemode adventure @s",
         "tag @s add hs.adv",
-        f"title @s actionbar {txt({'text': 'Spawn-Insel: Hier kann nichts abgebaut werden', 'color': 'light_purple'})}",
+        f"title @s actionbar {txt({'text': 'Spawn-Bereich: Hier kann nichts abgebaut werden', 'color': 'light_purple'})}",
     ])
     funktion("spiel/schutz_raus", [
         "gamemode survival @s[gamemode=adventure]",
@@ -406,6 +412,7 @@ def feste_funktionen(lichtpunkte, n_teile):
     pflege = ["# Abgenutzte Ambosse ersetzen, Monster von der Insel entfernen, Glitzern"]
     pflege.append(f"execute if loaded {ax} {ay} {az} run function {NS}:spiel/ambosse")
     pflege.append(f"kill @e[type=#{NS}:monster,{ZONE}]")
+    pflege.append(f"execute at {BODENSCHILD} {STATION_MITTE} run function {NS}:spiel/bodenstation")
     pflege.append(f"particle minecraft:enchant {BIB[0] + 0.5} {F + 3} {BIB[1] + 0.5} 2.5 1.5 2.5 0.6 25")
     funktion("spiel/pflege", pflege)
     funktion("spiel/ambosse", [f"execute unless block {x} {y} {z} minecraft:anvil "
@@ -586,6 +593,14 @@ def main():
            "summon minecraft:text_display ~0.5 ~4.7 ~-3.5 {Tags:[\"hs.bodenschild\"],billboard:\"vertical\","
            f"shadow:1b,text:{txt(['', {'text': 'Himmelstor ↑', 'color': 'light_purple', 'bold': True}, {'text': chr(10) + 'Hinein und zurück zur Spawn-Insel', 'color': 'white'}])}}}"]
     funktion("bau/bodenstation", st)
+    reparatur = ["# Fehlende Blöcke der Bodenstation ersetzen (z. B. nach Explosionen); ~ ~ ~ = ihr Mittelpunkt"]
+    for (x, y, z), blk in sorted(station.b.items(), key=lambda e: (phase(e[1]), e[0][1], e[0][2], e[0][0])):
+        pos = f"{koord(x, True)} {koord(y, True)} {koord(z, True)}"
+        reparatur.append(f"execute unless block {pos} minecraft:{blk.split('[')[0]} run setblock {pos} minecraft:{blk}")
+    for x, y, z in bauplan.TOR:
+        pos = f"{koord(x, True)} {koord(y, True)} {koord(z, True)}"
+        reparatur.append(f"execute unless block {pos} minecraft:end_gateway run setblock {pos} {tor}")
+    funktion("spiel/bodenstation", reparatur)
 
     lichtpunkte = [(x, z) for x in range(-30, 31, 10) for z in range(-30, 31, 10) if math.hypot(x, z) <= 34]
     feste_funktionen(lichtpunkte, len(teile))

@@ -93,11 +93,14 @@ Preisformel: 4 + 6 × Stufe, seltene Schatz-Verzauberungen 6 mehr, Reparatur 20,
 Auf der Insel (und im Luftraum darum) werden Spieler im Überlebensmodus automatisch in den
 **Abenteuermodus** gesetzt. Abbauen und Bauen geht dort nicht, Handeln, Zaubern, Ambosse, Werkbänke und
 Endertruhen funktionieren normal. Wer die Insel verlässt, ist sofort wieder im Überlebensmodus.
-Spieler im Kreativmodus sind nicht betroffen.
+Spieler im Kreativmodus sind nicht betroffen. Dasselbe gilt für die Bodenstation mit dem Himmelstor
+und ein paar Blöcke Rand drumherum.
 
 Außerdem kümmert sich das Pack automatisch um Folgendes:
 
 - Abgenutzte Ambosse werden jede Sekunde durch neue ersetzt.
+- Fehlt an der Bodenstation ein Block (etwa nach einer Explosion), wird er innerhalb einer Sekunde
+  ersetzt, solange jemand in der Nähe ist.
 - Monster, die auf die Insel gelangen, verschwinden.
 - Unsichtbare Lichtblöcke verhindern, dass dort nachts Monster spawnen.
 - Der Blitzableiter auf der Bibliotheksspitze verhindert, dass ein Blitz Händler in Hexen verwandelt.
