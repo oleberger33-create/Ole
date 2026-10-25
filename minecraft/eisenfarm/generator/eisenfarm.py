@@ -19,7 +19,12 @@ Aufbau (von unten nach oben, G = Bodenhöhe, H = Höhe des oberen Teils über de
 Der obere Teil liegt so hoch, dass Golems des Dorfs am Boden mehr als 16 Blöcke unter den
 Dorfbewohnern bleiben – sonst „sehen“ sie einen Golem und rufen keinen eigenen.
 
-Versionen (#gebaut): 1 = ohne Wasser, 2 = Wasser, 3 = hochgesetzt mit Zäunen (aktuell).
+Der Zombie steht auf einem Block, den ein Klebriger Kolben (gesteuert von einem Tageslichtsensor) bewegt:
+Tagsüber steht er einen Block höher und schaut über die Glaskante – die Dorfbewohner sehen ihn, geraten in
+Panik und rufen Golems. Nachts sackt er ab und ist rundum von Glas umgeben: keine Panik, alle schlafen.
+Ohne Schlaf in den letzten 20 Minuten rufen Dorfbewohner keine Golems.
+
+Versionen (#gebaut): 1 = ohne Wasser, 2 = Wasser, 3 = hochgesetzt mit Zäunen, 4 = Nachtsperre (aktuell).
 Ältere Stände werden nachgerüstet; danach testet das Pack sich selbst (Scoreboard ef.test).
 """
 import json
@@ -116,7 +121,19 @@ def entwurf(h, version):
         b[(4, v, 0)] = b[(4, v + 1, 0)] = "air"
         box(4, v + 2, -1, 5, v + 2, 1, "glowstone")    # Dach: gegen die Sonne und gegen Golems auf den Zäunen
         box(3, d, -1, 5, d, 1, "glass")                # Boden unter der Zombie-Ecke
-    else:
+    if version >= 4:
+        # Zombie-Aufzug: zwei Glasringe (Füße/Kopf in der Nacht), darüber offen, Leuchtstein nur über dem Zombie
+        for x, z in [(3, 0), (5, 0), (4, -1), (4, 1)]:
+            b[(x, v, z)] = b[(x, v + 1, z)] = "glass"
+            b[(x, v + 2, z)] = "air"
+            b[(x, v + 3, z)] = "glass"
+        b[(5, v + 2, -1)] = b[(5, v + 2, 1)] = "air"
+        b[(4, v, 0)] = b[(4, v + 1, 0)] = b[(4, v + 2, 0)] = "air"
+        b[(4, v + 3, 0)] = "glowstone"
+        b[(4, v - 1, 0)] = "stone"                     # Stand des Zombies (nachts hier, tagsüber eins höher)
+        b[(4, v - 2, 0)] = "sticky_piston[facing=up,extended=false]"
+        b[(5, v - 2, 0)] = "daylight_detector[inverted=false]"
+    if version < 3:
         box(3, v, -1, 4, v + 1, 1, "glass")
         b[(3, v, 0)] = b[(3, v + 1, 0)] = "air"
         b[(3, v + 2, 0)] = "glowstone"
@@ -130,7 +147,8 @@ def welt(x, y, z):
 def rang(blk):
     if blk in ("lava", "water"):
         return 3
-    if blk.startswith(("hopper", "chest", "white_bed", "oak_wall_sign", "oak_fence")):
+    if blk.startswith(("hopper", "chest", "white_bed", "oak_wall_sign", "oak_fence", "sticky_piston",
+                       "daylight_detector")):
         return 2
     return 0 if blk != "air" else 1
 
@@ -143,7 +161,7 @@ def setzbefehle(bloecke):
     return out
 
 
-neu, V = entwurf(H, 3)
+neu, V = entwurf(H, 4)
 alt, V_ALT = entwurf(0, 2)
 
 
@@ -184,18 +202,46 @@ LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (mi
 funktion("load", [
     "scoreboard objectives add ef.zustand dummy",
     "scoreboard objectives add ef.test dummy",
-    "# #gebaut: 1 = ohne Wasser, 2 = mit Wasser, 3 = hochgesetzt mit Zäunen (aktuell)",
+    "# #gebaut: 1 = ohne Wasser, 2 = mit Wasser, 3 = hochgesetzt, 4 = mit Nachtsperre (aktuell)",
     f"execute unless score #gebaut ef.zustand matches 1.. unless score #stufe ef.zustand matches 1.. run function {NS}:start",
     f"execute if score #gebaut ef.zustand matches 1..2 unless score #stufe ef.zustand matches 1.. run function {NS}:start_umbau",
+    f"execute if score #gebaut ef.zustand matches 3 unless score #stufe ef.zustand matches 1.. run function {NS}:start_sperre",
 ])
 funktion("tick", [f"execute if score #stufe ef.zustand matches 1 {LADEN} run function {NS}:bauen",
-                  f"execute if score #stufe ef.zustand matches 3 {LADEN} run function {NS}:umbau"])
+                  f"execute if score #stufe ef.zustand matches 3 {LADEN} run function {NS}:umbau",
+                  f"execute if score #stufe ef.zustand matches 4 {LADEN} run function {NS}:sperre"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 1"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 3"])
-fertig = ["scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 3",
-          f"schedule function {NS}:test/t1 100t"]
+funktion("start_sperre", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 4"])
+fertig = ["scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 4",
+          f"schedule function {NS}:test/s1 40t", f"schedule function {NS}:test/t1 100t"]
 funktion("bauen", bauen + fertig)
 funktion("umbau", umbau + fertig)
+v3, _ = entwurf(H, 3)
+aenderung = {p: blk for p, blk in neu.items() if v3.get(p) != blk}
+aenderung.update({p: "air" for p in v3 if p not in neu})
+funktion("sperre", ["# Version 3 → 4: Zombie-Aufzug mit Tageslichtsensor"] + setzbefehle(aenderung) + fertig)
+
+# Test des Zombie-Aufzugs: Zustand jetzt, dann Kolben per Redstone-Block auf „Tag“ zwingen
+sx, sy, sz = welt(4, V, 0)
+zombie_oben = f"if entity @e[type=minecraft:zombie,tag=ef.zombie,x={sx},y={sy + 1},z={sz},dx=0,dy=0,dz=0]"
+funktion("test/s1", [
+    f"execute store success score #nacht ef.test if block {sx + 1} {sy - 2} {sz} minecraft:daylight_detector[power=0]",
+    f"execute store success score #zombie_oben_jetzt ef.test {zombie_oben}",
+    f"setblock {sx} {sy - 2} {sz + 1} minecraft:redstone_block",
+    f"schedule function {NS}:test/s2 20t",
+])
+funktion("test/s2", [
+    f"execute store success score #aufzug_tag ef.test if block {sx} {sy} {sz} minecraft:stone "
+    f"if block {sx} {sy - 2} {sz} minecraft:sticky_piston[extended=true]",
+    f"execute store success score #zombie_oben_tag ef.test {zombie_oben}",
+    f"setblock {sx} {sy - 2} {sz + 1} minecraft:glass",
+    f"schedule function {NS}:test/s3 20t",
+])
+funktion("test/s3", [
+    f"execute store success score #zombie_oben_danach ef.test {zombie_oben}",
+    "execute store result score #zombie_lebt ef.test if entity @e[type=minecraft:zombie,tag=ef.zombie]",
+])
 
 # Selbsttest: Testgolem durchs Loch, danach 25 Minuten beobachten, ob von selbst Eisen kommt
 kx, ky, kz = welt(1, 6 + H + 2, 1)
@@ -218,14 +264,14 @@ funktion("test/t3", [
     f"execute store result score #eisen_5min ef.test {eisen}",
     "execute store result score #betten ef.test if entity "
     "@e[type=minecraft:villager,tag=ef.dorf,nbt={Brain:{memories:{\"minecraft:home\":{}}}}]",
-    f"schedule function {NS}:test/t4 12000t",
+    f"schedule function {NS}:test/t4 18000t",
 ])
 funktion("test/t4", [
-    f"execute store result score #eisen_15min ef.test {eisen}",
-    f"schedule function {NS}:test/t5 12000t",
+    f"execute store result score #eisen_20min ef.test {eisen}",
+    f"schedule function {NS}:test/t5 24000t",
 ])
 funktion("test/t5", [
-    f"execute store result score #eisen_25min ef.test {eisen}",
+    f"execute store result score #eisen_40min ef.test {eisen}",
     f"forceload remove {FL}",
     "scoreboard players set #fertig ef.test 3",
 ])
