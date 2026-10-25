@@ -27,8 +27,12 @@ Der Sensor speist den Kolben über 8 Felder Redstone-Staub (je Feld eine Stärke
 oben, solange der Sensor mindestens 8 zeigt, und verschwindet schon am späten Nachmittag (ca. Tageszeit 11000).
 So liegen die Dorfbewohner im Bett (ab 12000), bevor Spieler die Nacht überspringen können (ab 12542).
 
+Der äußere Rand der Plattform hat einen Glasboden: Golems spawnen ohne Wandprüfung und blieben sonst in
+den Ecken (nur Quellwasser, kein Sog) halb in der Glaswand stecken – und ein lebender Golem in Sichtweite
+blockiert alle weiteren. Auf Glas spawnen sie nicht, also nur noch im inneren Ring über dem Sog.
+
 Versionen (#gebaut): 1 = ohne Wasser, 2 = Wasser, 3 = hochgesetzt mit Zäunen, 4 = Zombie-Aufzug,
-5 = Aufzug mit Schwelle (aktuell).
+5 = Aufzug mit Schwelle, 6 = Glasrand auf der Plattform (aktuell).
 Ältere Stände werden nachgerüstet; danach testet das Pack sich selbst (Scoreboard ef.test).
 """
 import json
@@ -104,6 +108,8 @@ def entwurf(h, version):
             for z in range(-2, 4):
                 if x in (-2, 3) or z in (-2, 3):
                     b[(x, p + 1, z)] = "water"
+                    if version >= 6:
+                        b[(x, p, z)] = "glass"         # Rand: hier spawnen keine Golems
     d = p + 4                                          # Glasdecke
     box(-3, d, -3, 4, d, 4, "glass")
     for x, z in [(-2, -2), (3, -2), (-2, 3), (3, 3), (0, -2), (1, 3), (-2, 1), (3, 0)]:
@@ -177,7 +183,7 @@ def setzbefehle(bloecke):
     return out
 
 
-neu, V = entwurf(H, 5)
+neu, V = entwurf(H, 6)
 alt, V_ALT = entwurf(0, 2)
 
 
@@ -223,16 +229,25 @@ funktion("load", [
     f"execute if score #gebaut ef.zustand matches 1..2 unless score #stufe ef.zustand matches 1.. run function {NS}:start_umbau",
     f"execute if score #gebaut ef.zustand matches 3 unless score #stufe ef.zustand matches 1.. run function {NS}:start_sperre",
     f"execute if score #gebaut ef.zustand matches 4 unless score #stufe ef.zustand matches 1.. run function {NS}:start_schwelle",
+    f"execute if score #gebaut ef.zustand matches 5 unless score #stufe ef.zustand matches 1.. run function {NS}:start_glasrand",
 ])
 funktion("tick", [f"execute if score #stufe ef.zustand matches 1 {LADEN} run function {NS}:bauen",
                   f"execute if score #stufe ef.zustand matches 3 {LADEN} run function {NS}:umbau",
                   f"execute if score #stufe ef.zustand matches 4 {LADEN} run function {NS}:sperre",
-                  f"execute if score #stufe ef.zustand matches 5 {LADEN} run function {NS}:schwelle"])
+                  f"execute if score #stufe ef.zustand matches 5 {LADEN} run function {NS}:schwelle",
+                  f"execute if score #stufe ef.zustand matches 6 {LADEN} run function {NS}:glasrand"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 1"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 3"])
 funktion("start_sperre", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 4"])
 funktion("start_schwelle", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 5"])
-fertig = ["scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 5",
+funktion("start_glasrand", [f"forceload add {FL}", "scoreboard players set #stufe ef.zustand 6"])
+px1, py1, pz1 = welt(-2, 6 + H + 1, -2)
+hx, hy, hz = welt(1, 6 + H + 1, 1)
+festgesteckt = (f"tp @e[type=minecraft:iron_golem,x={px1},y={py1},z={pz1},dx=5,dy=2,dz=5] "
+                f"{hx}.0 {hy} {hz}.0")
+plattform_golems = f"@e[type=minecraft:iron_golem,x={px1},y={py1},z={pz1},dx=5,dy=2,dz=5]"
+fertig = ["# Golems, die noch auf der Plattform stehen, über das Loch setzen", festgesteckt,
+          "scoreboard players set #stufe ef.zustand 0", "scoreboard players set #gebaut ef.zustand 6",
           f"schedule function {NS}:test/s1 40t", f"schedule function {NS}:test/t1 100t"]
 funktion("bauen", bauen + fertig)
 funktion("umbau", umbau + fertig)
@@ -244,8 +259,9 @@ def differenz(vorher):
 
 funktion("sperre", ["# Version 3 → 5: Zombie-Aufzug mit Tageslichtsensor und Schwelle"]
          + differenz(entwurf(H, 3)[0]) + fertig)
-funktion("schwelle", ["# Version 4 → 5: Sensor über 8 Staubfelder (Zombie verschwindet ab Stärke < 8)"]
+funktion("schwelle", ["# Version 4 → 6: Sensor über 8 Staubfelder (Zombie verschwindet ab Stärke < 8)"]
          + differenz(entwurf(H, 4)[0]) + fertig)
+funktion("glasrand", ["# Version 5 → 6: Glasboden am Plattformrand"] + differenz(entwurf(H, 5)[0]) + fertig)
 
 # Test des Zombie-Aufzugs: Zustand jetzt, dann Kolben per Redstone-Block auf „Tag“ zwingen
 sx, sy, sz = welt(4, V, 0)
@@ -292,16 +308,19 @@ funktion("test/t2", [
 ])
 funktion("test/t3", [
     f"execute store result score #eisen_5min ef.test {eisen}",
+    f"execute store result score #golems_plattform_5min ef.test if entity {plattform_golems}",
     "execute store result score #betten ef.test if entity "
     "@e[type=minecraft:villager,tag=ef.dorf,nbt={Brain:{memories:{\"minecraft:home\":{}}}}]",
     f"schedule function {NS}:test/t4 18000t",
 ])
 funktion("test/t4", [
     f"execute store result score #eisen_20min ef.test {eisen}",
+    f"execute store result score #golems_plattform_20min ef.test if entity {plattform_golems}",
     f"schedule function {NS}:test/t5 24000t",
 ])
 funktion("test/t5", [
     f"execute store result score #eisen_40min ef.test {eisen}",
+    f"execute store result score #golems_plattform_40min ef.test if entity {plattform_golems}",
     f"forceload remove {FL}",
     "scoreboard players set #fertig ef.test 3",
 ])
