@@ -263,6 +263,16 @@ zs = [welt(*p)[2] for p in alle] + [Z0 - 8, Z0 + 10]
 FL = f"{min(xs)} {min(zs)} {max(xs)} {max(zs)}"
 LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (min(zs), max(zs)))
 
+# Mob-Limit: Pro Spieler zählen alle Monster im Umkreis von 128 Blöcken, also auch die in den Höhlen darunter.
+# Ist das Limit (70) voll, spawnt in der Farm nichts. Solange jemand im Spielerraum steht, verschwinden deshalb
+# alle 2 Sekunden Höhlenmonster, die mehr als 34 Blöcke von ihm weg sind (die obere
+# Ebene reicht bis 32); bei anderen Spielern (48) bleiben sie.
+MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "bogged", "creeper", "spider",
+           "cave_spider", "witch", "enderman", "slime"]
+rx, ry, rz = welt(-1, K - 2, 3)
+RAUM = f"x={rx},y={ry},z={rz},dx=4,dy=2,dz=1"
+fx, fy, fz = welt(-9, K - 2, -9)
+FARM = f"x={fx},y={fy},z={fz},dx=19,dy={8 - (K - 2)},dz=19"     # das ganze Bauwerk
 sx, sy, sz = welt(-8, -1, -8)
 SPAWN = f"x={sx},y={sy},z={sz},dx=17,dy=8,dz=17"                # beide Ebenen samt unteren Kanälen
 ZELLE = " ".join(f"{v}.0" for v in welt(1, K, 1))
@@ -279,17 +289,15 @@ funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run fun
                   f"execute if score #stufe xp.zustand matches 3 {LADEN} run function {NS}:umbau",
                   "# Spinnen passen nicht in die Kanäle und blieben für immer oben (sie belegen Mob-Plätze). Im Schacht klettern",
                   "# sie an den Wänden hoch, deshalb kommen sie direkt in die Tötungszelle, mit 1 Herz wie die anderen.",
-                  f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:spider,{SPAWN}] run function {NS}:spinne"])
+                  f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:spider,{SPAWN}] run function {NS}:spinne",
+                  "# Creeper in der Farm explodieren ohne Wirkung: Zwei Sprengungen hatten die Tötungszelle aufgerissen,",
+                  "# danach liefen Mobs in den Spielerraum.",
+                  f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:creeper,{FARM},tag=!xp.zahm] run function {NS}:zahm",
+                  "# Was trotzdem in den Spielerraum kommt, stirbt sofort"]
+                 + [f"execute if score #gebaut xp.zustand matches 2.. run kill @e[type=minecraft:{m},{RAUM}]" for m in MONSTER])
+funktion("zahm", ["data merge entity @s {ExplosionRadius:0b}", "tag @s add xp.zahm"])
 funktion("spinne", ["data modify entity @s Health set value 2.0f", f"tp @s {ZELLE}"])
 
-# Mob-Limit: Pro Spieler zählen alle Monster im Umkreis von 128 Blöcken, also auch die in den Höhlen darunter.
-# Ist das Limit (70) voll, spawnt in der Farm nichts. Solange jemand im Spielerraum steht, verschwinden deshalb
-# alle 2 Sekunden Höhlenmonster, die mehr als 34 Blöcke von ihm weg sind (die obere
-# Ebene reicht bis 32); bei anderen Spielern (48) bleiben sie.
-MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "bogged", "creeper", "spider",
-           "cave_spider", "witch", "enderman", "slime"]
-rx, ry, rz = welt(-1, K - 2, 3)
-RAUM = f"x={rx},y={ry},z={rz},dx=4,dy=2,dz=1"
 funktion("platz", [f"schedule function {NS}:platz 40t",
                    f"execute if score #gebaut xp.zustand matches 2.. if entity @a[{RAUM}] run function {NS}:platz_frei"])
 funktion("platz_frei",
