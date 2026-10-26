@@ -228,7 +228,7 @@ funktion("load", [
     "scoreboard objectives add xp.test dummy",
     "# #gebaut: 1 = Fall 22 (Mobs starben beim Aufprall), 2 = Fall 21 (aktuell)",
     f"execute unless score #gebaut xp.zustand matches 1.. unless score #stufe xp.zustand matches 1.. run function {NS}:start",
-    f"execute if score #gebaut xp.zustand matches 1 unless score #stufe xp.zustand matches 1.. run function {NS}:start_umbau",
+    f"execute if score #gebaut xp.zustand matches 1 unless score #stufe xp.zustand matches 1.. run function {NS}:start_umbau",    f"schedule function {NS}:platz 40t",
 ])
 funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run function {NS}:licht",
                   f"execute if score #stufe xp.zustand matches 2 {LADEN} run function {NS}:bauen",
@@ -237,6 +237,23 @@ funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run fun
                   "# sie an den Wänden hoch, deshalb kommen sie direkt in die Tötungszelle, mit 1 Herz wie die anderen.",
                   f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:spider,{SPAWN}] run function {NS}:spinne"])
 funktion("spinne", ["data modify entity @s Health set value 2.0f", f"tp @s {ZELLE}"])
+
+# Mob-Limit: Pro Spieler zählen alle Monster im Umkreis von 128 Blöcken, also auch die in den Höhlen darunter.
+# Ist das Limit (70) voll, spawnt in der Farm nichts. Solange jemand im Spielerraum steht, verschwinden deshalb
+# alle 2 Sekunden Höhlenmonster, die mehr als 32 Blöcke von ihm weg sind (die Farm
+# reicht bis 29); bei anderen Spielern (48) bleiben sie.
+MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "bogged", "creeper", "spider",
+           "cave_spider", "witch", "enderman", "slime"]
+rx, ry, rz = welt(-1, K - 2, 3)
+RAUM = f"x={rx},y={ry},z={rz},dx=4,dy=2,dz=1"
+funktion("platz", [f"schedule function {NS}:platz 40t",
+                   f"execute if score #gebaut xp.zustand matches 2.. if entity @a[{RAUM}] run function {NS}:platz_frei"])
+funktion("platz_frei",
+         [f"execute as @a[gamemode=!spectator] unless entity @s[{RAUM}] at @s run tag @e[type=minecraft:{m},distance=..48] add xp.bleibt"
+          for m in MONSTER]
+         + [f"execute at @a[{RAUM},limit=1] as @e[type=minecraft:{m},distance=32..128,tag=!xp.bleibt] "
+            f"unless data entity @s {{PersistenceRequired:1b}} at @s run tp @s ~ -300 ~" for m in MONSTER]
+         + ["tag @e[tag=xp.bleibt] remove xp.bleibt"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 3"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 1"])
 funktion("licht", lichter + ["scoreboard players set #stufe xp.zustand 2"])
