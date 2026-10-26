@@ -43,8 +43,11 @@ def funktion(name, zeilen):
 
 
 # ---------------------------------------------------------------- Modell (relativ)
-def modell(FALL):
-    """Alle Blöcke und die frei zu räumende Luft; FALL = Höhe von der Wasserebene bis zum Trichter."""
+def modell(FALL, oben=True, tief=True):
+    """Alle Blöcke und die frei zu räumende Luft; FALL = Höhe von der Wasserebene bis zum Trichter,
+    oben = mit zweiter Spawn-Ebene (ab Version 3), tief = Wasser 2 unter den Plattformen (ab Version 4).
+    Bei 1 Block Abstand sprangen die Mobs aus dem Wasser zurück auf die Plattformen."""
+    T = 1 if tief else 0                                          # so viel tiefer liegt das Wasser
     b = {}
     def setze(x, y, z, blk): b[(x, y, z)] = blk
     def box(x1, y1, z1, x2, y2, z2, blk):
@@ -56,46 +59,71 @@ def modell(FALL):
     LOCH = {(0, 0), (1, 0), (0, 1), (1, 1)}
     def kanal(x, z):
         return (z in (0, 1) and -8 <= x <= 9) or (x in (0, 1) and -8 <= z <= 9)
+    def kanalende(x, z):
+        return x in (-8, 9) or z in (-8, 9)
+    def falltueren(y):
+        # Falltüren (offen) über den Kanälen, die Klappe zur Kanalmitte: Mobs halten das Feld für Boden und fallen ins
+        # Wasser. Hängt die Klappe an der Plattformkante, ist sie eine Wand (Version 2 hatte das, per Konsole umgedreht).
+        for x in range(-8, 10):
+            for z in range(-8, 10):
+                if not kanal(x, z) or (x, z) in LOCH:
+                    continue
+                if z in (0, 1) and not (x in (0, 1)):
+                    setze(x, y, z, f"oak_trapdoor[facing={'north' if z == 0 else 'south'},half=bottom,open=true]")
+                elif x in (0, 1) and not (z in (0, 1)):
+                    setze(x, y, z, f"oak_trapdoor[facing={'west' if x == 0 else 'east'},half=bottom,open=true]")
     # Spawn-Ebene: Innenraum x/z -8..9, Wände bei -9 und 10
     for x in range(-9, 11):
         for z in range(-9, 11):
             rand = x in (-9, 10) or z in (-9, 10)
             if rand:
-                box(x, -1, z, x, 2, z, W)
+                box(x, -1 - T, z, x, 2, z, W)
                 setze(x, 3, z, "cobblestone_slab[type=bottom]")
                 continue
             setze(x, 3, z, "cobblestone_slab[type=bottom]")            # Decke: auf Stufen spawnt nichts
             if (x, z) in LOCH:
                 continue
             if kanal(x, z):
-                setze(x, -1, z, W)                                    # Kanalboden
-                ende = x in (-8, 9) or z in (-8, 9)
+                setze(x, -1 - T, z, W)                                # Kanalboden
+                ende = kanalende(x, z)
                 if ende:
-                    setze(x, 0, z, "water")                           # Quelle am Kanalende
+                    setze(x, -T, z, "water")                          # Quelle am Kanalende
             else:
-                setze(x, 0, z, W)                                     # Plattform
-    # Falltüren (offen) über den Kanälen, die Klappe zur Kanalmitte: Mobs halten das Feld für Boden und fallen ins Wasser.
-    # Hängt die Klappe an der Plattformkante, ist sie eine Wand (Version 2 hatte das, per Konsole umgedreht).
-    for x in range(-8, 10):
-        for z in range(-8, 10):
-            if not kanal(x, z) or (x, z) in LOCH:
-                continue
-            if z in (0, 1) and not (x in (0, 1)):
-                setze(x, 1, z, f"oak_trapdoor[facing={'north' if z == 0 else 'south'},half=bottom,open=true]")
-            elif x in (0, 1) and not (z in (0, 1)):
-                setze(x, 1, z, f"oak_trapdoor[facing={'west' if x == 0 else 'east'},half=bottom,open=true]")
-    # Fallschacht 2 × 2, Wände ringsum
-    for y in range(-FALL + 1, -1):
+                box(x, -T, z, x, 0, z, W)                             # Plattform
+    falltueren(1)
+    # Zweite Spawn-Ebene ab 3, gleich aufgebaut, aber das Wasser (auf 4) fließt von 2 × 2 Quellen in der Mitte nach
+    # außen. An den vier Kanalenden ist der Boden offen: Die Mobs fallen in die Quellen der unteren Kanäle
+    # (Landung im Wasser, kein Schaden) und schwimmen mit den unteren Mobs zum Fallschacht.
+    abwurf = set()
+    if oben:
+        for x in range(-9, 11):
+            for z in range(-9, 11):
+                setze(x, 7 + T, z, "cobblestone_slab[type=bottom]")
+                if x in (-9, 10) or z in (-9, 10):
+                    box(x, 3, z, x, 6 + T, z, W)
+                    continue
+                if kanal(x, z) and kanalende(x, z):
+                    abwurf.add((x, 3, z))                             # offen: hier fallen sie runter
+                    b.pop((x, 3, z), None)
+                    continue
+                setze(x, 3, z, W)                                     # Boden oben = Decke unten
+                if (x, z) in LOCH:
+                    setze(x, 4, z, "water")                           # Quellen in der Mitte
+                elif not kanal(x, z):
+                    box(x, 4, z, x, 4 + T, z, W)                      # Plattform
+        falltueren(5 + T)
+    # Fallschacht 2 × 2, Wände ringsum (bis unter die Wasserebene)
+    K = -T - FALL                                                # Tötungszelle: Mobs stehen in den Trichtern bei K - 1
+    for y in range(K + 1, -T):
         for x in range(-1, 3):
             for z in range(-1, 3):
                 if (x, z) not in LOCH:
                     setze(x, y, z, W)
-    for x in range(-1, 3):
-        for z in range(-1, 3):
-            if (x, z) not in LOCH:
-                setze(x, -1, z, W)
-    # Tötungszelle: Mobs stehen auf y=-22 (auf Trichtern bei -23)
-    K = -FALL
+    if not tief:
+        for x in range(-1, 3):
+            for z in range(-1, 3):
+                if (x, z) not in LOCH:
+                    setze(x, -1, z, W)
     for x in range(-1, 3):
         for z in range(-1, 3):
             if (x, z) not in LOCH:
@@ -111,10 +139,11 @@ def modell(FALL):
     setze(1, K - 1, 1, "hopper[facing=east]")
     setze(2, K - 1, 1, "hopper[facing=south]")
     setze(2, K - 1, 2, "hopper[facing=south]")
-    # Sichtschlitz: geschlossene Falltür vor den Mobs, darüber Stein. Der Spalt ist 13/16 hoch: Groß genug für
-    # Schläge und XP-Kugeln (eine untere Stufe ließ nur einen halben Block), zu klein für Babyzombies (0,98).
+    # Sichtschlitz: geschlossene Falltür (obere Hälfte) vor den Mobs. Der Spalt darunter ist 13/16 hoch: groß genug
+    # für Schläge und XP-Kugeln, zu klein für Babyzombies (0,98). Er liegt unter den Augen der Creeper; mit der
+    # Falltür unten (Spalt bis K + 1) sahen sie einen geduckten Spieler und sprengten.
     for x in (0, 1):
-        setze(x, K, 2, "oak_trapdoor[facing=south,half=bottom,open=false]")
+        setze(x, K, 2, "oak_trapdoor[facing=south,half=top,open=false]")
         setze(x, K + 1, 2, W)
         setze(x, K - 1, 2, W)
     # Spielerraum südlich: x -1..3, z 3..4, y K-1..K (2 hoch), Boden K-2
@@ -136,10 +165,11 @@ def modell(FALL):
     box(-1, K + 1, 3, 3, K + 1, 4, W)                           # Decke Spielerraum
     setze(-1, K - 1, 5, "air"); setze(-1, K, 5, "air")           # Eingang (Süden)
     setze(3, K, 4, "wall_torch[facing=north]")
-    # AFK-Mulde einen Block tiefer: Dort sind die Füße 24 unter der Spawn-Ebene, also spawnt überall etwas
-    # (im Spielerraum fehlt sonst ein Kreis von etwa 7 Blöcken direkt darüber)
-    for z in (3, 4):
-        setze(-1, K - 2, z, "air"); setze(-1, K - 3, z, W)
+    # Version 3: AFK-Mulde einen Block tiefer, damit die Füße 24 unter der Spawn-Ebene sind (sonst fehlt ein Kreis
+    # von etwa 7 Blöcken direkt darüber). Ab Version 4 liegt der ganze Spielerraum so tief.
+    if not tief:
+        for z in (3, 4):
+            setze(-1, K - 2, z, "air"); setze(-1, K - 3, z, W)
     for x in range(-2, 5):
         for z in range(-1, 6):
             if (x, K - 1, z) in b and b[(x, K - 1, z)] == "air" and (x, K - 2, z) not in b:
@@ -152,14 +182,23 @@ def modell(FALL):
             for y in (1, 2):
                 luft.add((x, y, z))
             if kanal(x, z) and (x, z) not in LOCH:
-                luft.add((x, 0, z))
+                luft |= {(x, y, z) for y in range(-T, 1)}
     for x, z in LOCH:
         for y in range(K, 1):
             luft.add((x, y, z))
     for x in range(-1, 4):
         for z in (3, 4):
             luft.add((x, K - 1, z)); luft.add((x, K, z))
-    luft |= {(-1, K - 1, 5), (-1, K, 5), (-1, K - 2, 3), (-1, K - 2, 4)}
+    luft |= {(-1, K - 1, 5), (-1, K, 5)}
+    if not tief:
+        luft |= {(-1, K - 2, 3), (-1, K - 2, 4)}
+    if oben:
+        for x in range(-8, 10):
+            for z in range(-8, 10):
+                luft |= {(x, 5 + T, z), (x, 6 + T, z)}
+                if kanal(x, z):
+                    luft |= {(x, y, z) for y in range(4, 5 + T)}           # Quellen in der Mitte bleiben (b)
+        luft |= abwurf
     luft = {p for p in luft if b.get(p, "air") == "air"}
     return b, luft, K
 
@@ -167,8 +206,9 @@ def modell(FALL):
 LOCH = {(0, 0), (1, 0), (0, 1), (1, 1)}
 # Fallhöhe 21: Die Mobs landen in der Trichtermulde (11/16 Block tief), also fallen sie 21,3 Blöcke
 # → 19 Schaden, 1 Herz bleibt. Version 1 hatte 22 (= 20 Schaden, die Mobs starben ohne XP).
+# #gebaut zählt die Version in der Welt: 2 = Fall 21, 3 = zweite Spawn-Ebene, 4 = Wasser 2 Blöcke tief.
 b, luft, K = modell(21)
-b_alt, luft_alt, K_alt = modell(22)
+b_v3, _, _ = modell(21, tief=False)
 
 
 def welt(x, y, z):
@@ -202,33 +242,37 @@ for dx in (-8, -3, 2, 7, 10):
         lichter.append(f"execute positioned {X0 + dx} 0 {Z0 + dz} positioned over motion_blocking_no_leaves "
                        f"if block ~ ~ ~ minecraft:air run setblock ~ ~ ~ minecraft:light[level=15]")
 
-# Umbau von Version 1 (Fall 22): Tötungszelle und Spielerraum einen Block höher
-umbau_b = {p: blk for p, blk in b.items() if b_alt.get(p) != blk}
-for p in b_alt:
-    if p not in b and p[1] >= K - 2:
-        umbau_b[p] = "air"
-for p in luft:
-    umbau_b.setdefault(p, "air")
-umbau = []
-for (x, y, z), blk in sorted(umbau_b.items(), key=lambda e: (e[1] != "air", rang(e[1]), e[0][1], e[0][0], e[0][2])):
-    wx, wy, wz = welt(x, y, z)
-    umbau.append(f"setblock {wx} {wy} {wz} minecraft:{blk}")
+def umbau_von(b_alt):
+    """Nur die Unterschiede zur alten Version; was es nicht mehr gibt, wird Luft (nicht unter dem Fundament)."""
+    neu = {p: blk for p, blk in b.items() if b_alt.get(p) != blk}
+    for p in b_alt:
+        if p not in b and p[1] >= K - 2:
+            neu[p] = "air"
+    for p in luft:
+        neu.setdefault(p, "air")
+    zeilen = []
+    for (x, y, z), blk in sorted(neu.items(), key=lambda e: (e[1] != "air", rang(e[1]), e[0][1], e[0][0], e[0][2])):
+        wx, wy, wz = welt(x, y, z)
+        zeilen.append(f"setblock {wx} {wy} {wz} minecraft:{blk}")
+    return zeilen
 
-alle = list(b) + list(luft) + list(b_alt)
+
+alle = list(b) + list(luft) + list(b_v3)
 xs = [welt(*p)[0] for p in alle] + [X0 - 8, X0 + 10]
 zs = [welt(*p)[2] for p in alle] + [Z0 - 8, Z0 + 10]
 FL = f"{min(xs)} {min(zs)} {max(xs)} {max(zs)}"
 LADEN = " ".join(f"if loaded {x} 0 {z}" for x in (min(xs), max(xs)) for z in (min(zs), max(zs)))
 
-sx, sy, sz = welt(-8, 0, -8)
-SPAWN = f"x={sx},y={sy},z={sz},dx=17,dy=2,dz=17"
+sx, sy, sz = welt(-8, -1, -8)
+SPAWN = f"x={sx},y={sy},z={sz},dx=17,dy=8,dz=17"                # beide Ebenen samt unteren Kanälen
 ZELLE = " ".join(f"{v}.0" for v in welt(1, K, 1))
 funktion("load", [
     "scoreboard objectives add xp.zustand dummy",
     "scoreboard objectives add xp.test dummy",
-    "# #gebaut: 1 = Fall 22 (Mobs starben beim Aufprall), 2 = Fall 21 (aktuell)",
+    "# #gebaut: 1 = Fall 22 (Mobs starben beim Aufprall), 2 = Fall 21, 3 = zweite Spawn-Ebene, 4 = Wasser tiefer (aktuell)",
     f"execute unless score #gebaut xp.zustand matches 1.. unless score #stufe xp.zustand matches 1.. run function {NS}:start",
-    f"execute if score #gebaut xp.zustand matches 1 unless score #stufe xp.zustand matches 1.. run function {NS}:start_umbau",    f"schedule function {NS}:platz 40t",
+    f"execute if score #gebaut xp.zustand matches 3 unless score #stufe xp.zustand matches 1.. run function {NS}:start_umbau",
+    f"schedule function {NS}:platz 40t",
 ])
 funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run function {NS}:licht",
                   f"execute if score #stufe xp.zustand matches 2 {LADEN} run function {NS}:bauen",
@@ -240,8 +284,8 @@ funktion("spinne", ["data modify entity @s Health set value 2.0f", f"tp @s {ZELL
 
 # Mob-Limit: Pro Spieler zählen alle Monster im Umkreis von 128 Blöcken, also auch die in den Höhlen darunter.
 # Ist das Limit (70) voll, spawnt in der Farm nichts. Solange jemand im Spielerraum steht, verschwinden deshalb
-# alle 2 Sekunden Höhlenmonster, die mehr als 32 Blöcke von ihm weg sind (die Farm
-# reicht bis 29); bei anderen Spielern (48) bleiben sie.
+# alle 2 Sekunden Höhlenmonster, die mehr als 34 Blöcke von ihm weg sind (die obere
+# Ebene reicht bis 32); bei anderen Spielern (48) bleiben sie.
 MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", "bogged", "creeper", "spider",
            "cave_spider", "witch", "enderman", "slime"]
 rx, ry, rz = welt(-1, K - 2, 3)
@@ -251,16 +295,24 @@ funktion("platz", [f"schedule function {NS}:platz 40t",
 funktion("platz_frei",
          [f"execute as @a[gamemode=!spectator] unless entity @s[{RAUM}] at @s run tag @e[type=minecraft:{m},distance=..48] add xp.bleibt"
           for m in MONSTER]
-         + [f"execute at @a[{RAUM},limit=1] as @e[type=minecraft:{m},distance=32..128,tag=!xp.bleibt] "
+         + [f"execute at @a[{RAUM},limit=1] as @e[type=minecraft:{m},distance=34..128,tag=!xp.bleibt] "
             f"unless data entity @s {{PersistenceRequired:1b}} at @s run tp @s ~ -300 ~" for m in MONSTER]
          + ["tag @e[tag=xp.bleibt] remove xp.bleibt"])
 funktion("start_umbau", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 3"])
 funktion("start", [f"forceload add {FL}", "scoreboard players set #stufe xp.zustand 1"])
 funktion("licht", lichter + ["scoreboard players set #stufe xp.zustand 2"])
-fertig = ["scoreboard players set #stufe xp.zustand 0", "scoreboard players set #gebaut xp.zustand 2",
+fertig = ["scoreboard players set #stufe xp.zustand 0", "scoreboard players set #gebaut xp.zustand 4",
           f"schedule function {NS}:test/t1 100t"]
 funktion("bauen", befehle + fertig)
-funktion("umbau", ["# Version 1 → 2: Fall 22 → 21"] + umbau + fertig)
+# Die Truhe zieht einen Block tiefer: Inhalt mitnehmen
+kiste_alt = [welt(2, K, 3), welt(3, K, 3)]
+kiste_neu = [welt(2, K - 1, 3), welt(3, K - 1, 3)]
+funktion("umbau", ["# Version 3 → 4: Wasser 2 Blöcke unter den Plattformen, Tötungszelle und Spielerraum 1 tiefer"]
+         + [f"data modify storage {NS}:kiste h{i} set from block {x} {y} {z} Items" for i, (x, y, z) in enumerate(kiste_alt)]
+         + [f"data modify block {x} {y} {z} Items set value []" for x, y, z in kiste_alt]   # sonst fällt alles doppelt raus
+         + umbau_von(b_v3)
+         + [f"data modify block {x} {y} {z} Items set from storage {NS}:kiste h{i}" for i, (x, y, z) in enumerate(kiste_neu)]
+         + fertig)
 
 # Selbsttest
 kx, ky, kz = welt(0, K, 0)
@@ -271,8 +323,8 @@ funktion("test/t1", [
     f"summon minecraft:zombie {X0 - 6}.5 {P} {Z0}.5 {{Tags:[\"xp.test\",\"xp.kanal\"],PersistenceRequired:1b,IsBaby:0b}}",
     f"summon minecraft:zombie {X0 - 5}.5 {P + 1} {Z0 - 5}.5 {{Tags:[\"xp.test\"],PersistenceRequired:1b,IsBaby:0b}}",
     f"summon minecraft:zombie {X0 + 6}.5 {P + 1} {Z0 + 6}.5 {{Tags:[\"xp.test\"],PersistenceRequired:1b,IsBaby:0b}}",
-    f"execute store success score #wasser xp.test if block {wpos(-8, 0, 0)} minecraft:water if block {wpos(9, 0, 1)} minecraft:water "
-    f"if block {wpos(0, 0, -8)} minecraft:water if block {wpos(1, 0, 9)} minecraft:water",
+    f"execute store success score #wasser xp.test if block {wpos(-8, -1, 0)} minecraft:water if block {wpos(9, -1, 1)} minecraft:water "
+    f"if block {wpos(0, -1, -8)} minecraft:water if block {wpos(1, -1, 9)} minecraft:water",
     f"schedule function {NS}:test/t2 600t",
 ])
 zelle = f"x={kx},y={ky},z={kz},dx=1,dy=1,dz=1"
