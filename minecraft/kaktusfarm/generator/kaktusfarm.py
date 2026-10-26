@@ -12,7 +12,10 @@ Gegenstand herunter. Die Etagen wechseln ab:
                 Zäune auf x 0/2/4/6 × z 0/2/4/6 – darauf liegt der Sand der nächsten A-Etage
 Ringsum ein Block Luft (ein Kaktus zerbricht auch an Glas), dann Glaswände. Der Boden ist aus Glas, darauf
 spawnen keine Monster. Herunterfallende Kakteen landen sonst oft auf den Kakteen darunter und verbrennen; das
-Pack bringt sie deshalb sofort zum Trichter vor der Doppeltruhe an der Westseite.
+Pack bringt sie deshalb sofort zum Trichter über der Doppeltruhe an der Westseite.
+Schmelzanlage an der Westseite (x -4): oben ein Trichter, darunter die Doppeltruhe auf Kopfhöhe, darunter zwei
+Trichter, die aus der Truhe in zwei Öfen füllen. Der grüne Farbstoff bleibt im Ofen; wer ihn herausnimmt, bekommt
+die XP (1 pro Kaktus). Brennstoff kommt von Hand in die Öfen.
 """
 import json
 import os
@@ -50,8 +53,9 @@ def pos(x, y, z):
 ETAGEN = 12
 HOCH = 3 * ETAGEN                                               # oberster Zaun bei HOCH - 1
 GERADE, UNGERADE = (0, 2, 4, 6), (1, 3, 5)
-KISTE = [((-4, 0, 2), "left"), ((-4, 0, 3), "right")]          # Blick nach Osten: links = Norden
-TRICHTER = (-3, 0, 3)
+KISTE = [((-4, 2, 2), "right"), ((-4, 2, 3), "left")]          # Blick nach Westen: links = Süden
+OEFEN = [(-4, 0, 2), (-4, 0, 3)]
+TRICHTER = (-4, 3, 3)
 
 # ---------------------------------------------------------------- Modell
 b = {}
@@ -74,8 +78,11 @@ for k in range(ETAGEN):
         for z in GERADE:
             b[(x, y + 2, z)] = "oak_fence"
 for (x, y, z), typ in KISTE:
-    b[(x, y, z)] = f"chest[facing=east,type={typ}]"
-b[TRICHTER] = "hopper[facing=west]"
+    b[(x, y, z)] = f"chest[facing=west,type={typ}]"
+for x, y, z in OEFEN:
+    b[(x, y, z)] = "furnace[facing=west]"
+    b[(x, y + 1, z)] = "hopper[facing=down]"
+b[TRICHTER] = "hopper[facing=down]"
 luft = {(x, y, z) for x in range(-1, 8) for z in range(-1, 8) for y in range(0, HOCH + 1)} - set(b)
 
 
