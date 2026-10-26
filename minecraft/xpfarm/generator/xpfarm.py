@@ -271,6 +271,8 @@ MONSTER = ["zombie", "husk", "drowned", "zombie_villager", "skeleton", "stray", 
            "cave_spider", "witch", "enderman", "slime"]
 rx, ry, rz = welt(-1, K - 2, 3)
 RAUM = f"x={rx},y={ry},z={rz},dx=4,dy=2,dz=1"
+zx, zy, zz = welt(0, K - 1, 0)
+ZELLBOX = f"x={zx},y={zy},z={zz},dx=1,dy=2,dz=2"                 # Tötungszelle samt Schlitz
 fx, fy, fz = welt(-9, K - 2, -9)
 FARM = f"x={fx},y={fy},z={fz},dx=19,dy={8 - (K - 2)},dz=19"     # das ganze Bauwerk
 sx, sy, sz = welt(-8, -1, -8)
@@ -293,6 +295,9 @@ funktion("tick", [f"execute if score #stufe xp.zustand matches 1 {LADEN} run fun
                   "# Creeper in der Farm explodieren ohne Wirkung: Zwei Sprengungen hatten die Tötungszelle aufgerissen,",
                   "# danach liefen Mobs in den Spielerraum.",
                   f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:creeper,{FARM},tag=!xp.zahm] run function {NS}:zahm",
+                  "# XP-Kugeln blieben zur Hälfte in den Trichtermulden hängen (sie zielen auf Hüfthöhe des Spielers, die Mulde",
+                  "# liegt tiefer als der Schlitz): Sie kommen direkt zum Spieler im Raum.",
+                  f"execute if score #gebaut xp.zustand matches 2.. as @e[type=minecraft:experience_orb,{ZELLBOX}] at @p[{RAUM}] run tp @s ~ ~ ~",
                   "# Was trotzdem in den Spielerraum kommt, stirbt sofort"]
                  + [f"execute if score #gebaut xp.zustand matches 2.. run kill @e[type=minecraft:{m},{RAUM}]" for m in MONSTER])
 funktion("zahm", ["data merge entity @s {ExplosionRadius:0b}", "tag @s add xp.zahm"])
