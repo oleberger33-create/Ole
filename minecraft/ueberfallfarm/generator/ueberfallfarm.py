@@ -1,7 +1,7 @@
 """Gibt die Befehle für die Überfall-Farm über dem Meer aus (läuft rein vanilla, wird einmal per Konsole gesetzt).
 
 Aufruf:  python3 ueberfallfarm.py <ort.json> [umbau]
-         umbau: nur Version 3 → 4 (oberer Teil 4 Blöcke tiefer), Zelle, Truhe und Spielerraum bleiben
+         umbau: nur Version 4 → 5 (Klappboden, Grube, Hebel, flacherer Spalt), alles andere bleibt
 
 ort.json:  {"chunk": [x, z]}   Nordwest-Ecke des Chunks; alles liegt in diesem einen Chunk (16 × 16)
 
@@ -22,16 +22,23 @@ Von oben nach unten:
             Wasser zu Ende, es läuft nicht über die Kante, die Räuber fallen 3 Blöcke tiefer in
   F2        Stufe 2, Rinne 2 breit: Quellen im Westen, 7 Blöcke Fluss nach Osten, dahinter das 2 × 2-Loch.
             Das letzte Feld vor dem Loch hat eine Stufe als Boden: Die Räuber fallen ab F2 - ½.
-  F2-1..K   trockener Schacht, 25½ Blöcke (2 × 2, Verwüster passen). Ob ein Räuber in der Trichtermulde oder auf dem
-            Rand landet: Er fällt 25½ bis 25¾ Blöcke, 23 Schaden. Plünderer, Diener und Magier kommen mit ½ Herz an,
-            Hexen mit 1½, Verwüster mit 39 Herzen. ½ Herz stirbt an jedem Schwertschlag, auch am schwächsten (ab 1,2
-            Schaden) und am Schwungschlag nebenan (1 Schaden). So kann kein Magier überleben und Plagegeister rufen.
-            Version 1 (25 Blöcke ab ganzem Block) ließ Räuber auf dem Rand mit 1 Herz übrig, ein Magier überlebte einen
-            schwachen Schlag. Version 2/3 (30 Blöcke) tötete alle außer Verwüstern beim Aufprall: ohne Smaragde und XP.
-  K         Tötungszelle über Trichtern; davor unten eine Stufe, darüber eine eiserne Falltür (obere Hälfte):
-            Durch den Spalt schlägt man die Verwüster, und die XP-Kugeln kommen heraus. Die Augen der Räuber liegen
-            über dem Spalt, sie sehen den Spieler nicht. Trifft man einen Verwüster, greifen nur Verwüster an.
-  K-1       Spielerraum (Füße), Truhe hinter den Trichtern, Ofen, Werkbank. Hier die Flasche trinken.
+  F2-1..K   trockener Schacht (2 × 2, Verwüster passen). Die Räuber fallen ab etwa F2 - 1 (so lange stecken sie
+            noch im Wasser der letzten Rinne).
+  K-1       Boden der Tötungszelle: 4 eiserne Falltüren. Hebel im Spielerraum:
+            BEUTE (Hebel aus, Falltüren zu): Landung auf den Falltüren nach 25½ bis 25¾ Blöcken, 23 Schaden.
+              Plünderer, Diener und Magier ½ Herz, Hexen 1½, Verwüster 38½ Herzen. Man schlägt durch den Spalt:
+              Smaragde (Plünderung), XP, Waffen. Für die Wellen 1 bis 4: Erst ab Welle 5 kommen Magier. Eine Hexe
+              heilt die anderen mit Tränken; ein geheilter Magier überlebt einen Schlag und ruft Plagegeister.
+            SICHER (Hebel an, Falltüren offen): Alles fällt weiter in die Grube auf die Trichter bei K-5, 29 Blöcke,
+              26 und mehr Schaden: Plünderer, Diener, Magier und Hexen sterben. Verwüster (fast 2 breit) passen nicht
+              zwischen die offenen Klappen, sie bleiben in der Zelle und werden durch den Spalt erledigt. Ihr Reiter
+              fällt beim Tod des Verwüsters in die Grube und stirbt. Die Grube leert sich in die Truhe auf der
+              Plattform am Wasser; was im Beute-Modus auf den Falltüren liegt, fällt beim Öffnen hinein.
+  Spalt     Vorn auf Bodenhöhe ein Teppich, darüber 1,44 Blöcke frei bis zu einer oberen Stufe (K + ½). Die Augen der
+            Räuber liegen darüber (ab K + 0,81), die des stehenden Spielers auch (K + 0,62): Eine Sichtlinie müsste
+            unter K + ½ durch, also sieht kein Räuber den Spieler. Er schlägt im Stehen schräg nach unten. Geduckt
+            (Augen K + 0,27) wird es knapp, also nicht ducken. Die XP-Kugeln rollen über den Teppich heraus.
+  K-1       Spielerraum (Füße), Hebel, Truhe aus Version 1 bis 4, Ofen, Werkbank. Hier die Flasche trinken.
   64        Dorfbewohner mit Bett und Komposter, 8 Blöcke unter der Zelle. Räuber suchen Dorfbewohner nur 4 Blöcke
             über und unter sich; so wird er nie angegriffen.
   63        Plattform auf dem Wasser, Leiter hoch in den Spielerraum
@@ -45,7 +52,6 @@ MEER = 63                                     # Wasseroberfläche: Wasser bis 62
 V = 64                                        # Füße des Dorfbewohners
 K = 72                                        # Tötungszelle (Trichter darunter)
 F2 = K + 26                                   # Wasser Stufe 2
-F2_ALT = K + 30                               # Version 2 und 3
 F1 = F2 + 3                                   # Wasser Stufe 1
 TOP = F1 + 5                                  # Schneefeld
 MAUER = TOP + 4                               # Mauern bis über die Spawnhöhe (TOP + 2): Eine Welle spawnt auf einem
@@ -94,23 +100,44 @@ schacht = [                                                         # 2 × 2 (x 
     fill(9, K - 2, 9, 12, F2 - 2, 12, W),
     fill(10, K, 10, 11, F2, 11, "air"),
 ]
+zelle = [
+    # Grube (Sicher-Modus): Trichter bei K-5, darüber frei bis zum Klappboden
+    fill(9, K - 6, 9, 12, K - 3, 12, W),
+    fill(10, K - 5, 10, 11, K - 2, 11, "air"),
+    setb(10, K - 5, 10, "hopper[facing=east]"),
+    setb(11, K - 5, 10, "hopper[facing=south]"),
+    setb(10, K - 5, 11, "hopper[facing=east]"),
+    setb(11, K - 5, 11, "hopper[facing=down]"),
+    fill(11, MEER + 1, 11, 11, K - 6, 11, "hopper[facing=down]"),
+    setb(11, MEER, 11, "chest[facing=west]"),
+    # Klappboden: offen liegen die Klappen an der West- und Ostwand
+    fill(10, K - 1, 10, 10, K - 1, 11, "iron_trapdoor[facing=east,half=bottom,open=false]"),
+    fill(11, K - 1, 10, 11, K - 1, 11, "iron_trapdoor[facing=west,half=bottom,open=false]"),
+    # Spalt
+    fill(10, K - 1, 12, 11, K - 1, 12, "white_carpet"),
+    fill(10, K, 12, 11, K, 12, "stone_brick_slab[type=top]"),
+    # Leitung: Hebel → Staub um die Zelle → Verstärker in der Zellwand → Falltüren
+    fill(8, K - 2, 8, 8, K - 2, 11, W),
+    fill(9, K - 2, 8, 13, K - 2, 8, W),
+    fill(13, K - 2, 9, 13, K - 2, 11, W),
+    fill(9, K - 1, 10, 9, K - 1, 11, "repeater[facing=west]"),
+    fill(12, K - 1, 10, 12, K - 1, 11, "repeater[facing=east]"),
+    fill(8, K - 1, 8, 8, K - 1, 11, "redstone_wire"),
+    fill(9, K - 1, 8, 13, K - 1, 8, "redstone_wire"),
+    fill(13, K - 1, 9, 13, K - 1, 12, "redstone_wire"),
+    setb(12, K - 1, 12, "redstone_wire"),
+    setb(12, K, 13, "lever[face=wall,facing=south,powered=true]"),   # an = Sicher
+    setb(12, K - 1, 12, "air"),
+    setb(12, K - 1, 12, "redstone_wire"),                            # neu gesetzt, damit er den Hebel bemerkt
+]
 unten = [
     # Spielerraum: innen x 9..13, z 13..14, Füße K-1
     fill(8, K - 2, 12, 14, K + 1, 15, W),
     fill(9, K - 1, 13, 13, K, 14, "air"),
     setb(11, K + 1, 14, "sea_lantern"),
     fill(8, K + 2, 12, 14, K + 2, 15, DECKEL, " replace minecraft:air"),  # auf dem Dach spawnt nichts
-    # Tötungszelle und Spalt
-    setb(10, K - 1, 10, "hopper[facing=east]"),
-    setb(11, K - 1, 10, "hopper[facing=south]"),
-    setb(10, K - 1, 11, "hopper[facing=east]"),
-    setb(11, K - 1, 11, "hopper[facing=east]"),
-    setb(12, K - 1, 11, "hopper[facing=south]"),
-    setb(12, K - 1, 12, "hopper[facing=south]"),
     setb(12, K - 1, 13, "chest[facing=south,type=right]"),
     setb(13, K - 1, 13, "chest[facing=south,type=left]"),
-    fill(10, K - 1, 12, 11, K - 1, 12, "stone_brick_slab[type=bottom]"),
-    fill(10, K, 12, 11, K, 12, "iron_trapdoor[facing=south,half=top,open=false]"),
     # Leiter vom Wasser in den Spielerraum (x 9, z 14)
     fill(7, MEER - 1, 11, 11, MEER - 1, 13, W),
     setb(9, MEER - 1, 14, W),
@@ -134,10 +161,9 @@ wasser = [
     fill(2, F2, 10, 2, F2, 11, "water"),                           # Quellen Stufe 2
 ]
 schnee = [fill(3, TOP, 3, 7, TOP, 8, "snow[layers=1]", " strict")]
-umbau = [fill(1, F2 - 1, 1, 12, F2_ALT + 3 + 5 + 4 + 1, 12, "air")]   # alte Stufen, Mauern und Schnee weg
 
 if __name__ == "__main__":
     modus = sys.argv[2] if len(sys.argv) > 2 else "neu"
-    teile = {"neu": oben + schacht + unten + wasser + schnee, "umbau": umbau + oben + wasser + schnee}[modus]
+    teile = {"neu": oben + schacht + unten + zelle + wasser + schnee, "umbau": zelle}[modus]
     for b in teile:
         print(b)
