@@ -1,6 +1,7 @@
 """Gibt die Befehle für die Überfall-Farm über dem Meer aus (läuft rein vanilla, wird einmal per Konsole gesetzt).
 
-Aufruf:  python3 ueberfallfarm.py <ort.json>
+Aufruf:  python3 ueberfallfarm.py <ort.json> [umbau]
+         umbau: nur Version 1 → 2 (oberer Teil 5 Blöcke höher), Zelle, Truhe und Spielerraum bleiben
 
 ort.json:  {"chunk": [x, z]}   Nordwest-Ecke des Chunks; alles liegt in diesem einen Chunk (16 × 16)
 
@@ -20,11 +21,13 @@ Von oben nach unten:
   F1        Stufe 1, 8 × 8 Wasser: Quellen an der Nordwand, 7 Blöcke Fluss nach Süden. In der letzten Reihe ist das
             Wasser zu Ende, es läuft nicht über die Kante, die Räuber fallen 3 Blöcke tiefer in
   F2        Stufe 2, Rinne 2 breit: Quellen im Westen, 7 Blöcke Fluss nach Osten, dahinter das 2 × 2-Loch
-  F2-1..K   trockener Schacht, 25 Blöcke: Plünderer, Diener und Magier landen mit ½ Herz, Hexen mit 1½ Herzen,
-            Verwüster mit 39 Herzen (2 × 2 passt für sie)
+  F2-1..K   trockener Schacht, 30 Blöcke: Plünderer, Diener, Magier und Hexen sterben beim Aufprall, Verwüster
+            kommen mit etwa 36 Herzen an (2 × 2 passt für sie). Version 1 hatte 25 Blöcke, alle kamen mit ½ bis
+            1 Herz an. Ein Magier, der einen Schlag überlebt, ruft Plagegeister, und die fliegen durch Wände.
+            Ohne Spielerschlag fehlen nur Smaragde und XP; Totems, Flaschen der Anführer und Banner fallen immer.
   K         Tötungszelle über Trichtern; davor unten eine Stufe, darüber eine eiserne Falltür (obere Hälfte):
-            Durch den Spalt schlägt man, und die XP-Kugeln kommen heraus. Die Augen der Räuber liegen über dem
-            Spalt, sie sehen den Spieler nicht (keine Pfeile, keine Plagegeister).
+            Durch den Spalt schlägt man die Verwüster, und die XP-Kugeln kommen heraus. Die Augen der Räuber liegen
+            über dem Spalt, sie sehen den Spieler nicht. Trifft man einen Verwüster, greifen nur Verwüster an.
   K-1       Spielerraum (Füße), Truhe hinter den Trichtern, Ofen, Werkbank. Hier die Flasche trinken.
   64        Dorfbewohner mit Bett und Komposter, 8 Blöcke unter der Zelle. Räuber suchen Dorfbewohner nur 4 Blöcke
             über und unter sich; so wird er nie angegriffen.
@@ -38,7 +41,8 @@ X0, Z0 = ORT["chunk"]
 MEER = 63                                     # Wasseroberfläche: Wasser bis 62
 V = 64                                        # Füße des Dorfbewohners
 K = 72                                        # Tötungszelle (Trichter darunter)
-F2 = K + 25                                   # Wasser Stufe 2
+F2 = K + 30                                   # Wasser Stufe 2
+F2_ALT = K + 25                               # Version 1
 F1 = F2 + 3                                   # Wasser Stufe 1
 TOP = F1 + 5                                  # Schneefeld
 W = "stone_bricks"
@@ -57,7 +61,7 @@ def setb(x, y, z, blk):
     return f"setblock {pos(x, y, z)} minecraft:{blk}"
 
 
-bau = [
+oben = [
     # Stufe 1: x 2..9, z 2..9
     fill(2, F1 - 1, 2, 9, F1 - 1, 9, W),
     fill(1, F1 - 1, 1, 10, TOP + 1, 1, W),                         # Nordwand
@@ -78,9 +82,12 @@ bau = [
     fill(1, F1 + 3, 10, 1, F1 + 3, 11, DECKEL),
     fill(11, F1 + 3, 9, 12, F1 + 3, 9, DECKEL),
     fill(12, F1 + 3, 10, 12, F1 + 3, 11, DECKEL),
-    # Schacht 2 × 2 (x 10..11, z 10..11) von K bis F2
+]
+schacht = [                                                         # 2 × 2 (x 10..11, z 10..11) von K bis F2
     fill(9, K - 2, 9, 12, F2 - 2, 12, W),
     fill(10, K, 10, 11, F2, 11, "air"),
+]
+unten = [
     # Spielerraum: innen x 9..13, z 13..14, Füße K-1
     fill(8, K - 2, 12, 14, K + 1, 15, W),
     fill(9, K - 1, 13, 13, K, 14, "air"),
@@ -120,7 +127,11 @@ wasser = [
     fill(2, F2, 10, 2, F2, 11, "water"),                           # Quellen Stufe 2
 ]
 schnee = [fill(3, TOP, 3, 7, TOP, 8, "snow[layers=1]", " strict")]
+umbau = [fill(1, F2_ALT - 1, 1, 12, TOP + 2, 12, "air"),           # alte Stufen samt Schnee weg
+         fill(9, F2_ALT - 1, 9, 12, F2 - 2, 12, W),                # Schacht nach oben verlängern
+         fill(10, F2_ALT - 1, 10, 11, F2, 11, "air")]
 
 if __name__ == "__main__":
-    for b in bau + wasser + schnee:
+    teile = umbau + oben if sys.argv[2:] == ["umbau"] else oben + schacht + unten
+    for b in teile + wasser + schnee:
         print(b)
