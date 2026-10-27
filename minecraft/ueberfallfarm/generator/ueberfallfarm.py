@@ -1,7 +1,8 @@
 """Gibt die Befehle für die Überfall-Farm über dem Meer aus (läuft rein vanilla, wird einmal per Konsole gesetzt).
 
 Aufruf:  python3 ueberfallfarm.py <ort.json> [umbau]
-         umbau: nur Version 1 → 2 (oberer Teil 5 Blöcke höher), Zelle, Truhe und Spielerraum bleiben
+         umbau2: nur Version 1 → 2 (oberer Teil 5 Blöcke höher), Zelle, Truhe und Spielerraum bleiben
+         umbau3: nur Version 2 → 3 (Mauern oben bis über die Spawnhöhe)
 
 ort.json:  {"chunk": [x, z]}   Nordwest-Ecke des Chunks; alles liegt in diesem einen Chunk (16 × 16)
 
@@ -45,6 +46,9 @@ F2 = K + 30                                   # Wasser Stufe 2
 F2_ALT = K + 25                               # Version 1
 F1 = F2 + 3                                   # Wasser Stufe 1
 TOP = F1 + 5                                  # Schneefeld
+MAUER = TOP + 4                               # Mauern bis über die Spawnhöhe (TOP + 2): Eine Welle spawnt auf einem
+                                              # Punkt, die Räuber schubsen sich im Fallen auseinander. In Version 2
+                                              # (Mauern 3 bzw. 6 Blöcke niedriger) flogen einige über die Südwand.
 W = "stone_bricks"
 DECKEL = "smooth_stone_slab[type=bottom]"     # auf Stufen spawnt nichts, und Räuber laufen nicht dorthin
 
@@ -64,24 +68,24 @@ def setb(x, y, z, blk):
 oben = [
     # Stufe 1: x 2..9, z 2..9
     fill(2, F1 - 1, 2, 9, F1 - 1, 9, W),
-    fill(1, F1 - 1, 1, 10, TOP + 1, 1, W),                         # Nordwand
-    fill(1, F1 - 1, 1, 1, TOP + 1, 9, W),                          # Westwand
-    fill(10, F1 - 1, 1, 10, TOP + 1, 9, W),                        # Ostwand
-    fill(1, TOP + 2, 1, 10, TOP + 2, 1, DECKEL),
-    fill(1, TOP + 2, 1, 1, TOP + 2, 9, DECKEL),
-    fill(10, TOP + 2, 1, 10, TOP + 2, 9, DECKEL),
+    fill(1, F1 - 1, 1, 10, MAUER, 1, W),                           # Nordwand
+    fill(1, F1 - 1, 1, 1, MAUER, 9, W),                            # Westwand
+    fill(10, F1 - 1, 1, 10, MAUER, 9, W),                          # Ostwand
+    fill(1, MAUER + 1, 1, 10, MAUER + 1, 1, DECKEL),
+    fill(1, MAUER + 1, 1, 1, MAUER + 1, 9, DECKEL),
+    fill(10, MAUER + 1, 1, 10, MAUER + 1, 9, DECKEL),
     fill(2, F2 - 1, 9, 9, F1 - 2, 9, W),                           # unter der Kante: Nordwand von Stufe 2
     # Stufe 2: x 2..9, z 10..11, Loch x 10..11
     fill(2, F2 - 1, 10, 9, F2 - 1, 11, W),
-    fill(1, F2 - 1, 12, 12, F1 + 2, 12, W),                        # Südwand
-    fill(1, F2 - 1, 10, 1, F1 + 2, 11, W),                         # Westwand
-    fill(12, F2 - 1, 9, 12, F1 + 2, 11, W),                        # Ostwand am Loch
+    fill(1, F2 - 1, 12, 12, MAUER, 12, W),                         # Südwand
+    fill(1, F2 - 1, 10, 1, MAUER, 11, W),                          # Westwand
+    fill(12, F2 - 1, 9, 12, MAUER, 11, W),                         # Ostwand am Loch
     fill(10, F2 - 1, 9, 10, F1 - 2, 9, W),                         # Nordwand am Loch, darüber die Ostwand von Stufe 1
-    fill(11, F2 - 1, 9, 11, F1 + 2, 9, W),
-    fill(1, F1 + 3, 12, 12, F1 + 3, 12, DECKEL),
-    fill(1, F1 + 3, 10, 1, F1 + 3, 11, DECKEL),
-    fill(11, F1 + 3, 9, 12, F1 + 3, 9, DECKEL),
-    fill(12, F1 + 3, 10, 12, F1 + 3, 11, DECKEL),
+    fill(11, F2 - 1, 9, 11, MAUER, 9, W),
+    fill(1, MAUER + 1, 12, 12, MAUER + 1, 12, DECKEL),
+    fill(1, MAUER + 1, 10, 1, MAUER + 1, 11, DECKEL),
+    fill(11, MAUER + 1, 9, 12, MAUER + 1, 9, DECKEL),
+    fill(12, MAUER + 1, 10, 12, MAUER + 1, 11, DECKEL),
 ]
 schacht = [                                                         # 2 × 2 (x 10..11, z 10..11) von K bis F2
     fill(9, K - 2, 9, 12, F2 - 2, 12, W),
@@ -132,6 +136,8 @@ umbau = [fill(1, F2_ALT - 1, 1, 12, TOP + 2, 12, "air"),           # alte Stufen
          fill(10, F2_ALT - 1, 10, 11, F2, 11, "air")]
 
 if __name__ == "__main__":
-    teile = umbau + oben if sys.argv[2:] == ["umbau"] else oben + schacht + unten
-    for b in teile + wasser + schnee:
+    modus = sys.argv[2] if len(sys.argv) > 2 else "neu"
+    teile = {"neu": oben + schacht + unten + wasser + schnee, "umbau2": umbau + oben + wasser + schnee,
+             "umbau3": oben}[modus]
+    for b in teile:
         print(b)
