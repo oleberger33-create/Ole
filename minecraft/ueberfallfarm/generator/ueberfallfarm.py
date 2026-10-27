@@ -28,15 +28,17 @@ Von oben nach unten:
             Plünderer, Diener, Magier und Hexen fallen durch in die Grube auf die Trichter bei K-5, 29 Blöcke,
             26 und mehr Schaden: Sie sterben alle. Verwüster (fast 2 breit) passen nicht zwischen die offenen Klappen,
             sie bleiben oben mit etwa 39 Herzen und werden durch den Spalt erledigt; trifft man sie, greifen nur
-            Verwüster an, und die sehen den Spieler nicht. Ihr Reiter fällt beim Tod des Verwüsters in die Grube und
-            stirbt. Die Grube leert sich in die Truhe auf der Plattform am Wasser.
+            Verwüster an, und die sehen den Spieler nicht. Wer auf dem Rücken eines Verwüsters landet (Hexe: 3 Herzen
+            übrig) oder als Reiter mitkommt, fällt bei seinem Tod 9 Blöcke tief in die Grube und stirbt. Die Grube
+            reicht deshalb bis knapp übers Wasser (Version 5: Trichter 4 Blöcke höher, eine Hexe überlebte dort und
+            warf durch den Spalt nach oben Schadenstränke). Sie leert sich in die Truhe auf der Plattform am Wasser.
             Warum kein Spielerschlag für die anderen (Version 4/5): Smaragde und XP gibt es nur, wenn ein Spieler
             trifft. Eine Hexe heilt die anderen mit Tränken; ein geheilter Magier überlebt den Schlag und ruft
             Plagegeister. Version 5 hatte dafür einen Hebel (Klappen zu für die Wellen 1 bis 4), zu umständlich.
-  Spalt     Vorn auf Bodenhöhe ein Teppich, darüber 1,44 Blöcke frei bis zu einer oberen Stufe (K + ½). Die Augen der
-            Räuber liegen darüber (ab K + 0,81), die des stehenden Spielers auch (K + 0,62): Eine Sichtlinie müsste
-            unter K + ½ durch, also sieht kein Räuber den Spieler. Er schlägt im Stehen schräg nach unten. Geduckt
-            (Augen K + 0,27) wird es knapp, also nicht ducken. Die XP-Kugeln rollen über den Teppich heraus.
+  Spalt     Vorn eine untere Stufe (K - ½), darüber frei bis zu einer oberen Stufe (K + ½). Die Augen der Räuber in
+            der Zelle liegen darüber (Verwüster auf den Klappen), die des stehenden Spielers auch (K + 0,62): Eine
+            Sichtlinie müsste unter K + ½ durch, also sieht kein Räuber den Spieler. Aus der Grube steigen Sichtlinien
+            steil an und treffen die untere Stufe oder den Boden. Nicht ducken (Augen K + 0,27).
   K-1       Spielerraum (Füße), Truhe aus Version 1 bis 4, Ofen, Werkbank. Hier die Flasche trinken.
   64        Dorfbewohner mit Bett und Komposter, 8 Blöcke unter der Zelle. Räuber suchen Dorfbewohner nur 4 Blöcke
             über und unter sich; so wird er nie angegriffen.
@@ -100,20 +102,20 @@ schacht = [                                                         # 2 × 2 (x 
     fill(10, K, 10, 11, F2, 11, "air"),
 ]
 zelle = [
-    # Grube (Sicher-Modus): Trichter bei K-5, darüber frei bis zum Klappboden
-    fill(9, K - 6, 9, 12, K - 3, 12, W),
-    fill(10, K - 5, 10, 11, K - 2, 11, "air"),
-    setb(10, K - 5, 10, "hopper[facing=east]"),
-    setb(11, K - 5, 10, "hopper[facing=south]"),
-    setb(10, K - 5, 11, "hopper[facing=east]"),
-    setb(11, K - 5, 11, "hopper[facing=down]"),
-    fill(11, MEER + 1, 11, 11, K - 6, 11, "hopper[facing=down]"),
-    setb(11, MEER, 11, "chest[facing=west]"),
+    # Grube: Trichter knapp über dem Wasser, darüber frei bis zum Klappboden, Truhe darunter (Zugang von Süden)
+    fill(9, MEER, 9, 12, K - 3, 12, W, " keep"),
+    fill(10, MEER + 2, 10, 11, K - 2, 11, "air"),
+    setb(10, MEER + 1, 10, "hopper[facing=east]"),
+    setb(11, MEER + 1, 10, "hopper[facing=south]"),
+    setb(10, MEER + 1, 11, "hopper[facing=east]"),
+    setb(11, MEER + 1, 11, "hopper[facing=down]"),
+    setb(11, MEER, 11, "chest[facing=south]"),
+    fill(11, MEER, 12, 11, MEER + 1, 12, "air"),
     # Klappboden: offen liegen die Klappen an der West- und Ostwand
     fill(10, K - 1, 10, 10, K - 1, 11, "iron_trapdoor[facing=east,half=bottom,open=false]"),
     fill(11, K - 1, 10, 11, K - 1, 11, "iron_trapdoor[facing=west,half=bottom,open=false]"),
     # Spalt
-    fill(10, K - 1, 12, 11, K - 1, 12, "white_carpet"),
+    fill(10, K - 1, 12, 11, K - 1, 12, "stone_brick_slab[type=bottom]"),
     fill(10, K, 12, 11, K, 12, "stone_brick_slab[type=top]"),
     # Leitung: Redstoneblock in der Raumwand → Staub um die Zelle → Verstärker in der Zellwand → Falltüren
     fill(8, K - 2, 8, 8, K - 2, 11, W),
