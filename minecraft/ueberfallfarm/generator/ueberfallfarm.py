@@ -1,8 +1,7 @@
 """Gibt die Befehle für die Überfall-Farm über dem Meer aus (läuft rein vanilla, wird einmal per Konsole gesetzt).
 
 Aufruf:  python3 ueberfallfarm.py <ort.json> [umbau]
-         umbau2: nur Version 1 → 2 (oberer Teil 5 Blöcke höher), Zelle, Truhe und Spielerraum bleiben
-         umbau3: nur Version 2 → 3 (Mauern oben bis über die Spawnhöhe)
+         umbau: nur Version 3 → 4 (oberer Teil 4 Blöcke tiefer), Zelle, Truhe und Spielerraum bleiben
 
 ort.json:  {"chunk": [x, z]}   Nordwest-Ecke des Chunks; alles liegt in diesem einen Chunk (16 × 16)
 
@@ -21,11 +20,14 @@ Von oben nach unten:
   TOP       Schneefeld
   F1        Stufe 1, 8 × 8 Wasser: Quellen an der Nordwand, 7 Blöcke Fluss nach Süden. In der letzten Reihe ist das
             Wasser zu Ende, es läuft nicht über die Kante, die Räuber fallen 3 Blöcke tiefer in
-  F2        Stufe 2, Rinne 2 breit: Quellen im Westen, 7 Blöcke Fluss nach Osten, dahinter das 2 × 2-Loch
-  F2-1..K   trockener Schacht, 30 Blöcke: Plünderer, Diener, Magier und Hexen sterben beim Aufprall, Verwüster
-            kommen mit etwa 36 Herzen an (2 × 2 passt für sie). Version 1 hatte 25 Blöcke, alle kamen mit ½ bis
-            1 Herz an. Ein Magier, der einen Schlag überlebt, ruft Plagegeister, und die fliegen durch Wände.
-            Ohne Spielerschlag fehlen nur Smaragde und XP; Totems, Flaschen der Anführer und Banner fallen immer.
+  F2        Stufe 2, Rinne 2 breit: Quellen im Westen, 7 Blöcke Fluss nach Osten, dahinter das 2 × 2-Loch.
+            Das letzte Feld vor dem Loch hat eine Stufe als Boden: Die Räuber fallen ab F2 - ½.
+  F2-1..K   trockener Schacht, 25½ Blöcke (2 × 2, Verwüster passen). Ob ein Räuber in der Trichtermulde oder auf dem
+            Rand landet: Er fällt 25½ bis 25¾ Blöcke, 23 Schaden. Plünderer, Diener und Magier kommen mit ½ Herz an,
+            Hexen mit 1½, Verwüster mit 39 Herzen. ½ Herz stirbt an jedem Schwertschlag, auch am schwächsten (ab 1,2
+            Schaden) und am Schwungschlag nebenan (1 Schaden). So kann kein Magier überleben und Plagegeister rufen.
+            Version 1 (25 Blöcke ab ganzem Block) ließ Räuber auf dem Rand mit 1 Herz übrig, ein Magier überlebte einen
+            schwachen Schlag. Version 2/3 (30 Blöcke) tötete alle außer Verwüstern beim Aufprall: ohne Smaragde und XP.
   K         Tötungszelle über Trichtern; davor unten eine Stufe, darüber eine eiserne Falltür (obere Hälfte):
             Durch den Spalt schlägt man die Verwüster, und die XP-Kugeln kommen heraus. Die Augen der Räuber liegen
             über dem Spalt, sie sehen den Spieler nicht. Trifft man einen Verwüster, greifen nur Verwüster an.
@@ -42,8 +44,8 @@ X0, Z0 = ORT["chunk"]
 MEER = 63                                     # Wasseroberfläche: Wasser bis 62
 V = 64                                        # Füße des Dorfbewohners
 K = 72                                        # Tötungszelle (Trichter darunter)
-F2 = K + 30                                   # Wasser Stufe 2
-F2_ALT = K + 25                               # Version 1
+F2 = K + 26                                   # Wasser Stufe 2
+F2_ALT = K + 30                               # Version 2 und 3
 F1 = F2 + 3                                   # Wasser Stufe 1
 TOP = F1 + 5                                  # Schneefeld
 MAUER = TOP + 4                               # Mauern bis über die Spawnhöhe (TOP + 2): Eine Welle spawnt auf einem
@@ -77,6 +79,7 @@ oben = [
     fill(2, F2 - 1, 9, 9, F1 - 2, 9, W),                           # unter der Kante: Nordwand von Stufe 2
     # Stufe 2: x 2..9, z 10..11, Loch x 10..11
     fill(2, F2 - 1, 10, 9, F2 - 1, 11, W),
+    fill(9, F2 - 1, 10, 9, F2 - 1, 11, "stone_brick_slab[type=bottom]"),   # Absprung ½ Block tiefer
     fill(1, F2 - 1, 12, 12, MAUER, 12, W),                         # Südwand
     fill(1, F2 - 1, 10, 1, MAUER, 11, W),                          # Westwand
     fill(12, F2 - 1, 9, 12, MAUER, 11, W),                         # Ostwand am Loch
@@ -131,13 +134,10 @@ wasser = [
     fill(2, F2, 10, 2, F2, 11, "water"),                           # Quellen Stufe 2
 ]
 schnee = [fill(3, TOP, 3, 7, TOP, 8, "snow[layers=1]", " strict")]
-umbau = [fill(1, F2_ALT - 1, 1, 12, TOP + 2, 12, "air"),           # alte Stufen samt Schnee weg
-         fill(9, F2_ALT - 1, 9, 12, F2 - 2, 12, W),                # Schacht nach oben verlängern
-         fill(10, F2_ALT - 1, 10, 11, F2, 11, "air")]
+umbau = [fill(1, F2 - 1, 1, 12, F2_ALT + 3 + 5 + 4 + 1, 12, "air")]   # alte Stufen, Mauern und Schnee weg
 
 if __name__ == "__main__":
     modus = sys.argv[2] if len(sys.argv) > 2 else "neu"
-    teile = {"neu": oben + schacht + unten + wasser + schnee, "umbau2": umbau + oben + wasser + schnee,
-             "umbau3": oben}[modus]
+    teile = {"neu": oben + schacht + unten + wasser + schnee, "umbau": umbau + oben + wasser + schnee}[modus]
     for b in teile:
         print(b)
