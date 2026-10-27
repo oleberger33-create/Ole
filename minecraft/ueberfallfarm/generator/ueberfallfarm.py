@@ -1,7 +1,7 @@
 """Gibt die Befehle für die Überfall-Farm über dem Meer aus (läuft rein vanilla, wird einmal per Konsole gesetzt).
 
 Aufruf:  python3 ueberfallfarm.py <ort.json> [umbau]
-         umbau: nur Version 4 → 5 (Klappboden, Grube, Hebel, flacherer Spalt), alles andere bleibt
+         umbau: nur Version 5 → 6 (Hebel weg, Klappen immer offen), alles andere bleibt
 
 ort.json:  {"chunk": [x, z]}   Nordwest-Ecke des Chunks; alles liegt in diesem einen Chunk (16 × 16)
 
@@ -24,21 +24,20 @@ Von oben nach unten:
             Das letzte Feld vor dem Loch hat eine Stufe als Boden: Die Räuber fallen ab F2 - ½.
   F2-1..K   trockener Schacht (2 × 2, Verwüster passen). Die Räuber fallen ab etwa F2 - 1 (so lange stecken sie
             noch im Wasser der letzten Rinne).
-  K-1       Boden der Tötungszelle: 4 eiserne Falltüren. Hebel im Spielerraum:
-            BEUTE (Hebel aus, Falltüren zu): Landung auf den Falltüren nach 25½ bis 25¾ Blöcken, 23 Schaden.
-              Plünderer, Diener und Magier ½ Herz, Hexen 1½, Verwüster 38½ Herzen. Man schlägt durch den Spalt:
-              Smaragde (Plünderung), XP, Waffen. Für die Wellen 1 bis 4: Erst ab Welle 5 kommen Magier. Eine Hexe
-              heilt die anderen mit Tränken; ein geheilter Magier überlebt einen Schlag und ruft Plagegeister.
-            SICHER (Hebel an, Falltüren offen): Alles fällt weiter in die Grube auf die Trichter bei K-5, 29 Blöcke,
-              26 und mehr Schaden: Plünderer, Diener, Magier und Hexen sterben. Verwüster (fast 2 breit) passen nicht
-              zwischen die offenen Klappen, sie bleiben in der Zelle und werden durch den Spalt erledigt. Ihr Reiter
-              fällt beim Tod des Verwüsters in die Grube und stirbt. Die Grube leert sich in die Truhe auf der
-              Plattform am Wasser; was im Beute-Modus auf den Falltüren liegt, fällt beim Öffnen hinein.
+  K-1       Boden der Tötungszelle: 4 eiserne Falltüren, immer offen (ein Redstoneblock in der Wand speist sie).
+            Plünderer, Diener, Magier und Hexen fallen durch in die Grube auf die Trichter bei K-5, 29 Blöcke,
+            26 und mehr Schaden: Sie sterben alle. Verwüster (fast 2 breit) passen nicht zwischen die offenen Klappen,
+            sie bleiben oben mit etwa 39 Herzen und werden durch den Spalt erledigt; trifft man sie, greifen nur
+            Verwüster an, und die sehen den Spieler nicht. Ihr Reiter fällt beim Tod des Verwüsters in die Grube und
+            stirbt. Die Grube leert sich in die Truhe auf der Plattform am Wasser.
+            Warum kein Spielerschlag für die anderen (Version 4/5): Smaragde und XP gibt es nur, wenn ein Spieler
+            trifft. Eine Hexe heilt die anderen mit Tränken; ein geheilter Magier überlebt den Schlag und ruft
+            Plagegeister. Version 5 hatte dafür einen Hebel (Klappen zu für die Wellen 1 bis 4), zu umständlich.
   Spalt     Vorn auf Bodenhöhe ein Teppich, darüber 1,44 Blöcke frei bis zu einer oberen Stufe (K + ½). Die Augen der
             Räuber liegen darüber (ab K + 0,81), die des stehenden Spielers auch (K + 0,62): Eine Sichtlinie müsste
             unter K + ½ durch, also sieht kein Räuber den Spieler. Er schlägt im Stehen schräg nach unten. Geduckt
             (Augen K + 0,27) wird es knapp, also nicht ducken. Die XP-Kugeln rollen über den Teppich heraus.
-  K-1       Spielerraum (Füße), Hebel, Truhe aus Version 1 bis 4, Ofen, Werkbank. Hier die Flasche trinken.
+  K-1       Spielerraum (Füße), Truhe aus Version 1 bis 4, Ofen, Werkbank. Hier die Flasche trinken.
   64        Dorfbewohner mit Bett und Komposter, 8 Blöcke unter der Zelle. Räuber suchen Dorfbewohner nur 4 Blöcke
             über und unter sich; so wird er nie angegriffen.
   63        Plattform auf dem Wasser, Leiter hoch in den Spielerraum
@@ -116,7 +115,7 @@ zelle = [
     # Spalt
     fill(10, K - 1, 12, 11, K - 1, 12, "white_carpet"),
     fill(10, K, 12, 11, K, 12, "stone_brick_slab[type=top]"),
-    # Leitung: Hebel → Staub um die Zelle → Verstärker in der Zellwand → Falltüren
+    # Leitung: Redstoneblock in der Raumwand → Staub um die Zelle → Verstärker in der Zellwand → Falltüren
     fill(8, K - 2, 8, 8, K - 2, 11, W),
     fill(9, K - 2, 8, 13, K - 2, 8, W),
     fill(13, K - 2, 9, 13, K - 2, 11, W),
@@ -125,10 +124,8 @@ zelle = [
     fill(8, K - 1, 8, 8, K - 1, 11, "redstone_wire"),
     fill(9, K - 1, 8, 13, K - 1, 8, "redstone_wire"),
     fill(13, K - 1, 9, 13, K - 1, 12, "redstone_wire"),
-    setb(12, K - 1, 12, "redstone_wire"),
-    setb(12, K, 13, "lever[face=wall,facing=south,powered=true]"),   # an = Sicher
-    setb(12, K - 1, 12, "air"),
-    setb(12, K - 1, 12, "redstone_wire"),                            # neu gesetzt, damit er den Hebel bemerkt
+    setb(12, K - 1, 12, W),
+    setb(13, K, 12, "redstone_block"),
 ]
 unten = [
     # Spielerraum: innen x 9..13, z 13..14, Füße K-1
@@ -164,6 +161,7 @@ schnee = [fill(3, TOP, 3, 7, TOP, 8, "snow[layers=1]", " strict")]
 
 if __name__ == "__main__":
     modus = sys.argv[2] if len(sys.argv) > 2 else "neu"
-    teile = {"neu": oben + schacht + unten + zelle + wasser + schnee, "umbau": zelle}[modus]
+    teile = {"neu": oben + schacht + unten + zelle + wasser + schnee,
+             "umbau": [setb(12, K, 13, "air")] + zelle}[modus]
     for b in teile:
         print(b)
