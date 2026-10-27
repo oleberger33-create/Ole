@@ -2,13 +2,14 @@
 
 Aufruf:  python3 reisebuch.py <ziele.json> [zip-datei] [entpackt-ordner]
 
-ziele.json:  {"spieler": ["Name", …],
+ziele.json:  {"spieler": ["Name", …] oder "alle",
               "ziele": [{"name": "XP-Farm", "pos": [x, y, z], "blick": [gier, neigung], "info": "Text"}, …]}
 
 Ein Klick im Buch führt „/trigger reise set <Nummer>“ aus; das darf jeder Spieler ohne Operator-Rechte.
 Das Pack schaltet den Trigger jeden Tick frei und teleportiert, wer ihn gesetzt hat (immer in die Oberwelt,
 auch aus dem Nether). „/trigger reise set 99“ gibt ein neues Buch, falls eins verloren geht.
-Nur die Spieler aus „spieler“ dürfen das Buch haben und benutzen; alle anderen verlieren es sofort. Das Buch trägt
+Nur die Spieler aus „spieler“ dürfen das Buch haben und benutzen; alle anderen verlieren es sofort. Mit "alle" bekommt
+jeder Spieler das Buch, auch wer neu auf den Server kommt. Das Buch trägt
 custom_data {reise:1b}: Stirbt ein Spieler, verschwindet es aus dem Fallengelassenen und er bekommt beim Wiederbeleben
 ein neues. Der Rest des Inventars fällt wie immer.
 """
@@ -57,8 +58,11 @@ buch = (f'minecraft:written_book[{MARKE},minecraft:written_book_content={{title:
         f'pages:[[{",".join(seite)}]]}}]')
 OK = f"tag={NS}.ok"
 
-tick = [f"tag @a[name={n}] add {NS}.ok" for n in SPIELER]
-tick += [f"clear @a[tag=!{NS}.ok] {UNSER}",
+if SPIELER == "alle":
+    tick = [f"tag @a add {NS}.ok"]
+else:
+    tick = [f"tag @a[name={n}] add {NS}.ok" for n in SPIELER] + [f"clear @a[tag=!{NS}.ok] {UNSER}"]
+tick += [
          f"scoreboard players enable @a[{OK}] {NS}"]
 for nr, z in enumerate(ZIELE, 1):
     x, y, zz = z["pos"]
