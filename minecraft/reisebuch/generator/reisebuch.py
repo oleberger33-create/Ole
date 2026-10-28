@@ -16,6 +16,13 @@ Nur die Spieler aus „spieler“ dürfen das Auge haben und benutzen; alle ande
 jeder Spieler eins, auch wer neu auf den Server kommt. Das Auge (wie früher das Buch) trägt custom_data {reise:1b}:
 Stirbt ein Spieler, verschwindet es aus dem Fallengelassenen und er bekommt beim Wiederbeleben ein neues. Wer noch das
 alte Buch hat, bekommt es gegen das Auge getauscht.
+
+Eigene Punkte: Unter den Farmen öffnet „Meine Punkte“ ein zweites Fenster mit 5 Plätzen je Spieler (Haus, Basis …).
+„Hier speichern“ merkt sich die jetzige Stelle mit Blickrichtung und Dimension (auch Nether und End); Namen und Bild
+kommen aus einer festen Liste, denn Spieler ohne Operator-Rechte können dem Server nur Zahlen schicken (/trigger).
+Der Speichern-Knopf setzt den Trigger auf 1PNN (P = Platz, NN = Name), Löschen auf 2P00, Hinreisen auf 10P.
+Jeder Spieler bekommt eine feste Nummer (Scoreboard reise.id); seine Punkte liegen im Storage reise:punkte unter p<id>.
+Die Fenster mit den eigenen Punkten baut das Pack für jeden Spieler neu (Makro-Funktionen mit seinen Daten).
 """
 import json
 import os
@@ -31,6 +38,11 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 ZIP = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HIER, "..", "Reisebuch.zip")
 ORDNER = sys.argv[3] if len(sys.argv) > 3 else None
 NEUES_AUGE = 99
+MEINE, FARMEN, SPEICHERN = 98, 97, 96                                  # Trigger, die ein Fenster öffnen
+PLAETZE = 5
+NAMEN = [("Haus", "oak_door"), ("Basis", "iron_door"), ("Farm", "wheat"), ("Mine", "iron_pickaxe"),
+         ("Lager", "bundle"), ("Portal", "ender_pearl"), ("Dorf", "emerald"), ("Turm", "spyglass"),
+         ("Hafen", "oak_boat"), ("Punkt", "map")]
 VERSION = 3                     # erhöhen, wenn alle ein neues Auge bekommen sollen
 dateien = {}
 
@@ -64,8 +76,52 @@ dialog = {
     "pause": False,
     "after_action": "close",
     "columns": 2,
-    "actions": [knopf(nr, z) for nr, z in enumerate(ZIELE, 1)],
+    "actions": [knopf(nr, z) for nr, z in enumerate(ZIELE, 1)] + [
+        {"label": [symbol("compass_16"), {"text": "  Meine Punkte", "color": "yellow"}],
+         "tooltip": {"text": "Eigene Punkte: Haus, Basis … speichern und hinreisen"}, "width": 150,
+         "action": {"type": "run_command", "command": f"/trigger {NS} set {MEINE}"}}],
     "exit_action": {"label": {"translate": "gui.done"}, "width": 150},
+}
+
+
+def befehl(nr):
+    return {"type": "run_command", "command": f"/trigger {NS} set {nr}"}
+
+
+meine = {   # Platzhalter $(n1) … kommen beim Öffnen aus den Daten des Spielers (Makro)
+    "type": "minecraft:multi_action",
+    "title": {"text": "Meine Punkte", "bold": True},
+    "external_title": {"text": "Meine Punkte"},
+    "body": [{"type": "minecraft:plain_message", "width": 300,
+              "contents": {"text": "Klick auf einen Punkt, um hinzureisen. Neue Punkte speicherst du dort, "
+                                   "wo du gerade stehst.", "color": "gray"}}],
+    "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 1,
+    "actions": [{"label": [{"type": "object", "object": "atlas", "atlas": "minecraft:items", "sprite": f"$(i{k})"},
+                           {"text": f"  $(n{k})", "color": f"$(c{k})"}],
+                 "tooltip": {"text": f"Platz {k}"}, "width": 200, "action": befehl(100 + k)}
+                for k in range(1, PLAETZE + 1)] + [
+        {"label": {"text": "+ Hier speichern", "color": "green"}, "width": 200, "action": befehl(SPEICHERN)},
+        {"label": {"text": "Zurück zu den Farmen"}, "width": 200, "action": befehl(FARMEN)}],
+    "exit_action": {"label": {"translate": "gui.done"}, "width": 200},
+}
+speichern = {
+    "type": "minecraft:multi_action",
+    "title": {"text": "Punkt speichern", "bold": True},
+    "body": [{"type": "minecraft:plain_message", "width": 300,
+              "contents": {"text": "Speichert die Stelle, an der du gerade stehst, mit Blickrichtung.", "color": "gray"}}],
+    "inputs": [
+        {"type": "minecraft:single_option", "key": "platz", "label": {"text": "Platz"}, "width": 200,
+         "options": [{"id": str(k), "display": {"text": f"{k}: $(n{k})"}, **({"initial": True} if k == 1 else {})}
+                     for k in range(1, PLAETZE + 1)]},
+        {"type": "minecraft:single_option", "key": "name", "label": {"text": "Name"}, "width": 200,
+         "options": [{"id": f"{m:02d}", "display": {"text": n}} for m, (n, _) in enumerate(NAMEN, 1)]}],
+    "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 1,
+    "actions": [
+        {"label": {"text": "Speichern", "color": "green"}, "width": 200,
+         "action": {"type": "dynamic/run_command", "template": f"/trigger {NS} set 1$(platz)$(name)"}},
+        {"label": {"text": "Platz leeren", "color": "red"}, "width": 200,
+         "action": {"type": "dynamic/run_command", "template": f"/trigger {NS} set 2$(platz)00"}},
+        {"label": {"text": "Zurück"}, "width": 200, "action": befehl(MEINE)}],
 }
 MARKE = f"minecraft:custom_data={{{NS}:1b}}"
 UNSER = f"*[{MARKE.replace('=', '~', 1)}]"                             # Item-Prädikat: jedes Item mit diesen Daten
@@ -87,6 +143,16 @@ for nr, z in enumerate(ZIELE, 1):
     x, y, zz = z["pos"]
     gier, neigung = z.get("blick", [0, 0])
     tick.append(f"execute as @a[{OK},scores={{{NS}={nr}}}] in minecraft:overworld run tp @s {x} {y} {zz} {gier} {neigung}")
+tick += [f"execute as @a[{OK}] unless score @s {NS}.id matches 1.. run function {NS}:neue_id",
+         f"execute as @a[{OK},scores={{{NS}={MEINE}}}] run function {NS}:meine",
+         f"execute as @a[{OK},scores={{{NS}={FARMEN}}}] run function {NS}:fenster",
+         f"execute as @a[{OK},scores={{{NS}={SPEICHERN}}}] run function {NS}:speichern_fenster"]
+for k in range(1, PLAETZE + 1):
+    tick += [f"execute as @a[{OK},scores={{{NS}={100 + k}}}] run function {NS}:hin {{platz:{k}}}",
+             f"execute as @a[{OK},scores={{{NS}={2000 + k * 100}}}] run function {NS}:leeren {{platz:{k}}}"]
+    for m, (n, item) in enumerate(NAMEN, 1):
+        tick.append(f"execute as @a[{OK},scores={{{NS}={1000 + k * 100 + m}}}] run function {NS}:merken "
+                    f"{{platz:{k},name:\"{n}\",icon:\"item/{item}\"}}")
 tick += [f"execute as @a[{OK},scores={{{NS}={NEUES_AUGE}}}] run function {NS}:auge",
          f"scoreboard players reset @a[scores={{{NS}=1..}}] {NS}",
          "# Gestorben: das fallengelassene Auge weg, nach dem Wiederbeleben ein neues (@e findet nur Lebende)",
@@ -98,11 +164,62 @@ tick += [f"execute as @a[{OK},scores={{{NS}={NEUES_AUGE}}}] run function {NS}:au
 
 funktion("load", [f"scoreboard objectives add {NS} trigger \"Reisebuch\"",
                   f"scoreboard objectives add {NS}.tod deathCount",
+                  f"scoreboard objectives add {NS}.id dummy",
                   f"scoreboard objectives add {NS}.klick minecraft.used:minecraft.carrot_on_a_stick"])
 funktion("tick", tick)
 funktion("auge", [f"clear @s {UNSER}", f"give @s {auge}"])
 # Der Dialog steht direkt im Befehl: Dialoge aus Datapacks lädt der Server nur beim Start, nicht bei /reload
 funktion("fenster", [f"dialog show @s {json.dumps(dialog, ensure_ascii=False)}"])
+
+# Eigene Punkte. reise:tmp ist Arbeitsplatz: id = Nummer des Spielers, p = seine Daten
+LEER = {f"{a}{k}": v for k in range(1, PLAETZE + 1) for a, v in (("n", "leer"), ("i", "item/barrier"), ("c", "gray"))}
+funktion("neue_id", [f"scoreboard players add #naechste {NS}.id 1",
+                     f"scoreboard players operation @s {NS}.id = #naechste {NS}.id",
+                     f"function {NS}:laden",
+                     f"execute unless data storage {NS}:tmp p.n1 run function {NS}:anlegen with storage {NS}:tmp"])
+funktion("anlegen", [f"$data modify storage {NS}:punkte p$(id) set value {json.dumps(LEER)}"])
+funktion("laden", [f"execute store result storage {NS}:tmp id int 1 run scoreboard players get @s {NS}.id",
+                   f"data remove storage {NS}:tmp p",
+                   f"function {NS}:laden_m with storage {NS}:tmp"])
+funktion("laden_m", [f"$data modify storage {NS}:tmp p set from storage {NS}:punkte p$(id)"])
+funktion("meine", [f"function {NS}:laden", f"function {NS}:meine_m with storage {NS}:tmp p"])
+funktion("meine_m", [f"$dialog show @s {json.dumps(meine, ensure_ascii=False)}"])
+# Die Vorlage des Speichern-Knopfs enthält selbst $(platz) und $(name) (füllt der Dialog aus); damit das Makro sie
+# stehen lässt, bekommt es sie als Werte mit, die genau so lauten
+funktion("speichern_fenster", [f"function {NS}:laden",
+                               f"data modify storage {NS}:tmp p.platz set value \"$(platz)\"",
+                               f"data modify storage {NS}:tmp p.name set value \"$(name)\"",
+                               f"function {NS}:speichern_m with storage {NS}:tmp p"])
+funktion("speichern_m", [f"$dialog show @s {json.dumps(speichern, ensure_ascii=False)}"])
+funktion("merken", [
+    f"$data modify storage {NS}:tmp a set value {{platz:$(platz),name:\"$(name)\",icon:\"$(icon)\"}}",
+    f"execute store result storage {NS}:tmp a.id int 1 run scoreboard players get @s {NS}.id",
+    f"data modify storage {NS}:tmp neu set value {{}}",
+    f"execute store result storage {NS}:tmp neu.x double 0.01 run data get entity @s Pos[0] 100",
+    f"execute store result storage {NS}:tmp neu.y double 0.01 run data get entity @s Pos[1] 100",
+    f"execute store result storage {NS}:tmp neu.z double 0.01 run data get entity @s Pos[2] 100",
+    f"execute store result storage {NS}:tmp neu.gier double 0.01 run data get entity @s Rotation[0] 100",
+    f"execute store result storage {NS}:tmp neu.neigung double 0.01 run data get entity @s Rotation[1] 100",
+    f"data modify storage {NS}:tmp neu.dim set from entity @s Dimension",
+    f"function {NS}:merken_m with storage {NS}:tmp a",
+    f"function {NS}:meine"])
+funktion("merken_m", [f"$data modify storage {NS}:punkte p$(id).s$(platz) set from storage {NS}:tmp neu",
+                      f"$data modify storage {NS}:punkte p$(id).n$(platz) set value \"$(name)\"",
+                      f"$data modify storage {NS}:punkte p$(id).i$(platz) set value \"$(icon)\"",
+                      f"$data modify storage {NS}:punkte p$(id).c$(platz) set value \"white\"",
+                      "$title @s actionbar {text:\"Gespeichert: $(name)\",color:\"green\"}"])
+funktion("leeren", [f"$data modify storage {NS}:tmp a set value {{platz:$(platz)}}",
+                    f"execute store result storage {NS}:tmp a.id int 1 run scoreboard players get @s {NS}.id",
+                    f"function {NS}:leeren_m with storage {NS}:tmp a",
+                    f"function {NS}:meine"])
+funktion("leeren_m", [f"$data remove storage {NS}:punkte p$(id).s$(platz)",
+                      f"$data modify storage {NS}:punkte p$(id).n$(platz) set value \"leer\"",
+                      f"$data modify storage {NS}:punkte p$(id).i$(platz) set value \"item/barrier\"",
+                      f"$data modify storage {NS}:punkte p$(id).c$(platz) set value \"gray\""])
+funktion("hin", [f"function {NS}:laden",
+                 f"$execute if data storage {NS}:tmp p.s$(platz) run return run function {NS}:hin_m with storage {NS}:tmp p.s$(platz)",
+                 "title @s actionbar {text:\"Dieser Platz ist leer\",color:\"gray\"}"])
+funktion("hin_m", ["$execute in $(dim) run tp @s $(x) $(y) $(z) $(gier) $(neigung)"])
 datei("data/minecraft/tags/function/load.json", json.dumps({"values": [f"{NS}:load"]}, indent=2))
 datei("data/minecraft/tags/function/tick.json", json.dumps({"values": [f"{NS}:tick"]}, indent=2))
 datei("pack.mcmeta", json.dumps({"pack": {
