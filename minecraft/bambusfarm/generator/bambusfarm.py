@@ -1,9 +1,11 @@
 """Gibt die Befehle für die Bambusfarm aus (rein vanilla, einmal per Konsole gesetzt).
 
-Aufruf:  python3 bambusfarm.py <ort.json> [neu|umbau]
+Aufruf:  python3 bambusfarm.py <ort.json> [neu|umbau|lager]
   neu    (Standard) die ganze Farm
   umbau  nur für die schon gebaute Farm: Schienen quer stellen, Loren mittig setzen, Truhe gegen den Stöcke-Crafter
          tauschen (der Bambus aus der alten Truhe kommt in den Zubringer-Trichter)
+  lager  nur für die Farm mit Crafter und einer Truhe: Crafter nach oben in die Lagerleitung, die alte Truhe weg
+         (ihre Stöcke kommen in die erste Lagertruhe)
 
 ort.json:  {"ecke": [x, y, z]}   Nordwest-Ecke, y: Bodenhöhe (dort liegen die Trichter)
 
@@ -18,14 +20,17 @@ Wächst ein Bambus auf 5 Blöcke, schlagen alle Kolben des Blocks Höhe 2 ab. Al
 Block stehen und wächst neu. Wie früh geschnitten wird, ändert die Menge nicht (jeder gewachsene Block wird geerntet),
 höher geschnitten feuert die Farm nur seltener. Bambus wächst nur unter freiem Himmel, deshalb ein Glasdach.
 Die Trichterloren saugen den Bambus durch die Erde, die Trichterreihen bringen ihn nach Westen in eine Sammelleitung
-und die zum Crafter am Westende, der aus je 2 Bambus einen Stock macht und ihn in die Doppeltruhe dahinter legt.
+und die zum Crafter am Westende, der aus je 2 Bambus einen Stock macht und ihn nach oben ins Lager gibt.
 
 Stöcke-Crafter (alles auf Bodenhöhe, Redstone unter Stufen): Nur die zwei Felder links oben und links Mitte sind frei,
 die anderen sieben gesperrt; der Trichter füllt die freien gleichmäßig. Ein Komparator liest den Crafter: Er zählt
 belegte und gesperrte Felder, also 9, wenn beide Bambus da sind, sonst 8 oder 7. Danach 9 Redstone-Stücke: Am letzten
 kommt nur aus 9 noch Strom an (9 - 8 = 1). Es zeigt in einen Block neben dem Crafter, der Crafter fertigt einen Stock,
 ein Feld wird frei, der Strom geht aus, und beim nächsten vollen Paar wieder an.
-Ist die Truhe voll, wirft der Crafter die Stöcke aus: rechtzeitig leeren.
+Lager: Über dem Boden läuft eine Trichterleitung vom Crafter nach Westen und dann vor dem Haus nach Norden. Unter jedem
+Trichter der Leitung zieht ein zweiter Trichter Stöcke heraus und legt sie in die Truhe daneben (vier Doppeltruhen auf
+Bodenhöhe, von oben zu öffnen). Ist eine Truhe voll, bleibt ihr Trichter voll und die Stöcke laufen zur nächsten.
+Sind alle voll, wirft der Crafter die Stöcke aus: rechtzeitig leeren (Platz für 13824 Stöcke).
 Die Schienen werden mit strict gesetzt, sonst drehen sie sich längs zur Reihe und die Loren schieben sich gegenseitig.
 """
 import json
@@ -97,17 +102,36 @@ befehle += [
 DRAHT = [(CX, TZ - 2, "south", "west"), (CX - 1, TZ - 2, "east", "west"), (CX - 2, TZ - 2, "east", "west"),
          (CX - 3, TZ - 2, "east", "south"), (CX - 3, TZ - 1, "north", "south"), (CX - 3, TZ, "north", "south"),
          (CX - 3, TZ + 1, "north", "east"), (CX - 2, TZ + 1, "west", "east"), (CX - 1, TZ + 1, "west", "east")]
+LX = CX - 5                                                           # Lagerleitung nach Norden, Truhen westlich davon
+LZ = range(TZ, TZ - 8, -1)
+lager = [fill(LX + 1, 1, TZ, CX, 1, TZ, "hopper[facing=west]"),
+         fill(LX, 1, TZ, LX, 1, LZ[-2], "hopper[facing=north]"),
+         f"setblock {pos(LX, 1, LZ[-1])} minecraft:hopper[facing=down]",
+         fill(LX, 0, TZ, LX, 0, LZ[-1], "hopper[facing=west]")]
+for z in LZ:                                                          # Doppeltruhe nach Westen: links ist die südliche
+    lager.append(f"setblock {pos(LX - 1, 0, z)} minecraft:chest[facing=west,type={'left' if (TZ - z) % 2 == 0 else 'right'}]")
+AUSGABE = "minecraft:crafter[orientation=up_west]{disabled_slots:[I;1,2,4,5,6,7,8]}"
 crafter = [
-    f"setblock {pos(CX - 1, 0, TZ)} minecraft:chest[facing=south,type=left]",
-    f"setblock {pos(CX - 2, 0, TZ)} minecraft:chest[facing=south,type=right]",
+    fill(CX - 2, 0, TZ, CX - 1, 0, TZ, W),                              # zwischen Crafter und Redstone
     f"setblock {pos(-1, 0, TZ)} minecraft:hopper[facing=west]",
-    f"setblock {pos(CX, 0, TZ)} minecraft:crafter[orientation=west_up]{{disabled_slots:[I;1,2,4,5,6,7,8]}}",
+] + lager + [
+    f"setblock {pos(CX, 0, TZ)} {AUSGABE}",
     f"setblock {pos(CX, 0, TZ - 1)} minecraft:comparator[facing=south,mode=compare]",
     f"setblock {pos(CX, 0, TZ + 1)} minecraft:{W}",                    # vom letzten Redstone geschaltet, neben dem Crafter
 ] + [f"setblock {pos(x, 0, z)} minecraft:redstone_wire[{a}=side,{b}=side]" for x, z, a, b in DRAHT] + [
     f"setblock {pos(x, 1, z)} minecraft:stone_brick_slab[type=bottom]" for x, z, _, _ in DRAHT + [(CX, TZ - 1, "", "")]]
 
-if MODUS == "umbau":
+if MODUS == "lager":
+    alt = [pos(CX - 1, 0, TZ), pos(CX - 2, 0, TZ)]
+    befehle = lager + [
+        f"data modify storage bam:umbau C set from block {pos(CX, 0, TZ)} Items",
+        f"setblock {pos(CX, 0, TZ)} {AUSGABE}",
+        f"data modify block {pos(CX, 0, TZ)} Items set from storage bam:umbau C",
+        f"data modify block {pos(LX - 1, 0, TZ)} Items set from block {alt[0]} Items",
+        f"data modify block {pos(LX - 1, 0, TZ - 1)} Items set from block {alt[1]} Items",
+        fill(CX - 2, 0, TZ, CX - 1, 0, TZ, W),
+    ]
+elif MODUS == "umbau":
     befehle = schienen + [
         f"execute as @e[type=minecraft:hopper_minecart,x={X0},y={Y0},z={Z0},dx={LAENGE + 1},dy=2,dz={reihen[-1] + 1}] "
         f"at @s align xz run tp @s ~0.5 {Y0 + 1 + 0.0625} ~0.5",
