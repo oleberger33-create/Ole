@@ -6,12 +6,12 @@ Aufruf:  python3 bambusfarm.py <ort.json> [neu|umbau|lager|etage]
          tauschen (der Bambus aus der alten Truhe kommt in den Zubringer-Trichter)
   lager  nur für die Farm mit Crafter und einer Truhe: Crafter nach oben in die Lagerleitung, die alte Truhe weg
          (ihre Stöcke kommen in die erste Lagertruhe)
-  etage  nur für die Farm mit einer Etage: zweite Etage obendrauf, Seelaternen ins untere Dach
+  etage  nur für die schon gebaute Farm mit einer Etage weniger: oberste Etage obendrauf, Seelaternen ins Dach darunter
 
 ort.json:  {"ecke": [x, y, z]}   Nordwest-Ecke, y: Bodenhöhe (dort liegen die Trichter)
 
-Zwei Etagen übereinander, je zwei gleiche Blöcke nebeneinander, jeder mit zwei Bambusreihen von 14 Stück. Querschnitt von Nord nach Süd (z relativ
-zur Mitte m eines Blocks), Höhe relativ zum Erdblock:
+Drei Etagen übereinander, je zwei gleiche Blöcke nebeneinander, jeder mit zwei Bambusreihen von 14 Stück.
+Querschnitt von Nord nach Süd (z relativ zur Mitte m eines Blocks), Höhe relativ zum Erdblock:
   m-3, m+3  Glaswand
   m-2, m+2  Erde, darauf der Bambus (bis 5 hoch); unter der Erde eine Trichterlore auf einer Schiene, darunter Trichter
   m-1, m+1  Kolben auf Höhe 2 zum Bambus hin, auf Höhe 5 ein Beobachter, der Höhe 5 vom Bambus beobachtet
@@ -20,8 +20,8 @@ zur Mitte m eines Blocks), Höhe relativ zum Erdblock:
 Wächst ein Bambus auf 5 Blöcke, schlagen alle Kolben des Blocks Höhe 2 ab. Alles darüber fällt mit ab, unten bleibt ein
 Block stehen und wächst neu. Wie früh geschnitten wird, ändert die Menge nicht (jeder gewachsene Block wird geerntet),
 höher geschnitten feuert die Farm nur seltener. Bambus braucht Licht 9 über der Spitze: oben ein Glasdach, in der
-unteren Etage Seelaternen im Dach über den Reihen. Die obere Sammelleitung führt am Westende senkrecht hinunter in den
-Zubringer der unteren.
+unteren Etagen Seelaternen im Dach über den Reihen. Die Sammelleitungen der oberen Etagen führen am Westende senkrecht
+hinunter in den Zubringer der untersten.
 Die Trichterloren saugen den Bambus durch die Erde, die Trichterreihen bringen ihn nach Westen in eine Sammelleitung
 und die zum Crafter am Westende, der aus je 2 Bambus einen Stock macht und ihn nach oben ins Lager gibt.
 
@@ -65,7 +65,7 @@ def h(n):                       # Höhe n über der Erde (1 = unterster Bambus)
 reihen = [m + s * 2 for m in MITTEN for s in (-1, 1)]
 z_end = MITTEN[-1] + 3
 TZ = MITTEN[0] + 3                                                    # Zeile der Sammelleitung (zwischen den Blöcken)
-ETAGEN = 2
+ETAGEN = 3
 HOCH = h(H) + 2                                                       # eine Etage: Trichter bis Dach
 
 
@@ -150,8 +150,10 @@ crafter = [
 ] + [f"setblock {pos(x, 0, z)} minecraft:redstone_wire[{a}=side,{b}=side]" for x, z, a, b in DRAHT] + [
     f"setblock {pos(x, 1, z)} minecraft:stone_brick_slab[type=bottom]" for x, z, _, _ in DRAHT + [(CX, TZ - 1, "", "")]]
 
-if MODUS == "etage":
-    befehle = etage(1) + [fill(1, h(H) + 1, z, LAENGE, h(H) + 1, z, "sea_lantern") for z in reihen] + bepflanzen(1)
+if MODUS == "etage":                                                  # oberste Etage auf die vorhandenen setzen
+    k = ETAGEN - 1
+    dach = (k - 1) * HOCH + h(H) + 1
+    befehle = etage(k) + [fill(1, dach, z, LAENGE, dach, z, "sea_lantern") for z in reihen] + bepflanzen(k)
 elif MODUS == "lager":
     alt = [pos(CX - 1, 0, TZ), pos(CX - 2, 0, TZ)]
     befehle = lager + [
