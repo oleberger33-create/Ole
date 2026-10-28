@@ -1,15 +1,16 @@
 """Gibt die Befehle für die Bambusfarm aus (rein vanilla, einmal per Konsole gesetzt).
 
-Aufruf:  python3 bambusfarm.py <ort.json> [neu|umbau|lager]
+Aufruf:  python3 bambusfarm.py <ort.json> [neu|umbau|lager|etage]
   neu    (Standard) die ganze Farm
   umbau  nur für die schon gebaute Farm: Schienen quer stellen, Loren mittig setzen, Truhe gegen den Stöcke-Crafter
          tauschen (der Bambus aus der alten Truhe kommt in den Zubringer-Trichter)
   lager  nur für die Farm mit Crafter und einer Truhe: Crafter nach oben in die Lagerleitung, die alte Truhe weg
          (ihre Stöcke kommen in die erste Lagertruhe)
+  etage  nur für die Farm mit einer Etage: zweite Etage obendrauf, Seelaternen ins untere Dach
 
 ort.json:  {"ecke": [x, y, z]}   Nordwest-Ecke, y: Bodenhöhe (dort liegen die Trichter)
 
-Zwei gleiche Blöcke nebeneinander, jeder mit zwei Bambusreihen von 14 Stück. Querschnitt von Nord nach Süd (z relativ
+Zwei Etagen übereinander, je zwei gleiche Blöcke nebeneinander, jeder mit zwei Bambusreihen von 14 Stück. Querschnitt von Nord nach Süd (z relativ
 zur Mitte m eines Blocks), Höhe relativ zum Erdblock:
   m-3, m+3  Glaswand
   m-2, m+2  Erde, darauf der Bambus (bis 5 hoch); unter der Erde eine Trichterlore auf einer Schiene, darunter Trichter
@@ -18,7 +19,9 @@ zur Mitte m eines Blocks), Höhe relativ zum Erdblock:
             am Ostende ein Beobachter nach oben, der die obere Leitung auf die untere überträgt
 Wächst ein Bambus auf 5 Blöcke, schlagen alle Kolben des Blocks Höhe 2 ab. Alles darüber fällt mit ab, unten bleibt ein
 Block stehen und wächst neu. Wie früh geschnitten wird, ändert die Menge nicht (jeder gewachsene Block wird geerntet),
-höher geschnitten feuert die Farm nur seltener. Bambus wächst nur unter freiem Himmel, deshalb ein Glasdach.
+höher geschnitten feuert die Farm nur seltener. Bambus braucht Licht 9 über der Spitze: oben ein Glasdach, in der
+unteren Etage Seelaternen im Dach über den Reihen. Die obere Sammelleitung führt am Westende senkrecht hinunter in den
+Zubringer der unteren.
 Die Trichterloren saugen den Bambus durch die Erde, die Trichterreihen bringen ihn nach Westen in eine Sammelleitung
 und die zum Crafter am Westende, der aus je 2 Bambus einen Stock macht und ihn nach oben ins Lager gibt.
 
@@ -61,44 +64,70 @@ def h(n):                       # Höhe n über der Erde (1 = unterster Bambus)
 
 reihen = [m + s * 2 for m in MITTEN for s in (-1, 1)]
 z_end = MITTEN[-1] + 3
-befehle = [
-    fill(-2, 1, 0, E + 1, h(H) + 3, z_end, "air"),                   # Gras und Blumen weg
-    fill(0, 0, 0, E + 1, D, z_end, W),                                # Unterbau
-    fill(0, h(1), 0, E, h(H) + 1, z_end, "glass"),                    # Glaskörper mit Dach, Technik kommt hinein
-    fill(E + 1, h(1), 0, E + 1, h(H), z_end, W),                      # Endwand im Osten
-]
-schienen = [fill(1, 1, z, LAENGE, 1, z, "powered_rail[shape=north_south,powered=false]") + " strict" for z in reihen]
-for z in reihen:
-    befehle += [
-        fill(0, 0, z, LAENGE, 0, z, "hopper[facing=west]"),
-        fill(1, D, z, LAENGE, D, z, "dirt"),
-        fill(1, h(1), z, LAENGE, h(H), z, "air"),
+TZ = MITTEN[0] + 3                                                    # Zeile der Sammelleitung (zwischen den Blöcken)
+ETAGEN = 2
+HOCH = h(H) + 2                                                       # eine Etage: Trichter bis Dach
+
+
+def etage(k):
+    """Befehle für Etage k (0 = unten), ohne Loren und Bambus. Unter einer weiteren Etage bekommt das Dach über den
+    Reihen Seelaternen statt Glas: Bambus wächst nur bei Licht 9 oder mehr über der Spitze."""
+    oy = k * HOCH
+    b = [
+        fill(-2 if k == 0 else 0, oy + 1, 0, E + 1, oy + h(H) + 3, z_end, "air"),   # Gras und Blumen weg
+        fill(0, oy, 0, E + 1, oy + D, z_end, W),                                     # Unterbau
+        fill(0, oy + h(1), 0, E, oy + h(H) + 1, z_end, "glass"),                     # Glaskörper mit Dach
+        fill(E + 1, oy + h(1), 0, E + 1, oy + h(H), z_end, W),                       # Endwand im Osten
     ]
-for m in MITTEN:
-    for s, blick in ((-1, "north"), (1, "south")):
-        z = m + s
-        befehle += [
-            fill(0, h(1), z, E, h(H), z, W),
-            fill(1, h(2), z, LAENGE, h(2), z, f"piston[facing={blick}]"),
-            fill(1, h(H), z, LAENGE, h(H), z, f"observer[facing={blick}]"),
+    for z in reihen:
+        b += [
+            fill(0, oy, z, LAENGE, oy, z, "hopper[facing=west]"),
+            fill(1, oy + D, z, LAENGE, oy + D, z, "dirt"),
+            fill(1, oy + h(1), z, LAENGE, oy + h(H), z, "air"),
         ]
-    befehle += [
-        fill(0, h(1), m, E, h(H), m, W),
-        fill(1, h(3), m, E, h(3), m, "redstone_wire[east=side,west=side]"),
-        fill(1, h(H), m, E, h(H), m, "redstone_wire[east=side,west=side]"),
-        f"setblock {pos(E, h(4), m)} minecraft:observer[facing=up]",
-        fill(0, h(H) + 1, m - 1, E + 1, h(H) + 1, m + 1, "stone_brick_slab[type=bottom]"),  # Deckel über der Technik
+        if k < ETAGEN - 1:
+            b.append(fill(1, oy + h(H) + 1, z, LAENGE, oy + h(H) + 1, z, "sea_lantern"))
+    for m in MITTEN:
+        for s, blick in ((-1, "north"), (1, "south")):
+            z = m + s
+            b += [
+                fill(0, oy + h(1), z, E, oy + h(H), z, W),
+                fill(1, oy + h(2), z, LAENGE, oy + h(2), z, f"piston[facing={blick}]"),
+                fill(1, oy + h(H), z, LAENGE, oy + h(H), z, f"observer[facing={blick}]"),
+            ]
+        b += [
+            fill(0, oy + h(1), m, E, oy + h(H), m, W),
+            fill(1, oy + h(3), m, E, oy + h(3), m, "redstone_wire[east=side,west=side]"),
+            fill(1, oy + h(H), m, E, oy + h(H), m, "redstone_wire[east=side,west=side]"),
+            f"setblock {pos(E, oy + h(4), m)} minecraft:observer[facing=up]",
+            fill(0, oy + h(H) + 1, m - 1, E + 1, oy + h(H) + 1, m + 1, "stone_brick_slab[type=bottom]"),  # Deckel
+        ]
+    # Sammelleitung westlich der Reihen zur Zeile TZ; oben geht sie dort senkrecht hinunter zum Zubringer
+    b += [
+        fill(-1, oy, reihen[0], -1, oy, TZ - 1, "hopper[facing=south]"),
+        fill(-1, oy, TZ + 1, -1, oy, reihen[-1], "hopper[facing=north]"),
+        fill(-1, oy + 1, reihen[0], -1, oy + 1, TZ - 1, "stone_brick_slab[type=bottom]"),
+        fill(-1, oy + 1, TZ + 1, -1, oy + 1, reihen[-1], "stone_brick_slab[type=bottom]"),
     ]
-befehle += schienen
-# Sammelleitung im Westen in den Zubringer-Trichter, der füllt den Crafter
-TZ = MITTEN[0] + 3
+    if k > 0:
+        b += [fill(-1, 1, TZ, -1, oy, TZ, "hopper[facing=down]"),
+              f"setblock {pos(-1, oy + 1, TZ)} minecraft:stone_brick_slab[type=bottom]"]
+    b += [fill(1, oy + 1, z, LAENGE, oy + 1, z, "powered_rail[shape=north_south,powered=false]") + " strict"
+          for z in reihen]
+    return b
+
+
+def bepflanzen(k):
+    oy = k * HOCH
+    b = [f"summon minecraft:hopper_minecart {X0 + x + 0.5} {Y0 + oy + 1 + 0.0625} {Z0 + z + 0.5}"
+         for z in reihen for x in range(1, LAENGE + 1)]
+    return b + [fill(1, oy + h(1), z, LAENGE, oy + h(1), z, "bamboo") for z in reihen]
+
+
+schienen = [fill(1, 1, z, LAENGE, 1, z, "powered_rail[shape=north_south,powered=false]") + " strict" for z in reihen]
+befehle = [c for k in range(ETAGEN) for c in etage(k)]
+# Zubringer-Trichter am Ende der unteren Sammelleitung füllt den Crafter
 CX = -2                                                               # Crafter; Truhe westlich davon, Redstone drumherum
-befehle += [
-    fill(-1, 0, reihen[0], -1, 0, TZ - 1, "hopper[facing=south]"),
-    fill(-1, 0, TZ + 1, -1, 0, reihen[-1], "hopper[facing=north]"),
-    fill(-1, 1, reihen[0], -1, 1, TZ - 1, "stone_brick_slab[type=bottom]"),
-    fill(-1, 1, TZ + 1, -1, 1, reihen[-1], "stone_brick_slab[type=bottom]"),
-]
 DRAHT = [(CX, TZ - 2, "south", "west"), (CX - 1, TZ - 2, "east", "west"), (CX - 2, TZ - 2, "east", "west"),
          (CX - 3, TZ - 2, "east", "south"), (CX - 3, TZ - 1, "north", "south"), (CX - 3, TZ, "north", "south"),
          (CX - 3, TZ + 1, "north", "east"), (CX - 2, TZ + 1, "west", "east"), (CX - 1, TZ + 1, "west", "east")]
@@ -121,7 +150,9 @@ crafter = [
 ] + [f"setblock {pos(x, 0, z)} minecraft:redstone_wire[{a}=side,{b}=side]" for x, z, a, b in DRAHT] + [
     f"setblock {pos(x, 1, z)} minecraft:stone_brick_slab[type=bottom]" for x, z, _, _ in DRAHT + [(CX, TZ - 1, "", "")]]
 
-if MODUS == "lager":
+if MODUS == "etage":
+    befehle = etage(1) + [fill(1, h(H) + 1, z, LAENGE, h(H) + 1, z, "sea_lantern") for z in reihen] + bepflanzen(1)
+elif MODUS == "lager":
     alt = [pos(CX - 1, 0, TZ), pos(CX - 2, 0, TZ)]
     befehle = lager + [
         f"data modify storage bam:umbau C set from block {pos(CX, 0, TZ)} Items",
@@ -139,10 +170,7 @@ elif MODUS == "umbau":
     ] + crafter + [f"data modify block {pos(-1, 0, TZ)} Items set from storage bam:umbau Items"]
 else:
     befehle += crafter
-    for z in reihen:
-        for x in range(1, LAENGE + 1):
-            befehle.append(f"summon minecraft:hopper_minecart {X0 + x + 0.5} {Y0 + 1 + 0.0625} {Z0 + z + 0.5}")
-    for z in reihen:
-        befehle.append(fill(1, h(1), z, LAENGE, h(1), z, "bamboo"))
+    for k in range(ETAGEN):
+        befehle += bepflanzen(k)
 for b in befehle:
     print(b)
