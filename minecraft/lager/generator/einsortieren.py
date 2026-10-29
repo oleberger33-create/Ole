@@ -29,7 +29,7 @@ def holz(i):
 
 
 KATEGORIEN = [
-    ("Erze & Barren", ["Eisen, Gold, Kupfer", "Diamant, Lapis", "Quarz, Kohle"], lambda i: (
+    ("Erze und Barren", ["Eisen, Gold, Kupfer", "Diamant, Lapis", "Quarz, Kohle"], lambda i: (
         i.endswith(("_ore", "_ingot", "_nugget")) or i.startswith("raw_") or i in {
             "diamond", "emerald", "lapis_lazuli", "coal", "charcoal", "quartz", "amethyst_shard", "netherite_scrap",
             "ancient_debris", "flint"} or i in {f"{m}_block" for m in (
@@ -38,10 +38,10 @@ KATEGORIEN = [
         i.endswith(("_pickaxe", "_axe", "_shovel", "_hoe", "bucket")) or i in {
             "shears", "fishing_rod", "flint_and_steel", "spyglass", "brush", "compass", "recovery_compass", "clock",
             "lead", "name_tag", "saddle", "bundle", "carrot_on_a_stick"})),
-    ("Kampf & Rüstung", ["Bögen, Pfeile", "Schwerter, Rüstung", "Armbrüste"], lambda i: (
+    ("Kampf und Rüstung", ["Bögen, Pfeile", "Schwerter, Rüstung", "Armbrüste"], lambda i: (
         i.endswith(("_sword", "_spear", "_helmet", "_chestplate", "_leggings", "_boots", "_horse_armor", "arrow"))
         or i in {"bow", "crossbow", "trident", "shield", "totem_of_undying", "mace", "fire_charge", "elytra"})),
-    ("Redstone & Schienen", ["Redstone, Fackeln", "Schienen, Loren", "Kolben, Trichter"], lambda i: (
+    ("Redstone und Schienen", ["Redstone, Fackeln", "Schienen, Loren", "Kolben, Trichter"], lambda i: (
         "redstone" in i or i.endswith(("rail", "minecart", "_bulb")) or i in {
             "repeater", "comparator", "piston", "sticky_piston", "observer", "hopper", "dropper", "dispenser",
             "lever", "stone_button", "stone_pressure_plate", "tnt", "daylight_detector", "target", "note_block",
@@ -57,7 +57,7 @@ KATEGORIEN = [
         "feather", "slime_ball", "ender_pearl", "blaze_rod", "breeze_rod", "ghast_tear", "phantom_membrane",
         "ink_sac", "glow_ink_sac", "rabbit_hide", "nautilus_shell", "dried_ghast", "shulker_shell", "armadillo_scute",
         "turtle_scute", "fermented_spider_eye", "blaze_powder", "magma_cream"}),
-    ("Pflanzen & Samen", ["Kaktus, Mohn", "Samen, Setzlinge", "Blumen, Zuckerrohr"], lambda i: (
+    ("Pflanzen und Samen", ["Kaktus, Mohn", "Samen, Setzlinge", "Blumen, Zuckerrohr"], lambda i: (
         i in BLUMEN or i.endswith(("_sapling", "_seeds", "_propagule", "_leaves", "_tulip", "_mushroom")) or i in {
             "cactus", "sugar_cane", "bamboo", "kelp", "cocoa_beans", "leaf_litter", "vine", "lily_pad",
             "short_grass", "tall_grass", "fern", "moss_block", "pumpkin", "melon", "dead_bush", "bush"})),
@@ -66,7 +66,7 @@ KATEGORIEN = [
                              "dripstone", "obsidian", "copper", "calcite", "prismarine"))
         and not i.startswith(("redstone", "glowstone")) and "blackstone" not in i and "nether_brick" not in i
         and i not in {"grindstone", "stonecutter", "lodestone"})),
-    ("Erde & Sand", ["Erde, Kies, Sand", "Lehm, Gras"], lambda i: i in {
+    ("Erde und Sand", ["Erde, Kies, Sand", "Lehm, Gras"], lambda i: i in {
         "dirt", "grass_block", "coarse_dirt", "rooted_dirt", "podzol", "mycelium", "mud", "gravel", "sand",
         "red_sand", "clay", "clay_ball", "dirt_path", "snow_block", "snowball", "soul_soil_x"}),
     ("Holz", ["Bretter, Stämme", "Stufen, Treppen", "Türen, Leitern"], lambda i: (
@@ -77,7 +77,7 @@ KATEGORIEN = [
     ("Nether", ["Netherrack", "Seelensand, Magma", "Schwarzstein, Basalt"], lambda i: (
         "nether" in i or "blackstone" in i or "basalt" in i or "soul_" in i or i.startswith(("crimson_", "warped_"))
         or i in {"magma_block", "glowstone", "glowstone_dust", "shroomlight", "quartz_block"})),
-    ("Farben & Deko", ["Farbstoffe, Wolle", "Banner, Teppiche", "Glas, Laternen"], lambda i: (
+    ("Farben und Deko", ["Farbstoffe, Wolle", "Banner, Teppiche", "Glas, Laternen"], lambda i: (
         i.endswith(("_dye", "_wool", "_carpet", "_banner", "_bed", "candle", "glass", "glass_pane", "terracotta",
                     "_concrete", "_concrete_powder", "lantern"))
         or i in {"torch", "painting", "item_frame", "glow_item_frame", "flower_pot", "armor_stand"})),
