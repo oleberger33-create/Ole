@@ -19,7 +19,7 @@ LEBEWESEN = {
     "iron_golem": ("minecraft:iron_golem", "Eisengolem"), "sheep": ("minecraft:sheep", "Schaf"),
     "cow": ("minecraft:cow", "Kuh"), "chicken": ("minecraft:chicken", "Huhn"), "bee": ("minecraft:bee", "Biene"),
     "snow_golem": ("minecraft:snow_golem", "Schneegolem"), "endermite": ("minecraft:endermite", "Endermilbe"),
-    "enderman": ("minecraft:enderman", "Enderman"),
+    "enderman": ("minecraft:enderman", "Enderman"), "cat": ("minecraft:cat", "Katze"),
     "hopper_minecart": ("minecraft:hopper_minecart", "Trichterlore"), "minecart": ("minecraft:minecart", "Lore"),
 }
 AFK = "player"                                   # „Hier stehen“: nur ein Schild, keine Prüfung
@@ -48,6 +48,8 @@ EINFACH = {
     "glass": ("glass", "#minecraft:impermeable", "minecraft:glass", "Glas"),
     "composter": ("composter", "minecraft:composter", "minecraft:composter", "Komposter"),
     "cauldron": ("cauldron", "#minecraft:cauldrons", "minecraft:cauldron", "Kessel"),
+    "lava_cauldron": ("lava_cauldron", "minecraft:lava_cauldron", "minecraft:cauldron", "Kessel mit Lava (Kessel + Lavaeimer)"),
+    "stonecutter": ("stonecutter", "minecraft:stonecutter", "minecraft:stonecutter", "Steinschneider"),
     "daylight_detector": ("daylight_detector", "minecraft:daylight_detector", "minecraft:daylight_detector",
                           "Tageslichtsensor"),
     "fletching_table": ("fletching_table", "minecraft:fletching_table", "minecraft:fletching_table", "Bognertisch"),
@@ -72,10 +74,12 @@ EINFACH = {
     "melon_stem": ("melon_stem", "#ofh:staengel", "minecraft:melon_seeds", "Melonen-/Kürbiskerne"),
     "oak_sapling": ("dark_oak_sapling", "#minecraft:saplings", "#minecraft:saplings", "Setzling"),
     "poppy": ("poppy", "#minecraft:small_flowers", "#minecraft:small_flowers", "Blume"),
-    "pointed_dripstone": ("pointed_dripstone", "minecraft:pointed_dripstone", "minecraft:pointed_dripstone",
+    "pointed_dripstone": ("pointed_dripstone", "minecraft:pointed_dripstone[vertical_direction=down]", "minecraft:pointed_dripstone",
                           "Spitzer Tropfstein"),
     "dripstone_block": ("dripstone_block", "minecraft:dripstone_block", "minecraft:dripstone_block", "Tropfsteinblock"),
-    "crafter": ("crafter", "minecraft:crafter", "minecraft:crafter", "Crafter"),
+    "crafter": ("crafter", "minecraft:crafter[orientation=up_north]|minecraft:crafter[orientation=up_east]|"
+                           "minecraft:crafter[orientation=up_south]|minecraft:crafter[orientation=up_west]",
+                "minecraft:crafter", "Crafter (Vorderseite oben)"),
     "bee_nest": ("bee_nest", "#ofh:bienen", "minecraft:bee_nest", "Bienennest"),
     "bookshelf": ("bookshelf", "minecraft:bookshelf", "minecraft:bookshelf", "Bücherregal"),
 }
@@ -109,6 +113,9 @@ def block(b, r):
         return None
     if i == AFK:
         return {"art": "afk", "name": "AFK-Platz", "schluessel": "afk"}
+    if i == "inhalt":                                     # Behälter befüllen / einstellen: nur eine Prüfung, kein Block
+        return {"art": "inhalt", "pruefen": p["pruefen"], "item": p.get("item"), "name": p["name"],
+                "text": p["text"], "schluessel": "inhalt:" + p["name"]}
     if i in LEBEWESEN:
         typ, name = LEBEWESEN[i]
         return {"art": "wesen", "typ": typ, "name": name, "item": None, "schluessel": i}
@@ -120,8 +127,10 @@ def block(b, r):
         props = {}
         if i == "chest" and f in ("n", "e", "s", "w"):
             props = {"facing": RICHTUNG[f]}
-        if i in ("white_bed", "red_bed"):
-            props = {"part": "foot"}
+        if i in ("white_bed", "red_bed"):                 # Bett = 2 Blöcke; Richtung zeigt vom Fußende zum Kopf
+            props = {"part": p.get("part", "foot")} | ({"facing": RICHTUNG[f]} if f else {})
+        if i == "pointed_dripstone":
+            props = {"vertical_direction": "down", "thickness": "tip"}
         return {"art": "block", "anzeige": anz, "props": props, "pruefen": pr, "item": item, "name": name,
                 "schluessel": i}
     if i in GERICHTET:

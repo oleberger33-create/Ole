@@ -30,13 +30,65 @@ FORMAT_MIN, FORMAT_MAX = 71, 121
 RES_FORMAT = 97
 PLAENE = json.load(open(sys.argv[1], encoding="utf-8"))
 # Blöcke, die in einer Farm von selbst entstehen (Ertrag oder fließende Flüssigkeit): kein Geist, keine Prüfung
-VON_SELBST_IN = {"bruchstein": lambda b: b["id"] == "cobblestone" or (b["id"] == "lava" and (b["x"], b["y"], b["z"]) == (3, 1, 0))}
+# Blöcke, die in einer Farm von selbst entstehen (Ertrag): kein Geist, keine Prüfung
+VON_SELBST_IN = {"bruchstein": {"cobblestone"}, "blumen": {"poppy"}}
+WACHSEN = {"sugar_cane", "kelp", "bamboo", "cactus"}        # wachsen von selbst nach oben: nur der unterste zählt
+SEITEN4 = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}
+# Was in Behälter gehört oder eingestellt werden muss (Farm: [(Block, Prüfung, Item, Name, Text im Spiel)])
+INHALT = {
+    "wolle": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears", "Schere im Spender",
+               "Schere in den Spender legen")],
+    "honig": [("dispenser", "items block ~ ~ ~ container.* minecraft:glass_bottle", "minecraft:glass_bottle",
+               "Glasflaschen im Spender", "Glasflaschen in den Spender legen")],
+    "blumen": [("dispenser", "items block ~ ~ ~ container.* minecraft:bone_meal", "minecraft:bone_meal",
+                "Knochenmehl im Spender", "Knochenmehl in den Spender legen")],
+    "stockcrafter": [("crafter", "block ~ ~ ~ minecraft:crafter{disabled_slots:[I;1,2,4,5,6,7,8]}", None,
+                      "Crafter: 7 Felder gesperrt", "Im Crafter alles sperren außer links oben und links Mitte")],
+}
+
+
+def vorbereiten(f):
+    """Pläne fürs Bauen im Spiel aufbereiten (Ertrag weg, Betten, Katzen, Befüllen)."""
+    weg = VON_SELBST_IN.get(f["id"], set())
+    f["fertig"] = [b for b in f["fertig"] if b["id"] not in weg]
+    for st in f["steps"]:
+        st["added"] = [b for b in st["added"] if b["id"] not in weg]
+    # Betten belegen 2 Blöcke: Paare suchen, Fußende + Kopfende mit Richtung
+    betten = {(b["x"], b["y"], b["z"]): b for b in f["fertig"] if b["id"] in ("white_bed", "red_bed")}
+    frei = set(betten)
+    for pos in sorted(betten):
+        if pos not in frei:
+            continue
+        for (dx, dz), r in SEITEN4.items():
+            n = (pos[0] + dx, pos[1], pos[2] + dz)
+            if n in frei:
+                for q, teil in ((pos, "foot"), (n, "head")):
+                    for st in [{"added": f["fertig"]}] + f["steps"]:
+                        for b in st["added"]:
+                            if (b["x"], b["y"], b["z"]) == q and b["id"] in ("white_bed", "red_bed"):
+                                b["p"] = {"part": teil, "f": r}
+                frei -= {pos, n}
+                break
+    # Creeper-Farm: die Katzen unter den Glasblöcken in der Mitte
+    if f["id"] == "creeper":
+        katzen = [{"x": b["x"], "y": b["y"] - 1, "z": b["z"], "id": "cat", "p": {}, "ent": True}
+                  for b in f["fertig"] if b["id"] == "glass"]
+        f["fertig"] += katzen
+        f["steps"][2]["added"] += [dict(k) for k in katzen]
+    # Befüllen: ein eigener Schritt direkt nach dem Schritt, in dem der Behälter gesetzt wird
+    for block_id, pruefen, item, name, text in INHALT.get(f["id"], []):
+        for k, st in enumerate(f["steps"]):
+            ziel = [b for b in st["added"] if b["id"] == block_id]
+            if ziel:
+                b = ziel[0]
+                f["steps"].insert(k + 1, {"text": text + ".", "added": [
+                    {"x": b["x"], "y": b["y"], "z": b["z"], "id": "inhalt", "ent": True,
+                     "p": {"pruefen": pruefen, "item": item, "name": name, "text": text}}]})
+                break
+
+
 for _f in PLAENE:
-    weg = VON_SELBST_IN.get(_f["id"])
-    if weg:
-        _f["fertig"] = [b for b in _f["fertig"] if not weg(b)]
-        for _s in _f["steps"]:
-            _s["added"] = [b for b in _s["added"] if not weg(b)]
+    vorbereiten(_f)
 AUS = sys.argv[2]
 VERSION = 1                      # erhöhen, wenn alle ein neues Item bekommen sollen
 GRUEN, ROT, GELB = 0x55FF55, 0xFF4040, 0xFFD040
@@ -84,23 +136,37 @@ BLICK = {0: (0, -1), 1: (1, 0), 2: (0, 1), 3: (-1, 0)}       # 0 Nord, 1 Ost, 2 
 
 
 def teilschritte(farm):
-    """[(Schritt-Nr, Text, Ebene k von n, [Blöcke])], je Bauschritt die neuen Blöcke Ebene für Ebene."""
+    """[(Schritt-Nr, Text, Ebene k von n, [Blöcke])]: je Bauschritt die Blöcke Ebene für Ebene von unten nach oben,
+    Flüssigkeiten zuletzt (erst wenn die Wände stehen). Nur was im fertigen Bau so bleibt; bei Pflanzen, die von
+    selbst nach oben wachsen, nur der unterste Block."""
+    fertig = {}
+    for b in farm["fertig"]:
+        fertig[(b["x"], b["y"], b["z"], bool(b.get("ent")))] = b
     out = []
     for k, s in enumerate(farm["steps"]):
-        bl = [b for b in s["added"] if b["id"] not in bloecke.VON_SELBST]
-        ebenen = sorted({b["y"] for b in bl})
-        if not ebenen:
+        bl = []
+        for b in s["added"]:
+            if b["id"] in bloecke.VON_SELBST:
+                continue
+            if b["id"] != "inhalt":
+                f_ = fertig.get((b["x"], b["y"], b["z"], bool(b.get("ent"))))
+                if not f_ or f_["id"] != b["id"] or f_.get("p") != b.get("p"):
+                    continue                       # wird später ersetzt: dann erst dort zeigen
+            if b["id"] in WACHSEN:
+                unten = fertig.get((b["x"], b["y"] - 1, b["z"], False))
+                if unten and unten["id"] == b["id"]:
+                    continue
+            bl.append(b)
+        fest = [b for b in bl if b["id"] not in ("water", "lava")]
+        fluessig = [b for b in bl if b["id"] in ("water", "lava")]
+        ebenen = sorted({b["y"] for b in fest})
+        if not bl:
             out.append((k, s["text"], 1, 1, []))
             continue
         for e, y in enumerate(ebenen, 1):
-            ebene = [b for b in bl if b["y"] == y]
-            if any(b["id"] == "water" for b in ebene) and any(b["id"] == "lava" for b in ebene):
-                # Gleichzeitig gesetzt fließt Wasser auf die Lavaquelle und macht Obsidian: erst Lava, dann Wasser
-                out.append((k, s["text"] + " – Zuerst die Lava setzen.", e, len(ebenen),
-                            [b for b in ebene if b["id"] != "water"]))
-                out.append((k, s["text"] + " – Jetzt das Wasser.", e, len(ebenen), [b for b in ebene if b["id"] == "water"]))
-            else:
-                out.append((k, s["text"], e, len(ebenen), ebene))
+            out.append((k, s["text"], e, len(ebenen) + (1 if fluessig else 0), [b for b in fest if b["y"] == y]))
+        if fluessig:
+            out.append((k, s["text"] + " – Jetzt Wasser/Lava einfüllen.", len(ebenen) + 1, len(ebenen) + 1, fluessig))
     return out
 
 
@@ -180,7 +246,18 @@ def zeilen_wesen(x, y, z, d, k):
     return [f"execute positioned ~{x} ~{y} ~{z} run function {fn}"]
 
 
+def zeilen_inhalt(x, y, z, d, k):
+    fn = klein("i", (d["pruefen"], k), [
+        f"execute unless {d['pruefen']} run scoreboard players add #m{k} {NS} 1",
+        f"execute if {d['pruefen']} positioned ~0.5 ~1.4 ~0.5 run kill @e[type=minecraft:text_display,tag={NS}_g,distance=..0.05]"])
+    return [f"execute positioned ~{x} ~{y} ~{z} run function {fn}"]
+
+
 def geist(x, y, z, d):
+    if d["art"] == "inhalt":
+        fn = klein("z", ("inhalt", d["pruefen"]), [
+            f"execute unless {d['pruefen']} run summon minecraft:text_display ~0.5 ~1.4 ~0.5 {text_nbt(d['text'], 'gold')}"])
+        return f"execute positioned ~{x} ~{y} ~{z} run function {fn}"
     if d["art"] == "block":
         fn = klein("z", (d["pruefen"], d["anzeige"], j(d["props"])), [
             f"execute {nicht(d['pruefen'])} run summon minecraft:block_display ~0.1 ~0.1 ~0.1 {anzeige_nbt(d)}"])
@@ -209,7 +286,7 @@ def material(liste, r=0):
             continue
         key = d["name"]                       # gleiche Namen (z. B. Trichter in alle Richtungen) zusammenfassen
         if key not in m:
-            bild = (d["typ"].split(":")[1] if d["art"] == "wesen" else (d.get("item") or ""))
+            bild = (d["typ"].split(":")[1] if d["art"] == "wesen" else (d.get("item") or "crafter"))
             m[key] = [d["name"], d.get("item"), 0, d["art"], bild]
         m[key][2] += 1
     return m
@@ -524,6 +601,7 @@ def material_dialog(f):
 # ---------- Funktionen erzeugen ----------
 CODES_DISPATCH = []
 anzahl_zeilen = 0
+TEST = {}                       # Teilschritte (Drehung 0) für den automatischen Bau-Test auf dem Testserver
 
 for nr, f in enumerate(PLAENE, 1):
     fid = f["id"]
@@ -554,6 +632,15 @@ for nr, f in enumerate(PLAENE, 1):
     CODES_DISPATCH += [(INFO + nr, f"{NS}:f/{fid}/info"), (BAUEN + nr, f"{NS}:f/{fid}/start"),
                        (ORT + nr, f"{NS}:f/{fid}/ort")]
 
+    TEST[fid] = []
+    for t in ts:
+        teil = []
+        for b in t[4]:
+            d = bloecke.block(b, 0)
+            if d and d["art"] != "afk":
+                teil.append({"x": b["x"], "y": b["y"], "z": b["z"], "id": b["id"], **{k: v for k, v in d.items() if k in
+                             ("art", "anzeige", "props", "typ", "pruefen")}})
+        TEST[fid].append(teil)
     for i, t in enumerate(ts):
         liste = t[4]
         mat = material(liste)
@@ -586,7 +673,7 @@ for nr, f in enumerate(PLAENE, 1):
                 if d["art"] == "afk":
                     continue
                 k = keys.index(d["name"])
-                pruefen += zeilen_block(x, y, z, d, k) if d["art"] == "block" else zeilen_wesen(x, y, z, d, k)
+                pruefen += {"block": zeilen_block, "wesen": zeilen_wesen, "inhalt": zeilen_inhalt}[d["art"]](x, y, z, d, k)
             pruefen.append(f"scoreboard players set #fehlt {NS} 0")
             pruefen += [f"scoreboard players operation #fehlt {NS} += #m{k} {NS}" for k in range(len(keys))]
             zeigen.append(f"scoreboard players operation @e[tag={NS}_neu] {NS}.id = #cur {NS}.id")
@@ -772,6 +859,8 @@ for pfad, inhalt in dateien.items():
     os.makedirs(os.path.dirname(voll), exist_ok=True)
     with open(voll, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(inhalt)
+
+json.dump(TEST, open(os.path.join(AUS, "teile.json"), "w"))
 
 # Ressourcenpaket: nur das Item-Bild (Polymer liefert es beim Beitreten aus)
 bild = os.path.join(AUS, "farmhelper.png")
