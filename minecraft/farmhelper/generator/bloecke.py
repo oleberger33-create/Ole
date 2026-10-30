@@ -113,6 +113,10 @@ def block(b, r):
         return None
     if i == AFK:
         return {"art": "afk", "name": "AFK-Platz", "schluessel": "afk"}
+    if i == "luft":                                       # muss frei sein (Loch, Schacht, Raum): ausgraben
+        return {"art": "block", "anzeige": "red_stained_glass", "props": {}, "pruefen": "#minecraft:replaceable",
+                "item": None, "name": "Ausgraben / frei machen", "schluessel": "luft", "farbe": 0xFF9900,
+                "bild": "structure_void"}
     if i == "inhalt":                                     # Behälter befüllen / einstellen: nur eine Prüfung, kein Block
         return {"art": "inhalt", "pruefen": p["pruefen"], "item": p.get("item"), "name": p["name"],
                 "text": p["text"], "schluessel": "inhalt:" + p["name"]}
@@ -129,6 +133,8 @@ def block(b, r):
             props = {"facing": RICHTUNG[f]}
         if i in ("white_bed", "red_bed"):                 # Bett = 2 Blöcke; Richtung zeigt vom Fußende zum Kopf
             props = {"part": p.get("part", "foot")} | ({"facing": RICHTUNG[f]} if f else {})
+        if i == "crafter":                                # Vorderseite nach oben (Spieler schaut beim Setzen nach unten)
+            props = {"orientation": "up_north"}
         if i == "pointed_dripstone":
             props = {"vertical_direction": "down", "thickness": "tip"}
         return {"art": "block", "anzeige": anz, "props": props, "pruefen": pr, "item": item, "name": name,

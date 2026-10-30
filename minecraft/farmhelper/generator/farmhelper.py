@@ -157,11 +157,15 @@ def teilschritte(farm):
                 if unten and unten["id"] == b["id"]:
                     continue
             bl.append(b)
+        luft = [{"x": q["x"], "y": q["y"], "z": q["z"], "id": "luft", "p": {}} for q in s.get("luft", [])]
+        if luft:
+            out.append((k, s["text"] + " – Zuerst Platz frei machen (rote Felder ausgraben).", 0, 0, luft))
         fest = [b for b in bl if b["id"] not in ("water", "lava")]
         fluessig = [b for b in bl if b["id"] in ("water", "lava")]
         ebenen = sorted({b["y"] for b in fest})
         if not bl:
-            out.append((k, s["text"], 1, 1, []))
+            if not luft:
+                out.append((k, s["text"], 1, 1, []))
             continue
         for e, y in enumerate(ebenen, 1):
             out.append((k, s["text"], e, len(ebenen) + (1 if fluessig else 0), [b for b in fest if b["y"] == y]))
@@ -194,10 +198,11 @@ def spawner_lage(farm):
 
 # ---------- Geister und Prüfungen ----------
 def anzeige_nbt(d, rot=False):
+    farbe = ROT if rot else d.get("farbe", GRUEN)
     props = ",".join(f'{k}:"{v}"' for k, v in d["props"].items())
     zustand = f'{{id:"minecraft:{d["anzeige"]}"' + (f",properties:{{{props}}}" if props else "") + "}"   # Format 26.3
     return (f'{{block_state:{zustand},transformation:[0.8f,0f,0f,0f,0f,0.8f,0f,0f,0f,0f,0.8f,0f,0f,0f,0f,1f],'
-            f'Glowing:1b,glow_color_override:{ROT if rot else GRUEN},brightness:{{sky:15,block:15}},'
+            f'Glowing:1b,glow_color_override:{farbe},brightness:{{sky:15,block:15}},'
             f'Tags:["{NS}_g","{NS}_neu"]}}')
 
 
@@ -286,7 +291,7 @@ def material(liste, r=0):
             continue
         key = d["name"]                       # gleiche Namen (z. B. Trichter in alle Richtungen) zusammenfassen
         if key not in m:
-            bild = (d["typ"].split(":")[1] if d["art"] == "wesen" else (d.get("item") or "crafter"))
+            bild = d.get("bild") or (d["typ"].split(":")[1] if d["art"] == "wesen" else (d.get("item") or "crafter"))
             m[key] = [d["name"], d.get("item"), 0, d["art"], bild]
         m[key][2] += 1
     return m
@@ -569,11 +574,12 @@ def plan_dialog(nr, f, i, ts, gesamt):
     k, text, e, n, liste = ts
     t = [balken(i, gesamt),
          [{"text": f"Schritt {k + 1} von {len(f['steps'])}", "color": "gold", "bold": True},
-          {"text": f"   Ebene {e}/{n} · Teil {i + 1}/{gesamt}", "color": "gray"}],
+          {"text": (f"   Ebene {e}/{n}" if n else "   Ausgraben") + f" · Teil {i + 1}/{gesamt}", "color": "gray"}],
          LINIE, {"text": text, "color": "white"}, LINIE,
          kopf("chest", "Für diesen Teil brauchst du", "yellow")] + material_text(material(liste)) + [
          LINIE, [{"text": "■ ", "color": "green"}, {"text": "hier hinsetzen   ", "color": "gray"},
-                 {"text": "■ ", "color": "red"}, {"text": "falscher Block   ", "color": "gray"},
+                 {"text": "■ ", "color": "red"}, {"text": "falscher Block / muss weg   ", "color": "gray"},
+                 {"text": "■ ", "color": "gold"}, {"text": "ausgraben   ", "color": "gray"},
                  {"text": "■ ", "color": "yellow"}, {"text": "Tier herbringen", "color": "gray"}]]
     a = [knopf("◀ Zurück", ZURUECK, "white", tip="Einen Teil zurück"),
          knopf("Weiter ▶", WEITER, "white", tip="Diesen Teil überspringen"),
