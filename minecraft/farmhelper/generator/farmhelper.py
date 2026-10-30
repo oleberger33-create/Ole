@@ -65,7 +65,7 @@ def j(obj):
 
 
 def trig(code):
-    return {"type": "run_command", "command": f"/trigger {NS} set {code}"}
+    return {"type": "run_command", "command": f"/trigger {NS}.t set {code}"}
 
 
 def zahl(v):
