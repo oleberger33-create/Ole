@@ -29,6 +29,14 @@ NS = "ofh"
 FORMAT_MIN, FORMAT_MAX = 71, 121
 RES_FORMAT = 97
 PLAENE = json.load(open(sys.argv[1], encoding="utf-8"))
+# Blöcke, die in einer Farm von selbst entstehen (Ertrag oder fließende Flüssigkeit): kein Geist, keine Prüfung
+VON_SELBST_IN = {"bruchstein": lambda b: b["id"] == "cobblestone" or (b["id"] == "lava" and (b["x"], b["y"], b["z"]) == (3, 1, 0))}
+for _f in PLAENE:
+    weg = VON_SELBST_IN.get(_f["id"])
+    if weg:
+        _f["fertig"] = [b for b in _f["fertig"] if not weg(b)]
+        for _s in _f["steps"]:
+            _s["added"] = [b for b in _s["added"] if not weg(b)]
 AUS = sys.argv[2]
 VERSION = 1                      # erhöhen, wenn alle ein neues Item bekommen sollen
 GRUEN, ROT, GELB = 0x55FF55, 0xFF4040, 0xFFD040
@@ -85,7 +93,14 @@ def teilschritte(farm):
             out.append((k, s["text"], 1, 1, []))
             continue
         for e, y in enumerate(ebenen, 1):
-            out.append((k, s["text"], e, len(ebenen), [b for b in bl if b["y"] == y]))
+            ebene = [b for b in bl if b["y"] == y]
+            if any(b["id"] == "water" for b in ebene) and any(b["id"] == "lava" for b in ebene):
+                # Gleichzeitig gesetzt fließt Wasser auf die Lavaquelle und macht Obsidian: erst Lava, dann Wasser
+                out.append((k, s["text"] + " – Zuerst die Lava setzen.", e, len(ebenen),
+                            [b for b in ebene if b["id"] != "water"]))
+                out.append((k, s["text"] + " – Jetzt das Wasser.", e, len(ebenen), [b for b in ebene if b["id"] == "water"]))
+            else:
+                out.append((k, s["text"], e, len(ebenen), ebene))
     return out
 
 
