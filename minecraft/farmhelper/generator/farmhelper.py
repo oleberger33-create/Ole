@@ -201,7 +201,7 @@ def hindernis(x, y, z, d):
 
 # ---------- Material ----------
 def material(liste, r=0):
-    """{schluessel: [Name, Item, Anzahl, Art]} in Reihenfolge des ersten Auftretens."""
+    """{Name: [Name, Item, Anzahl, Art, Bild-Schlüssel]} in Reihenfolge des ersten Auftretens."""
     m = {}
     for b in liste:
         d = bloecke.block(b, r)
@@ -209,28 +209,45 @@ def material(liste, r=0):
             continue
         key = d["name"]                       # gleiche Namen (z. B. Trichter in alle Richtungen) zusammenfassen
         if key not in m:
-            m[key] = [d["name"], d.get("item"), 0, d["art"]]
+            bild = (d["typ"].split(":")[1] if d["art"] == "wesen" else (d.get("item") or ""))
+            m[key] = [d["name"], d.get("item"), 0, d["art"], bild]
         m[key][2] += 1
     return m
 
 
-def item_sprite(item):
-    if not item:
-        return "item/spawn_egg"
-    if item.startswith("#"):
-        ersatz = {"#minecraft:dirt": "dirt", "#minecraft:sand": "sand", "#minecraft:planks": "oak_planks",
-                  "#minecraft:wool": "white_wool", "#minecraft:wooden_fences": "oak_fence",
-                  "#minecraft:walls": "cobblestone_wall", "#minecraft:signs": "oak_sign",
-                  "#minecraft:buttons": "stone_button", "#minecraft:beds": "white_bed",
-                  "#minecraft:wool_carpets": "white_carpet", "#minecraft:saplings": "dark_oak_sapling",
-                  "#minecraft:small_flowers": "poppy", "#minecraft:slabs": "smooth_stone_slab",
-                  "#minecraft:wooden_trapdoors": "oak_trapdoor"}
-        return "item/" + ersatz.get(item, "barrier")
-    return "item/" + item.split(":")[1]
+# ---------- Bilder (Sprites) ----------
+# sprites.json: alle Texturen aus 26.3, die es wirklich gibt (geprüft gegen die Spieldateien). Blöcke ohne eigenes
+# Item-Bild bekommen eine Block-Textur aus dem Block-Atlas, sonst wären es lila-schwarze Kästchen.
+VORHANDEN = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sprites.json"))))
+ERSATZ = {
+    "#minecraft:dirt": "dirt", "#minecraft:sand": "sand", "#minecraft:planks": "oak_planks", "#minecraft:wool": "white_wool",
+    "#minecraft:wooden_fences": "oak_planks", "#minecraft:walls": "cobblestone", "#minecraft:signs": "oak_sign",
+    "#minecraft:buttons": "stone", "#minecraft:beds": "red_wool", "#minecraft:wool_carpets": "white_wool",
+    "#minecraft:saplings": "dark_oak_sapling", "#minecraft:small_flowers": "poppy", "#minecraft:slabs": "smooth_stone_slab_side",
+    "#minecraft:wooden_trapdoors": "oak_trapdoor",
+    "cactus": "cactus_side", "magma_block": "magma", "composter": "composter_side", "daylight_detector": "daylight_detector_top",
+    "fletching_table": "fletching_table_front", "chest": "chest_minecart", "bee_nest": "bee_nest_front", "crafter": "crafter_north",
+    "observer": "observer_front", "piston": "piston_side", "sticky_piston": "piston_top_sticky", "dispenser": "dispenser_front",
+    "hay_block": "hay_block_side", "grass_block": "grass_block_side", "scaffolding": "scaffolding_side",
+    "wither_skeleton_skull": "wither_rose", "redstone_wire": "redstone", "compass": "compass_16", "clock": "clock_00",
+    "melon_stem": "melon_seeds", "hopper_minecart": "hopper_minecart", "minecart": "minecart",
+}
 
 
-def sprite(pfad):
-    return {"type": "object", "object": "atlas", "atlas": "minecraft:items", "sprite": pfad}
+def bild(name):
+    """Text-Baustein mit dem Bild zu einem Item- oder Blocknamen (oder Tag)."""
+    n = name.split(":")[-1] if not name.startswith("#") else name
+    n = ERSATZ.get(n, ERSATZ.get(name, n))
+    if not n.startswith("#") and f"item/{n}" not in VORHANDEN and f"item/{n}_spawn_egg" in VORHANDEN:
+        n = n + "_spawn_egg"
+    for atlas, pfad in (("items", f"item/{n}"), ("blocks", f"block/{n}")):
+        if pfad in VORHANDEN:
+            return {"type": "object", "object": "atlas", "atlas": f"minecraft:{atlas}", "sprite": pfad}
+    return {"type": "object", "object": "atlas", "atlas": "minecraft:items", "sprite": "item/barrier"}
+
+
+def gui(pfad):
+    return {"type": "object", "object": "atlas", "atlas": "minecraft:gui", "sprite": pfad}
 
 
 ICON = {"zuckerrohr": "sugar_cane", "bambus": "bamboo", "kaktus": "cactus", "kuerbis": "melon_slice", "seetang": "kelp",
@@ -242,6 +259,17 @@ ICON = {"zuckerrohr": "sugar_cane", "bambus": "bamboo", "kaktus": "cactus", "kue
         "aussenposten": "ominous_bottle", "ueberfall": "totem_of_undying", "handel": "emerald",
         "bruchstein": "cobblestone", "lava": "lava_bucket", "schnee": "snowball", "angeln": "fishing_rod",
         "stockcrafter": "stick"}
+KATEGORIEN = []                          # [(Name, Bild, Farbe, [Farm-Nummern])]
+for _nr, _f in enumerate(PLAENE, 1):
+    if not KATEGORIEN or KATEGORIEN[-1][0] != _f["cat"]:
+        KATEGORIEN.append((_f["cat"], {"Pflanzen": "wheat", "Tiere": "leather", "Mobs": "bone", "Nether": "blaze_rod",
+                                        "End": "ender_pearl", "Handel": "emerald", "Blöcke": "cobblestone",
+                                        "Sonstiges": "fishing_rod"}.get(_f["cat"], "wheat"),
+                           {"Pflanzen": "green", "Tiere": "gold", "Mobs": "red", "Nether": "dark_red", "End": "light_purple",
+                            "Handel": "dark_green", "Blöcke": "gray", "Sonstiges": "aqua"}.get(_f["cat"], "white"), []))
+    KATEGORIEN[-1][3].append(_nr)
+KAT = 9100                               # + Index der Kategorie
+
 
 # ---------- Ort-Prüfungen (aus den belegten Angaben im Handbuch) ----------
 FLUSS = ["minecraft:river", "minecraft:frozen_river", "minecraft:dripstone_caves"]
@@ -346,96 +374,151 @@ def ort_zeilen(fid):
 
 
 # ---------- Dialoge ----------
+LINIE = {"text": "━" * 34, "color": "dark_gray"}
+
+
+def kopf(icon, text, farbe="gold"):
+    return [bild(icon), {"text": "  " + text, "color": farbe, "bold": True}]
+
+
+def sterne(n):
+    return [{"text": "★" * n, "color": "gold"}, {"text": "★" * (5 - n), "color": "dark_gray"}]
+
+
+def balken(teil, gesamt, breite=20):
+    voll = round(breite * teil / max(gesamt, 1))
+    return [{"text": "▌" * voll, "color": "green"}, {"text": "▌" * (breite - voll), "color": "dark_gray"},
+            {"text": f"  {round(100 * teil / max(gesamt, 1))} %", "color": "white"}]
+
+
+def titel(f):
+    return [bild(ICON.get(f["id"], "wheat")), {"text": "  " + f["name"], "bold": True, "color": "gold"}]
+
+
 def text_mit_quelle(text, url):
     if url and url.startswith("http"):
-        return [{"text": "• " + text + " "}, {"text": "[Quelle]", "color": "aqua", "underlined": True,
-                                              "click_event": {"action": "open_url", "url": url},
-                                              "hover_event": {"action": "show_text", "value": url}}]
-    marke = " (geprüft in den Spieldaten 26.3)" if url is None else " (Hinweis zum Modell)"
-    return [{"text": "• " + text}, {"text": marke, "color": "gray"}]
+        return [{"text": " ▸ ", "color": "gold"}, {"text": text + " "},
+                {"text": "[Quelle ↗]", "color": "aqua", "underlined": True,
+                 "click_event": {"action": "open_url", "url": url}, "hover_event": {"action": "show_text", "value": url}}]
+    marke = " ✔ Spieldaten 26.3" if url is None else " ✎ Hinweis zum Modell"
+    return [{"text": " ▸ ", "color": "gold"}, {"text": text}, {"text": marke, "color": "dark_green" if url is None else "gray"}]
 
 
-def body(texte):
-    return [{"type": "minecraft:plain_message", "width": 400, "contents": t} for t in texte]
+def body(texte, breite=400):
+    return [{"type": "minecraft:plain_message", "width": breite, "contents": t} for t in texte]
 
 
-def material_text(m):
-    teile = []
-    for name, item, n, art in m.values():
-        teile.append(sprite(item_sprite(item)))
-        teile.append({"text": f" {n}× {name}" + (" (herbringen)" if art == "wesen" else "") + "   "})
-    return teile or [{"text": "nichts"}]
+def material_text(m, je_zeile=3):
+    """Material als Raster: Bild, Anzahl, Name; mehrere Einträge je Zeile."""
+    zeilen, zeile = [], []
+    for name, item, n, art, bildname in m.values():
+        zeile += [bild(bildname or "barrier"), {"text": f" {n}×", "color": "yellow", "bold": True},
+                  {"text": f" {name}" + (" (herbringen)" if art == "wesen" else "") + "     ", "color": "white"}]
+        if len(zeile) >= 3 * je_zeile:
+            zeilen.append(zeile); zeile = []
+    if zeile:
+        zeilen.append(zeile)
+    return zeilen or [[{"text": "nichts", "color": "gray"}]]
+
+
+def knopf(text, code, farbe=None, icon=None, tip=None, breite=130, fett=False):
+    label = ([bild(icon), {"text": " "}] if icon else []) + [{"text": text, **({"color": farbe} if farbe else {}),
+                                                              **({"bold": True} if fett else {})}]
+    k = {"label": label, "width": breite, "action": trig(code)}
+    if tip:
+        k["tooltip"] = {"text": tip}
+    return k
 
 
 def info_dialog(nr, f):
     meta = f.get("meta") or {}
-    t = [[{"text": "Ertrag: ", "color": "gold"}, {"text": f["out"]}],
-         [{"text": "Menge: ", "color": "gold"}, {"text": meta.get("rate") or "keine belegte Zahl"}],
-         [{"text": "Wo bauen: ", "color": "gold"}, {"text": f["where"]}],
-         [{"text": "Spieler nötig: ", "color": "gold"}, {"text": f["afk"]}],
-         {"text": f["why"], "color": "gray"}]
+    t = [[bild("emerald"), {"text": "  Ertrag: ", "color": "gold"}, {"text": f["out"]}],
+         [bild("clock"), {"text": "  Menge: ", "color": "gold"}, {"text": meta.get("rate") or "keine belegte Zahl"}],
+         [bild("compass"), {"text": "  Wo bauen: ", "color": "gold"}, {"text": f["where"]}],
+         [bild("name_tag"), {"text": "  Spieler nötig: ", "color": "gold"}, {"text": f["afk"]}],
+         [bild("golden_hoe"), {"text": "  Schwierigkeit: ", "color": "gold"}, *sterne(f["diff"])],
+         LINIE, {"text": f["why"], "color": "gray", "italic": True}]
     if meta.get("ort"):
-        t.append({"text": "Der richtige Ort", "color": "yellow", "bold": True})
-        t += [text_mit_quelle(a, b) for a, b in meta["ort"]]
+        t += [LINIE, kopf("map", "Der richtige Ort", "yellow")] + [text_mit_quelle(a, b) for a, b in meta["ort"]]
     if meta.get("meta"):
-        t.append({"text": "Beste Bauweise & Erweitern (Meta)", "color": "yellow", "bold": True})
-        t += [text_mit_quelle(a, b) for a, b in meta["meta"]]
+        t += [LINIE, kopf("writable_book", "Beste Bauweise & Erweitern", "yellow")] + \
+             [text_mit_quelle(a, b) for a, b in meta["meta"]]
     if f.get("help"):
-        t.append({"text": "Hilfe", "color": "yellow", "bold": True})
-        t += [[{"text": "• " + q + ": ", "color": "white"}, {"text": a, "color": "gray"}] for q, a in f["help"]]
-    t.append({"text": "Material für die ganze Farm (dieses Modell)", "color": "yellow", "bold": True})
-    t.append(material_text(material(f["fertig"])))
-    t.append({"text": "Hinweis: Das ist das Lern-Modell aus Oles Farm-Handbuch. Für mehr Ertrag verlängern oder stapeln "
-                      "– wie, steht oben unter Meta.", "color": "gray", "italic": True})
-    return {"type": "minecraft:multi_action", "title": {"text": f["name"], "bold": True},
-            "external_title": {"text": "Farm-Infos"}, "body": body(t), "can_close_with_escape": True, "pause": False,
-            "after_action": "close", "columns": 3,
-            "actions": [{"label": {"text": "Hier bauen", "color": "green"}, "width": 130, "action": trig(BAUEN + nr),
-                         "tooltip": {"text": "Der Plan erscheint als Geisterblöcke 2 Blöcke vor dir, in Blickrichtung."}},
-                        {"label": {"text": "Ort hier prüfen"}, "width": 130, "action": trig(ORT + nr)},
-                        {"label": {"text": "Zurück"}, "width": 130, "action": trig(MENU)}]}
+        t += [LINIE, kopf("knowledge_book", "Hilfe", "yellow")] + \
+             [[{"text": " ? ", "color": "aqua", "bold": True}, {"text": q + ": ", "color": "white"}, {"text": a, "color": "gray"}]
+              for q, a in f["help"]]
+    t += [LINIE, kopf("chest", "Material für die ganze Farm", "yellow")] + material_text(material(f["fertig"]))
+    t.append({"text": "Das ist das Lern-Modell aus Oles Farm-Handbuch. Für mehr Ertrag verlängern oder stapeln – wie, steht "
+                      "unter „Beste Bauweise“.", "color": "dark_gray", "italic": True})
+    return {"type": "minecraft:multi_action", "title": titel(f), "external_title": {"text": "Farm-Infos"},
+            "body": body(t), "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 3,
+            "actions": [knopf("Hier bauen", BAUEN + nr, "green", "golden_hoe", "Der Plan erscheint als leuchtende "
+                              "Geisterblöcke 2 Blöcke vor dir, in Blickrichtung.", fett=True),
+                        knopf("Ort prüfen", ORT + nr, "aqua", "compass", "Prüft Biom, Bauwerk, Dimension und Abstände "
+                              "an der Stelle, an der du stehst."),
+                        knopf("Zurück", KAT + [i for i, k in enumerate(KATEGORIEN) if nr in k[3]][0], "gray", "arrow")]}
 
 
 def haupt_dialog():
-    knoepfe = []
-    for nr, f in enumerate(PLAENE, 1):
-        knoepfe.append({"label": [sprite("item/" + ICON.get(f["id"], "wheat")), {"text": "  " + f["name"]}],
-                        "tooltip": {"text": f"{f['cat']} · {'★' * f['diff']}{'☆' * (5 - f['diff'])}\n{f['out']}"},
-                        "width": 160, "action": trig(INFO + nr)})
-    return {"type": "minecraft:multi_action", "title": {"text": "Ole's Farmhelper", "bold": True, "color": "gold"},
+    knoepfe = [knopf(f"{name}  ({len(nrn)})", KAT + i, farbe, icon, ", ".join(PLAENE[n - 1]["name"] for n in nrn), 150)
+               for i, (name, icon, farbe, nrn) in enumerate(KATEGORIEN)]
+    return {"type": "minecraft:multi_action",
+            "title": [bild("golden_hoe"), {"text": "  Ole's ", "color": "yellow", "bold": True},
+                      {"text": "Farmhelper", "color": "gold", "bold": True}],
             "external_title": {"text": "Ole's Farmhelper"},
-            "body": body([{"text": "Wähle eine Farm: Infos, beste Bauweise mit Quellen, Ort-Check – und dann Schritt "
-                                   "für Schritt bauen mit Geisterblöcken.", "color": "gray"}]),
-            "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 3,
-            "actions": knoepfe, "exit_action": {"label": {"translate": "gui.done"}, "width": 160}}
+            "body": body([{"text": "Was willst du farmen?", "color": "white", "bold": True},
+                          {"text": "Infos mit Quellen, Ort-Check – und dann Schritt für Schritt bauen mit leuchtenden "
+                                   "Geisterblöcken.", "color": "gray"}, LINIE], 300),
+            "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 2,
+            "actions": knoepfe, "exit_action": {"label": {"translate": "gui.done"}, "width": 150}}
+
+
+def kategorie_dialog(i):
+    name, icon, farbe, nrn = KATEGORIEN[i]
+    knoepfe = []
+    for nr in nrn:
+        f = PLAENE[nr - 1]
+        knoepfe.append({"label": [bild(ICON.get(f["id"], "wheat")), {"text": "  " + f["name"]}],
+                        "tooltip": [*sterne(f["diff"]), {"text": "\n" + f["out"], "color": "white"},
+                                    {"text": "\n" + f["where"], "color": "gray"}],
+                        "width": 170, "action": trig(INFO + nr)})
+    knoepfe.append(knopf("Alle Kategorien", MENU, "gray", "arrow", breite=170))
+    return {"type": "minecraft:multi_action", "title": [bild(icon), {"text": "  " + name, "color": farbe, "bold": True}],
+            "external_title": {"text": name}, "body": body([{"text": "Wähle eine Farm.", "color": "gray"}, LINIE], 360),
+            "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 2, "actions": knoepfe}
 
 
 def plan_dialog(nr, f, i, ts, gesamt):
     k, text, e, n, liste = ts
-    t = [[{"text": f"Schritt {k + 1}/{len(f['steps'])}", "color": "gold"},
-          {"text": f" · Ebene {e}/{n} · Teil {i + 1}/{gesamt}", "color": "gray"}],
-         {"text": text},
-         {"text": "Für diesen Teil brauchst du:", "color": "yellow"},
-         material_text(material(liste)),
-         {"text": "Grün = hier hinsetzen · Rot = falscher Block · Gelber Text = Tier herbringen. "
-                  "Die Leiste unten zeigt: im Inventar / fehlt noch.", "color": "gray"}]
-    a = [("◀ Schritt zurück", ZURUECK, None), ("Schritt überspringen ▶", WEITER, None),
-         ("Ort prüfen", PLANORT, None)]
-    a += [(f"Plan → {name}", code, None) for code, (_, name) in SCHIEBEN.items()]
-    a += [("Plan drehen ↻", DREHEN, None), ("Material ganze Farm", MATERIAL, None), ("Farm-Infos", INFO + nr, None),
-          ("Plan abbrechen", ABBRUCH, "red"), ("Andere Farm", MENU, None)]
-    return {"type": "minecraft:multi_action", "title": {"text": f["name"], "bold": True},
-            "external_title": {"text": "Bauplan"}, "body": body(t), "can_close_with_escape": True, "pause": False,
-            "after_action": "close", "columns": 3,
-            "actions": [{"label": {"text": l, **({"color": c} if c else {})}, "width": 130, "action": trig(code)}
-                        for l, code, c in a]}
+    t = [balken(i, gesamt),
+         [{"text": f"Schritt {k + 1} von {len(f['steps'])}", "color": "gold", "bold": True},
+          {"text": f"   Ebene {e}/{n} · Teil {i + 1}/{gesamt}", "color": "gray"}],
+         LINIE, {"text": text, "color": "white"}, LINIE,
+         kopf("chest", "Für diesen Teil brauchst du", "yellow")] + material_text(material(liste)) + [
+         LINIE, [{"text": "■ ", "color": "green"}, {"text": "hier hinsetzen   ", "color": "gray"},
+                 {"text": "■ ", "color": "red"}, {"text": "falscher Block   ", "color": "gray"},
+                 {"text": "■ ", "color": "yellow"}, {"text": "Tier herbringen", "color": "gray"}]]
+    a = [knopf("◀ Zurück", ZURUECK, "white", tip="Einen Teil zurück"),
+         knopf("Weiter ▶", WEITER, "white", tip="Diesen Teil überspringen"),
+         knopf("↻ Drehen", DREHEN, "aqua", tip="Plan um 90° drehen (um den Startpunkt)"),
+         knopf("↑ Norden", 9010, "yellow"), knopf("↓ Süden", 9011, "yellow"), knopf("▲ Hoch", 9014, "yellow"),
+         knopf("← Westen", 9013, "yellow"), knopf("→ Osten", 9012, "yellow"), knopf("▼ Runter", 9015, "yellow"),
+         knopf("Ort prüfen", PLANORT, "aqua", "compass", "Biom, Bauwerk, Abstände – und wie viele Blöcke im Weg sind"),
+         knopf("Material", MATERIAL, "gold", "chest", "Material für die ganze Farm"),
+         knopf("Farm-Infos", INFO + nr, "white", "writable_book"),
+         knopf("Andere Farm", MENU, "gray", "map"), knopf("Abbrechen", ABBRUCH, "red", "barrier",
+                                                          "Plan und Geisterblöcke entfernen")]
+    return {"type": "minecraft:multi_action", "title": titel(f), "external_title": {"text": "Bauplan"},
+            "body": body(t), "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 3,
+            "actions": a}
 
 
 def material_dialog(f):
-    return {"type": "minecraft:notice", "title": {"text": "Material: " + f["name"], "bold": True},
-            "body": body([material_text(material(f["fertig"])),
-                          {"text": "Mehr bauen = mehr Material (Module verlängern oder stapeln).", "color": "gray"}]),
-            "action": {"label": {"text": "Zurück"}, "width": 150, "action": trig(PLANMENU)}}
+    return {"type": "minecraft:notice", "title": [bild("chest"), {"text": "  Material: " + f["name"], "bold": True,
+                                                                   "color": "gold"}],
+            "body": body([LINIE, *material_text(material(f["fertig"])), LINIE,
+                          {"text": "Mehr Ertrag = Module verlängern oder stapeln (siehe Farm-Infos).", "color": "gray"}]),
+            "action": {"label": {"text": "◀ Zurück"}, "width": 150, "action": trig(PLANMENU)}}
 
 
 # ---------- Funktionen erzeugen ----------
@@ -478,17 +561,17 @@ for nr, f in enumerate(PLAENE, 1):
         # Plan-Menü und Anzeige-Leiste hängen nicht von der Drehung ab
         funktion(f"f/{fid}/s{i}/menu", [f"dialog show @s {j(plan_dialog(nr, f, i, t, len(ts)))}"])
         hud = []
-        teile = [{"text": f"{f['name']} · Schritt {t[0] + 1}/{len(f['steps'])} · Teil {i + 1}/{len(ts)} · ",
-                  "color": "gold"}, {"text": "fehlt "}, {"score": {"name": "#fehlt", "objective": NS}}]
+        voll = round(10 * i / max(len(ts), 1))
+        teile = [bild(ICON.get(fid, "wheat")), {"text": f" Schritt {t[0] + 1}/{len(f['steps'])} ", "color": "gold"},
+                 {"text": "▌" * voll, "color": "green"}, {"text": "▌" * (10 - voll), "color": "dark_gray"},
+                 {"text": "  fehlt ", "color": "gray"}, {"score": {"name": "#fehlt", "objective": NS}, "color": "yellow"}]
         for k, key in enumerate(keys):
-            name, item, _, art = mat[key]
+            name, item, _, art, bildname = mat[key]
+            teile += [{"text": "   "}, bild(bildname or "barrier"), {"text": " "}]
             if item:
                 hud.append(f"execute store result score #h{k} {NS} run clear @s {item} 0")
-                teile += [{"text": f" · {name} ", "color": "gray"}, {"score": {"name": f"#h{k}", "objective": NS}},
-                          {"text": "/", "color": "gray"}, {"score": {"name": f"#m{k}", "objective": NS}, "color": "yellow"}]
-            else:
-                teile += [{"text": f" · {name} ", "color": "gray"}, {"score": {"name": f"#m{k}", "objective": NS},
-                                                                     "color": "yellow"}]
+                teile += [{"score": {"name": f"#h{k}", "objective": NS}, "color": "white"}, {"text": "/", "color": "dark_gray"}]
+            teile.append({"score": {"name": f"#m{k}", "objective": NS}, "color": "yellow"})
         hud.append(f"title @s actionbar {j(teile)}")
         funktion(f"f/{fid}/s{i}/hud", hud)
         for r in range(4):
@@ -554,6 +637,9 @@ funktion("neue_id", [f"scoreboard players add #naechste {NS}.id 1", f"scoreboard
 funktion("item", [f"clear @s {UNSER}", f"give @s {ITEM}"])
 
 # Trigger verteilen
+for _i in range(len(KATEGORIEN)):
+    funktion(f"kat/{_i}", [f"dialog show @s {j(kategorie_dialog(_i))}"])
+    CODES_DISPATCH.append((KAT + _i, f"{NS}:kat/{_i}"))
 tr = [f"scoreboard players operation #cur {NS}.id = @s {NS}.id"]
 for code, fn in CODES_DISPATCH:
     tr.append(f"execute if score @s {NS}.t matches {code} run return run function {fn}")
