@@ -140,12 +140,17 @@ def klein(art, schluessel, zeilen):
 GEIST = f"positioned ~0.1 ~0.1 ~0.1 run kill @e[type=minecraft:block_display,tag={NS}_g,distance=..0.05]"
 
 
+def nicht(pr):
+    """„unless block …“ für jede erlaubte Variante (pruefen kann mehrere mit | getrennt haben)."""
+    return " ".join(f"unless block ~ ~ ~ {v}" for v in pr.split("|"))
+
+
 def zeilen_block(x, y, z, d, k):
     pr = d["pruefen"]
     fn = klein("c", (pr, k), [
-        f"execute unless block ~ ~ ~ {pr} run scoreboard players add #m{k} {NS} 1",
-        f"execute if block ~ ~ ~ {pr} {GEIST}",
-        f"execute unless block ~ ~ ~ #minecraft:replaceable unless block ~ ~ ~ {pr} positioned ~0.1 ~0.1 ~0.1 run "
+        f"execute {nicht(pr)} run scoreboard players add #m{k} {NS} 1",
+        *[f"execute if block ~ ~ ~ {v} {GEIST}" for v in pr.split("|")],
+        f"execute unless block ~ ~ ~ #minecraft:replaceable {nicht(pr)} positioned ~0.1 ~0.1 ~0.1 run "
         f"data merge entity @e[type=minecraft:block_display,tag={NS}_g,distance=..0.05,limit=1] "
         f"{{glow_color_override:{ROT}}}"])
     return [f"execute positioned ~{x} ~{y} ~{z} run function {fn}"]
@@ -163,7 +168,7 @@ def zeilen_wesen(x, y, z, d, k):
 def geist(x, y, z, d):
     if d["art"] == "block":
         fn = klein("z", (d["pruefen"], d["anzeige"], j(d["props"])), [
-            f"execute unless block ~ ~ ~ {d['pruefen']} run summon minecraft:block_display ~0.1 ~0.1 ~0.1 {anzeige_nbt(d)}"])
+            f"execute {nicht(d['pruefen'])} run summon minecraft:block_display ~0.1 ~0.1 ~0.1 {anzeige_nbt(d)}"])
     elif d["art"] == "wesen":
         fn = klein("z", ("wesen", d["typ"]), [
             f"execute positioned ~0.5 ~ ~0.5 unless entity @e[type={d['typ']},distance=..1.5] run summon "
@@ -174,7 +179,7 @@ def geist(x, y, z, d):
 
 
 def hindernis(x, y, z, d):
-    fn = klein("h", (d["pruefen"],), [f"execute unless block ~ ~ ~ #minecraft:replaceable unless block ~ ~ ~ {d['pruefen']} "
+    fn = klein("h", (d["pruefen"],), [f"execute unless block ~ ~ ~ #minecraft:replaceable {nicht(d['pruefen'])} "
                                       f"run scoreboard players add #hind {NS} 1"])
     return f"execute positioned ~{x} ~{y} ~{z} run function {fn}"
 
@@ -632,6 +637,7 @@ funktion("sekunde", [f"execute as @e[type=minecraft:marker,tag={NS}_plan] at @s 
 
 # Tags, Rezept, Pack-Datei
 for name, werte in {"truhe": ["minecraft:chest", "minecraft:trapped_chest"],
+                    "boden": ["#minecraft:dirt", "minecraft:grass_block"],
                     "bambus": ["minecraft:bamboo", "minecraft:bamboo_sapling"],
                     "seetang": ["minecraft:kelp", "minecraft:kelp_plant"],
                     "staengel": ["minecraft:melon_stem", "minecraft:attached_melon_stem", "minecraft:pumpkin_stem",

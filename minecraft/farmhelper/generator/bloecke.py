@@ -30,8 +30,8 @@ EINFACH = {
     "stone": ("stone", "minecraft:stone", "minecraft:stone", "Stein"),
     "cobblestone": ("cobblestone", "minecraft:cobblestone", "minecraft:cobblestone", "Bruchstein"),
     "smooth_stone": ("smooth_stone", "minecraft:smooth_stone", "minecraft:smooth_stone", "Glatter Stein"),
-    "dirt": ("dirt", "#minecraft:dirt", "#minecraft:dirt", "Erde"),
-    "grass_block": ("grass_block", "minecraft:grass_block", "minecraft:grass_block", "Grasblock"),
+    "dirt": ("dirt", "#ofh:boden", "#minecraft:dirt", "Erde"),
+    "grass_block": ("grass_block", "#ofh:boden", "#minecraft:dirt", "Grasblock (oder Erde)"),
     "farmland": ("farmland", "minecraft:farmland", "#minecraft:dirt", "Ackerboden (Erde + Hacke)"),
     "sand": ("sand", "#minecraft:sand", "#minecraft:sand", "Sand"),
     "soul_sand": ("soul_sand", "minecraft:soul_sand", "minecraft:soul_sand", "Seelensand"),
@@ -91,7 +91,7 @@ GERICHTET = {
     "wall_sign": ("oak_wall_sign", "#minecraft:wall_signs", "#minecraft:signs", "Schild (Wand)"),
     "ladder": ("ladder", "minecraft:ladder", "minecraft:ladder", "Leiter"),
 }
-FLUESSIG = {"water": ("light_blue_stained_glass", "minecraft:water[level=0]", "minecraft:water_bucket", "Wasser (Eimer)"),
+FLUESSIG = {"water": ("light_blue_stained_glass", "minecraft:water[level=0]|minecraft:bubble_column", "minecraft:water_bucket", "Wasser (Eimer)"),
             "lava": ("orange_stained_glass", "minecraft:lava[level=0]", "minecraft:lava_bucket", "Lava (Eimer)")}
 
 
