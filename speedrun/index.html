@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speedrun-Plan: Ole, Mats &amp; Sammy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16181a; --panel:#1f2225; --panel2:#272b2f; --line:#353a3f;
+  --text:#e9ebe6; --mute:#9aa19a;
+  --ole:#ff8a3d; --mats:#b57cff; --sammy:#58c77a; --warn:#ffd25a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 Rubik,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+h1{font-weight:800;font-size:clamp(28px,4.5vw,44px);line-height:1.05;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:22px;margin:40px 0 14px;font-weight:700}
+h3{margin:0;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.sub{color:var(--mute);margin:0 0 20px;max-width:70ch}
+.mono{font-family:"JetBrains Mono",monospace}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+nav a{color:var(--text);text-decoration:none;border:1px solid var(--line);background:var(--panel);padding:7px 14px;border-radius:999px;font-size:14px}
+nav a:hover{border-color:var(--mute)}
+nav a .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+
+/* Zeitleiste */
+.timeline{display:grid;grid-template-columns:6fr 14fr 7fr 8fr;gap:4px;margin-top:8px}
+.tl{background:var(--panel);border-top:4px solid var(--c);padding:10px 12px;border-radius:4px}
+.tl b{display:block;font-size:14px}
+.tl span{font-size:12.5px;color:var(--mute)}
+@media(max-width:700px){.timeline{grid-template-columns:1fr 1fr}}
+
+/* Personen */
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:980px){.people{grid-template-columns:1fr}}
+.person{background:var(--panel);border-radius:10px;border-top:5px solid var(--c);padding:18px 18px 8px;scroll-margin-top:16px}
+.person header{margin-bottom:12px}
+.person .name{font-size:28px;font-weight:800;line-height:1}
+.person .role{color:var(--c);font-weight:700;font-size:14px;margin-top:4px}
+.person .goal{margin-top:10px;font-size:13.5px;background:var(--panel2);padding:8px 10px;border-radius:6px}
+.phase{border-top:1px solid var(--line);padding:12px 0 10px}
+.phase h3{color:var(--c);display:flex;justify-content:space-between;gap:8px}
+.phase h3 .t{color:var(--mute);font-family:"JetBrains Mono",monospace;font-weight:500;text-transform:none;letter-spacing:0;font-size:12.5px}
+ul.check{list-style:none;padding:0;margin:8px 0 0}
+ul.check li{display:flex;gap:10px;align-items:flex-start;padding:4px 0}
+ul.check input{appearance:none;flex:none;width:18px;height:18px;margin-top:2px;border:2px solid var(--line);border-radius:4px;background:var(--bg);cursor:pointer;position:relative}
+ul.check input:checked{background:var(--c);border-color:var(--c)}
+ul.check input:checked::after{content:"";position:absolute;left:4px;top:0px;width:5px;height:10px;border:solid #111;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+ul.check label{cursor:pointer}
+ul.check li:has(input:checked) label{color:var(--mute);text-decoration:line-through}
+.qty{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--c);white-space:nowrap}
+.note{font-size:13px;color:var(--mute);margin:6px 0 0}
+.give{font-size:13px;margin:8px 0 0;padding:7px 10px;border-left:3px solid var(--c);background:var(--panel2);border-radius:0 6px 6px 0}
+
+/* Tabellen */
+.tablewrap{overflow-x:auto;background:var(--panel);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:500}
+tr:last-child td{border-bottom:0}
+td.num{font-family:"JetBrains Mono",monospace;font-weight:700;white-space:nowrap}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12.5px;font-weight:700;color:#111;background:var(--c)}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.rule{background:var(--panel);border-radius:10px;padding:14px 16px}
+.rule b{display:block;margin-bottom:4px}
+.rule p{margin:0;color:var(--mute);font-size:14px}
+.warn{border-left:4px solid var(--warn);background:var(--panel);padding:12px 16px;border-radius:0 10px 10px 0;margin-top:14px;font-size:14px}
+.reset{margin-top:22px;background:none;border:1px solid var(--line);color:var(--mute);padding:8px 14px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.reset:hover{color:var(--text);border-color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Speedrun-Plan<br>Ole · Mats · Sammy</h1>
+<p class="sub">Any% auf einer neuen Welt: Enderdrache so schnell wie möglich töten. Hier steht, wer was holt, wie viel davon und wem er es danach gibt. Die Häkchen speichert jeder Browser für sich.</p>
+
+<nav>
+  <a href="#ole"><span class="dot" style="background:var(--ole)"></span>Ole</a>
+  <a href="#mats"><span class="dot" style="background:var(--mats)"></span>Mats</a>
+  <a href="#sammy"><span class="dot" style="background:var(--sammy)"></span>Sammy</a>
+  <a href="#uebergaben">Übergaben</a>
+  <a href="#gesamt">Gesamtbedarf</a>
+  <a href="#regeln">Regeln</a>
+</nav>
+
+<h2>Zeitplan</h2>
+<div class="timeline">
+  <div class="tl" style="--c:#8fa3b0"><b>1 · Oberwelt</b><span class="mono">0–6 min</span></div>
+  <div class="tl" style="--c:var(--ole)"><b>2 · Nether</b><span class="mono">6–20 min</span></div>
+  <div class="tl" style="--c:var(--sammy)"><b>3 · Stronghold</b><span class="mono">20–27 min</span></div>
+  <div class="tl" style="--c:var(--mats)"><b>4 · Drache</b><span class="mono">27–35 min</span></div>
+</div>
+
+<h2>Wer holt was</h2>
+<div class="people">
+
+<!-- OLE -->
+<section class="person" id="ole" style="--c:var(--ole)">
+  <header>
+    <div class="name">Ole</div>
+    <div class="role">🔥 Nether-Kämpfer</div>
+    <div class="goal"><b>Hauptziel:</b> 8 Blaze-Ruten. Im End zerstört Ole die Kristalle.</div>
+  </header>
+
+  <div class="phase">
+    <h3>1 · Oberwelt <span class="t">0–6 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="o1"><label for="o1"><span class="qty">16×</span> Holzstämme</label></li>
+      <li><input type="checkbox" id="o2"><label for="o2">Stein-Spitzhacke, Stein-Schwert, Stein-Axt</label></li>
+      <li><input type="checkbox" id="o3"><label for="o3"><span class="qty">3×</span> Eisen: Schild (1) und Eisenschwert (2)</label></li>
+      <li><input type="checkbox" id="o4"><label for="o4"><span class="qty">64×</span> Bruchstein zum Bauen und Verstecken</label></li>
+      <li><input type="checkbox" id="o5"><label for="o5"><span class="qty">10×</span> Essen (vorerst von Tieren unterwegs)</label></li>
+    </ul>
+    <p class="note">Sobald das Portal steht, geht Ole als Erster durch.</p>
+  </div>
+
+  <div class="phase">
+    <h3>2 · Nether <span class="t">6–20 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="o6"><label for="o6">Nether-Festung finden und <b>Koordinaten in den Chat</b></label></li>
+      <li><input type="checkbox" id="o7"><label for="o7"><span class="qty">8×</span> Blaze-Ruten (7 sind Minimum)</label></li>
+      <li><input type="checkbox" id="o8"><label for="o8">Truhen in der Festung plündern (Eisen, Gold, Obsidian)</label></li>
+      <li><input type="checkbox" id="o9"><label for="o9">Falls Skelette in der Nähe sind: Pfeile und Knochen aufsammeln</label></li>
+    </ul>
+    <p class="note">Spawner <b>nicht</b> zerstören. Bau dir aus Bruchstein eine Deckung neben dem Spawner und kämpfe von dort.</p>
+    <p class="give">→ <b>Sammy:</b> alle Blaze-Ruten, entweder in die Portal-Kiste oder direkt übergeben</p>
+  </div>
+
+  <div class="phase">
+    <h3>3 · Stronghold <span class="t">20–27 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="o10"><label for="o10">Bogen craften (3 Faden von Mats + 3 Stöcke)</label></li>
+      <li><input type="checkbox" id="o11"><label for="o11"><span class="qty">32×</span> Pfeile craften (8 Feuerstein von Sammy, 8 Federn von Mats, 8 Stöcke)</label></li>
+      <li><input type="checkbox" id="o12"><label for="o12"><span class="qty">128×</span> Blöcke (Bruchstein/Netherrack) für die Türme im End</label></li>
+      <li><input type="checkbox" id="o13"><label for="o13">Im Portalraum die Silberfisch-Spawner zerstören</label></li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>4 · Drache <span class="t">27–35 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="o14"><label for="o14">Die <span class="qty">10</span> Endkristalle auf den Säulen abschießen</label></li>
+      <li><input type="checkbox" id="o15"><label for="o15">Die 2 Kristalle im Käfig: hochbauen, Käfig aufbrechen, Kristall schlagen und sofort runterspringen</label></li>
+      <li><input type="checkbox" id="o16"><label for="o16">Danach mit dem Bogen auf den Drachen schießen</label></li>
+    </ul>
+  </div>
+</section>
+
+<!-- MATS -->
+<section class="person" id="mats" style="--c:var(--mats)">
+  <header>
+    <div class="name">Mats</div>
+    <div class="role">🟣 Perlen-Händler</div>
+    <div class="goal"><b>Hauptziel:</b> 15 Enderperlen durch Tausch mit Piglins. Dazu kommen Wolle und Material für den Bogen.</div>
+  </header>
+
+  <div class="phase">
+    <h3>1 · Oberwelt <span class="t">0–6 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="m1"><label for="m1"><span class="qty">12×</span> Holzstämme und Stein-Werkzeug</label></li>
+      <li><input type="checkbox" id="m2"><label for="m2"><span class="qty">2×</span> Eisen für eine Schere</label></li>
+      <li><input type="checkbox" id="m3"><label for="m3"><span class="qty">21×</span> Wolle (Schafe scheren, ein Schaf gibt 1–3)</label></li>
+      <li><input type="checkbox" id="m4"><label for="m4"><span class="qty">8×</span> Federn (von Hühnern)</label></li>
+      <li><input type="checkbox" id="m5"><label for="m5"><span class="qty">10×</span> Essen</label></li>
+    </ul>
+    <p class="give">→ <b>Sammy:</b> 21 Wolle, bevor Mats in den Nether geht</p>
+  </div>
+
+  <div class="phase">
+    <h3>2 · Nether <span class="t">6–20 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="m6"><label for="m6"><b>Goldene Stiefel</b> anziehen (4 Gold, z. B. aus Nether-Golderz-Nuggets). Ohne Gold-Rüstung greifen Piglins an.</label></li>
+      <li><input type="checkbox" id="m7"><label for="m7">Bastion finden und <b>Koordinaten in den Chat</b></label></li>
+      <li><input type="checkbox" id="m8"><label for="m8"><span class="qty">~200×</span> Goldbarren (entspricht etwa 20+ Goldblöcken aus der Bastion)</label></li>
+      <li><input type="checkbox" id="m9"><label for="m9">Gold vor Piglins fallen lassen, bis du <span class="qty">15×</span> Enderperlen hast</label></li>
+      <li><input type="checkbox" id="m10"><label for="m10">Beim Tausch einsammeln: <span class="qty">3×</span> Faden, Feuerresistenz-Tränke, Obsidian</label></li>
+    </ul>
+    <p class="note">Wenn Piglins sehen, dass du Truhen öffnest oder Goldblöcke abbaust, werden sie wütend, auch mit Gold-Rüstung. Mauere sie vorher mit Blöcken ein. Backup, falls es zu wenig Perlen gibt: Im Wirrwald (blauer Wald) Endermen jagen.</p>
+    <p class="give">→ <b>Ole:</b> 3 Faden, 8 Federn, Feuerresistenz-Tränke<br>→ <b>Sammy:</b> alle Enderperlen</p>
+  </div>
+
+  <div class="phase">
+    <h3>3 · Stronghold <span class="t">20–27 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="m11"><label for="m11"><span class="qty">2–3×</span> Reserve-Perlen behalten, falls im Portal Augen fehlen</label></li>
+      <li><input type="checkbox" id="m12"><label for="m12"><span class="qty">64×</span> Blöcke</label></li>
+      <li><input type="checkbox" id="m13"><label for="m13"><span class="qty">2×</span> Ersatz-Betten von Sammy abholen</label></li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>4 · Drache <span class="t">27–35 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="m14"><label for="m14">Sammy beim Bett-Sprengen decken und Endermen fernhalten (<b>nicht anschauen!</b>)</label></li>
+      <li><input type="checkbox" id="m15"><label for="m15">Wenn Sammy die Betten ausgehen: Ersatz-Betten legen</label></li>
+      <li><input type="checkbox" id="m16"><label for="m16">Wenn Ole Hilfe beim Hochbauen braucht: einspringen</label></li>
+    </ul>
+  </div>
+</section>
+
+<!-- SAMMY -->
+<section class="person" id="sammy" style="--c:var(--sammy)">
+  <header>
+    <div class="name">Sammy</div>
+    <div class="role">⛏️ Versorger &amp; Scout</div>
+    <div class="goal"><b>Hauptziel:</b> In unter 6 Minuten ein Portal bauen, dann Betten, Essen, Enderaugen und den Stronghold finden. Sammy legt im End die Betten.</div>
+  </header>
+
+  <div class="phase">
+    <h3>1 · Oberwelt <span class="t">0–6 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="s1"><label for="s1"><span class="qty">12×</span> Holzstämme, Stein-Spitzhacke, Ofen, Kohle</label></li>
+      <li><input type="checkbox" id="s2"><label for="s2"><span class="qty">7×</span> Eisen: 2 Eimer (6) und Feuerzeug (1)</label></li>
+      <li><input type="checkbox" id="s3"><label for="s3">Kies abbauen bis <span class="qty">9×</span> Feuerstein (1 für Feuerzeug, 8 für Oles Pfeile)</label></li>
+      <li><input type="checkbox" id="s4"><label for="s4">Wassereimer füllen, Lava-See finden und das Portal per <b>Wasser+Lava</b> gießen (10 Obsidian)</label></li>
+      <li><input type="checkbox" id="s5"><label for="s5"><b>Portal-Koordinaten in den Chat</b> und eine Kiste neben das Portal stellen</label></li>
+    </ul>
+    <p class="give">→ <b>Ole:</b> 8 Feuerstein</p>
+  </div>
+
+  <div class="phase">
+    <h3>2 · Versorgung <span class="t">6–20 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="s6"><label for="s6"><span class="qty">7×</span> Betten (21 Wolle von Mats + 21 Holzbretter)</label></li>
+      <li><input type="checkbox" id="s7"><label for="s7"><span class="qty">45×</span> gebratenes Fleisch (Kühe/Schweine/Schafe), 15 für jeden</label></li>
+      <li><input type="checkbox" id="s8"><label for="s8">Boot bauen (für Wasser auf dem Weg zum Stronghold)</label></li>
+      <li><input type="checkbox" id="s9"><label for="s9">Danach in den Nether: Mats Gold tragen helfen oder Ole bei der Festung decken, je nachdem wer weiter zurück ist</label></li>
+    </ul>
+    <p class="give">→ <b>Ole & Mats:</b> je 15 Essen<br>→ <b>Mats:</b> 2 Ersatz-Betten (5 behält Sammy)</p>
+  </div>
+
+  <div class="phase">
+    <h3>3 · Stronghold <span class="t">20–27 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="s10"><label for="s10">8 Ruten zu <span class="qty">16×</span> Blaze-Pulver verarbeiten</label></li>
+      <li><input type="checkbox" id="s11"><label for="s11"><span class="qty">14–15×</span> Enderaugen craften (Pulver + Perle)</label></li>
+      <li><input type="checkbox" id="s12"><label for="s12">Erstes Auge werfen und die Richtung notieren (F3, Blickwinkel)</label></li>
+      <li><input type="checkbox" id="s13"><label for="s13">Etwa 300 Blöcke zur Seite laufen und ein zweites Auge werfen. Wo sich beide Linien kreuzen, liegt der Stronghold. Koordinaten in den Chat.</label></li>
+      <li><input type="checkbox" id="s14"><label for="s14">Abkürzung: Im Nether laufen (Koordinaten ÷ 8) und dort ein Portal bauen</label></li>
+      <li><input type="checkbox" id="s15"><label for="s15">Fehlende Augen in den Endportal-Rahmen einsetzen</label></li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>4 · Drache <span class="t">27–35 min</span></h3>
+    <ul class="check">
+      <li><input type="checkbox" id="s16"><label for="s16">Warten, bis der Drache sich auf das Podest in der Mitte setzt</label></li>
+      <li><input type="checkbox" id="s17"><label for="s17">Bett so legen, dass das Kopfende neben dem Drachen liegt, anklicken und sofort weg</label></li>
+      <li><input type="checkbox" id="s18"><label for="s18">Wiederholen, bis der Drache tot ist (meist 4–6 Betten)</label></li>
+    </ul>
+    <p class="note">Betten explodieren im End. Stell dich so, dass ein Block zwischen dir und dem Bett ist, und halte den Schild hoch. Nicht direkt danebenstehen!</p>
+  </div>
+</section>
+</div>
+
+<h2 id="uebergaben">Übergaben</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Wann</th><th>Von</th><th>An</th><th>Was</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">~5 min</td><td><span class="tag" style="--c:var(--mats)">Mats</span></td><td><span class="tag" style="--c:var(--sammy)">Sammy</span></td><td>21 Wolle</td></tr>
+    <tr><td class="mono">~6 min</td><td><span class="tag" style="--c:var(--sammy)">Sammy</span></td><td><span class="tag" style="--c:var(--ole)">Ole</span></td><td>8 Feuerstein</td></tr>
+    <tr><td class="mono">~12 min</td><td><span class="tag" style="--c:var(--sammy)">Sammy</span></td><td>Ole + Mats</td><td>Je 15 Essen. Mats bekommt außerdem 2 Betten.</td></tr>
+    <tr><td class="mono">~18 min</td><td><span class="tag" style="--c:var(--mats)">Mats</span></td><td><span class="tag" style="--c:var(--ole)">Ole</span></td><td>3 Faden, 8 Federn, Feuerresistenz-Tränke</td></tr>
+    <tr><td class="mono">~20 min</td><td><span class="tag" style="--c:var(--ole)">Ole</span></td><td><span class="tag" style="--c:var(--sammy)">Sammy</span></td><td>8 Blaze-Ruten</td></tr>
+    <tr><td class="mono">~20 min</td><td><span class="tag" style="--c:var(--mats)">Mats</span></td><td><span class="tag" style="--c:var(--sammy)">Sammy</span></td><td>12–13 Enderperlen (Mats behält 2–3 als Reserve)</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="gesamt">Gesamtbedarf</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Item</th><th>Menge</th><th>Wer</th><th>Wofür</th></tr></thead>
+  <tbody>
+    <tr><td>Blaze-Ruten</td><td class="num">8</td><td>Ole</td><td>16 Pulver für die Enderaugen</td></tr>
+    <tr><td>Enderperlen</td><td class="num">15</td><td>Mats</td><td>Enderaugen (bis zu 12 für den Rahmen, 2–3 zum Werfen)</td></tr>
+    <tr><td>Eisen</td><td class="num">12</td><td>alle</td><td>Eimer, Feuerzeug, Schild, Schwert, Schere</td></tr>
+    <tr><td>Gold</td><td class="num">~200</td><td>Mats</td><td>Tausch mit Piglins und goldene Stiefel</td></tr>
+    <tr><td>Wolle</td><td class="num">21</td><td>Mats</td><td>7 Betten</td></tr>
+    <tr><td>Betten</td><td class="num">7</td><td>Sammy</td><td>Drachen sprengen</td></tr>
+    <tr><td>Feuerstein</td><td class="num">9</td><td>Sammy</td><td>Feuerzeug und Pfeile</td></tr>
+    <tr><td>Federn / Faden</td><td class="num">8 / 3</td><td>Mats</td><td>Pfeile und Bogen für Ole</td></tr>
+    <tr><td>Essen</td><td class="num">45</td><td>Sammy</td><td>15 pro Person</td></tr>
+    <tr><td>Blöcke</td><td class="num">~250</td><td>alle</td><td>Deckung, Brücken, Türme im End</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="regeln">Regeln</h2>
+<div class="rules">
+  <div class="rule"><b>📍 Koordinaten in den Chat</b><p>Portal, Festung, Bastion, Stronghold und jeder Todespunkt. Nicht nur sagen, sondern schreiben.</p></div>
+  <div class="rule"><b>🤝 Wer fertig ist, hilft</b><p>Bei drei Leuten kostet Warten am meisten Zeit. Wer sein Ziel erreicht hat, fragt, wo Hilfe gebraucht wird.</p></div>
+  <div class="rule"><b>📦 Kiste am Portal</b><p>Alles, was übrig ist, kommt dort rein. Sammy behält den Überblick.</p></div>
+  <div class="rule"><b>💀 Wenn jemand stirbt</b><p>Sofort die Koordinaten posten. Wer am nächsten ist, holt die Items. Der Gestorbene übernimmt dessen Aufgabe in der Oberwelt.</p></div>
+</div>
+<div class="warn"><b>Modpack-Hinweis:</b> Euer Server läuft mit einem Modpack. Wenn Mods Strukturen, Piglin-Tausch oder den Drachen verändern, stimmen die Mengen hier eventuell nicht. Am besten vorher eine kurze Proberunde spielen.</div>
+
+<button class="reset" id="reset" type="button">Alle Häkchen zurücksetzen</button>
+</div>
+
+<script>
+(function(){
+  var KEY='speedrun-plan-checks';
+  var boxes=document.querySelectorAll('ul.check input');
+  var state={};
+  try{state=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  boxes.forEach(function(b){
+    if(state[b.id]) b.checked=true;
+    b.addEventListener('change',function(){
+      state[b.id]=b.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
+    });
+  });
+  document.getElementById('reset').addEventListener('click',function(){
+    state={};boxes.forEach(function(b){b.checked=false});
+    try{localStorage.removeItem(KEY)}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
