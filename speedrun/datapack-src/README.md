@@ -22,4 +22,4 @@ Läuft komplett auf dem Server. Spieler brauchen keine Mods.
 `python3 build.py <ausgabeordner>` erzeugt `speedrun.zip`. Die Datei kommt nach `<welt>/datapacks/`.
 
 ## Server zurück auf die Himmelsinsel stellen
-In `server.properties` `level-name=himmelsinsel` (und bei Bedarf `difficulty=hard`) setzen und den Server neu starten. Das Original liegt in `../server-backup/server.properties.himmelsinsel`.
+In `server.properties` `level-name=himmelsinsel` (und bei Bedarf `difficulty=hard`) setzen und den Server neu starten. Sonst bleibt in der Datei alles gleich.
