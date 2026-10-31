@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Speedrun-Datapack v2 (Minecraft 26.3, data pack format 121).
+"""Speedrun-Datapack v3 (Minecraft 26.3, data pack format 121).
 
 Modi: Solo, Duo, Trio, Squad, Koop. Bei mehreren Teams ist es ein Rennen:
 jedes Team startet an einem eigenen Ort, wer zuerst den Drachen tötet, gewinnt.
@@ -58,7 +58,7 @@ TASKS = [
 ]
 NT = len(TASKS)
 # counted tasks: key -> (needed amount, divisor for display)
-NEED = {'blaze': (7, 2), 'pearls': (12, 1), 'beds': (7, 1), 'food': (30, 1), 'eyes': (12, 1)}
+NEED = {'blaze': (7, 2), 'pearls': (12, 1), 'beds': (7, 1), 'food': (20, 1), 'eyes': (12, 1)}
 FOOD = ['cooked_beef', 'cooked_porkchop', 'cooked_mutton', 'cooked_chicken', 'cooked_rabbit',
         'cooked_cod', 'cooked_salmon', 'bread', 'baked_potato', 'golden_carrot']
 STEPS = {
@@ -81,6 +81,10 @@ STEPS = {
     6: [('tools', 'Eimer + Feuerzeug, Portal gießen'), ('beds', 'Betten craften'), ('food', 'Essen braten'), ('nether', 'In den Nether'),
         ('eyes', 'Enderaugen craften'), ('stronghold', 'Stronghold finden'), ('end', 'Ins End'), ('dragon', 'Drachen mit Betten sprengen')],
 }
+SLOTS = {1: 'gold', 2: 'light_purple', 3: 'green', 4: 'aqua', 5: 'red', 6: 'blue', 7: 'yellow', 8: 'white',
+         9: 'dark_green', 10: 'dark_aqua', 11: 'dark_red', 12: 'dark_purple', 13: 'gray', 14: 'dark_blue', 15: 'dark_gray', 16: 'black'}
+STEP_KEYS = sorted({k for steps in STEPS.values() for k, _ in steps})
+TEAM_LINES = [('blaze', 'Blaze-Ruten'), ('pearls', 'Enderperlen'), ('eyes', 'Enderaugen'), ('stronghold', 'Stronghold'), ('dragon', 'Drache')]
 BAR_COLOR = {'red': 'red', 'blue': 'blue', 'green': 'green', 'yellow': 'yellow', 'aqua': 'blue',
              'light_purple': 'pink', 'gold': 'yellow', 'white': 'white'}
 
@@ -152,6 +156,13 @@ load = [
     'scoreboard objectives add sr_role dummy',
     'scoreboard objectives add sr_team dummy',
     'scoreboard objectives add sr_click minecraft.used:minecraft.carrot_on_a_stick',
+    'scoreboard objectives add sr_slot dummy',
+    'scoreboard objectives add sr_pu_blaze minecraft.picked_up:minecraft.blaze_rod',
+    'scoreboard objectives add sr_pu_pearl minecraft.picked_up:minecraft.ender_pearl',
+    'scoreboard objectives add sr_cr_eye minecraft.crafted:minecraft.ender_eye',
+    *[f'scoreboard objectives add sr_cr_f{i} minecraft.crafted:minecraft.{f}' for i, f in enumerate(FOOD)],
+    *[f'scoreboard objectives add sr_d_{k} dummy' for k in STEP_KEYS],
+    *[f'scoreboard objectives add sr_v_{k} dummy' for k in NEED],
     f'scoreboard objectives add sr_wins dummy {tc({"text": "Siege", "color": "gold"})}',
     'scoreboard objectives setdisplay list sr_wins',
     f'scoreboard objectives add sr_lobby dummy {tc({"text": "SPEEDRUN", "color": "gold", "bold": True})}',
@@ -160,18 +171,23 @@ load = [
 ]
 for n, (color, cname) in TEAMS.items():
     load += [
-        f'team add sr_t{n}',
-        f'team modify sr_t{n} color {color}',
-        f'team modify sr_t{n} displayName {tc({"text": "Team " + cname, "color": color})}',
-        f'team modify sr_t{n} prefix {tc({"text": "[" + cname + "] ", "color": color})}',
-        f'team modify sr_t{n} friendlyFire false',
+        f'team remove sr_t{n}',
         f'scoreboard objectives add sr_s{n} dummy {tc({"text": "Team " + cname, "color": color, "bold": True})}',
         f'scoreboard objectives modify sr_s{n} numberformat blank',
-        f'scoreboard objectives setdisplay sidebar.team.{color} sr_s{n}',
         f'bossbar add {NS}:t{n} {tc({"text": "Team " + cname})}',
         f'bossbar set {NS}:t{n} color {BAR_COLOR[color]}',
         f'bossbar set {NS}:t{n} style notched_12',
         f'bossbar set {NS}:t{n} max {NT}',
+    ]
+for k, color in SLOTS.items():
+    load += [
+        f'team add sr_p{k}',
+        f'team modify sr_p{k} color {color}',
+        f'team modify sr_p{k} friendlyFire false',
+        f'team modify sr_p{k} nametagVisibility always',
+        f'scoreboard objectives add sr_o{k} dummy',
+        f'scoreboard objectives modify sr_o{k} numberformat blank',
+        f'scoreboard objectives setdisplay sidebar.team.{color} sr_o{k}',
     ]
 load += [
     'scoreboard players set #20 sr 20', 'scoreboard players set #60 sr 60', 'scoreboard players set #2 sr 2', 'scoreboard players set #5 sr 5',
@@ -310,7 +326,7 @@ fn('player/tp_lobby', [f'{OW} tp @s 0 200 0 180 0'])
 fn('player/to_lobby', [
     'team leave @s',
     'tag @s remove sr_run', 'tag @s remove sr_spec', 'tag @s add sr_lobby',
-    'scoreboard players set @s sr_role -1', 'scoreboard players set @s sr_team 0',
+    'scoreboard players set @s sr_role -1', 'scoreboard players set @s sr_team 0', 'scoreboard players set @s sr_slot 0',
     f'function {NS}:player/reset_state',
     'gamemode adventure @s',
     f'function {NS}:player/tp_lobby',
@@ -403,7 +419,7 @@ fn('role/pref', [
 ])
 fn('role/give', ['$scoreboard players set @s sr_role $(r)', 'tag @s add sr_hasrole', 'scoreboard players set #got sr 1'])
 for n in TEAMS:
-    S = f'@a[team=sr_t{n},tag=!sr_hasrole'
+    S = f'@a[tag=sr_cur,tag=!sr_hasrole'
     def assign(spec, extra=False):
         # pass 1: everyone whose wish matches gets the role; pass 2: free roles go to anyone left
         out = []
@@ -417,9 +433,10 @@ for n in TEAMS:
         if extra:
             out.append(f'execute as {S}] run function {NS}:role/extra')
         return ['scoreboard players set #got sr 0'] + out
-    lines = ['scoreboard players set #size sr 0', f'execute as @a[team=sr_t{n}] run scoreboard players add #size sr 1',
+    lines = ['tag @a remove sr_cur', f'tag @a[scores={{sr_team={n}}}] add sr_cur',
+             'scoreboard players set #size sr 0', f'execute as @a[scores={{sr_team={n}}}] run scoreboard players add #size sr 1',
              'execute if score #size sr matches 0 run return 0',
-             f'execute if score #size sr matches 1 as @a[team=sr_t{n}] run function {NS}:role/give {{r:0}}']
+             f'execute if score #size sr matches 1 as @a[scores={{sr_team={n}}}] run function {NS}:role/give {{r:0}}']
     lines += [f'execute if score #size sr matches 2 run function {NS}:role/duo_t{n}',
               f'execute if score #size sr matches 3 run function {NS}:role/trio_t{n}',
               f'execute if score #size sr matches 4.. run function {NS}:role/squad_t{n}']
@@ -436,10 +453,10 @@ for r, (name, hint) in ROLES.items():
               f'execute if score @s sr_role matches {r} run tellraw @s {msg({"text": "Deine Rolle: ", "color": "gray"}, {"text": name, "color": "yellow", "bold": True}, {"text": " – " + hint, "color": "white"})}']
 fn('role/brief', [
     'title @s times 5 60 15',
-    *[f'execute if entity @s[team=sr_t{n}] run title @s title {tc({"text": "Team " + cname, "color": color, "bold": True})}' for n, (color, cname) in TEAMS.items()],
+    *[f'execute if entity @s[scores={{sr_team={n}}}] run title @s title {tc({"text": "Team " + cname, "color": color, "bold": True})}' for n, (color, cname) in TEAMS.items()],
     *brief,
     f'function {NS}:role/plan_chat',
-    f'tellraw @s {msg({"text": "Mitspieler leuchten in Teamfarbe, die Leiste über der Hotbar zeigt, wo sie sind. Wichtige Orte kommen automatisch mit Koordinaten. Plan & Position teilen: Esc → Speedrun-Menü", "color": "gray"})}',
+    f'tellraw @s {msg({"text": "Rechts siehst du DEINE Schritte (▶ = jetzt dran) und unten den Team-Stand. Mitspieler leuchten, die Leiste über der Hotbar zeigt, wo sie sind. Wichtige Orte kommen automatisch mit Koordinaten. Plan & Position teilen: Esc → Speedrun-Menü", "color": "gray"})}',
     'execute if score #teams sr matches 2.. run tellraw @s ' + msg({'text': 'RENNEN! ', 'color': 'red', 'bold': True}, {'text': 'Jedes Team startet woanders. Wer zuerst den Drachen tötet, gewinnt.', 'color': 'white'}),
 ])
 hint_lines = []
@@ -494,15 +511,15 @@ for n, (color, cname) in TEAMS.items():
         'execute store result score #px sr run data get entity @s Pos[0]',
         'execute store result score #py sr run data get entity @s Pos[1]',
         'execute store result score #pz sr run data get entity @s Pos[2]',
-        f'$execute if dimension minecraft:overworld run tellraw @a[tag=sr_run,team=sr_t{n}] {tc(base + [{"text": "  Oberwelt", "color": "green"}] + who)}',
-        f'$execute if dimension minecraft:the_nether run tellraw @a[tag=sr_run,team=sr_t{n}] {tc(base + [{"text": "  Nether", "color": "red"}] + who)}',
-        f'$execute if dimension minecraft:the_end run tellraw @a[tag=sr_run,team=sr_t{n}] {tc(base + [{"text": "  End", "color": "light_purple"}] + who)}',
-        f'execute as @a[tag=sr_run,team=sr_t{n}] at @s run playsound minecraft:block.note_block.chime master @s ~ ~ ~ 0.8 1.5',
+        f'$execute if dimension minecraft:overworld run tellraw @a[tag=sr_run,scores={{sr_team={n}}}] {tc(base + [{"text": "  Oberwelt", "color": "green"}] + who)}',
+        f'$execute if dimension minecraft:the_nether run tellraw @a[tag=sr_run,scores={{sr_team={n}}}] {tc(base + [{"text": "  Nether", "color": "red"}] + who)}',
+        f'$execute if dimension minecraft:the_end run tellraw @a[tag=sr_run,scores={{sr_team={n}}}] {tc(base + [{"text": "  End", "color": "light_purple"}] + who)}',
+        f'execute as @a[tag=sr_run,scores={{sr_team={n}}}] at @s run playsound minecraft:block.note_block.chime master @s ~ ~ ~ 0.8 1.5',
     ])
 fn('fx/share_me', [
     f'execute unless entity @s[tag=sr_run] run return run tellraw @s {msg({"text": "Das geht nur im Run.", "color": "gray"})}',
     'data modify storage sr:run share.label set value "Position"',
-    *[f'execute if entity @s[team=sr_t{n}] at @s run function {NS}:fx/share_t{n} with storage sr:run share' for n in TEAMS],
+    *[f'execute if entity @s[scores={{sr_team={n}}}] at @s run function {NS}:fx/share_t{n} with storage sr:run share' for n in TEAMS],
 ])
 
 # ------------------------------------------------------------------ start (request -> countdown -> launch)
@@ -529,7 +546,7 @@ launch = [
     'scoreboard players add #run sr 1',
     'scoreboard players operation #runmode sr = #mode sr',
     # reset everybody's team / role state
-    'team leave @a', 'tag @a remove sr_run', 'tag @a remove sr_spec', 'tag @a remove sr_hasrole', 'tag @a remove sr_pending',
+    'team leave @a', 'scoreboard players set @a sr_slot 0', 'tag @a remove sr_run', 'tag @a remove sr_spec', 'tag @a remove sr_hasrole', 'tag @a remove sr_pending',
     'scoreboard players set @a sr_role -1', 'scoreboard players set @a sr_team 0',
     'tag @a[tag=!sr_watch] add sr_pending',
     # team size
@@ -538,8 +555,8 @@ launch = [
     'scoreboard players set #n sr 1', 'scoreboard players set #c sr 0',
     f'function {NS}:start/assign_next',
     'scoreboard players set #teams sr 0',
-    *[f'execute if entity @a[team=sr_t{n}] run scoreboard players add #teams sr 1' for n in TEAMS],
-    'tag @a[team=!] add sr_run', 'tag @a[tag=sr_run] remove sr_lobby',
+    *[f'execute if entity @a[scores={{sr_team={n}}}] run scoreboard players add #teams sr 1' for n in TEAMS],
+    'tag @a[scores={sr_team=1..}] add sr_run', 'tag @a[tag=sr_run] remove sr_lobby',
     f'execute as @a[tag=sr_run] run function {NS}:player/reset_state',
     'gamemode survival @a[tag=sr_run]',
     'effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
@@ -548,10 +565,18 @@ launch = [
     f'{OW} tp @a[tag=sr_run] 0 200 0',
 ]
 for n in TEAMS:
-    launch += [f'execute if entity @a[team=sr_t{n}] run function {NS}:team/setup_t{n}',
-               f'execute unless entity @a[team=sr_t{n}] run bossbar set {NS}:t{n} visible false']
+    launch += [f'execute if entity @a[scores={{sr_team={n}}}] run function {NS}:team/setup_t{n}',
+               f'execute unless entity @a[scores={{sr_team={n}}}] run bossbar set {NS}:t{n} visible false']
 launch += [
     'execute as @a[tag=sr_run] at @s run spawnpoint @s ~ ~ ~',
+    'scoreboard players set #k sr 0',
+    f'execute as @a[tag=sr_run] run function {NS}:start/slot',
+    'scoreboard players set @a[tag=sr_run] sr_pu_blaze 0', 'scoreboard players set @a[tag=sr_run] sr_pu_pearl 0',
+    'scoreboard players set @a[tag=sr_run] sr_cr_eye 0',
+    *[f'scoreboard players set @a[tag=sr_run] sr_cr_f{i} 0' for i in range(len(FOOD))],
+    *[f'scoreboard players set @a[tag=sr_run] sr_d_{k} 0' for k in STEP_KEYS],
+    *[f'scoreboard players set @a[tag=sr_run] sr_v_{k} 0' for k in NEED],
+    f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] run function {NS}:p/init',
     'scoreboard players set #ticks sr 0', 'scoreboard players set #active sr 1',
     f'execute as @a[tag=sr_run] run function {NS}:role/brief',
     'execute as @a[tag=sr_run] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.6 1.2',
@@ -569,11 +594,11 @@ fn('start/assign_next', [
     f'function {NS}:start/assign_next',
 ])
 for n in TEAMS:
-    fn(f'start/join_t{n}', [f'team join sr_t{n} @s', 'tag @s remove sr_pending', f'scoreboard players set @s sr_team {n}'])
+    fn(f'start/join_t{n}', ['tag @s remove sr_pending', f'scoreboard players set @s sr_team {n}'])
 
 # per-team setup: roles, start position, sidebar, bossbar, task flags
 for n, (color, cname) in TEAMS.items():
-    sel = f'@a[tag=sr_run,team=sr_t{n}]'
+    sel = f'@a[tag=sr_run,scores={{sr_team={n}}}]'
     setup = [
         f'function {NS}:role/assign_t{n}',
         'scoreboard players operation #slot sr = #nextslot sr',
@@ -596,16 +621,16 @@ for n, (color, cname) in TEAMS.items():
             setup.append(f'scoreboard players display numberformat {key} sr_s{n} fixed {tc({"text": "0/" + str(NEED[key][0]), "color": "gray"})}')
             setup.append(f'scoreboard players set #t{n}_v_{key} sr 0')
     setup += [f'scoreboard objectives modify sr_s{n} displayname {tc({"text": "Team " + cname, "color": color, "bold": True})}',
-              f'execute as {sel} run waypoint modify @s color {color}']
+              ]
     setup += [f'bossbar set {NS}:t{n} value 0', f'bossbar set {NS}:t{n} visible true', f'bossbar set {NS}:t{n} players {sel}']
     fn(f'team/setup_t{n}', setup)
 
 fn('pos/pick', [f'execute if score #slot sr matches {i} run return run function {NS}:pos/set {{x:{x},z:{z}}}' for i, (x, z) in enumerate(POS)])
 fn('pos/set', ['$scoreboard players set #cx sr $(x)', '$scoreboard players set #cz sr $(z)'])
 fn('pos/place', [
-    '$execute in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 24 false @a[tag=sr_run,team=sr_t$(n)]',
-    '$execute if score #ok sr matches 0 in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 96 false @a[tag=sr_run,team=sr_t$(n)]',
-    '$execute if score #ok sr matches 0 in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 320 false @a[tag=sr_run,team=sr_t$(n)]',
+    '$execute in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 24 false @a[tag=sr_run,scores={sr_team=$(n)}]',
+    '$execute if score #ok sr matches 0 in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 96 false @a[tag=sr_run,scores={sr_team=$(n)}]',
+    '$execute if score #ok sr matches 0 in minecraft:overworld store success score #ok sr run spreadplayers $(x) $(z) 2 320 false @a[tag=sr_run,scores={sr_team=$(n)}]',
     f'execute if score #ok sr matches 0 run function {NS}:pos/retry',
 ])
 fn('pos/retry', [
@@ -632,9 +657,9 @@ second = [
     'scoreboard players operation #sec sr = #s sr', 'scoreboard players operation #sec sr %= #60 sr',
 ]
 for n in TEAMS:
-    second.append(f'execute if entity @a[tag=sr_run,team=sr_t{n}] run function {NS}:team/second_t{n}')
+    second.append(f'execute if entity @a[tag=sr_run,scores={{sr_team={n}}}] run function {NS}:team/second_t{n}')
 second += [
-    *[f'execute as @a[tag=sr_run,team=sr_t{n}] run function {NS}:role/step_t{n}' for n in TEAMS],
+    f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] at @s run function {NS}:p/second',
     'scoreboard players operation #five sr = #s sr', 'scoreboard players operation #five sr %= #5 sr',
     'execute if score #five sr matches 0 run effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
     f'function {NS}:run/end_watch',
@@ -645,13 +670,13 @@ fn('run/empty', ['scoreboard players set #active sr 0',
                  f'tellraw @a {msg({"text": "Run beendet – niemand mehr im Run.", "color": "gray"})}'])
 
 SHARE = {
-    'nether': ('Nether-Portal', 'in minecraft:the_nether as @a[tag=sr_run,team=sr_t{n},distance=0..,limit=1]'),
-    'fortress': ('Festung', 'as @a[tag=sr_run,team=sr_t{n},advancements={{minecraft:nether/find_fortress=true}},limit=1]'),
-    'bastion': ('Bastion', 'as @a[tag=sr_run,team=sr_t{n},advancements={{minecraft:nether/find_bastion=true}},limit=1]'),
-    'stronghold': ('Stronghold', 'as @a[tag=sr_run,team=sr_t{n},advancements={{minecraft:story/follow_ender_eye=true}},limit=1]'),
+    'nether': ('Nether-Portal', 'in minecraft:the_nether as @a[tag=sr_run,scores={{sr_team={n}}},distance=0..,limit=1]'),
+    'fortress': ('Festung', 'as @a[tag=sr_run,scores={{sr_team={n}}},advancements={{minecraft:nether/find_fortress=true}},limit=1]'),
+    'bastion': ('Bastion', 'as @a[tag=sr_run,scores={{sr_team={n}}},advancements={{minecraft:nether/find_bastion=true}},limit=1]'),
+    'stronghold': ('Stronghold', 'as @a[tag=sr_run,scores={{sr_team={n}}},advancements={{minecraft:story/follow_ender_eye=true}},limit=1]'),
 }
 for n, (color, cname) in TEAMS.items():
-    sel = f'@a[tag=sr_run,team=sr_t{n}]'
+    sel = f'@a[tag=sr_run,scores={{sr_team={n}}}]'
     def bar(zero):
         return tc([{'text': 'Team ' + cname, 'color': color, 'bold': True},
                    {'text': '  ·  ', 'color': 'gray'}, {'nbt': 'mode', 'storage': 'sr:run', 'interpret': True, 'color': 'white'},
@@ -694,7 +719,7 @@ for n, (color, cname) in TEAMS.items():
                     + tc([{'score': {'name': v, 'objective': 'sr'}, 'color': 'yellow'}, {'text': f'/{amount}', 'color': 'gray'}])]
         return out + [f'execute if score #sum sr matches {need}.. run return 1', 'return 0']
     def adv(a):
-        return [f'execute if entity @a[tag=sr_run,team=sr_t{n},advancements={{{a}=true}}] run return 1', 'return 0']
+        return [f'execute if entity @a[tag=sr_run,scores={{sr_team={n}}},advancements={{{a}=true}}] run return 1', 'return 0']
     def dim(d, a):
         return [f'execute as {sel} at @s if dimension {d} run return 1'] + adv(a)
     C = {
@@ -708,7 +733,7 @@ for n, (color, cname) in TEAMS.items():
         'blaze': sumc([('minecraft:blaze_rod', 2), ('minecraft:blaze_powder', 1), ('minecraft:ender_eye', 1)], 14, 'blaze'),
         'pearls': sumc([('minecraft:ender_pearl', 1), ('minecraft:ender_eye', 1)], 12, 'pearls'),
         'beds': sumc([('#minecraft:beds', 1)], 7, 'beds'),
-        'food': sumc([(f'minecraft:{f}', 1) for f in FOOD], 30, 'food'),
+        'food': sumc([(f'minecraft:{f}', 1) for f in FOOD], 20, 'food'),
         'eyes': sumc([('minecraft:ender_eye', 1)], 12, 'eyes'),
         'stronghold': adv('minecraft:story/follow_ender_eye'),
         'end': dim('minecraft:the_end', 'minecraft:story/enter_the_end'),
@@ -720,9 +745,10 @@ for n, (color, cname) in TEAMS.items():
              f'execute store result bossbar {NS}:t{n} value run scoreboard players get #t{n}_cnt sr',
              f'scoreboard players display name {key} sr_s{n} {tc({"text": "✔ " + label, "color": "green"})}',
              f'scoreboard players display numberformat {key} sr_s{n} fixed {tc({"text": "✔", "color": "green", "bold": True})}',
-             f'tellraw {sel} {tc([{"text": "✔ ", "color": "green", "bold": True}, {"text": label, "color": "white"}])}',
+             f'tellraw {sel} {tc([{"text": "✔ Team: ", "color": "dark_green", "bold": True}, {"text": label, "color": "gray"}])}',
              f'execute as {sel} at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 0.5 1.6',
-             f'execute if score #teams sr matches 2.. run tellraw @a[team=!sr_t{n}] {tc([{"text": "[" + cname + "] ", "color": color, "bold": True}, {"text": label, "color": "gray"}])}']
+             f'tag @a remove sr_cur2', f'tag {sel} add sr_cur2',
+             f'execute if score #teams sr matches 2.. run tellraw @a[tag=!sr_cur2] {tc([{"text": "[" + cname + "] ", "color": color, "bold": True}, {"text": label, "color": "gray"}])}']
         if key in SHARE:
             lbl, sel_share = SHARE[key]
             d += [f'data modify storage sr:run share.label set value "{lbl}"',
@@ -744,7 +770,7 @@ fn('run/end_watch', [
 ])
 gone = ['scoreboard players set #wn sr 0']
 for n in TEAMS:
-    gone.append(f'execute if score #wn sr matches 0 if entity @a[tag=sr_run,team=sr_t{n},advancements={{minecraft:end/kill_dragon=true}}] run scoreboard players set #wn sr {n}')
+    gone.append(f'execute if score #wn sr matches 0 if entity @a[tag=sr_run,scores={{sr_team={n}}},advancements={{minecraft:end/kill_dragon=true}}] run scoreboard players set #wn sr {n}')
 gone += ['execute if score #wn sr matches 0 in minecraft:the_end positioned 0 64 0 as @p[tag=sr_run,distance=..200] run scoreboard players operation #wn sr = @s sr_team',
          'execute if score #wn sr matches 0 run scoreboard players set #wn sr 1',
          'execute store result storage sr:run win.n int 1 run scoreboard players get #wn sr',
@@ -766,7 +792,7 @@ fin += ['scoreboard players operation #last sr = #ticks sr', f'function {NS}:hol
 tstr = lambda zero: [{'text': 'Zeit ', 'color': 'gray'}, {'score': {'name': '#min', 'objective': 'sr'}, 'color': 'white'},
                      {'text': ':0' if zero else ':', 'color': 'white'}, {'score': {'name': '#sec', 'objective': 'sr'}, 'color': 'white'}]
 for n, (color, cname) in TEAMS.items():
-    sel = f'@a[tag=sr_run,team=sr_t{n}]'
+    sel = f'@a[tag=sr_run,scores={{sr_team={n}}}]'
     fin += [
         f'execute if score #winner sr matches {n} if score #teams sr matches 2.. run title @a title {tc({"text": "Team " + cname + " gewinnt!", "color": color, "bold": True})}',
         f'execute if score #winner sr matches {n} if score #teams sr matches 1 run title @a title {tc({"text": "Drache besiegt!", "color": "gold", "bold": True})}',
@@ -867,6 +893,114 @@ fn('role/cycle', ['scoreboard players add @s sr_pref 1',
 fn('item/sweep', ['scoreboard players set #itick sr 0',
                   'execute as @e[type=minecraft:item] if items entity @s contents *[minecraft:custom_data~{sr_item:1b}] run kill @s',
                   'clear @a[tag=!sr_lobby] *[minecraft:custom_data~{sr_item:1b}]'])
+
+
+# ------------------------------------------------------------------ personal sidebars (one per player)
+slot = ['scoreboard players add #k sr 1', 'scoreboard players operation @s sr_slot = #k sr',
+        'execute store result storage sr:tmp s.k int 1 run scoreboard players get #k sr',
+        f'execute if score #k sr matches ..16 run function {NS}:start/slot_join with storage sr:tmp s']
+fn('start/slot', slot)
+sj = ['$team join sr_p$(k) @s']
+for n, (color, cname) in TEAMS.items():
+    sj.append(f'$execute if score @s sr_team matches {n} run team modify sr_p$(k) prefix {tc({"text": "[" + cname + "] ", "color": color})}')
+for k, color in SLOTS.items():
+    sj.append(f'execute if score @s sr_slot matches {k} run waypoint modify @s color {color}')
+fn('start/slot_join', sj)
+
+def p_store():
+    return ['execute store result storage sr:tmp p.k int 1 run scoreboard players get @s sr_slot',
+            'execute store result storage sr:tmp p.n int 1 run scoreboard players get @s sr_team']
+fn('p/init', p_store() + [f'execute if score @s sr_role matches {r} run return run function {NS}:p/init_r{r} with storage sr:tmp p' for r in STEPS])
+fn('p/second', p_store() + [f'execute if score @s sr_role matches {r} run return run function {NS}:p/r{r} with storage sr:tmp p' for r in STEPS])
+
+LBL = dict(TASKS)
+def cnt(key, who='@s', obj=None):
+    return [{'score': {'name': who, 'objective': obj or f'sr_v_{key}'}, 'color': 'yellow'}, {'text': f'/{NEED[key][0]}', 'color': 'gray'}]
+for r, steps in STEPS.items():
+    team_part = r != 0
+    init = ['$scoreboard players reset * sr_o$(k)',
+            f'$scoreboard objectives modify sr_o$(k) displayname {tc({"text": ROLES[r][0], "color": "yellow", "bold": True})}']
+    for i, (key, text) in enumerate(steps):
+        init += [f'$scoreboard players set s{i} sr_o$(k) {100 - i}',
+                 f'$scoreboard players display name s{i} sr_o$(k) {tc({"text": "☐ " + text, "color": "gray"})}']
+        if key in NEED:
+            init.append(f'$scoreboard players display numberformat s{i} sr_o$(k) fixed {tc({"text": "0/" + str(NEED[key][0]), "color": "gray"})}')
+    if team_part:
+        init += [f'$scoreboard players set g0 sr_o$(k) 50',
+                 f'$scoreboard players display name g0 sr_o$(k) {tc({"text": "── Team ──", "color": "dark_gray"})}']
+        for j, (key, label) in enumerate(TEAM_LINES):
+            init += [f'$scoreboard players set g{j + 1} sr_o$(k) {49 - j}',
+                     f'$scoreboard players display name g{j + 1} sr_o$(k) {tc({"text": label, "color": "gray"})}']
+    fn(f'p/init_r{r}', init)
+
+    up = ['scoreboard players set #found sr 0']
+    for i, (key, text) in enumerate(steps):
+        up.append(f'execute if score @s sr_d_{key} matches 0 if function {NS}:pc/{key} run function {NS}:pd/{key}')
+        bar = [{'text': '[' + ROLES[r][0] + '] ', 'color': 'yellow', 'bold': True},
+               {'text': f'Schritt {i + 1}/{len(steps)} ▸ ', 'color': 'gray', 'bold': False},
+               {'text': text, 'color': 'white', 'bold': False}]
+        if key in NEED:
+            bar += [{'text': '   ', 'bold': False}] + [dict(c, bold=False) for c in cnt(key)]
+        up += [
+            f'$execute if score @s sr_d_{key} matches 1 run scoreboard players display name s{i} sr_o$(k) {tc({"text": "✔ " + text, "color": "green"})}',
+            f'$execute if score @s sr_d_{key} matches 1 run scoreboard players display numberformat s{i} sr_o$(k) fixed {tc({"text": "✔", "color": "green", "bold": True})}',
+            f'$execute if score @s sr_d_{key} matches 0 if score #found sr matches 0 run scoreboard players display name s{i} sr_o$(k) {tc({"text": "▶ " + text, "color": "yellow", "bold": True})}',
+            f'execute if score @s sr_d_{key} matches 0 if score #found sr matches 0 run title @s actionbar {tc(bar)}',
+            f'$execute if score @s sr_d_{key} matches 0 if score #found sr matches 1 run scoreboard players display name s{i} sr_o$(k) {tc({"text": "☐ " + text, "color": "gray"})}',
+        ]
+        if key in NEED:
+            up.append(f'$execute if score @s sr_d_{key} matches 0 run scoreboard players display numberformat s{i} sr_o$(k) fixed {tc(cnt(key))}')
+        up.append(f'execute if score @s sr_d_{key} matches 0 run scoreboard players set #found sr 1')
+    up.append(f'execute if score #found sr matches 0 run title @s actionbar {tc([{"text": "[" + ROLES[r][0] + "] ", "color": "yellow", "bold": True}, {"text": "Alles erledigt – hilf deinem Team!", "color": "green", "bold": False}])}')
+    if team_part:
+        for j, (key, label) in enumerate(TEAM_LINES):
+            e = f'g{j + 1}'
+            up.append(f'$execute if score #t$(n)_{key} sr_done matches 1 run scoreboard players display numberformat {e} sr_o$(k) fixed {tc({"text": "✔", "color": "green", "bold": True})}')
+            if key in NEED:
+                up.append(f'$execute if score #t$(n)_{key} sr_done matches 0 run scoreboard players display numberformat {e} sr_o$(k) fixed ' +
+                          tc([{'score': {'name': '#t$(n)_v_' + key, 'objective': 'sr'}, 'color': 'yellow'}, {'text': f'/{NEED[key][0]}', 'color': 'gray'}]))
+            else:
+                up.append(f'$execute if score #t$(n)_{key} sr_done matches 0 run scoreboard players display numberformat {e} sr_o$(k) fixed {tc({"text": "–", "color": "dark_gray"})}')
+    for zero in (False, True):
+        t = [{'text': ROLES[r][0], 'color': 'yellow', 'bold': True}, {'text': '  ⏱ ', 'color': 'white', 'bold': False},
+             {'score': {'name': '#min', 'objective': 'sr'}, 'color': 'white', 'bold': False},
+             {'text': ':0' if zero else ':', 'color': 'white', 'bold': False},
+             {'score': {'name': '#sec', 'objective': 'sr'}, 'color': 'white', 'bold': False}]
+        up.append(f'$execute if score #sec sr matches {"..9" if zero else "10.."} run scoreboard objectives modify sr_o$(k) displayname {tc(t)}')
+    fn(f'p/r{r}', up)
+
+# personal conditions (run as the player, at the player)
+def inv(item, target='#a'):
+    return f'execute store result score {target} sr run clear @s {item} 0'
+PC = {
+    'gear': [inv('minecraft:shield'), 'execute if score #a sr matches 0 run return 0',
+             inv('minecraft:iron_sword', '#b'), inv('minecraft:diamond_sword', '#c'), inv('minecraft:netherite_sword', '#d'),
+             'scoreboard players operation #b sr += #c sr', 'scoreboard players operation #b sr += #d sr',
+             'execute if score #b sr matches 1.. run return 1', 'return 0'],
+    'tools': [inv('minecraft:flint_and_steel'), 'execute if score #a sr matches 0 run return 0',
+              inv('minecraft:bucket', '#b'), inv('minecraft:water_bucket', '#c'), inv('minecraft:lava_bucket', '#d'),
+              'scoreboard players operation #b sr += #c sr', 'scoreboard players operation #b sr += #d sr',
+              'execute if score #b sr matches 1.. run return 1', 'return 0'],
+    'nether': ['execute if dimension minecraft:the_nether run return 1',
+               'execute if entity @s[advancements={minecraft:story/enter_the_nether=true}] run return 1', 'return 0'],
+    'fortress': ['execute if entity @s[advancements={minecraft:nether/find_fortress=true}] run return 1', 'return 0'],
+    'bastion': ['execute if entity @s[advancements={minecraft:nether/find_bastion=true}] run return 1', 'return 0'],
+    'stronghold': ['execute if entity @s[advancements={minecraft:story/follow_ender_eye=true}] run return 1', 'return 0'],
+    'end': ['execute if dimension minecraft:the_end run return 1',
+            'execute if entity @s[advancements={minecraft:story/enter_the_end=true}] run return 1', 'return 0'],
+    'blaze': ['scoreboard players operation @s sr_v_blaze = @s sr_pu_blaze', 'execute if score @s sr_v_blaze matches 7.. run return 1', 'return 0'],
+    'pearls': ['scoreboard players operation @s sr_v_pearls = @s sr_pu_pearl', 'execute if score @s sr_v_pearls matches 12.. run return 1', 'return 0'],
+    'beds': ['execute store result score @s sr_v_beds run clear @s #minecraft:beds 0', 'execute if score @s sr_v_beds matches 7.. run return 1', 'return 0'],
+    'food': ['scoreboard players set @s sr_v_food 0', *[f'scoreboard players operation @s sr_v_food += @s sr_cr_f{i}' for i in range(len(FOOD))],
+             'execute if score @s sr_v_food matches 20.. run return 1', 'return 0'],
+    'eyes': ['scoreboard players operation @s sr_v_eyes = @s sr_cr_eye', 'execute if score @s sr_v_eyes matches 12.. run return 1', 'return 0'],
+    'dragon': ['execute if score #finished sr matches 1 run return 1', 'return 0'],
+}
+for key in STEP_KEYS:
+    fn(f'pc/{key}', PC[key])
+    fn(f'pd/{key}', [f'scoreboard players set @s sr_d_{key} 1',
+                     f'tellraw @s {tc([{"text": "✔ ", "color": "green", "bold": True}, {"text": "Dein Schritt erledigt: ", "color": "gray"}, {"text": LBL[key], "color": "white"}])}',
+                     'playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 0.8 1.2'])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
