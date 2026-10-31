@@ -20,12 +20,18 @@ Die Rollen werden automatisch nach Teamgröße vergeben. Wunschrollen werden zue
 - **3 Spieler:** Kämpfer / Portal & Perlen / Versorger
 - **4+ Spieler:** Kämpfer / Portal & Perlen / Versorger / Späher
 
-## Lobby-Insel (0 / 200 / 0)
-- Vorne: 4 Knöpfe für die Wunschrolle
-- Hinten links: **Modus wechseln**
-- Hinten Mitte: **Hebel = Run starten** (Countdown 5 s)
-- Hinten rechts: **Zuschauen an/aus**
-- Schwebeschrift: Titel, aktueller Modus, Bestzeiten pro Modus
+## Lobby (Insel bei 0 / 200 / 0)
+Jeder in der Lobby hat diese Items in der Hotbar (Rechtsklick):
+
+| Slot | Item | Funktion |
+| --- | --- | --- |
+| 1 | Netherstern | Run starten (Countdown 5 s) |
+| 2 | Uhr | Modus wechseln |
+| 3 | Kompass / Blaze-Rute / Perle / Bett / Enderauge | Wunschrolle wechseln |
+| 5 | Fernrohr | Zuschauen an/aus |
+| 9 | Buch | Speedrun-Menü |
+
+Die Items lassen sich nicht verlieren. Im Run sind sie weg. Über der Insel schweben Titel, aktueller Modus und Bestzeiten pro Modus.
 
 ## Während des Runs
 - Seitenleiste: Team-Checkliste mit 12 Aufgaben, die sich selbst abhaken

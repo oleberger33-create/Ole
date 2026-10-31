@@ -12,7 +12,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'speedrun')
 NS = 'sr'
-BUILD_VERSION = 2
+BUILD_VERSION = 3
 files = {}
 
 
@@ -125,6 +125,7 @@ load = [
     'scoreboard objectives add sr_pref dummy',
     'scoreboard objectives add sr_role dummy',
     'scoreboard objectives add sr_team dummy',
+    'scoreboard objectives add sr_click minecraft.used:minecraft.carrot_on_a_stick',
     f'scoreboard objectives add sr_wins dummy {tc({"text": "Siege", "color": "gold"})}',
     'scoreboard objectives setdisplay list sr_wins',
     f'scoreboard objectives add sr_lobby dummy {tc({"text": "SPEEDRUN", "color": "gold", "bold": True})}',
@@ -174,7 +175,9 @@ fn('tick', [
     f'execute as @a[scores={{sr_leave=1..}}] run function {NS}:player/rejoin',
     f'execute as @a[scores={{sr_rolle=1..}}] run function {NS}:role/pref',
     f'execute as @a[scores={{sr_aktion=1..}}] run function {NS}:player/action',
-    f'execute if score #built sr matches {BUILD_VERSION} run function {NS}:lobby/inputs',
+    f'execute as @a[scores={{sr_click=1..}}] run function {NS}:item/click',
+    'scoreboard players add #itick sr 1',
+    'execute if score #itick sr matches 10.. run function sr:item/sweep',
     f'execute as @a[tag=sr_lobby] run function {NS}:lobby/keep',
     f'execute if score #cd sr matches 1.. run function {NS}:start/cd_tick',
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
@@ -211,21 +214,6 @@ build += [f'{OW} {c}' for c in (
     # path ring + centre plate
     + ['fill -1 199 -1 1 199 1 minecraft:polished_andesite', 'setblock 0 199 0 minecraft:gold_block']
 )]
-for p, (name, block, color, x) in PREFS.items():
-    build += [f'{OW} setblock {x} 200 -4 minecraft:{block}',
-              f'{OW} setblock {x} 200 -3 minecraft:stone_button[face=wall,facing=south]',
-              sign(x, 201, -4, 0, [name, 'Wunschrolle', 'Knopf drücken'], color)]
-build += [
-    f'{OW} setblock -4 200 5 minecraft:yellow_concrete',
-    f'{OW} setblock -4 200 4 minecraft:stone_button[face=wall,facing=north]',
-    sign(-4, 201, 5, 8, ['Modus', 'wechseln', 'Knopf drücken'], 'yellow'),
-    f'{OW} setblock 0 200 5 minecraft:gold_block',
-    f'{OW} setblock 0 200 4 minecraft:lever[face=wall,facing=north,powered=false]',
-    sign(0, 201, 5, 8, ['RUN STARTEN', 'Hebel ziehen', 'Countdown 5 s'], 'green'),
-    f'{OW} setblock 4 200 5 minecraft:gray_concrete',
-    f'{OW} setblock 4 200 4 minecraft:stone_button[face=wall,facing=north]',
-    sign(4, 201, 5, 8, ['Zuschauen', 'an / aus', 'Knopf drücken'], 'aqua'),
-]
 for x, z in [(-8, -6), (8, -6), (-8, 6), (8, 6), (0, -9), (0, 9)]:
     build += [f'{OW} setblock {x} 200 {z} minecraft:oak_fence', f'{OW} setblock {x} 201 {z} minecraft:lantern']
 for x, z in [(-6, 2), (6, 2), (-3, 8), (3, -8), (-8, 0), (8, 0)]:
@@ -233,11 +221,10 @@ for x, z in [(-6, 2), (6, 2), (-3, 8), (3, -8), (-8, 0), (8, 0)]:
 build += [
     holo('sr_holo_title', 0, 205.0, -7, {'text': 'SPEEDRUN', 'color': 'gold', 'bold': True}, 4.0),
     holo('sr_holo_sub', 0, 204.2, -7, {'text': 'Wer killt den Drachen zuerst?', 'color': 'gray'}, 1.4),
+    holo('sr_holo_hint', 0, 201.6, -3, [{'text': 'Rechtsklick auf die Items in deiner Hotbar', 'color': 'white'}], 1.0),
     f'function {NS}:mode/apply_silent',
     f'function {NS}:holo/leaderboard',
     f'scoreboard players set #built sr {BUILD_VERSION}',
-    'scoreboard players set #lever sr 0',
-    *[f'scoreboard players set #b{i} sr 0' for i in range(1, 8)],
 ]
 fn('lobby/build', build)
 fn('lobby/try_build', [
@@ -245,26 +232,6 @@ fn('lobby/try_build', [
     f'schedule function {NS}:lobby/try_build 20t',
 ])
 
-# buttons: (id, x, z, facing-side z of button, action)
-buttons = [(p, x, -3, f'execute positioned {x} 200 -2 as @p[distance=..6] run scoreboard players set @s sr_rolle {p}') for p, (_, _, _, x) in PREFS.items()]
-buttons += [(5, -4, 4, 'execute positioned -4 200 3 as @p[distance=..6] run scoreboard players set @s sr_aktion 5'),
-            (6, 4, 4, 'execute positioned 4 200 3 as @p[distance=..6] run scoreboard players set @s sr_aktion 4')]
-inputs = []
-for i, x, z, action in buttons:
-    b = f'#b{i}'
-    inputs += [
-        f'execute in minecraft:overworld if block {x} 200 {z} minecraft:stone_button[powered=true] if score {b} sr matches 0 {action[len("execute "):]}',
-        f'execute in minecraft:overworld if block {x} 200 {z} minecraft:stone_button[powered=true] run scoreboard players set {b} sr 1',
-        f'execute in minecraft:overworld if block {x} 200 {z} minecraft:stone_button[powered=false] run scoreboard players set {b} sr 0',
-    ]
-inputs.append(f'execute in minecraft:overworld if block 0 200 4 minecraft:lever[powered=true] run function {NS}:lobby/lever')
-fn('lobby/inputs', inputs)
-fn('lobby/lever', [
-    f'{OW} setblock 0 200 4 minecraft:lever[face=wall,facing=north,powered=false]',
-    'execute in minecraft:overworld positioned 0 200 3 as @p[distance=..8] run tag @s add sr_starter',
-    f'function {NS}:start/request',
-    'tag @a remove sr_starter',
-])
 fn('lobby/keep', [
     'effect give @s minecraft:resistance infinite 4 true',
     'effect give @s minecraft:saturation infinite 0 true',
@@ -272,6 +239,8 @@ fn('lobby/keep', [
     f'execute at @s unless dimension minecraft:overworld run function {NS}:player/tp_lobby',
     f'execute at @s if dimension minecraft:overworld unless entity @s[y=185,dy=200] run function {NS}:player/tp_lobby',
     f'execute at @s if dimension minecraft:overworld unless entity @s[x=-40,dx=80,z=-40,dz=80] run function {NS}:player/tp_lobby',
+    f'execute if entity @s[tag=sr_refresh] run return run function {NS}:item/hotbar',
+    *[f'execute unless items entity @s hotbar.{slot} *[minecraft:custom_data~{{sr:"{key}"}}] run return run function {NS}:item/hotbar' for slot, key in ((0, 'start'), (1, 'mode'), (2, 'role'), (4, 'watch'), (8, 'menu'))],
 ])
 
 # holograms: mode line + leaderboard
@@ -286,6 +255,7 @@ for m, (name, size) in MODES.items():
 fn('mode/apply_silent', mode_apply)
 fn('mode/apply', [
     f'function {NS}:mode/apply_silent',
+    'tag @a[tag=sr_lobby] add sr_refresh',
     f'tellraw @a {msg({"text": "Modus: ", "color": "gray"}, {"nbt": "mode", "storage": "sr:run", "interpret": True, "color": "yellow", "bold": True})}',
     'execute as @a at @s run playsound minecraft:block.note_block.bell master @s ~ ~ ~ 0.8 1.2',
 ])
@@ -318,6 +288,7 @@ fn('player/to_lobby', [
     'gamemode adventure @s',
     f'function {NS}:player/tp_lobby',
     f'{OW} spawnpoint @s 0 200 0',
+    f'function {NS}:item/hotbar',
 ])
 fn('player/reset_state', [
     'clear @s',
@@ -356,7 +327,7 @@ fn('player/first_join', [
     f'function {NS}:player/to_lobby', f'function {NS}:player/welcome',
     'title @s times 10 50 15',
     f'title @s title {tc({"text": "SPEEDRUN", "color": "gold", "bold": True})}',
-    f'title @s subtitle {tc({"text": "Modus wählen · Hebel ziehen · Drache töten", "color": "gray"})}',
+    f'title @s subtitle {tc({"text": "Rechtsklick auf die Items in deiner Hotbar", "color": "gray"})}',
 ])
 fn('player/rejoin', [
     'scoreboard players set @s sr_leave 0',
@@ -380,9 +351,10 @@ fn('player/watch', [
     f'execute if score #active sr matches 1 unless entity @s[tag=sr_run] run return run function {NS}:player/spectate',
     f'execute if entity @s[tag=sr_watch] run return run function {NS}:player/watch_off',
     'tag @s add sr_watch',
+    'tag @s add sr_refresh',
     f'tellraw @s {msg({"text": "Du schaust beim nächsten Run zu. ", "color": "aqua"}, clk("[Doch mitspielen]", "/trigger sr_aktion set 4", "green"))}',
 ])
-fn('player/watch_off', ['tag @s remove sr_watch', f'tellraw @s {msg({"text": "Du spielst beim nächsten Run mit.", "color": "green"})}'])
+fn('player/watch_off', ['tag @s remove sr_watch', 'tag @s add sr_refresh', f'tellraw @s {msg({"text": "Du spielst beim nächsten Run mit.", "color": "green"})}'])
 fn('player/spectate', [
     'tag @s remove sr_lobby', 'tag @s add sr_spec', 'effect clear @s',
     'gamemode spectator @s',
@@ -395,6 +367,7 @@ fn('role/pref', [
     *[f'execute if score @s sr_rolle matches {p} run tellraw @s {msg({"text": "Wunschrolle: ", "color": "gray"}, {"text": name, "color": color, "bold": True}, {"text": " (zählt ab 3 Spielern pro Team)", "color": "dark_gray"})}'
       for p, (name, _, color, _) in PREFS.items()],
     'scoreboard players operation @s sr_pref = @s sr_rolle',
+    'tag @s add sr_refresh',
     'playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.4',
     'scoreboard players set @s sr_rolle 0',
 ])
@@ -712,16 +685,77 @@ fn('run/abort', [
 fn('run/abort_cd', ['scoreboard players set #cd sr 0', 'title @a clear',
                     f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " hat den Countdown abgebrochen.", "color": "red"})}'])
 
+
+# ------------------------------------------------------------------ hotbar items (right click)
+def citem(key, model, name, lore, glint=False):
+    comps = [f'minecraft:item_model="minecraft:{model}"',
+             f'minecraft:custom_name={tc(dict(name, italic=False))}',
+             'minecraft:lore=[' + ','.join(tc({'text': l, 'color': 'gray', 'italic': False}) for l in lore) + ']',
+             f'minecraft:custom_data={{sr_item:1b,sr:"{key}"}}',
+             'minecraft:unbreakable={}',
+             'minecraft:tooltip_display={hidden_components:["minecraft:unbreakable"]}',
+             'minecraft:use_cooldown={seconds:0.6f}']
+    if glint:
+        comps.append('minecraft:enchantment_glint_override=true')
+    return 'minecraft:carrot_on_a_stick[' + ','.join(comps) + ']'
+
+ROLE_ITEMS = {0: ('compass', 'egal', 'white', 'Rolle wird automatisch verteilt'),
+              1: ('blaze_rod', 'Kämpfer', 'gold', ROLES[1][1]),
+              2: ('ender_pearl', 'Portal & Perlen', 'light_purple', ROLES[2][1]),
+              3: ('red_bed', 'Versorger', 'green', ROLES[3][1]),
+              4: ('ender_eye', 'Späher', 'aqua', ROLES[4][1])}
+hb = ['tag @s remove sr_refresh',
+      'clear @s *[minecraft:custom_data~{sr_item:1b}]',
+      'item replace entity @s hotbar.0 with ' + citem('start', 'nether_star', {'text': '▶ RUN STARTEN', 'color': 'green', 'bold': True},
+                                                    ['Rechtsklick: Countdown für alle', 'die nicht zuschauen'], glint=True)]
+for m, (name, size) in MODES.items():
+    hb.append(f'execute if score #mode sr matches {m} run item replace entity @s hotbar.1 with ' +
+              citem('mode', 'clock', {'text': f'Modus: {name}', 'color': 'yellow', 'bold': True},
+                    [MODE_INFO[m], 'Rechtsklick: nächster Modus', 'Solo → Duo → Trio → Squad → Koop']))
+hb.append('execute unless score @s sr_pref matches 1..4 run scoreboard players set @s sr_pref 0')
+for p, (model, name, color, desc) in ROLE_ITEMS.items():
+    hb.append(f'execute if score @s sr_pref matches {p} run item replace entity @s hotbar.2 with ' +
+              citem('role', model, {'text': f'Wunschrolle: {name}', 'color': color, 'bold': True},
+                    [desc, 'Rechtsklick: nächste Rolle', 'Gilt ab 3 Spielern pro Team']))
+hb += [
+    'execute if entity @s[tag=sr_watch] run item replace entity @s hotbar.4 with ' +
+    citem('watch', 'spyglass', {'text': 'Zuschauen: AN', 'color': 'aqua', 'bold': True}, ['Du schaust beim nächsten Run zu', 'Rechtsklick: doch mitspielen']),
+    'execute unless entity @s[tag=sr_watch] run item replace entity @s hotbar.4 with ' +
+    citem('watch', 'spyglass', {'text': 'Zuschauen: AUS', 'color': 'gray', 'bold': True}, ['Du spielst beim nächsten Run mit', 'Rechtsklick: zuschauen', 'Läuft ein Run: sofort live zuschauen']),
+    'item replace entity @s hotbar.8 with ' + citem('menu', 'book', {'text': 'Speedrun-Menü', 'color': 'white', 'bold': True}, ['Rechtsklick: alle Optionen', 'auch über Esc → Speedrun-Menü']),
+]
+fn('item/hotbar', hb)
+fn('item/click', [
+    'scoreboard players set @s sr_click 0',
+    'execute unless entity @s[tag=sr_lobby] run return 0',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"start"}}] run return run function {NS}:start/by_player',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"mode"}}] run return run function {NS}:mode/cycle',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"role"}}] run return run function {NS}:role/cycle',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"watch"}}] run return run function {NS}:player/watch',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"menu"}}] run return run dialog show @s {NS}:menu',
+])
+fn('role/cycle', ['scoreboard players add @s sr_pref 1',
+                  'execute if score @s sr_pref matches 5.. run scoreboard players set @s sr_pref 0',
+                  'scoreboard players operation @s sr_rolle = @s sr_pref',
+                  f'execute if score @s sr_rolle matches 1.. run return run function {NS}:role/pref',
+                  'scoreboard players set @s sr_rolle 0', 'tag @s add sr_refresh',
+                  f'tellraw @s {msg({"text": "Wunschrolle: egal (wird automatisch verteilt)", "color": "gray"})}'])
+fn('item/sweep', ['scoreboard players set #itick sr 0',
+                  'execute as @e[type=minecraft:item] if items entity @s contents *[minecraft:custom_data~{sr_item:1b}] run kill @s',
+                  'clear @a[tag=!sr_lobby] *[minecraft:custom_data~{sr_item:1b}]'])
+
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
 rows = [
     ('a1', {'text': ' '}),
-    ('a2', [{'text': 'Modus: ', 'color': 'gray'}, {'text': 'Knopf links hinten', 'color': 'yellow'}]),
-    ('a3', [{'text': 'Start: ', 'color': 'gray'}, {'text': 'Hebel hinten', 'color': 'green'}]),
-    ('a4', [{'text': 'Rolle: ', 'color': 'gray'}, {'text': 'Knöpfe vorne', 'color': 'gold'}]),
-    ('a5', [{'text': 'Menü: ', 'color': 'gray'}, {'text': 'Esc → Speedrun', 'color': 'aqua'}]),
-    ('a6', {'text': '  '}),
-    ('a7', [{'text': 'Siege stehen in der ', 'color': 'dark_gray'}, {'text': 'Tab-Liste', 'color': 'gray'}]),
+    ('a2', [{'text': 'Hotbar-Items: ', 'color': 'gray'}, {'text': 'Rechtsklick', 'color': 'yellow'}]),
+    ('a3', [{'text': '1 ', 'color': 'dark_gray'}, {'text': 'Run starten', 'color': 'green'}]),
+    ('a4', [{'text': '2 ', 'color': 'dark_gray'}, {'text': 'Modus wechseln', 'color': 'yellow'}]),
+    ('a5', [{'text': '3 ', 'color': 'dark_gray'}, {'text': 'Wunschrolle', 'color': 'gold'}]),
+    ('a6', [{'text': '5 ', 'color': 'dark_gray'}, {'text': 'Zuschauen', 'color': 'aqua'}]),
+    ('a7', [{'text': '9 ', 'color': 'dark_gray'}, {'text': 'Menü', 'color': 'white'}]),
+    ('a8', {'text': '  '}),
+    ('a9', [{'text': 'Siege: ', 'color': 'dark_gray'}, {'text': 'Tab-Liste', 'color': 'gray'}]),
 ]
 for i, (e, t) in enumerate(rows):
     lob += [f'scoreboard players set {e} sr_lobby {len(rows) - i}', f'scoreboard players display name {e} sr_lobby {tc(t)}']
