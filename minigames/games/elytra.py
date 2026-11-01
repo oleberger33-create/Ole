@@ -452,13 +452,15 @@ _game = [
     f'execute if score #elytra_t mg matches {_GO} run function {NS}:elytra/go',
     f'execute as @e[type=minecraft:player,tag={_AL},tag=!mg_elytra_fin] run function {NS}:elytra/pl',   # @e: only living players
     *_ring_checks,
+    # a solo finish ends the round inside the ring checks: stop here, so the HUD does not overwrite the record actionbar
+    # and the multiplayer end checks below do not run in the same tick
+    f'execute unless score #{_K} mg matches 2 run return 0',
     'scoreboard players operation #elytra_m mg = #elytra_t mg', 'scoreboard players operation #elytra_m mg %= #4 mg',
     f'execute if score #elytra_m mg matches 0 if score #elytra_t mg matches {_GO}.. run function {NS}:elytra/hud',
     f'execute if score #elytra_m mg matches 2 run {OW} kill @e[type=minecraft:item,x={EX - 62},y=90,z={EZ - 62},dx=124,dy=115,dz=124]',
     'execute if score #elytra_place mg matches 1.. run scoreboard players operation #elytra_r2 mg = #elytra_dl mg',
     'execute if score #elytra_place mg matches 1.. run scoreboard players operation #elytra_r2 mg -= #elytra_t mg',
     *_warn,
-    f'execute unless score #{_K} mg matches 2 run return 0',
     f'execute unless entity @a[tag={_T}] run return run function {NS}:elytra/end_go',
     f'execute if score #elytra_place mg matches 1.. unless entity {_RACE} run return run function {NS}:elytra/end_go',
     f'execute if score #elytra_place mg matches 1.. if score #elytra_r2 mg matches ..0 run return run function {NS}:elytra/end_late',

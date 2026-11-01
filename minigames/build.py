@@ -634,7 +634,7 @@ fn('hub/click', [
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"info"}}] run return run function {NS}:hub/info',
 ])
 fn('hub/info', [f'tellraw @s {msg({"text": "Spielregeln", "color": "gold", "bold": True})}',
-                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": "Jeder springt auf seiner eigenen Strecke: 24 schwebende Inseln mit Sprung-Modulen auf einer von 5 Maps. Auf jeder Insel wartet eine Truhe – je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind. Nach 15 Minuten (oder 30 s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt.", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": "Jeder springt auf seiner eigenen Strecke: 24 schwebende Inseln mit Sprung-Modulen auf einer von 5 Maps. Auf jeder Insel wartet eine Truhe – je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind. Nach 15 Minuten (oder 30 s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt. Auch solo: Bist du alleine in der Lobby, ist es ein Zeitrennen über alle 24 Inseln – deine Bestzeit wird gespeichert.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " 1v1 (Item 3): ", "color": "red", "bold": True}, {"text": "Sumo, Spleef, Duell, Windstoß, Knockback-Stock, Ein Pfeil, Streitkolben, Brücken-Duell, Steigende Lava, Fallender Boden, Boxen, Pferderennen, Parkour-Duell. Modus anklicken = Warteschlange, sobald ein Gegner da ist geht es los.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " BedWars: ", "color": "red", "bold": True}, {"text": "Bis zu 4 Teams. Eisen und Gold kommen am Team-Generator, Diamanten auf den Ecken-Inseln, Smaragde in der Mitte. Beim Dorfbewohner kaufst du Wolle, Waffen, Rüstung und Spitzhacken. Solange dein Bett steht, respawnst du – zerstör die Betten der anderen!", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " SkyWars: ", "color": "aqua", "bold": True}, {"text": "Jeder startet in einem Glaskäfig auf seiner Insel. Truhen plündern, Brücken bauen, die Mitte hat den besten Loot. Wer zuletzt lebt, gewinnt.", "color": "white"}])}',
@@ -755,12 +755,14 @@ INQ = []   # filled at the end (all queue tags known)
 fn('rush/request', [
     'scoreboard players set #n mg 0',
     f'execute as @a[tag=mg_hub] unless function {NS}:q/inq run scoreboard players add #n mg 1',
-    f'execute if score #n mg matches ..1 run return run tellraw @s {msg({"text": "Für Parkour-Rush braucht ihr mindestens 2 Spieler in der Lobby.", "color": "red"})}',
     f'execute unless score #lanes mg matches {BUILD_VERSION} run return run tellraw @s {msg({"text": "Die Strecken werden noch gebaut (", "color": "red"}, {"score": {"name": "#lanes_done", "objective": "mg"}, "color": "white"}, {"text": f"/{len(JOBS)}). Gleich fertig!", "color": "red"})}',
     f'execute if score #rush mg matches 1.. run return run tellraw @s {msg({"text": "Parkour-Rush läuft schon.", "color": "red"})}',
+    f'execute if score #n mg matches ..0 run return run tellraw @s {msg({"text": "Verlass zuerst deine Warteschlange (Barriere-Item), um Parkour-Rush zu spielen.", "color": "red"})}',
     f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " startet ", "color": "gray"}, {"text": "PARKOUR-RUSH", "color": "green", "bold": True}, {"text": " für alle in der Lobby!", "color": "gray"})}',
     'scoreboard players set #rush mg 1', 'scoreboard players set #cd mg 5', 'scoreboard players set #cdt mg 0',
-    'scoreboard players set #L mg 0', 'scoreboard players set @a mg_lane 0',
+    'execute if score #n mg matches 1 run scoreboard players set #cd mg 15',
+    f'execute if score #n mg matches 1 as @a[tag=mg_hub] unless function {NS}:q/inq run tellraw @s {msg({"text": "Solo-Zeitrennen: Schaff alle 24 Inseln so schnell du kannst – deine Bestzeit wird gespeichert. Wer in den nächsten 15 Sekunden in der Lobby ist, spielt mit.", "color": "gray"})}',
+    'scoreboard players set #L mg 0', 'scoreboard players reset * mg_lane', 'scoreboard players set @a mg_lane 0',
     f'execute as @a[tag=mg_hub] unless function {NS}:q/inq run function {NS}:rush/lane_assign',
     f'execute as @a[tag=mg_hub] if function {NS}:q/inq run tellraw @s {msg({"text": "Du bist in einer Warteschlange und bleibst deshalb draußen. Verlass sie mit dem Barriere-Item, um mitzumachen.", "color": "gray"})}',
     f'function {NS}:rush/cd_show',
@@ -778,7 +780,7 @@ fn('rush/cd_tick', ['scoreboard players add #cdt mg 1',
                     f'execute if score #cd mg matches ..0 run return run function {NS}:rush/start',
                     f'execute if score #cdt mg matches 0 run function {NS}:rush/cd_show'])
 start = [
-    f'execute as @a[tag=mg_hub,scores={{mg_lane=0}}] unless function {NS}:q/inq run function {NS}:rush/lane_assign',
+    f'execute as @a[tag=mg_hub] unless score @s mg_lane matches 1.. unless function {NS}:q/inq run function {NS}:rush/lane_assign',   # also players who joined during the countdown
     f'execute as @a[tag=mg_hub,scores={{mg_lane=1..}}] unless function {NS}:q/inq run tag @s add mg_rush', 'tag @a[tag=mg_rush] remove mg_hub',
     f'execute as @a[tag=mg_rush] run function {NS}:q/leave_all',
     'clear @a[tag=mg_rush]', 'effect clear @a[tag=mg_rush]', 'gamemode adventure @a[tag=mg_rush]',
@@ -801,11 +803,16 @@ start += [
     'effect give @a[tag=mg_rush] minecraft:resistance infinite 4 true',
     'scoreboard players set #rush mg 2', 'scoreboard players set #t mg 0', f'scoreboard players set #left mg {RUSH_TIME}',
     'scoreboard players set #finished mg 0',
+    'execute store result score #rush_np mg if entity @a[tag=mg_rush]', 'scoreboard players set #rush_tt mg 0',
+    f'bossbar set {NS}:rush name {tc({"text": "Parkour-Rush", "color": "green", "bold": True})}',
     f'bossbar set {NS}:rush players @a[tag=mg_rush]', f'bossbar set {NS}:rush visible true', f'bossbar set {NS}:rush max {RUSH_TIME}',
     'title @a[tag=mg_rush] times 5 50 10',
     f'title @a[tag=mg_rush] title {tc({"text": "LOS!", "color": "green", "bold": True})}',
     *[f'execute if score #map mg matches {mi + 1} run title @a[tag=mg_rush] subtitle ' + tc([{'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' · 24 Inseln', 'color': 'white'}]) for mi, t in enumerate(THEMES)],
-    *[f'execute if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' – jeder hat seine eigene Strecke. Auf jeder Insel wartet eine Truhe, je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind.', 'color': 'gray'}) for mi, t in enumerate(THEMES)],
+    *[f'execute if score #rush_np mg matches 2.. if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' – jeder hat seine eigene Strecke. Auf jeder Insel wartet eine Truhe, je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind.', 'color': 'gray'}) for mi, t in enumerate(THEMES)],
+    *[f'execute if score #rush_np mg matches ..1 if score #map mg matches {mi + 1} run title @a[tag=mg_rush] subtitle ' + tc([{'text': 'Solo-Zeitrennen · ', 'color': 'aqua'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' · 24 Inseln', 'color': 'white'}]) for mi, t in enumerate(THEMES)],
+    *[f'execute if score #rush_np mg matches ..1 if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' – Solo-Zeitrennen: Schaff alle 24 Inseln in 15 Minuten, so schnell du kannst. Deine Zeit zählt als persönlicher Rekord. Keine Arena.', 'color': 'gray'}) for mi, t in enumerate(THEMES)],
+    f'execute if score #rush_np mg matches ..1 run tellraw @a[tag=mg_rush] ' + tc([{'text': '  '}, {'text': '[Spiel verlassen]', 'color': 'red', 'click_event': {'action': 'run_command', 'command': '/trigger mg_aktion set 99'}}]),
     'execute as @a[tag=mg_rush] at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1',
 ]
 fn('rush/start', start)
@@ -814,6 +821,7 @@ fn('rush/tick', [
     'execute unless score #rush mg matches 2.. run return 0',
     f'execute if score #rush mg matches 2 run function {NS}:rush/parkour_tick',
     f'execute if score #rush mg matches 3 run function {NS}:rush/arena_tick',
+    f'execute if score #rush mg matches 4 run function {NS}:rush/solo_wait',
 ])
 fn('rush/parkour_tick', [
     *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush,scores={{mg_lane={L}}}] in minecraft:overworld positioned {map_x(mi)} {Y} {lane_z(L)} run function {NS}:rush/cp_m{mi + 1}'
@@ -822,14 +830,15 @@ fn('rush/parkour_tick', [
       for mi, m in enumerate(MAPGEN)],
     'execute as @a[tag=mg_rush] at @s if block ~ ~-1 ~ minecraft:emerald_block run effect give @s minecraft:jump_boost 8 1 true',
     'execute as @a[tag=mg_rush] at @s if block ~ ~-1 ~ minecraft:redstone_block run effect give @s minecraft:speed 6 1 true',
-    'scoreboard players add #t mg 1',
+    'scoreboard players add #t mg 1', 'scoreboard players add #rush_tt mg 1',
     f'execute if score #t mg matches 20.. run function {NS}:rush/second',
 ])
 reach_common = [
     '$scoreboard players set @s mg_cp $(n)',
     'scoreboard players operation @s mg_prog = @s mg_cp',
     '$scoreboard players set @s mg_cx $(cx)', '$scoreboard players set @s mg_cy $(cy)',
-    'scoreboard players operation @s mg_cz = @s mg_lane', 'scoreboard players operation @s mg_cz *= #1000 mg', '$scoreboard players add @s mg_cz $(cz)',
+    'scoreboard players operation @s mg_cz = @s mg_lane', 'scoreboard players operation @s mg_cz *= #1000 mg',
+    '$scoreboard players set #rush_cz mg $(cz)', 'scoreboard players operation @s mg_cz += #rush_cz mg',   # cz can be negative: 'players add' only takes 0.. (macro would fail -> island never counts)
     '$execute positioned ~$(r) ~1 ~$(r) run spawnpoint @s ~ ~ ~',
     '$setblock ~$(ax) ~$(ay) ~$(az) minecraft:chest[facing=west]{LootTable:"mg:$(tier)"}',
 ]
@@ -851,6 +860,7 @@ fn('rush/back', [
 ])
 fn('rush/back_tp', ['$execute in minecraft:overworld run tp @s $(x).5 $(y) $(z).5'])
 fn('rush/finish_player', [
+    f'execute if score #rush_np mg matches ..1 run return run function {NS}:rush/solo_finish',
     'title @s times 5 40 10',
     f'title @s title {tc({"text": "ZIEL!", "color": "aqua", "bold": True})}',
     f'title @s subtitle {tc({"text": "Hol dir die 2 Truhen!", "color": "gold"})}',
@@ -859,8 +869,8 @@ fn('rush/finish_player', [
     'scoreboard players set #finished mg 1',
     f'tellraw @a[tag=mg_rush] {msg({"selector": "@s", "color": "aqua", "bold": True}, {"text": " ist im Ziel! ", "color": "white"}, {"text": "Arena in ", "color": "gray"}, {"score": {"name": "#left", "objective": "mg"}, "color": "red"}, {"text": " Sekunden!", "color": "gray"})}',
 ])
-def tbar(zero):
-    return tc([{'text': 'Parkour-Rush', 'color': 'green', 'bold': True}, {'text': '   Arena in ', 'color': 'white'},
+def tbar(zero, solo=False):
+    return tc([{'text': 'Parkour-Rush', 'color': 'green', 'bold': True}, {'text': '   Solo · Restzeit ' if solo else '   Arena in ', 'color': 'white'},
                {'score': {'name': '#lm', 'objective': 'mg'}, 'color': 'white'}, {'text': ':0' if zero else ':', 'color': 'white'},
                {'score': {'name': '#ls', 'objective': 'mg'}, 'color': 'white'}])
 TD = {'Himmel': 'birch_trapdoor', 'Nether': 'crimson_trapdoor', 'Eis': 'spruce_trapdoor', 'Dschungel': 'jungle_trapdoor'}
@@ -870,17 +880,35 @@ fn('rush/second', [
     'scoreboard players set #t mg 0', 'scoreboard players remove #left mg 1',
     'scoreboard players operation #lm mg = #left mg', 'scoreboard players operation #lm mg /= #60 mg',
     'scoreboard players operation #ls mg = #left mg', 'scoreboard players operation #ls mg %= #60 mg',
-    f'execute if score #ls mg matches 10.. run bossbar set {NS}:rush name {tbar(False)}',
-    f'execute if score #ls mg matches ..9 run bossbar set {NS}:rush name {tbar(True)}',
+    f'execute if score #rush_np mg matches 2.. if score #ls mg matches 10.. run bossbar set {NS}:rush name {tbar(False)}',
+    f'execute if score #rush_np mg matches 2.. if score #ls mg matches ..9 run bossbar set {NS}:rush name {tbar(True)}',
+    f'execute if score #rush_np mg matches ..1 if score #ls mg matches 10.. run bossbar set {NS}:rush name {tbar(False, True)}',
+    f'execute if score #rush_np mg matches ..1 if score #ls mg matches ..9 run bossbar set {NS}:rush name {tbar(True, True)}',
     f'execute store result bossbar {NS}:rush value run scoreboard players get #left mg',
     f'bossbar set {NS}:rush players @a[tag=mg_rush]',
     f'execute as @a[tag=mg_rush,scores={{mg_cp=..{NCP - 1}}}] run title @s actionbar [{{"text":"Insel ","color":"gray"}},{{"score":{{"name":"@s","objective":"mg_cp"}},"color":"yellow","bold":true}},{{"text":"/{NCP}","color":"gray"}}]',
     'execute if score #left mg matches 1..5 as @a[tag=mg_rush] at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.5',
-    'execute if score #left mg matches 60 run tellraw @a[tag=mg_rush] ' + msg({'text': 'Noch 1 Minute bis zur Arena!', 'color': 'red', 'bold': True}),
+    'execute if score #left mg matches 60 if score #rush_np mg matches 2.. run tellraw @a[tag=mg_rush] ' + msg({'text': 'Noch 1 Minute bis zur Arena!', 'color': 'red', 'bold': True}),
+    'execute if score #left mg matches 60 if score #rush_np mg matches ..1 run tellraw @a[tag=mg_rush] ' + msg({'text': 'Noch 1 Minute!', 'color': 'red', 'bold': True}),
     f'execute unless entity @a[tag=mg_rush] run return run function {NS}:rush/stop',
+    f'execute if score #left mg matches ..0 if score #rush_np mg matches ..1 run return run function {NS}:rush/solo_timeout',
     f'execute if score #left mg matches ..0 run function {NS}:rush/to_arena',
 ])
 
+fn('rush/solo_timeout', [
+    'scoreboard players set #rush mg 4', 'scoreboard players set #rush_et mg 0',
+    'title @a[tag=mg_rush] times 5 60 15',
+    f'title @a[tag=mg_rush] title {tc({"text": "Zeit um!", "color": "red", "bold": True})}',
+    f'execute as @a[tag=mg_rush] run title @s subtitle [{{"text":"Insel ","color":"gray"}},{{"score":{{"name":"@s","objective":"mg_cp"}},"color":"yellow","bold":true}},{{"text":"/{NCP} erreicht","color":"gray"}}]',
+    f'execute as @a[tag=mg_rush] run tellraw @s {msg({"text": "Zeit um! Du hast Insel ", "color": "gray"}, {"score": {"name": "@s", "objective": "mg_cp"}, "color": "yellow", "bold": True}, {"text": f"/{NCP} erreicht. Für eine Bestzeit musst du alle {NCP} Inseln schaffen.", "color": "gray"})}',
+    f'bossbar set {NS}:rush name {tc({"text": "Solo-Zeitrennen vorbei", "color": "red", "bold": True})}', f'bossbar set {NS}:rush color red',
+    'execute as @a[tag=mg_rush] at @s run playsound minecraft:block.note_block.bass master @s ~ ~ ~ 1 0.7',
+])
+fn('rush/solo_wait', [
+    'scoreboard players add #rush_et mg 1',
+    f'execute unless entity @a[tag=mg_rush] run return run function {NS}:rush/stop',
+    f'execute if score #rush_et mg matches 100.. run function {NS}:rush/stop',
+])
 fn('rush/to_arena', [
     f'{OW} kill @e[type=minecraft:ender_pearl,x={map_x(0) - 20},dx={map_x(len(THEMES) - 1) - map_x(0) + MAXLEN + 40},y={Y - 40},dy=110,z={lane_z(1) - 60},dz={lane_z(LANES) - lane_z(1) + 120}]',
     f'{OW} kill @e[type=minecraft:item,x={map_x(0) - 20},dx={map_x(len(THEMES) - 1) - map_x(0) + MAXLEN + 40},y={Y - 40},dy=110,z={lane_z(1) - 60},dz={lane_z(LANES) - lane_z(1) + 120}]',
@@ -1702,7 +1730,7 @@ WATCHDOG = []       # extra lines for hub/watchdog (run every 10 ticks): send pl
 def register_game(key, name, color, prof, trig, action, sub, menu, guard=None):
     GAMES.append(dict(key=key, name=name, color=color, prof=prof, trig=trig, action=action, sub=sub, menu=menu, guard=guard))
 SF_IDX = MODES.index('stickbett') + 1
-register_game('rush', 'Parkour-Rush', 'green', 'farmer', 50, f'function {NS}:rush/request', '24 Inseln · Truhen · Arena', '24 Inseln, Loot, Arena')
+register_game('rush', 'Parkour-Rush', 'green', 'farmer', 50, f'function {NS}:rush/request', '24 Inseln · Arena · auch solo', '24 Inseln, Loot, Arena, auch solo')
 register_game('bw', 'BedWars', 'red', 'weaponsmith', 51, f'function {NS}:bw/toggle', 'Teams · Betten · Händler', 'bis 4 Teams', 'mg_q_bw')
 register_game('sw', 'SkyWars', 'aqua', 'cartographer', 52, f'function {NS}:sw/toggle', 'Inseln · Truhen · Letzter gewinnt', 'bis 8 Spieler', 'mg_q_sw')
 register_game('sf', 'Stick-Fight Bett', 'yellow', 'fletcher', SF_IDX, f'function {NS}:q/toggle_stickbett', '1v1 · Bett abbauen · bis 5', '1v1, Bett abbauen', 'mg_q_stickbett')
@@ -1722,7 +1750,7 @@ def pb_txt(p, color='white'):
     """text components for a value formatted by pb_fmt"""
     S = lambda n: {'score': {'name': f'#{p}_{n}', 'objective': 'mg'}, 'color': color, 'bold': True}
     return [S('m'), {'text': ':', 'color': color, 'bold': True}, S('s10'), S('s1'), {'text': '.', 'color': color, 'bold': True}, S('d')]
-def pb_register(key, name, color, label='Bestzeit', unit='time', lower=True):
+def pb_register(key, name, color, label='Bestzeit', unit='time', lower=True, unit_one=None):
     """Creates function mg:<key>/pb: run as a player with the new value in #pbv mg.  Announces it, stores a new record and
     sets #pbn mg to 1 if it was a new record (0 otherwise), so the caller can give a bonus.  unit 'time' (ticks) or a word."""
     PB_GAMES.append((key, name, color, label, unit, lower))
@@ -1732,10 +1760,15 @@ def pb_register(key, name, color, label='Bestzeit', unit='time', lower=True):
     if unit == 'time':
         cur, old = pb_txt('pa', 'yellow'), pb_txt('pb', 'gold')
         prep = pb_fmt('#pbv mg', 'pa') + pb_fmt(f'@s {obj}', 'pb')
-    else:
-        cur = [{'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' ' + unit, 'color': 'yellow'}]
-        old = [{'score': {'name': '@s', 'objective': obj}, 'color': 'gold', 'bold': True}, {'text': ' ' + unit, 'color': 'gold'}]
-        prep = []
+    else:   # count: singular word when the value is 1 (e.g. 1 Runde / 7 Runden)
+        one = unit_one or {'Runden': 'Runde', 'Level': 'Level', 'Punkte': 'Punkt'}.get(unit, unit)
+        cur = [{'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' ', 'color': 'yellow'},
+               {'nbt': 'u1', 'storage': f'{NS}:pb', 'interpret': True, 'color': 'yellow'}]
+        old = [{'score': {'name': '@s', 'objective': obj}, 'color': 'gold', 'bold': True}, {'text': ' ', 'color': 'gold'},
+               {'nbt': 'u2', 'storage': f'{NS}:pb', 'interpret': True, 'color': 'gold'}]
+        prep = [f'data modify storage {NS}:pb u1 set value "{unit}"', f'data modify storage {NS}:pb u2 set value "{unit}"',
+                f'execute if score #pbv mg matches 1 run data modify storage {NS}:pb u1 set value "{one}"',
+                f'execute if score @s {obj} matches 1 run data modify storage {NS}:pb u2 set value "{one}"']
     fn(f'{key}/pb', [
         'scoreboard players set #pbn mg 0',
         f'execute unless score @s {obj} matches 1.. run scoreboard players set #pbn mg 1',
@@ -1747,6 +1780,25 @@ def pb_register(key, name, color, label='Bestzeit', unit='time', lower=True):
         f'execute if score #pbn mg matches 1 run tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": f" – neuer persönlicher Rekord in {name}: ", "color": "gray"}, *cur)}',
         f'execute if score #pbn mg matches 1 run title @s actionbar {tc([{"text": "★ NEUER REKORD ★  ", "color": "gold", "bold": True}] + cur)}',
         'execute if score #pbn mg matches 1 at @s run playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1.3'])
+
+# ---- Parkour-Rush solo time trial (uses pb_register / pb_fmt, so it lives here; the rest of rush is above)
+pb_register('rush', 'Parkour-Rush', 'green')
+fn('rush/solo_finish', [      # as the player who reached the last island in a solo run
+    'scoreboard players set #rush mg 4', 'scoreboard players set #rush_et mg 0',
+    'scoreboard players operation #pbv mg = #rush_tt mg',
+    *pb_fmt('#rush_tt mg', 'rz'),
+    'title @s times 5 70 15',
+    f'title @s title {tc({"text": "ZIEL!", "color": "aqua", "bold": True})}',
+    f'title @s subtitle {tc([{"text": "Zeit: ", "color": "gray"}] + pb_txt("rz", "yellow"))}',
+    f'tellraw @s {msg({"text": f"Geschafft! Alle {NCP} Inseln in ", "color": "gray"}, *pb_txt("rz", "yellow"), {"text": ".", "color": "gray"})}',
+    f'function {NS}:rush/pb',
+    'scoreboard players add @s mg_coins 3',
+    'execute if score #pbn mg matches 1 run scoreboard players add @s mg_coins 5',
+    f'execute if score #pbn mg matches 0 run tellraw @s {msg({"text": "+3 Münzen", "color": "yellow"})}',
+    f'execute if score #pbn mg matches 1 run tellraw @s {msg({"text": "+3 Münzen, +5 Rekord-Bonus", "color": "yellow"})}',
+    f'bossbar set {NS}:rush name {tc({"text": "Solo-Zeitrennen geschafft!", "color": "aqua", "bold": True})}',
+    'playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1.2',
+])
 
 def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp=16, size=48, build=(), setup=(), game=(),
           cleanup=(), spect=None, custom_end=False, title_sub='', coins_win=10, solo=False, solo_end=()):

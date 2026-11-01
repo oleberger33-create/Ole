@@ -1,5 +1,8 @@
 # Farbenparty (block party): a 32x32 floor of coloured concrete tiles. Music plays, then a colour is announced -
 # get onto a tile of that colour before the countdown ends, everything else vanishes. Last one standing wins.
+# Solo run (1 starter, #farben_np 1 from the framework): play until you fall; the rounds survived are a personal record
+# (mg_farben_pb, higher is better). No revive / no elimination coins in solo; +2 coins from 5 rounds, +2 bonus when a
+# new record reaches a new 5-round step.  (#farben_nx = temp for the next floor pattern; #farben_np belongs to the framework)
 FB = (72000, Y, 0)
 _cx, _cy, _cz = FB
 _X0, _Z0 = _cx - 16, _cz - 16          # floor: 32x32 blocks = 16x16 tiles of 2x2, x/z _X0.._X0+31
@@ -169,10 +172,10 @@ _BB = f'bossbar set {NS}:farben'
 fn('farben/round', [
     'scoreboard players add #farben_r mg 1', 'scoreboard players set #farben_ph mg 0', 'scoreboard players set #farben_m mg -1',
     'execute store result score #farben_pt mg run random value 50..110',
-    f'execute store result score #farben_np mg run random value 0..{len(_PATTERNS) - 1}',
-    'execute if score #farben_np mg = #farben_p mg run scoreboard players add #farben_np mg 1',
-    f'execute if score #farben_np mg matches {len(_PATTERNS)}.. run scoreboard players set #farben_np mg 0',
-    'scoreboard players operation #farben_p mg = #farben_np mg',
+    f'execute store result score #farben_nx mg run random value 0..{len(_PATTERNS) - 1}',
+    'execute if score #farben_nx mg = #farben_p mg run scoreboard players add #farben_nx mg 1',
+    f'execute if score #farben_nx mg matches {len(_PATTERNS)}.. run scoreboard players set #farben_nx mg 0',
+    'scoreboard players operation #farben_p mg = #farben_nx mg',
     f'execute store result score #farben_pl mg run random value 0..{len(_PAL) - 2}',
     f'execute if score #farben_r mg matches 6.. store result score #farben_pl mg run random value 0..{len(_PAL) - 1}',
     f'function {NS}:farben/pal', f'function {NS}:farben/pat',
@@ -262,11 +265,12 @@ fn('farben/eval', [
     # anyone no longer standing on the floor (feet below y 100.95, e.g. knocked off late in the hold) is out before scoring -
     # otherwise they would count as a survivor and then fall through the rebuilt floor in the next round
     f'execute as @a[tag={_AL}] at @s if entity @s[y=-64,dy={_cy + 64 - 0.05}] run function {NS}:farben/fall',
+    f'execute if score #farben_np mg matches ..1 unless entity @a[tag={_AL}] run return run function {NS}:farben/solo_over',
     f'execute store result score #farben_n mg if entity @a[tag={_AL}]',
     f'execute if score #farben_n mg matches 0 if entity @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/revive',
     f'execute store result score #farben_n mg if entity @a[tag={_AL}]',
     f'execute as @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/elim',
-    f'execute if score #farben_n mg matches ..1 run return run function {NS}:farben/end',
+    f'execute if score #farben_np mg matches 2.. if score #farben_n mg matches ..1 run return run function {NS}:farben/end',
     f'execute as @a[tag={_AL}] at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 0.6 1.4',
     f'function {NS}:farben/round',
     f'execute if entity @a[tag=mg_farben_rev] run function {NS}:farben/revive2',
@@ -275,6 +279,8 @@ _game = [
     # falling below the floor = out (no death screen); deaths of any other kind count too
     f'execute as @a[tag={_AL}] at @s if entity @s[y=-64,dy={_cy - 4 + 64}] run function {NS}:farben/fall',
     f'execute as @a[tag={_AL},scores={{mg_deaths=1..}}] run function {NS}:farben/fall',
+    # solo: the player fell (or left with trigger 99) -> result + record, end
+    f'execute if score #farben_np mg matches ..1 unless entity @a[tag={_AL}] run return run function {NS}:farben/solo_over',
     'scoreboard players remove #farben_pt mg 1',
     f'execute if score #farben_ph mg matches 3 if score #farben_pt mg matches ..0 run function {NS}:farben/round',
     f'execute if score #farben_ph mg matches 0 run function {NS}:farben/music',
@@ -284,7 +290,7 @@ _game = [
     f'execute if score #farben_ph mg matches 2 if score #farben_pt mg matches ..0 run function {NS}:farben/eval',
     # someone left (trigger 99) and at most one player is left -> end (unless a fall is still being decided)
     f'execute store result score #farben_n mg if entity @a[tag={_AL}]',
-    f'execute if score #farben mg matches 2 if score #farben_n mg matches ..1 unless entity @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/end',
+    f'execute if score #farben mg matches 2 if score #farben_np mg matches 2.. if score #farben_n mg matches ..1 unless entity @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/end',
     'scoreboard players operation #m mg = #farben_t mg', 'scoreboard players operation #m mg %= #5 mg',
     f'execute if score #m mg matches 0 run {_BB} players @a[tag={_T}]',
     f'execute if score #m mg matches 0 run {_BB} visible true',
@@ -298,11 +304,55 @@ _setup = [
     f'tag @a[tag={_T}] remove mg_farben_fell', f'tag @a[tag={_T}] remove mg_farben_rev',
     f'{_BB} name {tc({"text": "Farbenparty – gleich geht es los!", "color": "light_purple", "bold": True})}',
     f'{_BB} color pink', f'{_BB} max 1', f'{_BB} value 1', f'{_BB} players @a[tag={_T}]', f'{_BB} visible true',
+    f'execute if score #farben_np mg matches ..1 as @a[tag={_T}] run function {NS}:farben/solo_info',
 ]
+
+# ---- solo run
+pb_register('farben', 'Farbenparty', 'light_purple', label='meiste Runden', unit='Runden', lower=False)
+fn('farben/solo_info', [    # as the player at the start of a solo run
+    'execute if score @s mg_farben_pb matches 1.. run tellraw @s ' + msg({'text': 'Solo-Runde! ', 'color': 'aqua', 'bold': True},
+                                                                         {'text': 'Dein Rekord: ', 'color': 'gray'},
+                                                                         {'score': {'name': '@s', 'objective': 'mg_farben_pb'}, 'color': 'gold', 'bold': True},
+                                                                         {'text': ' Runden – schaffst du mehr?', 'color': 'gray'}),
+    'execute unless score @s mg_farben_pb matches 1.. run tellraw @s ' + msg({'text': 'Solo-Runde! ', 'color': 'aqua', 'bold': True},
+                                                                             {'text': 'Spiel, bis du fällst – jede geschaffte Runde zählt für deinen Rekord.', 'color': 'gray'})])
+fn('farben/solo_res', [     # as the solo player who fell: round #farben_r was not survived
+    'scoreboard players operation #pbv mg = #farben_r mg', 'scoreboard players remove #pbv mg 1',
+    'execute if score #pbv mg matches ..-1 run scoreboard players set #pbv mg 0',
+    'scoreboard players set #farben_ob mg 0',
+    'execute if score @s mg_farben_pb matches 1.. run scoreboard players operation #farben_ob mg = @s mg_farben_pb',
+    'title @s times 5 60 15',
+    'execute unless score #pbv mg matches 1 run title @s subtitle ' + tc([{'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' Runden geschafft', 'color': 'white'}]),
+    'execute unless score #pbv mg matches 1 run tellraw @s ' + msg({'text': 'Runtergefallen! ', 'color': 'red', 'bold': True}, {'text': 'Du hast ', 'color': 'gray'},
+                        {'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' Runden geschafft.', 'color': 'gray'}),
+    'execute if score #pbv mg matches 1 run title @s subtitle ' + tc([{'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' Runde geschafft', 'color': 'white'}]),
+    'execute if score #pbv mg matches 1 run tellraw @s ' + msg({'text': 'Runtergefallen! ', 'color': 'red', 'bold': True}, {'text': 'Du hast ', 'color': 'gray'},
+                        {'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' Runde geschafft.', 'color': 'gray'}),
+    f'function {NS}:farben/pb',
+    *[f'execute if score #pbn mg matches 1 {cond} score #pbv mg matches 1 run title @s subtitle ' + tc([{'text': '★ Neuer Rekord: ', 'color': 'gold', 'bold': True},
+                                                                                                   {'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True},
+                                                                                                   {'text': word, 'color': 'yellow'}])
+      for cond, word in (('unless', ' Runden'), ('if', ' Runde'))],
+    # coins: 2 from 5 rounds; record bonus only when the record reaches a new 5-round step
+    'scoreboard players operation #farben_ob mg /= #5 mg',
+    'scoreboard players operation #farben_nb mg = #pbv mg', 'scoreboard players operation #farben_nb mg /= #5 mg',
+    'execute if score #pbv mg matches 5.. run scoreboard players add @s mg_coins 2',
+    'execute if score #pbv mg matches 5.. run tellraw @s ' + msg({'text': '+2 Münzen', 'color': 'yellow'}),
+    'execute unless score #pbv mg matches 5.. run tellraw @s ' + msg({'text': 'Ab 5 Runden gibt es Münzen.', 'color': 'gray'}),
+    'execute if score #pbn mg matches 1 if score #farben_nb mg > #farben_ob mg run scoreboard players add @s mg_coins 2',
+    'execute if score #pbn mg matches 1 if score #farben_nb mg > #farben_ob mg run tellraw @s ' + msg({'text': 'Rekord-Bonus: ', 'color': 'gold'}, {'text': '+2 Münzen', 'color': 'yellow'})])
+fn('farben/solo_over', [    # as the server: the solo player is no longer in the game (fell or left)
+    f'execute as @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/solo_res',
+    f'tag @a[tag={_T}] remove mg_farben_fell',
+    f'{_BB} name ' + tc({'text': 'Farbenparty – Solo-Runde vorbei', 'color': 'light_purple', 'bold': True}), f'{_BB} value 0',
+    f'{_BB} players @a[tag={_T}]',      # a player who left with trigger 99 must not keep the bossbar in the hub until finish
+    f'function {NS}:farben/end'])
+
 EXTRA_LOAD.extend([f'bossbar add {NS}:farben {tc({"text": "Farbenparty"})}', f'execute unless entity @a[tag={_T}] run bossbar set {NS}:farben visible false'])
 ENTER_LINES.extend(['tag @s remove mg_farben_fell', 'tag @s remove mg_farben_rev'])
-party('farben', 'Farbenparty', 'light_purple', FB, trig=61, prof='shepherd', sub='Musik · Farbe · Letzter gewinnt', menu='Stell dich auf die richtige Farbe',
-      info='Wenn die Musik stoppt, wird eine Farbe angesagt. Stell dich schnell auf ein Feld dieser Farbe – alle anderen Felder verschwinden! Jede Runde wird die Zeit kürzer. Wer zuletzt noch steht, gewinnt.',
+party('farben', 'Farbenparty', 'light_purple', FB, trig=61, prof='shepherd', sub='Musik · Farbe · Letzter gewinnt · auch solo', menu='Stell dich auf die richtige Farbe – auch solo',
+      info='Wenn die Musik stoppt, wird eine Farbe angesagt. Stell dich schnell auf ein Feld dieser Farbe – alle anderen Felder verschwinden! Jede Runde wird die Zeit kürzer. Wer zuletzt noch steht, gewinnt. '
+           'Alleine spielst du, bis du fällst – wie viele Runden schaffst du?',
       title_sub='Merk dir die Farbe!', size=24, build=_b, setup=_setup, game=_game, custom_end=True,
       cleanup=[f'{_BB} players', f'{_BB} visible false', 'scoreboard players set #farben_ph mg 3'],
-      spect=_SPECT)
+      spect=_SPECT, solo=True)
