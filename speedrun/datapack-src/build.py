@@ -228,6 +228,7 @@ fn('tick', [
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
     f'execute if score #resume sr matches 1 if entity @a[name=matsllll] if entity @a[name=Qelloxx] run function {NS}:fix/resume',
     *[f'execute unless score #gb_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
+    *[f'execute unless score #gb2_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback2_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
 ])
 
 # ------------------------------------------------------------------ lobby island
@@ -1105,6 +1106,14 @@ for who, items in GIVEBACK.items():
     fn('fix/giveback_' + who.lower(), [f'scoreboard players set {flag} sr 1'] +
        [f'give {who} {item} {count}' for item, count in sorted(items.items(), key=lambda x: -x[1])] +
        [f'tellraw {who} ' + msg({'text': 'Deine Items von vor dem Neustart sind zurück.', 'color': 'green'})])
+
+
+GIVEBACK2 = {'FNGreg': {'minecraft:shield': 1, 'minecraft:iron_sword': 1},
+             'Qelloxx': {'minecraft:copper_axe': 1, 'minecraft:copper_pickaxe': 1}}
+for who, items in GIVEBACK2.items():
+    fn('fix/giveback2_' + who.lower(), [f'scoreboard players set #gb2_{who.lower()} sr 1'] +
+       [f'give {who} {item} {count}' for item, count in items.items()] +
+       [f'tellraw {who} ' + msg({'text': 'Werkzeug zurück.', 'color': 'green'})])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
