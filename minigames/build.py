@@ -1159,7 +1159,7 @@ for k in MODES:
                     'effect give @s minecraft:slowness 3 255 true', 'effect give @s minecraft:resistance 3 4 true'] + m['kit'])
     go = list(m.get('go', []))
     if k == 'lava':
-        go += [f'{OW} fill {cx - 6} {cy + 1} {cz - 6} {cx + 6} {cy + 39} {cz + 6} minecraft:air', 'scoreboard players set #lava_lvl mg 0', 'scoreboard players set #lava_t mg 0']
+        go += [f'{OW} fill {cx - 6} {cy + 1} {cz - 6} {cx + 6} {cy + 39} {cz + 6} minecraft:air', 'scoreboard players set #lava_lvl mg 0', 'scoreboard players set #lava_t mg -160', f'title {sel} actionbar {tc({"text": "Bau dich hoch – in 12 Sekunden steigt die Lava!", "color": "gold"})}']
     if k == 'boden':
         go += [f'{OW} fill {cx - 8} {cy - 21} {cz - 8} {cx + 8} {cy + 3} {cz + 8} minecraft:air',
                f'{OW} fill {cx - 8} {cy} {cz - 8} {cx + 8} {cy} {cz + 8} minecraft:lime_concrete',
@@ -1220,7 +1220,7 @@ for k in MODES:
         tick.append(f'execute as {P2} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run {OW} tp @s {cx + sp[1][0]} {cy + 1} {cz + sp[1][2]} -90 0')
     if k == 'lava':
         tick += ['scoreboard players add #lava_t mg 1',
-                 'execute if score #lava_t mg matches 70.. if score #lava_lvl mg matches ..37 run function ' + f'{NS}:lava/rise']
+                 'execute if score #lava_t mg matches 80.. if score #lava_lvl mg matches ..37 run function ' + f'{NS}:lava/rise']
     if k == 'boden':
         tick += [f'execute as {sel} at @s if block ~ ~-1 ~ #minecraft:{t} run setblock ~ ~-1 ~ minecraft:red_concrete' for t in ('wool',)]
         tick = tick[:-1]
