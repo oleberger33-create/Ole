@@ -1708,14 +1708,56 @@ register_game('sw', 'SkyWars', 'aqua', 'cartographer', 52, f'function {NS}:sw/to
 register_game('sf', 'Stick-Fight Bett', 'yellow', 'fletcher', SF_IDX, f'function {NS}:q/toggle_stickbett', '1v1 · Bett abbauen · bis 5', '1v1, Bett abbauen', 'mg_q_stickbett')
 register_game('duel', '1v1-Modi', 'gold', 'armorer', 54, f'function {NS}:q/menu', f'{len(MODES)} Modi zur Auswahl', f'{len(MODES)} Modi')
 
+# ---- personal records for solo-capable games (mg_<key>_pb).  Time values are ticks, shown as m:ss.t
+PB_GAMES = []      # (key, name, colour, label, unit, lower_better)
+def pb_fmt(src, p):
+    """scoreboard lines: ticks in score `src` -> #<p>_m, #<p>_s10, #<p>_s1, #<p>_d (minutes, seconds, tenths)"""
+    return [f'scoreboard players operation #{p}_d mg = {src}', f'scoreboard players operation #{p}_d mg /= #2 mg',     # tenths of a second
+            f'scoreboard players operation #{p}_s1 mg = #{p}_d mg', f'scoreboard players operation #{p}_s1 mg /= #10 mg',  # whole seconds
+            f'scoreboard players operation #{p}_m mg = #{p}_s1 mg', f'scoreboard players operation #{p}_m mg /= #60 mg',
+            f'scoreboard players operation #{p}_s1 mg %= #60 mg', f'scoreboard players operation #{p}_s10 mg = #{p}_s1 mg',
+            f'scoreboard players operation #{p}_s10 mg /= #10 mg', f'scoreboard players operation #{p}_s1 mg %= #10 mg',
+            f'scoreboard players operation #{p}_d mg %= #10 mg']
+def pb_txt(p, color='white'):
+    """text components for a value formatted by pb_fmt"""
+    S = lambda n: {'score': {'name': f'#{p}_{n}', 'objective': 'mg'}, 'color': color, 'bold': True}
+    return [S('m'), {'text': ':', 'color': color, 'bold': True}, S('s10'), S('s1'), {'text': '.', 'color': color, 'bold': True}, S('d')]
+def pb_register(key, name, color, label='Bestzeit', unit='time', lower=True):
+    """Creates function mg:<key>/pb: run as a player with the new value in #pbv mg.  Announces it, stores a new record and
+    sets #pbn mg to 1 if it was a new record (0 otherwise), so the caller can give a bonus.  unit 'time' (ticks) or a word."""
+    PB_GAMES.append((key, name, color, label, unit, lower))
+    obj = f'mg_{key}_pb'
+    EXTRA_LOAD.append(f'scoreboard objectives add {obj} dummy')
+    cmp = '<' if lower else '>'
+    if unit == 'time':
+        cur, old = pb_txt('pa', 'yellow'), pb_txt('pb', 'gold')
+        prep = pb_fmt('#pbv mg', 'pa') + pb_fmt(f'@s {obj}', 'pb')
+    else:
+        cur = [{'score': {'name': '#pbv', 'objective': 'mg'}, 'color': 'yellow', 'bold': True}, {'text': ' ' + unit, 'color': 'yellow'}]
+        old = [{'score': {'name': '@s', 'objective': obj}, 'color': 'gold', 'bold': True}, {'text': ' ' + unit, 'color': 'gold'}]
+        prep = []
+    fn(f'{key}/pb', [
+        'scoreboard players set #pbn mg 0',
+        f'execute unless score @s {obj} matches 1.. run scoreboard players set #pbn mg 1',
+        f'execute if score @s {obj} matches 1.. if score #pbv mg {cmp} @s {obj} run scoreboard players set #pbn mg 1',
+        f'execute if score #pbv mg matches ..0 run scoreboard players set #pbn mg 0',
+        *prep,
+        f'execute if score #pbn mg matches 0 if score @s {obj} matches 1.. run tellraw @s {msg({"text": "Ergebnis: ", "color": "gray"}, *cur, {"text": f"   ·   Dein Rekord ({label}): ", "color": "gray"}, *old)}',
+        f'execute if score #pbn mg matches 1 run scoreboard players operation @s {obj} = #pbv mg',
+        f'execute if score #pbn mg matches 1 run tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": f" – neuer persönlicher Rekord in {name}: ", "color": "gray"}, *cur)}',
+        f'execute if score #pbn mg matches 1 run title @s actionbar {tc([{"text": "★ NEUER REKORD ★  ", "color": "gold", "bold": True}] + cur)}',
+        'execute if score #pbn mg matches 1 at @s run playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1.3'])
+
 def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp=16, size=48, build=(), setup=(), game=(),
-          cleanup=(), spect=None, custom_end=False, title_sub='', coins_win=10):
+          cleanup=(), spect=None, custom_end=False, title_sub='', coins_win=10, solo=False, solo_end=()):
     """Generic free-for-all lobby game.
     State #key: 0 idle, 1 countdown, 2 running, 3 ending.  Players: tag mg_<key>; still in the game: tag mg_al_<key>.
     The fragment supplies: build (map), setup (after players are tagged, before state 2; run as server),
     game (every tick while running), cleanup (at finish).  Default win rule: last player alive (unless custom_end)."""
     cx, cy, cz = center
     PARTY_KEYS.append(key)
+    if solo:            # solo-capable: one player is enough; #<key>_np holds the number of starters (1 = solo run)
+        minp = 1
     T, AL, Q = f'mg_{key}', f'mg_al_{key}', f'mg_q_{key}'
     spect = spect or (cx, cy + 12, cz)
     FL = f'{cx - size} {cz - size} {cx + size} {cz + size}'
@@ -1727,6 +1769,7 @@ def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp
         f'execute if entity @s[tag={Q}] run return run function {NS}:{key}/leave',
         f'function {NS}:q/leave_all', f'tag @s add {Q}',
         f'execute if score #{key} mg matches 1.. run tellraw @s {msg({"text": name + " läuft gerade – du bist in der Warteschlange für die nächste Runde.", "color": "gray"})}',
+        *([f'execute unless score #{key} mg matches 1.. run tellraw @s {msg({"text": "Du kannst auch alleine spielen – in 15 Sekunden geht es los, bis dahin können noch andere mitmachen.", "color": "gray"})}'] if solo else []),
         f'tellraw @a[tag=mg_hub] {msg({"selector": "@s", "color": "white"}, {"text": " wartet auf ", "color": "gray"}, {"text": name, "color": color, "bold": True}, {"text": " – ", "color": "gray"}, {"text": "[Mitspielen]", "color": "green", "click_event": {"action": "run_command", "command": f"/trigger mg_aktion set {trig}"}})}',
     ])
     fn(f'{key}/leave', [f'tag @s remove {Q}', f'tellraw @s {msg({"text": name + "-Warteschlange verlassen.", "color": "gray"})}'])
@@ -1753,12 +1796,14 @@ def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp
                         f'clear @a[tag={T}]', f'effect clear @a[tag={T}]', f'gamemode adventure @a[tag={T}]', f'tag @a[tag={T}] add {AL}',
                         f'scoreboard players set @a[tag={T}] mg_deaths 0', f'execute as @a[tag={T}] run {OW} spawnpoint @s {spect[0]} {spect[1]} {spect[2]}',
                         f'scoreboard players set #{key}_t mg 0',
+                        f'execute store result score #{key}_np mg if entity @a[tag={T}]',
                         *setup,
                         f'{OW} forceload remove {FL}',
                         f'scoreboard players set #{key} mg 2',
                         f'title @a[tag={T}] times 5 50 10',
                         f'title @a[tag={T}] title {tc({"text": name.upper(), "color": color, "bold": True})}',
                         f'title @a[tag={T}] subtitle {tc({"text": title_sub, "color": "white"})}',
+                        *([f'execute if score #{key}_np mg matches ..1 run title @a[tag={T}] subtitle {tc([{"text": "Solo-Runde · ", "color": "aqua"}, {"text": title_sub, "color": "white"}])}'] if solo else []),
                         f'tellraw @a[tag={T}] {msg({"text": info, "color": "gray"})}',
                         f'tellraw @a[tag={T}] {tc([{"text": "  "}, {"text": "[Spiel verlassen]", "color": "red", "click_event": {"action": "run_command", "command": "/trigger mg_aktion set 99"}}])}'])
     fn(f'{key}/tick', [f'execute if score #{key} mg matches 2 run function {NS}:{key}/game'])
@@ -1769,14 +1814,20 @@ def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp
               f'execute if score #surv mg matches 0 run return run function {NS}:{key}/end',
               f'execute as @a[tag={AL},scores={{mg_deaths=1..}}] run function {NS}:{key}/out',
               f'execute store result score #alive mg if entity @a[tag={AL}]',
-              f'execute if score #alive mg matches ..1 run function {NS}:{key}/end']
+              (f'execute if score #alive mg matches ..1 if score #{key}_np mg matches 2.. run function {NS}:{key}/end' if solo else
+               f'execute if score #alive mg matches ..1 run function {NS}:{key}/end'),
+              *([f'execute if score #alive mg matches 0 if score #{key}_np mg matches ..1 run function {NS}:{key}/end'] if solo else [])]
     fn(f'{key}/game', g)
     fn(f'{key}/out', [f'tag @s remove {AL}', 'scoreboard players set @s mg_deaths 0', 'gamemode spectator @s', 'clear @s',
                       f'execute store result score #alive mg if entity @a[tag={AL}]',
                       f'tellraw @a[tag={T}] {msg({"selector": "@s", "color": "white"}, {"text": " ist raus! ", "color": "red"}, {"text": "Noch ", "color": "gray"}, {"score": {"name": "#alive", "objective": "mg"}, "color": "white"}, {"text": " übrig.", "color": "gray"})}',
                       f'execute in minecraft:overworld run tp @s {spect[0]} {spect[1]} {spect[2]}',
                       'scoreboard players add @s mg_coins 2'])
+    if solo:            # solo run: no win / no draw message, the fragment's solo_end shows the result (records etc.)
+        fn(f'{key}/solo_end', [*solo_end, f'title @a[tag={T}] title {tc({"text": "Solo-Runde vorbei", "color": color, "bold": True})}',
+                               f'scoreboard players set #{key} mg 3', f'schedule function {NS}:{key}/finish 100t'])
     fn(f'{key}/end', [
+        *([f'execute if score #{key}_np mg matches ..1 run return run function {NS}:{key}/solo_end'] if solo else []),
         f'execute store result score #elim mg if entity @a[tag={T},tag=!{AL}]',
         f'execute if score #elim mg matches 1.. as @a[tag={AL}] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt " + name + "!", "color": "white"})}',
         f'execute unless entity @a[tag={AL}] run tellraw @a[tag={T}] {msg({"text": "Unentschieden – niemand hat überlebt.", "color": "gray"})}',
@@ -1983,6 +2034,10 @@ for i, name, it, price, color in HATS:
     hat_cmd += [f'execute if score @s mg_hat matches {i} run clear @s *[minecraft:custom_data~{{mg_hat:1b}}]', f'execute if score @s mg_hat matches {i} run item replace entity @s armor.head with {it}']
 fn('cos/hat_put', hat_cmd)
 menu.append(f'tellraw @s {tc([{"text": "   "}, {"text": "[Hut absetzen]", "color": "gray", "click_event": {"action": "run_command", "command": "/trigger mg_aktion set 80"}}])}')
+for _k, _n, _c, _lab, _u, _lo in PB_GAMES:      # personal records of the solo-capable games
+    _val = pb_txt(f'r_{_k}', _c) if _u == 'time' else [{'score': {'name': '@s', 'objective': f'mg_{_k}_pb'}, 'color': _c, 'bold': True}, {'text': ' ' + _u, 'color': _c}]
+    menu += [*([f'execute if score @s mg_{_k}_pb matches 1.. run {l}' for l in pb_fmt(f'@s mg_{_k}_pb', f'r_{_k}')] if _u == 'time' else []),
+             f'execute if score @s mg_{_k}_pb matches 1.. run tellraw @s {tc([{"text": "   Rekord " + _n + ": ", "color": "gray"}] + _val)}']
 fn('cos/menu', menu)
 fn('cos/trail_off', ['scoreboard players set @s mg_trail 0', f'tellraw @s {msg({"text": "Spur abgelegt.", "color": "gray"})}'])
 fn('cos/hat_off', ['scoreboard players set @s mg_hat 0', 'item replace entity @s armor.head with minecraft:air', f'tellraw @s {msg({"text": "Hut abgesetzt.", "color": "gray"})}'])
