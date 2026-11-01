@@ -219,6 +219,11 @@ load += [
 fn('load', load)
 
 # ------------------------------------------------------------------ tick
+# one-shot item gifts on request of the server owner: (id, player, {item: count}); each is given once (flag #gift_<id>)
+GIFTS = [('g1', 'FNGreg', {'minecraft:obsidian': 10, 'minecraft:flint_and_steel': 1}, '10 Obsidian und 1 Feuerzeug')]
+for _gid, _who, _items, _label in GIFTS:
+    fn(f'gift/{_gid}', [f'scoreboard players set #gift_{_gid} sr 1', *[f'give {_who} {it} {n}' for it, n in _items.items()],
+                        f'tellraw {_who} ' + msg({'text': 'Geschenk erhalten: ' + _label, 'color': 'green'})])
 fn('tick', [
     'scoreboard players enable @a sr_rolle',
     'scoreboard players enable @a sr_aktion',
@@ -234,6 +239,7 @@ fn('tick', [
     f'execute as @a[tag=sr_lobby] run function {NS}:lobby/keep',
     f'execute if score #cd sr matches 1.. run function {NS}:start/cd_tick',
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
+    *[f'execute unless score #gift_{gid} sr matches 1 if entity @e[type=minecraft:player,name={who}] run function {NS}:gift/{gid}' for gid, who, *_ in GIFTS],
 ])
 
 # ------------------------------------------------------------------ lobby island
