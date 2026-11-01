@@ -12,7 +12,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'minigames')
 NS = 'mg'
-BUILD_VERSION = 1
+BUILD_VERSION = 2
 files = {}
 
 
@@ -53,25 +53,36 @@ js('data/minecraft/tags/function/tick.json', {'values': [f'{NS}:tick']})
 
 # ------------------------------------------------------------------ loot tables
 def item(name, weight, count=None, extra=None):
+    """Loot entry in the 26.3 format: modifiers live under "modifier" and use "type"."""
     e = {'type': 'minecraft:item', 'name': f'minecraft:{name}', 'weight': weight}
-    fns = []
+    mods = []
     if count:
-        fns.append({'function': 'minecraft:set_count', 'count': {'min': count[0], 'max': count[1]}})
+        mods.append({'type': 'minecraft:set_count', 'count': {'type': 'minecraft:uniform', 'min': count[0], 'max': count[1]}})
     if extra:
-        fns += extra
-    if fns:
-        e['functions'] = fns
+        mods += extra
+    if mods:
+        e['modifier'] = mods if len(mods) > 1 else mods[0]
     return e
 
+def ench(**lv):
+    return [{'type': 'minecraft:set_enchantments', 'enchantments': {f'minecraft:{k}': v for k, v in lv.items()}}]
+def potion(pid):
+    return [{'type': 'minecraft:set_potion', 'id': f'minecraft:{pid}'}]
 LOOT = {
-    'tier1': (2, [item('stone_sword', 4), item('leather_chestplate', 3), item('leather_helmet', 3), item('leather_boots', 3),
-                  item('bread', 4, (3, 6)), item('arrow', 2, (6, 10)), item('bow', 1), item('cooked_beef', 3, (2, 4))]),
-    'tier2': (2, [item('iron_sword', 3), item('chainmail_chestplate', 3), item('iron_helmet', 2), item('iron_boots', 2),
-                  item('shield', 2), item('bow', 2), item('arrow', 3, (8, 16)), item('golden_apple', 1), item('cooked_porkchop', 3, (3, 5))]),
-    'tier3': (2, [item('iron_chestplate', 3), item('iron_leggings', 3), item('diamond_sword', 1), item('iron_sword', 2),
-                  item('crossbow', 2), item('arrow', 2, (10, 16)), item('golden_apple', 2, (1, 2)), item('ender_pearl', 1, (1, 2))]),
-    'finish': (2, [item('diamond_chestplate', 2), item('diamond_sword', 2), item('diamond_helmet', 2),
-                   item('golden_apple', 3, (2, 3)), item('bow', 1, None, [{'function': 'minecraft:enchant_randomly'}])]),
+    'tier1': (3, [item('iron_sword', 3), item('iron_helmet', 3), item('iron_boots', 3), item('chainmail_chestplate', 3),
+                  item('bow', 2), item('arrow', 3, (8, 16)), item('cooked_beef', 3, (4, 8)), item('shield', 2), item('golden_apple', 1)]),
+    'tier2': (3, [item('iron_chestplate', 3), item('iron_leggings', 3), item('diamond_helmet', 2), item('diamond_boots', 2),
+                  item('iron_sword', 3, None, ench(sharpness=1)), item('bow', 2, None, ench(power=2)), item('arrow', 3, (12, 20)),
+                  item('golden_apple', 3, (1, 2)), item('splash_potion', 2, None, potion('healing')), item('ender_pearl', 1, (1, 2))]),
+    'tier3': (3, [item('diamond_chestplate', 2), item('diamond_leggings', 2), item('diamond_sword', 3), item('diamond_axe', 1),
+                  item('crossbow', 2, None, ench(quick_charge=2)), item('golden_apple', 3, (2, 3)),
+                  item('splash_potion', 2, None, potion('strong_healing')), item('potion', 2, None, potion('strength')),
+                  item('ender_pearl', 2, (1, 2)), item('arrow', 2, (16, 24))]),
+    'finish': (4, [item('diamond_sword', 3, None, ench(sharpness=3)), item('diamond_chestplate', 3, None, ench(protection=2)),
+                   item('diamond_leggings', 2, None, ench(protection=2)), item('bow', 2, None, ench(power=3, flame=1)),
+                   item('enchanted_golden_apple', 1), item('golden_apple', 3, (3, 4)),
+                   item('splash_potion', 2, None, potion('strong_healing')), item('potion', 2, None, potion('strong_strength')),
+                   item('totem_of_undying', 1)]),
 }
 for key, (rolls, entries) in LOOT.items():
     js(f'data/{NS}/loot_table/rush_{key}.json', {'type': 'minecraft:chest', 'pools': [{'rolls': rolls, 'entries': entries}]})
@@ -106,38 +117,51 @@ def holo(tag, x, y, z, text, scale=1.0):
 def forceload(cx, cz, r):
     return f'{OW} forceload add {cx - r} {cz - r} {cx + r} {cz + r}'
 
-# ------------------------------------------------------------------ parkour course (deterministic)
-rnd = random.Random(26)
-course = []          # list of (x, y, z, block)
-checkpoints = []     # (x, y, z) centre of each checkpoint pad (standing block)
-x, y, z = RUSH[0] + 3, Y, RUSH[2]
-SECTIONS = [('Leicht', 10, (2, 3), (0, 0), 'lime_concrete'),
-            ('Mittel', 12, (3, 3), (-1, 1), 'yellow_concrete'),
-            ('Schwer', 12, (3, 4), (-1, 1), 'orange_concrete')]
-for si, (name, jumps, dxr, dyr, block) in enumerate(SECTIONS):
-    for j in range(jumps):
-        dx = rnd.randint(*dxr)
-        dy = rnd.randint(*dyr)
-        if dx == 4 and dy == 1:
-            dy = 0                       # 4 forward + 1 up is not jumpable
-        dz = rnd.randint(-2, 2) if dx <= 3 else rnd.randint(-1, 1)
-        x, y, z = x + dx, max(Y - 6, min(Y + 8, y + dy)), z + dz
-        course.append((x, y, z, block))
-    # checkpoint platform 5x5, 3 blocks further
-    x += 4
-    checkpoints.append((x, y, z))
-    for px in range(-2, 3):
-        for pz in range(-2, 3):
-            course.append((x + px, y, z + pz, 'smooth_quartz'))
-    course.append((x, y, z, 'gold_block'))
-    x += 2
+# ------------------------------------------------------------------ parkour maps (deterministic)
+MAPS = [
+    # name, colour, seed, z-offset, (easy, medium, hard blocks), platform block, filler under start
+    ('Himmel', 'aqua', 26, 0, ('lime_concrete', 'yellow_concrete', 'orange_concrete'), 'smooth_quartz'),
+    ('Nether', 'red', 7, 300, ('crimson_nylium', 'nether_bricks', 'magma_block'), 'polished_blackstone_bricks'),
+    ('Eis', 'aqua', 99, 600, ('snow_block', 'packed_ice', 'blue_ice'), 'packed_ice'),
+    ('Dschungel', 'green', 42, 900, ('moss_block', 'jungle_log', 'oak_leaves'), 'mossy_stone_bricks'),
+    ('End', 'light_purple', 13, 1200, ('end_stone_bricks', 'purpur_block', 'obsidian'), 'end_stone_bricks'),
+]
+def make_course(seed, z0, blocks, plat):
+    rnd = random.Random(seed)
+    course, cps = [], []
+    x, y, z = RUSH[0] + 3, Y, z0
+    sections = [(10, (2, 3), (0, 0)), (12, (3, 3), (-1, 1)), (12, (3, 4), (-1, 1))]
+    for si, (jumps, dxr, dyr) in enumerate(sections):
+        for j in range(jumps):
+            dx = rnd.randint(*dxr); dy = rnd.randint(*dyr)
+            if dx == 4 and dy == 1:
+                dy = 0
+            dz = rnd.randint(-2, 2) if dx <= 3 else rnd.randint(-1, 1)
+            x, y, z = x + dx, max(Y - 6, min(Y + 8, y + dy)), max(z0 - 30, min(z0 + 30, z + dz))
+            course.append((x, y, z, blocks[si]))
+            if si == 2 and j % 4 == 3:                       # hard part: a 1-block pillar under the step
+                course.append((x, y - 1, z, plat))
+        x += 4
+        cps.append((x, y, z))
+        for px in range(-2, 3):
+            for pz in range(-2, 3):
+                course.append((x + px, y, z + pz, plat))
+        course.append((x, y, z, 'gold_block'))
+        x += 2
+    return course, cps
+MAPDATA = []
+for mi, (mname, mcolor, seed, zoff, blocks, plat) in enumerate(MAPS):
+    course, cps = make_course(seed, RUSH[2] + zoff, blocks, plat)
+    MAPDATA.append((mname, mcolor, RUSH[2] + zoff, course, cps, plat))
+checkpoints = MAPDATA[0][4]
 FINISH = checkpoints[-1]
 NCP = len(checkpoints)
+MAXX = max(c[0] for m in MAPDATA for c in m[4]) + 8
 
 # ------------------------------------------------------------------ load
 load = [
     forceload(HUB[0], HUB[2], 32),
-    forceload(RUSH[0] + 80, RUSH[2], 96),
+    f'{OW} forceload remove 984 -96 1176 96',   # v1 left the old single parkour permanently loaded
     forceload(ARENA[0], ARENA[2], 32),
     *[forceload(c[0], c[2], 24) for _, c, _ in DUELS.values()],
     'scoreboard objectives add mg dummy',
@@ -179,17 +203,16 @@ fn('load', load)
 
 # ------------------------------------------------------------------ build
 fn('build/try', [
-    f'execute in minecraft:overworld if loaded {HUB[0]} {Y} {HUB[2]} if loaded {RUSH[0]} {Y} {RUSH[2]} if loaded {FINISH[0]} {Y} {FINISH[2]} '
+    f'execute in minecraft:overworld if loaded {HUB[0]} {Y} {HUB[2]} '
     f'if loaded {ARENA[0]} {Y} {ARENA[2]} if loaded {DUELS["duell"][1][0]} {Y} 0 run return run function {NS}:build/all',
     f'schedule function {NS}:build/try 20t',
 ])
 fn('build/all', [
     'kill @e[type=minecraft:text_display,tag=mg_holo]',
-    f'function {NS}:build/hub', f'function {NS}:build/rush', f'function {NS}:build/arena',
+    f'function {NS}:build/hub', f'function {NS}:build/arena', 'scoreboard players set #bm mg 0', f'function {NS}:build/map_next',
     *[f'function {NS}:build/{k}' for k in DUELS],
-    f'scoreboard players set #built mg {BUILD_VERSION}',
-    f'tellraw @a {msg({"text": "Minigame-Welt gebaut.", "color": "gray"})}',
 ])
+fn('build/done', [f'scoreboard players set #built mg {BUILD_VERSION}', f'tellraw @a {msg({"text": "Minigame-Welt gebaut.", "color": "gray"})}'])
 
 hx, hy, hz = HUB
 hub = [f'{OW} {c}' for c in (
@@ -212,20 +235,32 @@ hub += [
 ]
 fn('build/hub', hub)
 
-rush = [f'{OW} fill {RUSH[0] - 8} {Y - 10} {RUSH[2] - 40} {FINISH[0] + 12} {Y + 14} {RUSH[2] + 40} minecraft:air']
-rush += [f'{OW} {c}' for c in disk(RUSH[0], Y, RUSH[2], 3, 'smooth_quartz')]
-rush.append(f'{OW} setblock {RUSH[0]} {Y} {RUSH[2]} minecraft:emerald_block')
-for (bx, by, bz, block) in course:
-    rush.append(f'{OW} setblock {bx} {by} {bz} minecraft:{block}')
-fx, fy, fz = FINISH
-rush += [f'{OW} {c}' for c in disk(fx, fy, fz, 4, 'smooth_quartz')]
-rush += [f'{OW} setblock {fx} {fy} {fz} minecraft:diamond_block']
-for i, (cx, cy, cz) in enumerate(checkpoints):
-    label = 'ZIEL' if i == NCP - 1 else f'Checkpoint {i + 1}'
-    color = 'aqua' if i == NCP - 1 else 'yellow'
-    rush.append(holo('mg_cp', cx, cy + 2.6, cz, [{'text': label, 'color': color, 'bold': True}, {'text': '\nLoot!', 'color': 'gold', 'bold': False}], 1.2))
-rush.append(holo('mg_cp', RUSH[0], Y + 2.6, RUSH[2], {'text': 'START', 'color': 'green', 'bold': True}, 1.4))
-fn('build/rush', rush)
+nxt = ['scoreboard players add #bm mg 1']
+for mi, (mname, mcolor, z0, course, cps, plat) in enumerate(MAPDATA):
+    i = mi + 1
+    nxt.append(f'execute if score #bm mg matches {i} run return run function {NS}:build/map{i}_load')
+    fn(f'build/map{i}_load', [f'{OW} forceload add {RUSH[0] - 16} {z0 - 40} {MAXX + 16} {z0 + 40}', f'schedule function {NS}:build/map{i}_try 20t'])
+    fn(f'build/map{i}_try', [
+        f'execute in minecraft:overworld if loaded {RUSH[0]} {Y} {z0} if loaded {cps[-1][0]} {Y} {cps[-1][2]} if loaded {MAXX} {Y} {z0 - 32} if loaded {MAXX} {Y} {z0 + 32} run return run function {NS}:build/map{i}',
+        f'schedule function {NS}:build/map{i}_try 20t'])
+    fx, fy, fz = cps[-1]
+    b = [f'{OW} fill {RUSH[0] - 8} {Y - 10} {z0 - 34} {MAXX + 8} {Y + 14} {z0 + 34} minecraft:air']
+    b += [f'{OW} {c}' for c in disk(RUSH[0], Y, z0, 3, plat)]
+    b.append(f'{OW} setblock {RUSH[0]} {Y} {z0} minecraft:emerald_block')
+    for (bx, by, bz, block) in course:
+        b.append(f'{OW} setblock {bx} {by} {bz} minecraft:{block}')
+    b += [f'{OW} {c}' for c in disk(fx, fy, fz, 4, plat)]
+    b.append(f'{OW} setblock {fx} {fy} {fz} minecraft:diamond_block')
+    b.append(f'kill @e[type=minecraft:text_display,tag=mg_cp{i}]')
+    for ci, (cx, cy, cz) in enumerate(cps):
+        label = 'ZIEL' if ci == len(cps) - 1 else f'Checkpoint {ci + 1}'
+        b.append(holo(f'mg_cp{i}', cx, cy + 2.6, cz, [{'text': label, 'color': 'aqua' if ci == len(cps) - 1 else 'yellow', 'bold': True},
+                                                      {'text': '\nLoot!', 'color': 'gold', 'bold': False}], 1.2))
+    b.append(holo(f'mg_cp{i}', RUSH[0], Y + 2.6, z0, [{'text': 'START\n', 'color': 'green', 'bold': True}, {'text': 'Map: ' + mname, 'color': mcolor, 'bold': False}], 1.4))
+    b += [f'{OW} forceload remove {RUSH[0] - 16} {z0 - 40} {MAXX + 16} {z0 + 40}', f'function {NS}:build/map_next']
+    fn(f'build/map{i}', b)
+nxt.append(f'function {NS}:build/done')
+fn('build/map_next', nxt)
 
 ax, ay, az = ARENA
 arena = [f'{OW} {c}' for c in (
@@ -296,7 +331,7 @@ fn('hub/click', [
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"info"}}] run return run function {NS}:hub/info',
 ])
 fn('hub/info', [f'tellraw @s {msg({"text": "Spielregeln", "color": "gold", "bold": True})}',
-                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": f"Jump-n-Run über dem Void. Auf jedem goldenen Checkpoint gibt es Loot, im Ziel den besten. Nach {RUSH_TIME // 60} Minuten (oder {FINISH_GRACE} s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt. Runterfallen = zurück zum Checkpoint.", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": f"Jump-n-Run über dem Void auf einer von 5 Maps (Himmel, Nether, Eis, Dschungel, End). Auf jedem goldenen Checkpoint gibt es Loot, im Ziel den besten. Nach {RUSH_TIME // 60} Minuten (oder {FINISH_GRACE} s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt. Runterfallen = zurück zum Checkpoint.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Sumo: ", "color": "yellow", "bold": True}, {"text": "Ohne Waffen. Wer von der Plattform fällt, verliert die Runde.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Spleef: ", "color": "aqua", "bold": True}, {"text": "Mit der Schaufel den Schnee unter dem Gegner wegmachen.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Duell: ", "color": "red", "bold": True}, {"text": "Schwert, Bogen, Eisenrüstung. Wer stirbt, verliert die Runde.", "color": "white"}])}',
@@ -375,8 +410,10 @@ fn('rush/start', [
     f'execute as @a[tag=mg_rush] run function {NS}:q/leave_all',
     'clear @a[tag=mg_rush]', 'effect clear @a[tag=mg_rush]', 'gamemode adventure @a[tag=mg_rush]',
     'scoreboard players set @a[tag=mg_rush] mg_cp 0', 'scoreboard players set @a[tag=mg_rush] mg_loot 0',
-    f'{OW} tp @a[tag=mg_rush] {RUSH[0]} {Y + 1} {RUSH[2]} -90 0',
-    f'execute as @a[tag=mg_rush] run {OW} spawnpoint @s {RUSH[0]} {Y + 1} {RUSH[2]}',
+    'execute store result score #map mg run random value 1..%d' % len(MAPDATA),
+    *[f'execute if score #map mg matches {mi + 1} run {OW} tp @a[tag=mg_rush] {RUSH[0]} {Y + 1} {m[2]} -90 0' for mi, m in enumerate(MAPDATA)],
+    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] run {OW} spawnpoint @s {RUSH[0]} {Y + 1} {m[2]}' for mi, m in enumerate(MAPDATA)],
+    *[f'execute if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': m[0], 'color': m[1], 'bold': True}) for mi, m in enumerate(MAPDATA)],
     'effect give @a[tag=mg_rush] minecraft:saturation infinite 0 true',
     'effect give @a[tag=mg_rush] minecraft:resistance infinite 4 true',
     'scoreboard players set #rush mg 2', 'scoreboard players set #t mg 0', 'scoreboard players set #left mg ' + str(RUSH_TIME),
@@ -384,13 +421,22 @@ fn('rush/start', [
     f'bossbar set {NS}:rush players @a[tag=mg_rush]', f'bossbar set {NS}:rush visible true', f'bossbar set {NS}:rush max {RUSH_TIME}',
     'title @a[tag=mg_rush] times 5 40 10',
     f'title @a[tag=mg_rush] title {tc({"text": "LOS!", "color": "green", "bold": True})}',
-    f'title @a[tag=mg_rush] subtitle {tc({"text": "Springen, Loot auf den goldenen Blöcken holen", "color": "white"})}',
+    *[f'execute if score #map mg matches {mi + 1} run title @a[tag=mg_rush] subtitle ' + tc([{'text': 'Map: ', 'color': 'gray'}, {'text': m[0], 'color': m[1], 'bold': True}, {'text': ' · Loot auf den goldenen Blöcken', 'color': 'white'}]) for mi, m in enumerate(MAPDATA)],
     'execute as @a[tag=mg_rush] at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1',
 ])
-cp_checks = []
-for i, (cx, cy, cz) in enumerate(checkpoints):
-    tier = 'finish' if i == NCP - 1 else ['tier1', 'tier2', 'tier3'][min(i, 2)]
-    cp_checks.append(f'execute as @a[tag=mg_rush,scores={{mg_cp=..{i}}}] at @s if entity @s[x={cx - 2},dx=4,y={cy},dy=3,z={cz - 2},dz=4] run function {NS}:rush/cp {{n:{i + 1},tier:"{tier}",x:{cx},y:{cy + 1},z:{cz}}}')
+for mi, (mname, mcolor, z0, course, cps, plat) in enumerate(MAPDATA):
+    i = mi + 1
+    checks = []
+    for ci, (cx, cy, cz) in enumerate(cps):
+        tier = 'finish' if ci == len(cps) - 1 else ['tier1', 'tier2', 'tier3'][min(ci, 2)]
+        checks.append(f'execute as @a[tag=mg_rush,scores={{mg_cp=..{ci}}}] at @s if entity @s[x={cx - 2},dx=4,y={cy},dy=3,z={cz - 2},dz=4] run function {NS}:rush/cp {{n:{ci + 1},tier:"{tier}",x:{cx},y:{cy + 1},z:{cz}}}')
+    fn(f'rush/cp_m{i}', checks)
+    fn(f'rush/fall_m{i}', [f'execute if score @s mg_cp matches 0 run {OW} tp @s {RUSH[0]} {Y + 1} {z0} -90 0',
+                           *[f'execute if score @s mg_cp matches {ci + 1} run {OW} tp @s {cx} {cy + 1} {cz} -90 0' for ci, (cx, cy, cz) in enumerate(cps)],
+                           'playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.6 1'])
+    fn(f'rush/load_m{i}', [f'{OW} forceload add {RUSH[0] - 16} {z0 - 40} {MAXX + 16} {z0 + 40}'])
+    fn(f'rush/unload_m{i}', [f'{OW} forceload remove {RUSH[0] - 16} {z0 - 40} {MAXX + 16} {z0 + 40}'])
+cp_checks = [f'execute if score #map mg matches {mi + 1} run function {NS}:rush/cp_m{mi + 1}' for mi in range(len(MAPDATA))]
 fn('rush/tick', [
     f'execute if score #rush mg matches 1 run function {NS}:rush/cd_tick',
     'execute unless score #rush mg matches 2.. run return 0',
@@ -404,14 +450,9 @@ fn('rush/cd_tick', ['scoreboard players add #cdt mg 1',
                     f'execute if score #cdt mg matches 0 run function {NS}:rush/cd_show'])
 fn('rush/parkour_tick', [
     *cp_checks,
-    f'execute as @a[tag=mg_rush] at @s if entity @s[y=-64,dy={Y - 8 + 64}] run function {NS}:rush/fall',
+    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] at @s if entity @s[y=-64,dy={Y - 8 + 64}] run function {NS}:rush/fall_m{mi + 1}' for mi in range(len(MAPDATA))],
     'scoreboard players add #t mg 1',
     f'execute if score #t mg matches 20.. run function {NS}:rush/second',
-])
-fn('rush/fall', [
-    f'execute if score @s mg_cp matches 0 run {OW} tp @s {RUSH[0]} {Y + 1} {RUSH[2]} -90 0',
-    *[f'execute if score @s mg_cp matches {i + 1} run {OW} tp @s {cx} {cy + 1} {cz} -90 0' for i, (cx, cy, cz) in enumerate(checkpoints)],
-    'playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.6 1',
 ])
 fn('rush/cp', [
     '$scoreboard players set @s mg_cp $(n)',
@@ -490,7 +531,7 @@ fn('rush/stop', [
     'scoreboard players set #rush mg 0', f'bossbar set {NS}:rush visible false', f'bossbar set {NS}:rush color green',
     f'execute as @a[tag=mg_rush] run function {NS}:hub/enter',
     f'{OW} kill @e[type=minecraft:item,x={ARENA[0] - 30},dx=60,y={Y - 10},dy=40,z={ARENA[2] - 30},dz=60]',
-    f'{OW} kill @e[type=minecraft:item,x={RUSH[0] - 10},dx={FINISH[0] - RUSH[0] + 30},y={Y - 20},dy=50,z={RUSH[2] - 45},dz=90]',
+    f'{OW} kill @e[type=minecraft:item,x={RUSH[0] - 10},dx={MAXX - RUSH[0] + 30},y={Y - 20},dy=50,z={RUSH[2] - 45},dz=1300]',
 ])
 
 # ------------------------------------------------------------------ 1v1 (queue, rounds, best of 3)
