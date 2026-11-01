@@ -14,7 +14,7 @@ _LIMIT = _GO + 7200                # 6 minutes without a finisher
 _FLOOR = EY - 4                    # canyon floor (top surface y96)
 _LOW = EY - 2                      # below y98 = crashed
 _SAFE = 'smooth_quartz'            # tower floor + respawn pads (standing there is allowed)
-_BUILD_V = 3
+_BUILD_V = 4
 _SPECT = (EX, EY + 75, EZ)
 _ELY = ('minecraft:elytra[minecraft:unbreakable={},minecraft:enchantments={"minecraft:binding_curse":1},'
         'minecraft:tooltip_display={hidden_components:["minecraft:unbreakable"]},'
@@ -172,6 +172,9 @@ for _x in range(-56, 57):
     _build.append(_F(EX + _x, _FLOOR, EZ + _zc + 2, EX + _x, _FLOOR, EZ + _zc + 2, 'mud'))
 for _i, (_dx, _dz, _r, _h) in enumerate(_MESAS):
     _build += _mesa(_dx, _dz, _r, _h, _i)
+    if _r >= 5:                                     # a lower side lobe so the big mesas look less like columns
+        _a = math.radians(_rnd.choice([0, 180]) + _rnd.randint(-25, 25))
+        _build += _mesa(_dx + round((_r - 1) * math.cos(_a)), _dz + round((_r - 1) * math.sin(_a)), _r - 2, int(_h * 0.6), _i + 3)
 # stone bridge over ring 7
 _build += [_F(EX + 4, EY + 37, EZ - 9, EX + 8, EY + 39, EZ + 13, 'red_sandstone'),
            _F(EX + 4, EY + 37, EZ - 9, EX + 8, EY + 37, EZ + 13, 'cut_red_sandstone'),
@@ -191,6 +194,7 @@ _build += [_F(EX - 55, _TOWER_TOP - 1, EZ - 45, EX - 45, _TOWER_TOP - 1, EZ - 35
            _F(EX - 55, _TOWER_TOP, EZ - 35, EX - 45, _TOWER_TOP, EZ - 35, 'waxed_cut_copper'),
            _F(EX - 55, _TOWER_TOP, EZ - 45, EX - 55, _TOWER_TOP, EZ - 35, 'waxed_cut_copper'),
            _F(EX - 45, _TOWER_TOP, EZ - 45, EX - 45, _TOWER_TOP, EZ - 35, 'waxed_cut_copper'),
+           _F(EX - 45, _TOWER_TOP, EZ - 44, EX - 45, _TOWER_TOP, EZ - 36, _SAFE),      # floor under the gate: standing allowed
            _F(EX - 55, _TOWER_TOP + 1, EZ - 45, EX - 45, _TOWER_TOP + 4, EZ - 45, 'light_blue_stained_glass'),
            _F(EX - 55, _TOWER_TOP + 1, EZ - 35, EX - 45, _TOWER_TOP + 4, EZ - 35, 'light_blue_stained_glass'),
            _F(EX - 55, _TOWER_TOP + 1, EZ - 45, EX - 55, _TOWER_TOP + 4, EZ - 35, 'light_blue_stained_glass')]
@@ -234,7 +238,7 @@ for _d in _RD:
         slab = f'positioned {cx - R - 1} {cy - R - 1} {cz - 2} if entity @s[dx={2 * R + 2},dy={2 * R + 2},dz=3]'
         delta = f'{R * 0.35:.2f} {R * 0.35:.2f} 0.15'
     sel = f'@a[tag={_AL},tag=!mg_elytra_fin,scores={{mg_elytra_p={k - 1}}}]'
-    _ring_checks.append(f'execute as {sel} positioned {cx} {cy} {cz} if entity @s[distance=..{R + 0.5}] {slab} at @s run function {NS}:elytra/r{k}')
+    _ring_checks.append(f'execute as {sel} positioned {cx} {cy - 0.3:.1f} {cz} if entity @s[distance=..{R + 1}] {slab} at @s run function {NS}:elytra/r{k}')
     _hud_fx += [f'execute as {sel} run particle minecraft:end_rod {cx} {cy} {cz} {delta} 0 10 force @s',
                 f'execute as {sel} at @s anchored eyes facing {cx} {cy} {cz} run particle minecraft:electric_spark ^ ^ ^5 0 0 0 0 1 force @s',
                 f'execute as {sel} at @s anchored eyes facing {cx} {cy} {cz} run particle minecraft:electric_spark ^ ^ ^6.5 0 0 0 0 1 force @s']
@@ -288,13 +292,17 @@ fn('elytra/goal', [
     'clear @s', 'gamemode spectator @s',
     f'tellraw @s {msg({"text": "Du bist jetzt Zuschauer – schau den anderen beim Fliegen zu.", "color": "gray"})}'])
 fn('elytra/first', [
-    'tag @s add mg_elytra_win',
+    'tag @s add mg_elytra_win', f'function {NS}:elytra/award',
     'scoreboard players operation #elytra_dl mg = #elytra_t mg', f'scoreboard players add #elytra_dl mg {_AFTER}',
     f'title @s title {tc({"text": "SIEG!", "color": "gold", "bold": True})}',
     'title @s subtitle ' + tc([{'text': 'Platz 1  ·  ', 'color': 'white'}] + _TIME),
     f'tellraw @a[tag={_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' fliegt als Erster durchs Ziel! ', 'color': 'yellow'}, *_TIME),
+    f'tellraw @a[tag=!{_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' gewinnt Elytra-Rennen!', 'color': 'white'}),
     f'tellraw {_RACE} ' + msg({'text': 'Ihr habt noch 3 Minuten, um ins Ziel zu kommen!', 'color': 'red'}),
     f'execute as {_RACE} at @s run playsound minecraft:entity.wither.spawn master @s ~ ~ ~ 0.4 1.6'])
+
+# the win is booked the moment it is decided, so leaving the round afterwards cannot cost it
+fn('elytra/award', ['scoreboard players add @s mg_wins 1', 'scoreboard players add @s mg_coins 15'])
 
 # crashes / respawn
 _rsp = ['scoreboard players set @s mg_elytra_g 0']
@@ -324,7 +332,8 @@ fn('elytra/pl', [
     f'execute if score @s mg_deaths matches 1.. run return run function {NS}:elytra/died',
     f'execute if entity @s[y=-64,dy={_LOW + 64}] run return run function {NS}:elytra/crash_low',
     f'execute unless entity @s[x={EX - 62},y=90,z={EZ - 62},dx=124,dy=115,dz=124] run return run function {NS}:elytra/crash_out',
-    'execute store success score #elytra_og mg if predicate {condition:"minecraft:entity_properties",entity:"this",predicate:{flags:{is_on_ground:true}}}',
+    # 26.3 (pack format 121) renamed the predicate key "condition" to "type"; 26.1 test servers still need "condition"
+    'execute store success score #elytra_og mg if predicate {' + ('type' if MIN_FORMAT >= 121 else 'condition') + ':"minecraft:entity_properties",entity:"this",predicate:{flags:{is_on_ground:true}}}',
     f'execute if score #elytra_og mg matches 1 at @s if block ~ ~-0.5 ~ minecraft:{_SAFE} run scoreboard players set #elytra_og mg 0',
     'execute if score #elytra_og mg matches 0 run scoreboard players set @s mg_elytra_g 0',
     'execute if score #elytra_og mg matches 1 run scoreboard players add @s mg_elytra_g 1',
@@ -369,13 +378,24 @@ fn('elytra/hud', [
     f'execute as @a[tag={_T},tag=mg_elytra_fin] run title @s actionbar {_ab_fin}'])
 
 # end of the race
-fn('elytra/end_go', [f'tag @a[tag={_T},tag=!mg_elytra_win] remove {_AL}', f'title @a[tag={_T}] times 10 60 20',
-                     f'effect clear @a[tag={_T}] minecraft:glowing', f'function {NS}:elytra/end'])
+# own end instead of the framework's elytra/end: wins/coins were already booked in elytra/first / end_time,
+# so nobody keeps mg_al_elytra and the framework's draw line never shows up
+_W = f'@a[tag={_T},tag=mg_elytra_win]'
+fn('elytra/end_go', [
+    f'tag @a[tag={_T}] remove {_AL}', f'title @a[tag={_T}] times 10 60 20', f'effect clear @a[tag={_T}] minecraft:glowing',
+    f'execute as {_W} run tellraw @a[tag={_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' gewinnt Elytra-Rennen!', 'color': 'white'}),
+    f'execute unless entity {_W} if score #elytra_place mg matches 1.. run tellraw @a[tag={_T}] ' + msg({'text': 'Der Sieger hat das Rennen schon verlassen – sein Sieg zählt trotzdem.', 'color': 'gray'}),
+    f'execute unless entity {_W} if score #elytra_place mg matches 0 run tellraw @a[tag={_T}] ' + msg({'text': 'Unentschieden – niemand hat einen Ring geschafft.', 'color': 'gray'}),
+    f'title @a[tag={_T}] title {tc({"text": "Spiel vorbei!", "color": "dark_aqua", "bold": True})}',
+    f'execute as {_W} at @s run summon minecraft:firework_rocket ~ ~1 ~ {{LifeTime:20,FireworksItem:{{id:"minecraft:firework_rocket",count:1,components:{{"minecraft:fireworks":{{flight_duration:1,explosions:[{{shape:"large_ball",colors:[I;16766720],has_twinkle:true}}]}}}}}}}}',
+    f'scoreboard players set #{_K} mg 3', f'schedule function {NS}:{_K}/finish 100t'])
 fn('elytra/end_late', [f'tellraw {_RACE} ' + msg({'text': 'Zeit abgelaufen – du hast es nicht mehr ins Ziel geschafft.', 'color': 'red'}),
                        f'function {NS}:elytra/end_go'])
 fn('elytra/end_time', [
     f'tellraw @a[tag={_T}] ' + msg({'text': 'Zeit abgelaufen! Niemand hat das Ziel erreicht – wer am weitesten kam, gewinnt.', 'color': 'red'}),
     f'execute if score #elytra_best mg matches 1.. as {_RACE} if score @s mg_elytra_p = #elytra_best mg run tag @s add mg_elytra_win',
+    f'execute as @a[tag={_T},tag=mg_elytra_win] run function {NS}:elytra/award',
+    f'execute as @a[tag={_T},tag=mg_elytra_win] run tellraw @a[tag=!{_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' gewinnt Elytra-Rennen!', 'color': 'white'}),
     f'function {NS}:elytra/end_go'])
 _warn = []
 for _ticks, _txt in ((1200, 'Noch 60 Sekunden!'), (600, 'Noch 30 Sekunden!'), (200, 'Noch 10 Sekunden!')):
@@ -425,4 +445,4 @@ party(_K, 'Elytra-Rennen', 'dark_aqua', (EX, EY, EZ), trig=65, prof='toolsmith',
       info='Gleite mit der Elytra vom Startturm durch alle 15 Ringe – in der richtigen Reihenfolge. Raketen geben Schub '
            '(Nachschub an Ring 5 und 10). Absturz oder Bodenkontakt = zurück zum letzten Ring. Wer zuerst durchs goldene Ziel fliegt, gewinnt!',
       title_sub='Flieg durch alle 15 Ringe!', size=60, build=_build, setup=_setup, game=_game, custom_end=True,
-      spect=_SPECT, coins_win=15, cleanup=[_gate('red_stained_glass')])
+      spect=_SPECT, coins_win=0, cleanup=[_gate('red_stained_glass')])

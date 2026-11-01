@@ -200,13 +200,16 @@ for t in TM:
 _b.append(f'{OW} kill @e[type=minecraft:item,{_AREA}]')
 
 # ------------------------------------------------------------------ state / helpers
-_TAGS = ('mg_ctf_r', 'mg_ctf_b', 'mg_ctf_c', 'mg_ctf_kl')
+_TAGS = ('mg_ctf_r', 'mg_ctf_b', 'mg_ctf_c', 'mg_ctf_kl', 'mg_ctf_cam')
 ENTER_LINES.extend([f'tag @s remove {t}' for t in _TAGS] + ['scoreboard players set @s mg_ctf_rs 0'])
 EXTRA_LOAD.extend([
     'scoreboard objectives add mg_ctf_k playerKillCount', 'scoreboard objectives add mg_ctf_rs dummy', 'scoreboard objectives add mg_ctf_a dummy',
     'scoreboard objectives add mg_ctf_cap dummy',
     f'bossbar add {NS}:ctf {tc({"text": "Capture the Flag"})}', f'bossbar set {NS}:ctf max {_LEN}', f'bossbar set {NS}:ctf style notched_10',
     f'scoreboard players set #ctf_len mg {_LEN}',
+    # server restarted mid-round: nobody is in a round any more -> hide the stale bar
+    f'execute unless entity @a[tag={_T}] run bossbar set {NS}:ctf visible false',
+    f'execute unless entity @a[tag={_T}] run bossbar set {NS}:ctf players',
 ])
 for t, d in TM.items():
     EXTRA_LOAD += [f'team add {d["team"]}', f'team modify {d["team"]} color {d["col"]}', f'team modify {d["team"]} friendlyFire false',
@@ -280,9 +283,11 @@ for t, d in TM.items():
         f'execute as @a[tag={_T},tag=mg_ctf_{d["o"]}] at @s run playsound minecraft:entity.wither.ambient master @s ~ ~ ~ 0.5 1.5',
         f'execute in minecraft:overworld run summon minecraft:firework_rocket {fx}.5 {fy + 1} {fz}.5 {{LifeTime:25,FireworksItem:{{id:"minecraft:firework_rocket",count:1,components:{{"minecraft:fireworks":{{flight_duration:1,explosions:[{{shape:"star",colors:[I;{d["rgb"]}],fade_colors:[I;16777215],has_twinkle:true}}]}}}}}}}}'])
     # death / respawn
+    # the camera tp is done by ctf/cam_* from ctf/rs once the player has really respawned (a tp on the death screen is lost)
     fn(f'ctf/dead_{t}', [
-        'gamemode spectator @s', f'{OW} tp @s {cam_x}.5 {CY + 12} {CZ}.5 {-d["yaw"]} 30', 'scoreboard players set @s mg_ctf_rs 60',
+        'gamemode spectator @s', 'tag @s remove mg_ctf_cam', 'scoreboard players set @s mg_ctf_rs 60',
         *_title('@s', 'Du bist gestorben!', 'red', 'Respawn in 3 Sekunden ...')])
+    fn(f'ctf/cam_{t}', ['gamemode spectator @s', f'{OW} tp @s {cam_x}.5 {CY + 12} {CZ}.5 {-d["yaw"]} 30', 'tag @s add mg_ctf_cam'])
     # end: team t wins
     fn(f'ctf/win_{t}', [
         f'tag @a[tag={_T}] remove {_AL}', f'tag @a[tag={_T},tag=mg_ctf_{t}] add {_AL}',
@@ -302,6 +307,11 @@ fn('ctf/died', [
     f'execute if entity @s[tag=mg_ctf_b] run function {NS}:ctf/dead_b'])
 fn('ctf/rs', [
     'scoreboard players remove @s mg_ctf_rs 1',
+    # still on the death screen? (Health 0) -> no camera yet, and never run the respawn before the player is back
+    'execute store result score #ctf_hp mg run data get entity @s Health',
+    'execute if score #ctf_hp mg matches ..0 if score @s mg_ctf_rs matches ..0 run scoreboard players set @s mg_ctf_rs 1',
+    f'execute if score #ctf_hp mg matches 1.. if entity @s[tag=!mg_ctf_cam,tag=mg_ctf_r] run function {NS}:ctf/cam_r',
+    f'execute if score #ctf_hp mg matches 1.. if entity @s[tag=!mg_ctf_cam,tag=mg_ctf_b] run function {NS}:ctf/cam_b',
     f'execute if score @s mg_ctf_rs matches 59 run title @s actionbar {tc(_txt("Respawn in 3 ...", "gray"))}',
     f'execute if score @s mg_ctf_rs matches 40 run title @s actionbar {tc(_txt("Respawn in 2 ...", "gray"))}',
     f'execute if score @s mg_ctf_rs matches 20 run title @s actionbar {tc(_txt("Respawn in 1 ...", "gray"))}',
@@ -312,18 +322,22 @@ fn('ctf/rs', [
     'title @s clear'])
 
 # ---- HUD (every 10 ticks): bossbar with score + time, status in the actionbar
-_tm = ['scoreboard players operation #ctf_rem mg = #ctf_len mg', 'scoreboard players operation #ctf_rem mg -= #ctf_t mg',
+_tm = ['scoreboard players operation #ctf_rem mg = #ctf_len mg',
+       f'execute if score #ctf_sd mg matches 1 run scoreboard players set #ctf_rem mg {_LEN + _SD}',   # overtime: time until the draw
+       'scoreboard players operation #ctf_rem mg -= #ctf_t mg',
        'execute if score #ctf_rem mg matches ..0 run scoreboard players set #ctf_rem mg 0',
        'scoreboard players operation #ctf_s mg = #ctf_rem mg', 'scoreboard players add #ctf_s mg 19', 'scoreboard players operation #ctf_s mg /= #20 mg',
        'scoreboard players operation #ctf_mm mg = #ctf_s mg', 'scoreboard players operation #ctf_mm mg /= #60 mg',
        'scoreboard players operation #ctf_ss mg = #ctf_s mg', 'scoreboard players operation #ctf_ss mg %= #60 mg',
        'scoreboard players operation #ctf_s10 mg = #ctf_ss mg', 'scoreboard players operation #ctf_s10 mg /= #10 mg',
        'scoreboard players operation #ctf_s1 mg = #ctf_ss mg', 'scoreboard players operation #ctf_s1 mg %= #10 mg',
-       f'execute if score #ctf_sd mg matches 0 store result bossbar {NS}:ctf value run scoreboard players get #ctf_rem mg',
+       f'execute store result bossbar {NS}:ctf value run scoreboard players get #ctf_rem mg',
        f'execute if score #ctf_sd mg matches 0 run bossbar set {NS}:ctf name ' + tc(_SCORE + [_txt('     ⌛ ', 'gray'),
             {'score': {'name': '#ctf_mm', 'objective': 'mg'}, 'color': 'white'}, _txt(':', 'white'),
             {'score': {'name': '#ctf_s10', 'objective': 'mg'}, 'color': 'white'}, {'score': {'name': '#ctf_s1', 'objective': 'mg'}, 'color': 'white'}]),
-       f'execute if score #ctf_sd mg matches 1 run bossbar set {NS}:ctf name ' + tc(_SCORE + [_txt('     VERLÄNGERUNG – nächste Eroberung gewinnt!', 'light_purple', bold=True)]),
+       f'execute if score #ctf_sd mg matches 1 run bossbar set {NS}:ctf name ' + tc(_SCORE + [_txt('     VERLÄNGERUNG – nächste Eroberung gewinnt!  ⌛ ', 'light_purple', bold=True),
+            {'score': {'name': '#ctf_mm', 'objective': 'mg'}, 'color': 'white'}, _txt(':', 'white'),
+            {'score': {'name': '#ctf_s10', 'objective': 'mg'}, 'color': 'white'}, {'score': {'name': '#ctf_s1', 'objective': 'mg'}, 'color': 'white'}]),
        f'bossbar set {NS}:ctf players @a[tag={_T}]']
 for t, d in TM.items():
     o = d['o']
@@ -343,7 +357,7 @@ fn('ctf/timeup', [
     f'execute if score #ctf_sb mg > #ctf_sr mg run tellraw @a[tag={_T}] {msg(_txt("Die Zeit ist um!", "yellow", bold=True))}',
     f'execute if score #ctf_sb mg > #ctf_sr mg run return run function {NS}:ctf/win_b',
     'scoreboard players set #ctf_sd mg 1',
-    f'bossbar set {NS}:ctf color purple', f'bossbar set {NS}:ctf value {_LEN}',
+    f'bossbar set {NS}:ctf color purple', f'bossbar set {NS}:ctf max {_SD}', f'bossbar set {NS}:ctf value {_SD}',
     f'tellraw @a[tag={_T}] {msg(_txt("Gleichstand! ", "light_purple", bold=True), _txt("Verlängerung: Die nächste Eroberung gewinnt – du hast 2 Minuten!", "white"))}',
     *_title(f'@a[tag={_T}]', 'VERLÄNGERUNG!', 'light_purple', 'Die nächste Eroberung gewinnt'),
     f'execute as @a[tag={_T}] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.5 1.2'])
@@ -359,6 +373,11 @@ fn('ctf/left', [  # one team has nobody left
     f'function {NS}:ctf/end'])
 fn('ctf/arrows', [f'execute as @a[tag={_AL},gamemode=adventure] store result score @s mg_ctf_a run clear @s minecraft:arrow 0',
                   f'give @a[tag={_AL},gamemode=adventure,scores={{mg_ctf_a=..7}}] minecraft:arrow 1'])
+_UNB = '[minecraft:unbreakable={},minecraft:tooltip_display={hidden_components:["minecraft:unbreakable"]}]'
+fn('ctf/kitchk', [f'execute as @a[tag={_AL},gamemode=adventure] store result score @s mg_ctf_a run clear @s minecraft:stone_sword 0',
+                  f'give @a[tag={_AL},gamemode=adventure,scores={{mg_ctf_a=0}}] minecraft:stone_sword{_UNB}',
+                  f'execute as @a[tag={_AL},gamemode=adventure] store result score @s mg_ctf_a run clear @s minecraft:bow 0',
+                  f'give @a[tag={_AL},gamemode=adventure,scores={{mg_ctf_a=0}}] minecraft:bow{_UNB}'])
 fn('ctf/slow', [
     f'{OW} kill @e[type=minecraft:item,{_AREA}]',
     *[f'execute at @a[tag={_AL},tag=mg_ctf_{TM[t]["o"]},tag=mg_ctf_c] run particle minecraft:dust{{color:{d["dust"]},scale:1.5}} ~ ~2.4 ~ 0.25 0.25 0.25 0 4 force'
@@ -374,7 +393,7 @@ _setup = [
     f'execute as @a[tag={_T},sort=random] run function {NS}:ctf/assign',
     f'execute as @a[tag={_T},tag=mg_ctf_r] run function {NS}:ctf/spawn_r',
     f'execute as @a[tag={_T},tag=mg_ctf_b] run function {NS}:ctf/spawn_b',
-    f'bossbar set {NS}:ctf color yellow', f'bossbar set {NS}:ctf value {_LEN}', f'bossbar set {NS}:ctf players @a[tag={_T}]',
+    f'bossbar set {NS}:ctf color yellow', f'bossbar set {NS}:ctf max {_LEN}', f'bossbar set {NS}:ctf value {_LEN}', f'bossbar set {NS}:ctf players @a[tag={_T}]',
     f'bossbar set {NS}:ctf visible true',
     f'function {NS}:ctf/hud',
 ]
@@ -388,7 +407,8 @@ _game = [
     f'execute as @a[tag={_AL},scores={{mg_deaths=1..}}] run function {NS}:ctf/died',
     'tag @a[tag=mg_ctf_kl] remove mg_ctf_kl', f'scoreboard players set @a[tag={_T},scores={{mg_ctf_k=1..}}] mg_ctf_k 0',
     f'execute as @a[tag={_AL},scores={{mg_ctf_rs=1..}}] run function {NS}:ctf/rs',
-    void_kill(_AL, CY - 6),
+    # only living players: a spectator waiting for the respawn may fly below the map
+    f'execute as @a[tag={_AL},gamemode=adventure] at @s if entity @s[y=-64,dy={CY - 6 + 64}] run kill @s',
 ]
 for t, d in TM.items():
     o = d['o']
@@ -408,6 +428,9 @@ _game += [
     f'execute if score #ctf_t mg matches {_LEN - 1200} run tellraw @a[tag={_T}] {msg(_txt("Noch 1 Minute!", "yellow", bold=True))}',
     f'execute if score #ctf_t mg matches {_LEN - 1200} run bossbar set {NS}:ctf color red',
     f'execute if score #ctf_t mg matches {_LEN - 200}.. if score #ctf_t mg matches ..{_LEN - 1} if score #m mg matches 0 as @a[tag={_T}] at @s run playsound minecraft:block.note_block.hat master @s ~ ~ ~ 1 1.5',
+    f'execute if score #ctf_t mg matches {_LEN + _SD - 200}.. if score #ctf_t mg matches ..{_LEN + _SD - 1} if score #m mg matches 0 as @a[tag={_T}] at @s run playsound minecraft:block.note_block.hat master @s ~ ~ ~ 1 1.5',
+    # dropped sword / bow (Q) is deleted with the other items -> hand it back
+    f'execute if score #m mg matches 5 run function {NS}:ctf/kitchk',
     # end conditions
     f'execute if score #ctf_sr mg matches 3.. run return run function {NS}:ctf/win_r',
     f'execute if score #ctf_sb mg matches 3.. run return run function {NS}:ctf/win_b',

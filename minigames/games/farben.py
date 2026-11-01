@@ -259,6 +259,9 @@ fn('farben/elim', [
     f'tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "white"}, {"text": " ist raus! ", "color": "red"}, {"text": "Noch ", "color": "gray"}, {"score": {"name": "#farben_n", "objective": "mg"}, "color": "white"}, {"text": " übrig.", "color": "gray"})}',
 ])
 fn('farben/eval', [
+    # anyone no longer standing on the floor (feet below y 100.95, e.g. knocked off late in the hold) is out before scoring -
+    # otherwise they would count as a survivor and then fall through the rebuilt floor in the next round
+    f'execute as @a[tag={_AL}] at @s if entity @s[y=-64,dy={_cy + 64 - 0.05}] run function {NS}:farben/fall',
     f'execute store result score #farben_n mg if entity @a[tag={_AL}]',
     f'execute if score #farben_n mg matches 0 if entity @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/revive',
     f'execute store result score #farben_n mg if entity @a[tag={_AL}]',
@@ -284,6 +287,7 @@ _game = [
     f'execute if score #farben mg matches 2 if score #farben_n mg matches ..1 unless entity @a[tag={_T},tag=mg_farben_fell] run function {NS}:farben/end',
     'scoreboard players operation #m mg = #farben_t mg', 'scoreboard players operation #m mg %= #5 mg',
     f'execute if score #m mg matches 0 run {_BB} players @a[tag={_T}]',
+    f'execute if score #m mg matches 0 run {_BB} visible true',
 ]
 _setup = [
     f'{OW} spreadplayers {_cx} {_cz} 3 12 false @a[tag={_T}]',
@@ -295,7 +299,7 @@ _setup = [
     f'{_BB} name {tc({"text": "Farbenparty – gleich geht es los!", "color": "light_purple", "bold": True})}',
     f'{_BB} color pink', f'{_BB} max 1', f'{_BB} value 1', f'{_BB} players @a[tag={_T}]', f'{_BB} visible true',
 ]
-EXTRA_LOAD.extend([f'bossbar add {NS}:farben {tc({"text": "Farbenparty"})}', f'bossbar set {NS}:farben visible false'])
+EXTRA_LOAD.extend([f'bossbar add {NS}:farben {tc({"text": "Farbenparty"})}', f'execute unless entity @a[tag={_T}] run bossbar set {NS}:farben visible false'])
 ENTER_LINES.extend(['tag @s remove mg_farben_fell', 'tag @s remove mg_farben_rev'])
 party('farben', 'Farbenparty', 'light_purple', FB, trig=61, prof='shepherd', sub='Musik · Farbe · Letzter gewinnt', menu='Stell dich auf die richtige Farbe',
       info='Wenn die Musik stoppt, wird eine Farbe angesagt. Stell dich schnell auf ein Feld dieser Farbe – alle anderen Felder verschwinden! Jede Runde wird die Zeit kürzer. Wer zuletzt noch steht, gewinnt.',

@@ -4,7 +4,7 @@
 MX, MY, MZ = 74000, Y, 0
 _K = 'murder'
 _T, _AL = 'mg_murder', 'mg_al_murder'
-_SPECT = (MX, MY + 20, MZ + 34)
+_SPECT = (MX, MY + 20, MZ + 23)       # above the fountain: whoever respawns in adventure mode lands in water, not in the void
 _LEN = 4800                       # round length in ticks (4 min)
 _AREA = f'x={MX - 30},y={MY - 5},z={MZ - 30},dx=60,dy=30,dz=60'
 
@@ -159,7 +159,7 @@ _b += [_F(-15, 1, -15, -15, 4, -7, 'bookshelf'), _F(-15, 1, -15, -7, 4, -15, 'bo
        _F(-13, 1, -10, -9, 1, -8, 'red_carpet'), _S(-9, 1, -9, 'lectern[facing=south]'), _S(-11, 5, -11, 'lantern[hanging=true]'),
        _S(-14, 1, -9, 'spruce_stairs[facing=west]'), _S(-14, 1, -14, 'potted_fern')]
 # --- N dining room
-_b += [_F(-3, 1, -12, 3, 1, -10, 'dark_oak_slab[type=top]'), _F(-4, 1, -15, -2, 1, -15, 'barrel[facing=up]'), _F(2, 1, -15, 4, 1, -15, 'barrel[facing=up]'),
+_b += [_F(-3, 1, -12, 3, 1, -10, 'dark_oak_slab[type=top]'), _F(-4, 1, -15, -2, 1, -15, 'stripped_spruce_log[axis=y]'), _F(2, 1, -15, 4, 1, -15, 'stripped_spruce_log[axis=y]'),
        _S(-4, 2, -15, 'potted_red_tulip'), _S(4, 2, -15, 'potted_white_tulip'), _S(-3, 2, -15, 'lantern'), _S(3, 2, -15, 'lantern')]
 for cx_ in (-3, -1, 1, 3):
     _b += [_S(cx_, 1, -13, 'spruce_stairs[facing=north]'), _S(cx_, 1, -9, 'spruce_stairs[facing=south]')]
@@ -167,8 +167,8 @@ for cx_ in (-2, 0, 2):
     _b.append(_S(cx_, 2, -11, 'candle[candles=3,lit=true]'))
 _b += [_S(-2, 5, -11, 'lantern[hanging=true]'), _S(2, 5, -11, 'lantern[hanging=true]')]
 # --- NE kitchen
-_b += [_F(8, 1, -15, 14, 1, -15, 'polished_andesite'), _S(9, 1, -15, 'smoker[facing=south,lit=true]'), _S(11, 1, -15, 'furnace[facing=south]'),
-       _S(13, 1, -15, 'water_cauldron[level=3]'), _F(15, 1, -14, 15, 2, -13, 'barrel[facing=west]'), _S(15, 1, -10, 'crafting_table'),
+_b += [_F(8, 1, -15, 14, 1, -15, 'polished_andesite'), _S(9, 1, -15, 'polished_deepslate'), _S(11, 1, -15, 'polished_deepslate'),
+       _S(13, 1, -15, 'water_cauldron[level=3]'), _F(15, 1, -14, 15, 2, -13, 'stripped_spruce_log[axis=x]'), _S(15, 1, -10, 'fletching_table'),
        _F(10, 1, -11, 12, 1, -10, 'smooth_stone_slab[type=top]'), _S(11, 2, -11, 'cake'), _S(11, 5, -12, 'lantern[hanging=true]'),
        _S(8, 2, -15, 'potted_cactus')]
 # --- W lounge with fireplace
@@ -190,7 +190,7 @@ _b += [_F(9, 1, -3, 13, 1, 3, 'cyan_carpet'), _F(13, 1, -5, 15, 1, -5, 'polished
 # --- SW bedroom
 _b += [_S(-15, 1, 9, 'red_bed[facing=west,part=head]'), _S(-14, 1, 9, 'red_bed[facing=west,part=foot]'),
        _S(-15, 1, 12, 'blue_bed[facing=west,part=head]'), _S(-14, 1, 12, 'blue_bed[facing=west,part=foot]'),
-       _S(-15, 1, 10, 'barrel[facing=up]'), _S(-15, 2, 10, 'candle[candles=2,lit=true]'),
+       _S(-15, 1, 10, 'stripped_spruce_log[axis=y]'), _S(-15, 2, 10, 'candle[candles=2,lit=true]'),
        _F(-13, 1, 15, -11, 3, 15, 'stripped_spruce_wood'), _F(-13, 1, 9, -10, 1, 13, 'white_carpet'), _S(-11, 5, 11, 'lantern[hanging=true]')]
 # --- S entrance hall
 _b += [_F(-1, 1, 7, 1, 1, 15, 'red_carpet'), _S(-3, 1, 15, 'potted_azalea_bush'), _S(3, 1, 15, 'potted_azalea_bush'),
@@ -323,14 +323,22 @@ fn('murder/bow_get', [
     'playsound minecraft:item.armor.equip_chain master @s ~ ~ ~ 1 1.2',
 ])
 fn('murder/bow_check', [
-    'scoreboard players set #n mg 0',
-    *[f'execute as @a[tag={_AL}] {c} run scoreboard players add #n mg 1' for c in _has('dbow')],
+    f'execute store result score #n mg run clear @a[tag={_AL}] *[minecraft:custom_data~{{mg_murder:"dbow"}}] 0',
     'execute if entity @e[type=minecraft:item,tag=mg_murder_bi] run scoreboard players add #n mg 1',
     f'execute if score #n mg matches 0 run function {NS}:murder/bow_respawn',
 ])
-fn('murder/bow_respawn', [
-    f'{OW} summon minecraft:item {MX}.5 {MY + 1.2} {MZ}.5 {{Item:{{id:"minecraft:bow",count:1,components:{{"minecraft:custom_name":{tc(_txt("Detektiv-Bogen", "aqua", bold=True))},'
-    f'"minecraft:enchantments":{{"minecraft:power":255}},"minecraft:unbreakable":{{}},"minecraft:custom_data":{{mg_murder:"dbow"}}}}}},Motion:[0.0,0.0,0.0]}}',
+fn('murder/bow_respawn', [   # already locked (no vanilla pickup), then turned into the real detective bow
+    f'{OW} summon minecraft:item {MX}.5 {MY + 1.2} {MZ}.5 {{Item:{{id:"minecraft:bow",count:1}},PickupDelay:32767,Age:-32768,Glowing:1b,Tags:["mg_murder_bi","mg_murder_bnew"],Motion:[0.0,0.0,0.0]}}',
+    f'item replace entity @e[type=minecraft:item,tag=mg_murder_bnew] contents with {_bow("dbow")}',
+    'tag @e[type=minecraft:item,tag=mg_murder_bnew] remove mg_murder_bnew',
+    f'tellraw @a[tag={_T}] {msg(_txt("Der Detektiv-Bogen liegt in der großen Halle! ", "aqua", bold=True), _txt("Unschuldige können ihn aufheben.", "gray"))}',
+    f'execute as @a[tag={_T}] at @s run playsound minecraft:block.amethyst_block.chime master @s ~ ~ ~ 1 0.8',
+])
+# detective needs a new arrow: holds the bow anywhere (also offhand / cursor / crafting grid) and has no arrow left
+fn('murder/need_arrow', [
+    'execute store result score #n mg run clear @s minecraft:arrow 0', 'execute if score #n mg matches 1.. run return 0',
+    'execute store result score #n mg run clear @s *[minecraft:custom_data~{mg_murder:"dbow"}] 0', 'execute if score #n mg matches 1.. run return 1',
+    'return 0',
 ])
 fn('murder/buy', [
     'clear @s minecraft:gold_ingot 10', 'scoreboard players remove @s mg_murder_g 10',
@@ -380,10 +388,13 @@ fn('murder/hud', [
 ])
 fn('murder/last_minute', [
     f'bossbar set {NS}:murder color red',
-    f'effect give @a[tag={_AL},tag=!mg_murder_m] minecraft:glowing infinite 0 true',
-    f'tellraw @a[tag={_T}] {msg(_txt("Noch 60 Sekunden! ", "red", bold=True), _txt("Alle Unschuldigen leuchten jetzt – der Mörder muss sich beeilen!", "gray"))}',
+    f'effect give @a[tag={_AL}] minecraft:glowing infinite 0 true',      # everyone, murderer included - otherwise he is the only one not glowing
+    f'tellraw @a[tag={_T}] {msg(_txt("Noch 60 Sekunden! ", "red", bold=True), _txt("Alle Lebenden leuchten jetzt – niemand kann sich mehr verstecken!", "gray"))}',
     f'execute as @a[tag={_T}] at @s run playsound minecraft:block.bell.use master @s ~ ~ ~ 1 0.7',
 ])
+_disarm = [f'clear @a[tag={_T}] minecraft:iron_sword', f'clear @a[tag={_T}] minecraft:bow', f'clear @a[tag={_T}] minecraft:arrow',
+           f'effect give @a[tag={_T}] minecraft:resistance 10 4 true', f'{OW} kill @e[type=minecraft:arrow,{_AREA}]',
+           f'kill @e[type=minecraft:item,tag=mg_murder_bi]']
 _reveal_end = [
     f'execute if entity @a[tag=mg_murder_m] run tellraw @a[tag={_T}] {msg(_txt("Der Mörder war: ", "gray"), {"selector": "@a[tag=mg_murder_m]", "color": "dark_red", "bold": True})}',
     f'execute if entity @a[tag=mg_murder_d] run tellraw @a[tag={_T}] {msg(_txt("Detektiv: ", "gray"), {"selector": "@a[tag=mg_murder_d]", "color": "aqua", "bold": True})}',
@@ -395,6 +406,7 @@ fn('murder/win_i', [
     *_reveal_end,
     f'execute as @a[tag={_AL}] at @s run playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1',
     f'execute as @a[tag=mg_murder_m] at @s run playsound minecraft:entity.wither.death master @s ~ ~ ~ 0.4 1.2',
+    *_disarm,
     f'function {NS}:murder/end',
 ])
 fn('murder/win_m', [
@@ -403,6 +415,7 @@ fn('murder/win_m', [
     f'tellraw @a[tag={_T}] {msg(_txt("Kein Unschuldiger ist mehr übrig – der Mörder gewinnt!", "dark_red", bold=True))}',
     *_reveal_end,
     f'execute as @a[tag={_T}] at @s run playsound minecraft:entity.wither.spawn master @s ~ ~ ~ 0.5 0.8',
+    *_disarm,
     f'function {NS}:murder/end',
 ])
 
@@ -421,8 +434,7 @@ _game = [
     # detective arrow reload: 5 s after the last arrow is gone
     f'execute as @a[tag={_AL},scores={{mg_murder_cd=1}}] run function {NS}:murder/arrow_give',
     f'scoreboard players remove @a[tag={_AL},scores={{mg_murder_cd=1..}}] mg_murder_cd 1',
-    f'execute as @a[tag={_AL},tag=!mg_murder_m,scores={{mg_murder_cd=0}}] {_has("dbow")[0]} unless items entity @s container.* minecraft:arrow '
-    f'unless items entity @s weapon.offhand minecraft:arrow unless items entity @s player.cursor minecraft:arrow run scoreboard players set @s mg_murder_cd 100',
+    f'execute as @a[tag={_AL},tag=!mg_murder_m,scores={{mg_murder_cd=0}}] if function {NS}:murder/need_arrow run scoreboard players set @s mg_murder_cd 100',
     f'execute if score #m5 mg matches 0 run function {NS}:murder/slow',
     f'execute if score #m200 mg matches 100 run function {NS}:murder/gold',
     f'execute if score #m mg matches 0 run function {NS}:murder/hud',

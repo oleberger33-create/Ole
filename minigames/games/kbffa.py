@@ -13,8 +13,9 @@ _BX1, _BX2, _BZ1, _BZ2, _BY1, _BY2 = KX - 40, KX + 39, KZ - 39, KZ + 39, KY - 17
 _FL = f'{_BX1} {_BZ1} {_BX2} {_BZ2}'
 _SPY = KY + 13                                    # spawn platform surface block
 _BOX = f'x={_BX1},dx={_BX2 - _BX1},y={_BY1 - 50},dy={_BY2 - _BY1 + 60},z={_BZ1},dz={_BZ2 - _BZ1}'
-_ZONE = f'x={KX - 9},dx=18,y={KY + 9},dy=12,z={KZ - 9},dz=18'   # protected spawn airspace
+_ZONE = f'x={KX - 7},dx=14,y={KY + 9},dy=12,z={KZ - 7},dz=14'   # protected spawn airspace (platform r=5; pads at r=9 stay outside)
 _AGE = ['sandstone', 'yellow_terracotta', 'orange_terracotta', 'red_terracotta']
+_COIN_CAP = 30                                    # kbffa coins per visit
 _PEARL_CD = 200                                   # ticks until a thrown pearl is refilled
 
 
@@ -168,7 +169,7 @@ for ca in (90, 270):
                                                                                                                    _S(px, 8, pz, 'sea_lantern')]
     ox, oz = _polar(3, ca)
     _b += [_S(px + oz, 9, pz + ox, 'amethyst_cluster[facing=up]'), _S(px - oz, 9, pz - ox, 'small_amethyst_bud[facing=up]')]
-    jx, jz = _polar(10, ca)
+    jx, jz = _polar(9, ca)                        # pad just inside the platform edge (platform spans r=11..17)
     _PADS.append((jx, jz))
     _b += [_F(jx - 1, 0, jz - 1, jx + 1, 0, jz + 1, 'polished_andesite'), _S(jx, 0, jz, 'purple_glazed_terracotta')]
     _busy |= {(jx + i, jz + j) for i in (-1, 0, 1) for j in (-1, 0, 1)}
@@ -209,10 +210,11 @@ _DROP = []
 for i, a in enumerate((45, 135, 225, 315)):
     x, z = _polar(5, a)
     _DROP.append(f'execute if score #kbffa_r mg matches {i} in minecraft:overworld run tp @s {KX + x}.5 {KY + 1} {KZ + z}.5 {a - 90} 0')
-fn(f'{_K}/kick_spawn', ['execute store result score #kbffa_r mg run random value 0..3'] + _DROP + [
-    'scoreboard players set @s mg_kbffa_sp 0',
-    f'title @s actionbar {tc(_txt("Zu lange am Spawn – ab in den Kampf!", "red", bold=True))}',
+fn(f'{_K}/drop', ['execute store result score #kbffa_r mg run random value 0..3'] + _DROP + [
+    'scoreboard players set @s mg_kbffa_hold 40',
     'execute at @s run playsound minecraft:entity.breeze.wind_burst master @s ~ ~ ~ 0.8 1'])
+fn(f'{_K}/kick_spawn', [f'title @s actionbar {tc(_txt("Zu lange am Spawn – ab in den Kampf!", "red", bold=True))}', f'function {NS}:{_K}/drop'])
+fn(f'{_K}/no_return', [f'title @s actionbar {tc(_txt("Spawn-Schutz gibt es nur direkt nach dem Respawn!", "red", bold=True))}', f'function {NS}:{_K}/drop'])
 
 # ------------------------------------------------------------------ kit / respawn
 fn(f'{_K}/kit', ['clear @s',
@@ -223,7 +225,7 @@ fn(f'{_K}/kit', ['clear @s',
 fn(f'{_K}/respawn', [
     'tag @s add mg_kbffa_rsp',
     f'{OW} execute as @e[type=minecraft:ender_pearl,{_BOX}] at @s on origin if entity @s[tag=mg_kbffa_rsp] run kill @e[type=minecraft:ender_pearl,distance=..0.5,limit=1,sort=nearest]',
-    'tag @s remove mg_kbffa_rsp', 'tag @s remove mg_kbffa_rech',
+    'tag @s remove mg_kbffa_rsp', 'tag @s remove mg_kbffa_rech', 'tag @s add mg_kbffa_fresh',
     *[f'scoreboard players set @s mg_kbffa_{o} 0' for o in ('s', 'lt', 'lh', 'pc', 'sp', 'dd', 'dt')],
     'scoreboard players set @s mg_deaths 0', 'scoreboard players set @s mg_kbffa_pv 40',
     'effect clear @s', 'effect give @s minecraft:instant_health 1 5 true', 'effect give @s minecraft:saturation infinite 0 true',
@@ -239,7 +241,9 @@ fn(f'{_K}/refill', ['clear @s minecraft:sandstone',
 fn(f'{_K}/join', [
     'execute unless entity @s[tag=mg_hub] run return 0',
     f'function {NS}:q/leave_all', 'tag @s remove mg_hub', f'tag @s add {_T}', f'tag @s add {_W}',
-    *[f'scoreboard players set @s mg_kbffa_{o} 0' for o in ('k', 'd', 'best', 'use', 'pad')],
+    *[f'scoreboard players set @s mg_kbffa_{o} 0' for o in ('k', 'd', 'best', 'use', 'pad', 'cn', 'hold')],
+    'execute unless score @s mg_kbffa_pid matches 1.. run scoreboard players add #kbffa_pid mg 1',      # persistent id (survives rejoin)
+    'execute unless score @s mg_kbffa_pid matches 1.. run scoreboard players operation @s mg_kbffa_pid = #kbffa_pid mg',
     'scoreboard players add #kbffa_id mg 1', 'scoreboard players operation @s mg_kbffa_id = #kbffa_id mg',
     f'execute store result score @s mg_kbffa_col run random value 0..{len(_COLORS) - 1}',
     'ride @s dismount', 'clear @s', 'effect clear @s', 'gamemode adventure @s',
@@ -288,7 +292,7 @@ fn(f'{_K}/fall', [
     'scoreboard players set #kbffa_lh mg 0',
     'execute if score @s mg_kbffa_lt matches 1.. run scoreboard players operation #kbffa_lh mg = @s mg_kbffa_lh',
     'scoreboard players operation #kbffa_vs mg = @s mg_kbffa_s',
-    'scoreboard players set #kbffa_kf mg 0', 'tag @s add mg_kbffa_vic',
+    'scoreboard players set #kbffa_kf mg 0', 'tag @s add mg_kbffa_vic', 'scoreboard players operation #kbffa_vid mg = @s mg_kbffa_pid',
     f'execute if score #kbffa_lh mg matches 1.. as @a[tag={_T},tag=!mg_kbffa_vic,tag=!{_W}] if score @s mg_kbffa_id = #kbffa_lh mg at @s run function {NS}:{_K}/kill',
     f'execute if score #kbffa_kf mg matches 0 run tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "white"}, _txt(" ist ins Nichts gestürzt.", "gray"))}',
     f'execute if score #kbffa_kf mg matches 0 if score #kbffa_vs mg matches 3.. run tellraw @a[tag={_T}] {msg(_txt("Die ", "gray"), {"score": {"name": "#kbffa_vs", "objective": "mg"}, "color": "red", "bold": True}, _txt("er-Serie von ", "gray"), {"selector": "@s", "color": "white"}, _txt(" ist vorbei.", "gray"))}',
@@ -300,7 +304,12 @@ fn(f'{_K}/fall', [
     f'function {NS}:{_K}/respawn'])
 fn(f'{_K}/kill', [
     'scoreboard players set #kbffa_kf mg 1', 'tag @s add mg_kbffa_klr',
-    'scoreboard players add @s mg_kbffa_k 1', 'scoreboard players add @s mg_kbffa_s 1', 'scoreboard players add @s mg_coins 1',
+    # anti coin farming: no coins for killing the same player twice in a row, max ~30 coins per visit
+    'scoreboard players set #kbffa_pay mg 1',
+    'execute if score @s mg_kbffa_lv = #kbffa_vid mg run scoreboard players set #kbffa_pay mg 0',
+    f'execute if score @s mg_kbffa_cn matches {_COIN_CAP}.. run scoreboard players set #kbffa_pay mg 0',
+    'scoreboard players operation @s mg_kbffa_lv = #kbffa_vid mg',
+    'scoreboard players add @s mg_kbffa_k 1', 'scoreboard players add @s mg_kbffa_s 1', f'function {NS}:{_K}/coin {{n:1}}',
     f'tellraw @a[tag={_T}] {msg(_txt("☠ ", "red"), {"selector": _VIC, "color": "white"}, _txt(" wurde von ", "gray"), {"selector": "@s", "color": "gold"}, _txt(" ins Nichts gestoßen ", "gray"), _txt("(Serie ", "dark_gray"), {"score": {"name": "@s", "objective": "mg_kbffa_s"}, "color": "red"}, _txt(")", "dark_gray"))}',
     'title @s times 0 25 8', f'title @s title {tc(_txt("", "white"))}',
     f'title @s subtitle {tc([_txt("☠ ", "red"), {"selector": _VIC, "color": "white"}, _txt("  +1 Kill", "gold", bold=True)])}',
@@ -311,8 +320,8 @@ fn(f'{_K}/kill', [
     f'execute as {_VIC} run title @s subtitle {tc([_txt("von ", "gray"), {"selector": "@a[tag=mg_kbffa_klr,limit=1]", "color": "gold"}])}',
     'effect give @s minecraft:instant_health 1 1 true',
     f'function {NS}:{_K}/refill',
-    f'execute if score #kbffa_vs mg matches 5.. run tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "gold", "bold": True}, _txt(" beendet die ", "yellow"), {"score": {"name": "#kbffa_vs", "objective": "mg"}, "color": "red", "bold": True}, _txt("er-Serie von ", "yellow"), {"selector": _VIC, "color": "white"}, _txt("! +3 Münzen", "yellow"))}',
-    'execute if score #kbffa_vs mg matches 5.. run scoreboard players add @s mg_coins 3',
+    f'execute if score #kbffa_vs mg matches 5.. run tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "gold", "bold": True}, _txt(" beendet die ", "yellow"), {"score": {"name": "#kbffa_vs", "objective": "mg"}, "color": "red", "bold": True}, _txt("er-Serie von ", "yellow"), {"selector": _VIC, "color": "white"}, _txt("!", "yellow"))}',
+    f'execute if score #kbffa_vs mg matches 5.. run function {NS}:{_K}/coin {{n:3}}',
     f'function {NS}:{_K}/streak',
     'execute if score @s mg_kbffa_s > @s mg_kbffa_best run scoreboard players operation @s mg_kbffa_best = @s mg_kbffa_s',
     f'execute if score @s mg_kbffa_s matches 5.. if score @s mg_kbffa_s > #kbffa_rec mg unless entity @s[tag=mg_kbffa_rech] run tellraw @a[tag={_T}] {msg(_txt("★ Neuer Arena-Rekord: ", "light_purple", bold=True), {"score": {"name": "@s", "objective": "mg_kbffa_s"}, "color": "white", "bold": True}, _txt(" Kills in Folge von ", "light_purple"), {"selector": "@s", "color": "white"})}',
@@ -322,8 +331,9 @@ fn(f'{_K}/kill', [
 fn(f'{_K}/streak', [
     'execute if score @s mg_kbffa_s matches 3 run effect give @s minecraft:speed 20 0 true',
     f'execute if score @s mg_kbffa_s matches 3 run title @s actionbar {tc(_txt("3er-Serie! Tempo für 20 Sekunden", "aqua", bold=True))}',
+    'execute if score @s mg_kbffa_s matches 3 run scoreboard players set @s mg_kbffa_hold 40',
     f'execute if score @s mg_kbffa_s matches 5 run give @s {PEARL} 1',
-    'execute if score @s mg_kbffa_s matches 5 run scoreboard players add @s mg_coins 2',
+    f'execute if score @s mg_kbffa_s matches 5 run function {NS}:{_K}/coin {{n:2}}',
     f'execute if score @s mg_kbffa_s matches 5 run tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "gold", "bold": True}, _txt(" hat eine ", "yellow"), _txt("5er-Serie", "red", bold=True), _txt("! Extra-Enderperle.", "yellow"))}',
     'execute if score @s mg_kbffa_s matches 5 run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1.2',
     f'execute if score @s mg_kbffa_s matches 10 run function {NS}:{_K}/st10',
@@ -333,36 +343,42 @@ fn(f'{_K}/st10', [
     'clear @s minecraft:stick[minecraft:custom_data~{mg_kbffa_stick:1b}]',
     f'execute unless items entity @s hotbar.0 * run item replace entity @s hotbar.0 with {STICK2}',
     f'execute unless items entity @s container.* minecraft:stick run give @s {STICK2}',
-    'scoreboard players add @s mg_coins 5',
+    f'function {NS}:{_K}/coin {{n:5}}',
     f'tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "gold", "bold": True}, _txt(" ist nicht zu stoppen – ", "yellow"), _txt("10er-Serie", "red", bold=True), _txt("! Donner-Stock freigeschaltet.", "yellow"))}',
     f'title @s title {tc(_txt("10er-SERIE!", "gold", bold=True))}',
     f'title @s subtitle {tc(_txt("Donner-Stock: Rückstoß III", "yellow"))}',
     f'execute as @a[tag={_T}] at @s run playsound minecraft:entity.lightning_bolt.thunder master @s ~ ~ ~ 0.6 1.3',
     'particle minecraft:totem_of_undying ~ ~1 ~ 0.5 1 0.5 0.4 60'])
 fn(f'{_K}/st15', [
-    f'give @s {PEARL} 1', 'scoreboard players add @s mg_coins 2',
+    f'give @s {PEARL} 1', f'function {NS}:{_K}/coin {{n:2}}',
     f'tellraw @a[tag={_T}] {msg({"selector": "@s", "color": "gold", "bold": True}, _txt(" ist auf einer ", "yellow"), {"score": {"name": "@s", "objective": "mg_kbffa_s"}, "color": "red", "bold": True}, _txt("er-Serie! Stoppt ihn!", "yellow"))}',
     'playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 0.8 1.2'])
+fn(f'{_K}/coin', ['execute if score #kbffa_pay mg matches 0 run return 0',
+                  '$scoreboard players add @s mg_coins $(n)', '$scoreboard players add @s mg_kbffa_cn $(n)'])
 fn(f'{_K}/died', ['scoreboard players set @s mg_deaths 0', f'function {NS}:{_K}/fall'])
 
 # ------------------------------------------------------------------ per player tick
-fn(f'{_K}/zone', ['effect give @s minecraft:resistance 1 4 true', 'effect give @s minecraft:weakness 1 100 true',
+fn(f'{_K}/zone', [f'execute unless entity @s[tag=mg_kbffa_fresh] run return run function {NS}:{_K}/no_return',   # no pearling back to safety
+                  f'execute unless entity @s[tag={_SAFE}] run attribute @s minecraft:knockback_resistance modifier add {NS}:kbffa_safe 1 add_value',
+                  'effect give @s minecraft:resistance 1 4 true', 'effect give @s minecraft:weakness 1 100 true',
                   f'tag @s add {_SAFE}', 'scoreboard players add @s mg_kbffa_sp 1',
                   f'execute if score @s mg_kbffa_sp matches 300 run title @s actionbar {tc(_txt("Noch 5 Sekunden am Spawn – spring runter!", "yellow", bold=True))}',
+                  'execute if score @s mg_kbffa_sp matches 300 run scoreboard players set @s mg_kbffa_hold 40',
                   f'execute if score @s mg_kbffa_sp matches 400.. run function {NS}:{_K}/kick_spawn'])
-fn(f'{_K}/unsafe', [f'tag @s remove {_SAFE}', 'scoreboard players set @s mg_kbffa_sp 0', 'effect clear @s minecraft:weakness',
+fn(f'{_K}/unsafe', [f'tag @s remove {_SAFE}', 'tag @s remove mg_kbffa_fresh', 'effect clear @s minecraft:weakness',
+                    f'attribute @s minecraft:knockback_resistance modifier remove {NS}:kbffa_safe',
                     'execute unless score @s mg_kbffa_pv matches 1.. run effect clear @s minecraft:resistance',
                     'playsound minecraft:item.armor.equip_leather master @s ~ ~ ~ 0.7 0.8'])
-fn(f'{_K}/pad', ['scoreboard players set @s mg_kbffa_pad 30', 'effect give @s minecraft:levitation 1 7 true', 'effect give @s minecraft:slow_falling 3 0 true',
+fn(f'{_K}/pad', ['scoreboard players set @s mg_kbffa_pad 50', 'effect give @s minecraft:levitation 2 5 true', 'effect give @s minecraft:slow_falling 7 0 true',
                  'playsound minecraft:entity.breeze.wind_burst master @a[distance=..16] ~ ~ ~ 0.8 1.3', 'particle minecraft:dragon_breath ~ ~0.2 ~ 0.4 0.1 0.4 0.02 20'])
 fn(f'{_K}/pearl', ['scoreboard players add @s mg_kbffa_pc 1',
                    f'execute if score @s mg_kbffa_pc matches {_PEARL_CD}.. run function {NS}:{_K}/pearl_give'])
 fn(f'{_K}/pearl_give', ['scoreboard players set @s mg_kbffa_pc 0', f'give @s {PEARL} 1',
                         'playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.4 1.8'])
-_HAS = lambda p: [f'if items entity @s container.* {p}', f'if items entity @s weapon.offhand {p}', f'if items entity @s player.cursor {p}']
 _KS = [_txt('Kills ', 'gray'), {'score': {'name': '@s', 'objective': 'mg_kbffa_k'}, 'color': 'gold', 'bold': True},
        _txt('  ·  Serie ', 'gray'), {'score': {'name': '@s', 'objective': 'mg_kbffa_s'}, 'color': 'red', 'bold': True}]
 fn(f'{_K}/hud', [
+    'execute if score @s mg_kbffa_hold matches 1.. run return 0',
     f'execute if entity @s[tag={_SAFE}] run return run title @s actionbar {tc([_txt("⛨ Spawn-Schutz", "aqua", bold=True), _txt("  ·  ", "gray")] + _KS)}',
     'scoreboard players set @s mg_kbffa_ps 219', 'scoreboard players operation @s mg_kbffa_ps -= @s mg_kbffa_pc', 'scoreboard players operation @s mg_kbffa_ps /= #20 mg',
     f'execute if score @s mg_kbffa_pc matches 1.. run return run title @s actionbar {tc(_KS + [_txt("  ·  Perle ", "gray"), {"score": {"name": "@s", "objective": "mg_kbffa_ps"}, "color": "yellow"}, _txt(" s", "yellow")])}',
@@ -376,15 +392,19 @@ fn(f'{_K}/ptick', [
     f'execute if entity @s[{_ZONE}] run function {NS}:{_K}/zone',
     f'execute if entity @s[tag={_SAFE}] unless entity @s[{_ZONE}] run function {NS}:{_K}/unsafe',
     f'execute if block ~ ~-1 ~ minecraft:purple_glazed_terracotta unless score @s mg_kbffa_pad matches 1.. run function {NS}:{_K}/pad',
-    *[f'execute {c} run scoreboard players set @s mg_kbffa_pc 0' for c in _HAS('minecraft:ender_pearl')],
-    f'execute ' + ' '.join(c.replace('if items', 'unless items', 1) for c in _HAS('minecraft:ender_pearl')) + f' run function {NS}:{_K}/pearl',
+    'execute store result score @s mg_kbffa_n run clear @s minecraft:ender_pearl 0',      # counts inventory, cursor AND 2x2 crafting grid
+    'execute if score @s mg_kbffa_n matches 1.. run scoreboard players set @s mg_kbffa_pc 0',
+    f'execute if score @s mg_kbffa_n matches 0 run function {NS}:{_K}/pearl',
+    'execute if score @s mg_kbffa_hold matches 1.. run scoreboard players remove @s mg_kbffa_hold 1',
     f'execute if score #kbffa_m10 mg matches 0 run function {NS}:{_K}/hud'])
 # restock (every 45 ticks): lost stick / leave item, slow sandstone trickle
 _STK = '*[minecraft:custom_data~{mg_kbffa_stick:1b}]'
 _LVI = '*[minecraft:custom_data~{mg_kbffa_leave:1b}]'
 fn(f'{_K}/restock', [
-    'execute ' + ' '.join(c.replace('if items', 'unless items', 1) for c in _HAS(_STK)) + f' run give @s {STICK}',
-    'execute ' + ' '.join(c.replace('if items', 'unless items', 1) for c in _HAS(_LVI)) + f' run give @s {LEAVE}',
+    f'execute store result score @s mg_kbffa_n run clear @s {_STK.replace("*", "minecraft:stick", 1)} 0',
+    f'execute if score @s mg_kbffa_n matches 0 run give @s {STICK}',
+    f'execute store result score @s mg_kbffa_n run clear @s {_LVI.replace("*", "minecraft:carrot_on_a_stick", 1)} 0',
+    f'execute if score @s mg_kbffa_n matches 0 run give @s {LEAVE}',
     'execute store result score @s mg_kbffa_n run clear @s minecraft:sandstone 0',
     f'execute if score @s mg_kbffa_n matches ..31 run give @s {SAND} 4'])
 
@@ -424,17 +444,18 @@ fn(f'{_K}/tick', [
     f'execute if score #kbffa_m mg matches 22 run function {NS}:{_K}/slow'])
 
 # ------------------------------------------------------------------ registration / wiring
-register_game(_K, 'Knockback-FFA', 'light_purple', 'leatherworker', _TRIG, f'function {NS}:{_K}/join',
+register_game(_K, 'Knockback-FFA', 'light_purple', 'butcher', _TRIG, f'function {NS}:{_K}/join',
               'Jederzeit rein · Schubs sie runter', 'Endlos, jederzeit einsteigen')
 INFO.append(('Knockback-FFA', 'light_purple', 'Jederzeit einsteigen über NPC oder Kompass. Mit dem Rückstoß-Stock schubst du die anderen von der '
              'Insel – wer dich zuletzt (innerhalb von 10 s) getroffen hat, bekommt den Kill. Sandstein zerfällt nach ~8 s, die Enderperle kommt nach '
              '10 s zurück. Serien: 3 = Tempo, 5 = Extra-Perle, 10 = Donner-Stock. Kein PvP am Spawn. Raus mit dem Barriere-Item oder /trigger mg_aktion set 99.'))
 ENTER_LINES.extend([f'execute if entity @s[tag={_T}] run function {NS}:{_K}/bye',
-                    *[f'tag @s remove {t}' for t in (_T, _W, _SAFE, 'mg_kbffa_vic', 'mg_kbffa_klr', 'mg_kbffa_rsp', 'mg_kbffa_atk', 'mg_kbffa_rech')],
-                    'attribute @s minecraft:fall_damage_multiplier base reset'])
+                    *[f'tag @s remove {t}' for t in (_T, _W, _SAFE, 'mg_kbffa_vic', 'mg_kbffa_klr', 'mg_kbffa_rsp', 'mg_kbffa_atk', 'mg_kbffa_rech', 'mg_kbffa_fresh')],
+                    'attribute @s minecraft:fall_damage_multiplier base reset',
+                    f'attribute @s minecraft:knockback_resistance modifier remove {NS}:kbffa_safe'])
 EXTRA_TICK.append(f'execute if score #kbffa mg matches 1.. run function {NS}:{_K}/tick')
 EXTRA_LOAD.extend([
-    *[f'scoreboard objectives add mg_kbffa_{o} dummy' for o in ('k', 's', 'd', 'best', 'id', 'lh', 'lt', 'pc', 'ps', 'sp', 'pv', 'pad', 'col', 'n')],
+    *[f'scoreboard objectives add mg_kbffa_{o} dummy' for o in ('k', 's', 'd', 'best', 'id', 'lh', 'lt', 'pc', 'ps', 'sp', 'pv', 'pad', 'col', 'n', 'hold', 'pid', 'lv', 'cn')],
     'scoreboard objectives add mg_kbffa_dd minecraft.custom:minecraft.damage_dealt',
     'scoreboard objectives add mg_kbffa_dt minecraft.custom:minecraft.damage_taken',
     'scoreboard objectives add mg_kbffa_use minecraft.used:minecraft.carrot_on_a_stick',
