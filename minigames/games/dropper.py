@@ -19,7 +19,7 @@ _PICK = 4                              # levels per round
 _B = DY - 6                            # shaft floor (y94); pool water y95..97
 _L = DY + 64                           # start ledge block (y164), feet at y165
 _R = _L + 5                            # glass roof (y169)
-_BUILD_V = 3
+_BUILD_V = 4
 _PRED = 'type' if MIN_FORMAT >= 121 else 'condition'
 _GRAV = 0.04                           # half gravity inside the shafts: ~3.6 s per drop, enough time to steer around the obstacles
 
@@ -31,7 +31,7 @@ _GRAV = 0.04                           # half gravity inside the shafts: ~3.6 s 
 # id (optional): stable record key (scoreboard mg_dropper_r_<id>); default = the name in lower case ascii.
 #       Never rename a level without setting id to the old key, otherwise its records are lost.
 _LEVELS = [
-    dict(name='Farbschacht', diff=2, col='yellow', wall='white_concrete', band=None, corner='quartz_pillar', light='sea_lantern',
+    dict(name='Farbschacht', diff=1, col='yellow', wall='white_concrete', band=None, corner='quartz_pillar', light='sea_lantern',
          ledge='smooth_quartz', floor='white_concrete', poolfloor='sea_lantern', rim='yellow_concrete',
          bands=['red_concrete', 'orange_concrete', 'yellow_concrete', 'lime_concrete', 'light_blue_concrete', 'purple_concrete'],
          pool=(3, 3, 9, 9),
@@ -41,7 +41,7 @@ _LEVELS = [
                  (33, 'lime_concrete', 'full', [(5, 4, 9, 8)], [], 1),
                  (42, 'light_blue_concrete', 'full', [(4, 3, 8, 7)], [], 1),
                  (51, 'purple_concrete', 'empty', [], [(0, 2, 12, 3), (0, 8, 12, 9)], 2)]),
-    dict(name='Tiefsee', diff=4, col='aqua', wall='prismarine_bricks', band='dark_prismarine', corner='dark_prismarine', light='sea_lantern',
+    dict(name='Tiefsee', diff=3, col='aqua', wall='prismarine_bricks', band='dark_prismarine', corner='dark_prismarine', light='sea_lantern',
          ledge='dark_prismarine', floor='prismarine', poolfloor='sea_lantern', rim='light_blue_concrete',
          pool=(7, 3, 10, 6),
          layers=[(7, 'cyan_stained_glass', 'full', [(4, 8, 7, 11)], [], 1),
@@ -60,7 +60,7 @@ _LEVELS = [
                  (36, 'warped_wart_block', 'full', [(9, 4, 12, 7)], [], 1),
                  (45, 'red_stained_glass', 'full', [(8, 6, 11, 9)], [], 1),
                  (54, 'nether_bricks', 'full', [(7, 6, 12, 8)], [], 2)]),
-    dict(name='Endkern', diff=8, col='light_purple', wall='end_stone_bricks', band='purpur_block', corner='obsidian', light='pearlescent_froglight',
+    dict(name='Endkern', diff=7, col='light_purple', wall='end_stone_bricks', band='purpur_block', corner='obsidian', light='pearlescent_froglight',
          ledge='purpur_block', floor='end_stone', poolfloor='pearlescent_froglight', rim='purpur_pillar',
          pool=(8, 6, 10, 8),
          layers=[(6, 'purpur_block', 'full', [(3, 9, 6, 12)], [], 1),
@@ -73,12 +73,130 @@ _LEVELS = [
                  (58, 'amethyst_block', 'empty', [], [(10, 7, 10, 7)], 1)]),
 ]
 
-# ===== NEW LEVELS: paste the designer's 8 level dicts into this list (replacing the placeholders) =====
-def _ph(src, name, diff):          # TEMPORARY placeholder: a copy of an existing level under another name
-    return dict(_LEVELS[src], name=name, diff=diff)
+# ===== NEW LEVELS (8 designed levels; diff 1..10 - same scale as above) =====
+# Leaves carry [persistent=true] (otherwise they decay) - layer blocks only, never wall/band/rim (those are used in replace filters).
+_LEAF = '[persistent=true]'
 _NEW_LEVELS = [
-    _ph(0, 'Platzhalter A', 1), _ph(1, 'Platzhalter B', 3), _ph(2, 'Platzhalter C', 5), _ph(3, 'Platzhalter D', 7),
-    _ph(0, 'Platzhalter E', 9), _ph(1, 'Platzhalter F', 3), _ph(2, 'Platzhalter G', 6), _ph(3, 'Platzhalter H', 10),
+    # ---------------------------------------------------------------- easy
+    dict(name='Wolkenreich', diff=2, col='white', wall='calcite', band='white_wool', corner='snow_block', light='sea_lantern',
+         ledge='white_wool', floor='snow_block', poolfloor='sea_lantern', rim='light_blue_wool',
+         pool=(4, 4, 8, 8),
+         layers=[(7, 'white_stained_glass', 'full', [(3, 3, 8, 8)], [], 1),
+                 # cloud ring: a wide frame with a cloud puff in the middle -> fall through the 2-wide ring
+                 (15, 'white_wool', 'empty', [], [(0, 0, 12, 2), (0, 10, 12, 12), (0, 0, 2, 12), (10, 0, 12, 12), (5, 5, 7, 7)], 2),
+                 (23, 'snow_block', 'full', [(6, 6, 10, 10)], [], 1),
+                 (31, 'light_blue_stained_glass', 'full', [(4, 5, 9, 10)], [(6, 7, 7, 8)], 1),
+                 (40, 'white_wool', 'full', [(3, 4, 7, 8)], [], 1),
+                 # a thin cloud strand across the gap
+                 (49, 'calcite', 'empty', [], [(0, 0, 12, 1), (0, 11, 12, 12), (0, 0, 1, 12), (11, 0, 12, 12), (2, 6, 10, 6)], 1),
+                 (58, 'white_stained_glass', 'full', [(3, 3, 9, 9)], [(6, 6, 6, 6)], 1)]),
+    dict(name='Kirschgarten', diff=2, col='light_purple', wall='cherry_planks', band='stripped_cherry_wood', corner='cherry_log',
+         light='pearlescent_froglight', ledge='pink_terracotta', floor='moss_block', poolfloor='pearlescent_froglight', rim='pink_concrete',
+         pool=(3, 3, 7, 7),
+         layers=[(8, 'cherry_leaves' + _LEAF, 'full', [(3, 6, 8, 11)], [], 2),
+                 (17, 'pink_stained_glass', 'full', [(5, 4, 10, 9)], [], 1),
+                 # branches: cherry logs along z, two channels to fall through
+                 (25, 'cherry_log[axis=z]', 'empty', [], [(0, 0, 3, 12), (6, 0, 6, 12), (10, 0, 12, 12)], 1),
+                 (33, 'cherry_leaves' + _LEAF, 'full', [(6, 3, 10, 8)], [], 2),
+                 (43, 'pink_wool', 'full', [(3, 5, 8, 10)], [(5, 7, 6, 8)], 1),
+                 (52, 'cherry_leaves' + _LEAF, 'full', [(2, 2, 7, 7)], [], 2),
+                 (61, 'pink_wool', 'empty', [], [(5, 5, 5, 5)], 1)]),
+    # ---------------------------------------------------------------- medium
+    dict(name='Wüstentempel', diff=4, col='gold', wall='sandstone', bands=['orange_terracotta', 'cut_sandstone', 'blue_terracotta', 'cut_sandstone'],
+         corner='chiseled_sandstone', light='ochre_froglight', ledge='smooth_sandstone', floor='cut_sandstone', poolfloor='ochre_froglight',
+         rim='blue_terracotta',
+         pool=(7, 2, 10, 5),
+         layers=[(6, 'cut_sandstone', 'full', [(3, 8, 6, 11)], [], 1),
+                 (13, 'orange_terracotta', 'full', [(5, 6, 8, 9)], [], 1),
+                 # split: the lower-right hole is the trap, only the upper-left one leads on
+                 (20, 'smooth_sandstone', 'full', [(3, 4, 6, 7), (7, 8, 10, 11)], [], 1),
+                 (28, 'blue_terracotta', 'full', [(3, 3, 6, 6)], [], 1),
+                 # temple beams across the shaft
+                 (36, 'cut_sandstone', 'empty', [], [(0, 3, 12, 3), (0, 6, 12, 6), (0, 9, 12, 9)], 1),
+                 (44, 'orange_terracotta', 'full', [(4, 5, 7, 8)], [], 1),
+                 (52, 'smooth_sandstone', 'full', [(6, 3, 9, 7)], [(7, 5, 8, 5)], 1),
+                 (60, 'chiseled_sandstone', 'full', [(6, 1, 10, 6)], [], 1)]),
+    dict(name='Pilzwald', diff=5, col='red', wall='mushroom_stem', band='brown_mushroom_block', corner='dark_oak_log', light='shroomlight',
+         ledge='mycelium', floor='mycelium', poolfloor='shroomlight', rim='red_mushroom_block',
+         pool=(7, 2, 11, 5),
+         layers=[# three giant caps - only the gap between them (i 7..8) leads on, the others are dead ends
+                 (7, 'red_mushroom_block', 'empty', [], [(3, 0, 8, 5), (0, 7, 6, 12), (9, 4, 12, 12)], 2),
+                 (15, 'brown_mushroom_block', 'full', [(6, 8, 9, 11)], [], 1),
+                 # stem tops scattered in the open air
+                 (22, 'mushroom_stem', 'empty', [], [(2, 2, 3, 3), (6, 9, 7, 10), (9, 5, 10, 6), (4, 6, 4, 6), (10, 10, 10, 10), (8, 12, 9, 12)], 1),
+                 (30, 'red_mushroom_block', 'full', [(3, 6, 8, 10)], [(5, 8, 5, 8)], 1),
+                 # split: both holes reachable, only the right one is open below
+                 (38, 'brown_mushroom_block', 'full', [(1, 4, 4, 7), (6, 3, 9, 6)], [], 1),
+                 (46, 'mushroom_stem', 'full', [(7, 2, 10, 5)], [], 1),
+                 (54, 'red_mushroom_block', 'empty', [], [(0, 0, 12, 0), (0, 6, 12, 12), (0, 0, 5, 12), (12, 0, 12, 12), (8, 2, 9, 3)], 2)]),
+    dict(name='Lush-Höhle', diff=5, col='green', wall='mossy_stone_bricks', band='moss_block', corner='mossy_cobblestone',
+         light='verdant_froglight', ledge='moss_block', floor='moss_block', poolfloor='verdant_froglight', rim='lime_terracotta',
+         pool=(2, 6, 6, 10),
+         layers=[(6, 'moss_block', 'full', [(3, 2, 6, 5)], [], 1),
+                 # staggered close layers (6 apart)
+                 (12, 'azalea_leaves' + _LEAF, 'full', [(4, 4, 7, 7)], [], 1),
+                 (18, 'flowering_azalea_leaves' + _LEAF, 'full', [(5, 6, 8, 9)], [], 1),
+                 # glow berries: single glowing blocks hanging in the air
+                 (26, 'ochre_froglight', 'empty', [], [(4, 5, 4, 5), (6, 7, 6, 8), (8, 5, 8, 5), (9, 9, 9, 9), (5, 10, 5, 10), (7, 3, 7, 3)], 1),
+                 (33, 'moss_block', 'full', [(6, 6, 10, 9)], [], 2),
+                 # split: the right hole looks closer, but only the left one is open below
+                 (42, 'azalea_leaves' + _LEAF, 'full', [(3, 7, 6, 10), (8, 2, 11, 5)], [], 1),
+                 (50, 'clay', 'full', [(2, 7, 5, 10)], [], 1),
+                 (58, 'green_stained_glass', 'full', [(2, 6, 6, 10)], [(4, 8, 4, 8)], 1)]),
+    # ---------------------------------------------------------------- hard
+    dict(name='Eispalast', diff=9, col='aqua', wall='packed_ice', band='blue_ice', corner='snow_block', light='sea_lantern',
+         ledge='snow_block', floor='snow_block', poolfloor='sea_lantern', rim='blue_ice',
+         pool=(5, 7, 7, 9),
+         layers=[(6, 'packed_ice', 'full', [(4, 7, 6, 9)], [], 1),
+                 # staggered close layers (5 apart)
+                 (11, 'light_blue_stained_glass', 'full', [(5, 6, 7, 8)], [], 1),
+                 (16, 'blue_ice', 'full', [(6, 5, 8, 7)], [], 1),
+                 # icicle bars: 1-wide slots between the bars
+                 (23, 'packed_ice', 'empty', [], [(0, 0, 12, 3), (0, 0, 4, 12), (0, 11, 12, 12), (11, 0, 12, 12),
+                                                  (5, 4, 10, 4), (5, 6, 10, 6), (5, 8, 10, 8), (5, 10, 10, 10)], 1),
+                 # ice ring around a frozen pillar
+                 (29, 'white_stained_glass', 'full', [(6, 5, 8, 7)], [(7, 6, 7, 6)], 1),
+                 # split: two mirrored holes, only the left one continues
+                 (36, 'blue_ice', 'full', [(4, 6, 6, 8), (8, 6, 10, 8)], [], 1),
+                 (42, 'packed_ice', 'full', [(4, 7, 6, 9)], [], 1),
+                 (47, 'light_blue_stained_glass', 'full', [(5, 7, 6, 9)], [], 1),
+                 (54, 'packed_ice', 'full', [(5, 7, 7, 8)], [], 1),
+                 # one ice block right above the middle of the pool
+                 (61, 'blue_ice', 'empty', [], [(6, 8, 6, 8)], 1)]),
+    dict(name='Redstone-Fabrik', diff=8, col='dark_red', wall='waxed_cut_copper', band='redstone_block', corner='iron_block', light='glowstone',
+         ledge='smooth_stone', floor='polished_andesite', poolfloor='glowstone', rim='redstone_block',
+         pool=(8, 4, 10, 6),
+         layers=[(6, 'waxed_cut_copper', 'full', [(3, 1, 5, 3)], [], 1),
+                 # laser grid: redstone bars every 3 blocks, 2x2 cells in between
+                 (13, 'redstone_block', 'empty', [], [(2, 0, 2, 12), (5, 0, 5, 12), (8, 0, 8, 12), (11, 0, 11, 12),
+                                                      (0, 2, 12, 2), (0, 5, 12, 5), (0, 8, 12, 8), (0, 11, 12, 11)], 1),
+                 (19, 'waxed_copper_grate', 'full', [(4, 4, 6, 6)], [], 1),
+                 (25, 'waxed_oxidized_copper', 'full', [(4, 5, 6, 7)], [], 1),
+                 # hole split by a copper bar: only the right half leads on
+                 (31, 'waxed_exposed_cut_copper', 'full', [(3, 5, 7, 8)], [(5, 5, 5, 8)], 1),
+                 (38, 'waxed_weathered_copper', 'full', [(6, 4, 7, 6)], [], 1),
+                 # iron beam: two slots, only the upper one leads on
+                 (45, 'iron_block', 'empty', [], [(0, 0, 12, 2), (0, 9, 12, 12), (0, 0, 4, 12), (10, 0, 12, 12), (5, 6, 9, 6)], 1),
+                 (52, 'waxed_copper_block', 'full', [(7, 3, 9, 5)], [], 1),
+                 (58, 'waxed_copper_grate', 'full', [(7, 3, 10, 6)], [(9, 5, 9, 5)], 1)]),
+    dict(name='Sculk-Tiefe', diff=10, col='dark_aqua', wall='deepslate_tiles', band='sculk', corner='reinforced_deepslate', light='verdant_froglight',
+         ledge='polished_deepslate', floor='sculk', poolfloor='verdant_froglight', rim='cyan_terracotta',
+         pool=(4, 9, 6, 11),
+         layers=[(6, 'sculk', 'full', [(3, 8, 5, 10)], [], 2),
+                 (13, 'tinted_glass', 'full', [(4, 7, 6, 9)], [], 1),
+                 # 1-wide slot
+                 (19, 'deepslate_tiles', 'full', [(5, 6, 5, 9)], [], 1),
+                 (25, 'sculk', 'full', [(4, 6, 6, 8)], [], 1),
+                 # sculk veins: three channels (1, 2 and 3 wide)
+                 (31, 'reinforced_deepslate', 'empty', [], [(0, 0, 12, 1), (0, 11, 12, 12), (0, 0, 2, 12), (11, 0, 12, 12), (4, 2, 4, 10), (7, 2, 7, 10)], 1),
+                 # split: both reachable, only the lower one leads on
+                 (37, 'sculk', 'full', [(5, 8, 6, 10), (5, 3, 6, 5)], [], 1),
+                 (43, 'cobbled_deepslate', 'full', [(4, 9, 6, 11)], [], 1),
+                 # close layer (5 apart): 1x5 slot
+                 (48, 'sculk', 'full', [(3, 10, 7, 10)], [], 1),
+                 # a deepslate stalagmite inside the hole
+                 (54, 'deepslate_tiles', 'full', [(5, 9, 7, 11)], [(6, 9, 6, 9)], 1),
+                 (60, 'sculk', 'full', [(3, 9, 7, 11)], [], 1)]),
 ]
 # ===== END NEW LEVELS =====
 _LEVELS += _NEW_LEVELS
@@ -324,10 +442,12 @@ for _l, _lv in enumerate(_LEVELS):
         f'execute if score #dropper_new mg matches 2 run tellraw @a[tag={_T},distance=0.01..] ' + msg(
             {'selector': '@s', 'color': 'white'}, {'text': ' – neuer Rekord auf ', 'color': 'gray'}, NM, {'text': ': ', 'color': 'gray', 'bold': False},
             *pb_txt('dropper_a', 'yellow')),
-        f'execute if score #dropper_new mg matches 1 run scoreboard players add @s mg_dropper_rc 1',
         f'execute if score #dropper_new mg matches 1..2 run scoreboard players operation @s {O} = #dropper_lv mg',
-        'execute if score #dropper_new mg matches 1..2 at @s run playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 0.8 1.6',
+        f'execute if score #dropper_new mg matches 1 run function {NS}:dropper/rc',
         f'execute if score #dropper_new mg matches 1..2 if score #dropper_np mg matches ..1 if score @s mg_dropper_nr matches ..{1} run function {NS}:dropper/rec_coin'])
+# mg_dropper_rc = number of levels with a record, always recounted from the per-level objectives (never drifts if levels change)
+fn('dropper/rc', ['scoreboard players set @s mg_dropper_rc 0',
+                  *[f'execute if score @s {_obj(_l)} matches 1.. run scoreboard players add @s mg_dropper_rc 1' for _l in range(_NL)]])
 fn('dropper/rec_coin', ['scoreboard players add @s mg_dropper_nr 1', 'scoreboard players add @s mg_coins 1',
                         f'tellraw @s ' + msg({'text': '+1 Münze ', 'color': 'yellow'}, {'text': '(Level-Rekord)', 'color': 'gold'})])
 fn('dropper/arr', [f'execute if score @s mg_dropper_c matches {_l} run return run function {NS}:dropper/rec/a{_l}' for _l in range(_NL)])
@@ -363,11 +483,11 @@ fn('dropper/splash', [
 fn('dropper/fail', [
     'scoreboard players add @s mg_dropper_f 1',
     'particle minecraft:poof ~ ~0.5 ~ 0.4 0.4 0.4 0.05 20',
-    'playsound minecraft:entity.player.big_fall master @s ~ ~ ~ 1 0.7',
-    'playsound minecraft:block.note_block.bass master @s ~ ~ ~ 1 0.6',
     'title @s times 0 25 8', f'title @s title {tc({"text": "✖", "color": "red", "bold": True})}',
     f'title @s subtitle {tc([{"text": "Berührt! ", "color": "red", "bold": True}, {"text": "Nochmal von oben", "color": "gray"}])}',
-    f'function {NS}:dropper/tp',
+    f'function {NS}:dropper/tp',      # sounds after the teleport, at the ledge (see dropper/done)
+    'execute at @s run playsound minecraft:entity.player.big_fall master @s ~ ~ ~ 1 0.7',
+    'execute at @s run playsound minecraft:block.note_block.bass master @s ~ ~ ~ 1 0.6',
     'execute at @s run playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.6 1.3'])
 fn('dropper/died', ['scoreboard players set @s mg_deaths 0', f'attribute @s minecraft:gravity base set {_GRAV}',
                     'effect give @s minecraft:saturation infinite 0 true', 'effect give @s minecraft:resistance infinite 4 true',
@@ -386,15 +506,20 @@ def _clock(src):
             'scoreboard players operation #dropper_s1 mg %= #10 mg']
 
 
+_RSND = 'playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 0.8 1.6'     # new level record (#dropper_new 1..2 from dropper/rec)
 _done = ['scoreboard players operation #dropper_lv mg = #dropper_t mg', 'scoreboard players operation #dropper_lv mg -= @s mg_dropper_lt',
          f'function {NS}:dropper/rec',
          'scoreboard players add @s mg_dropper_l 1', 'execute if score #dropper_np mg matches 2.. run scoreboard players add @s mg_coins 1',
          'particle minecraft:splash ~ ~1 ~ 0.6 0.4 0.6 0.2 40',
+         f'execute if score @s mg_dropper_l matches {_PICK + 1}.. if score #dropper_new mg matches 1..2 run {_RSND}',   # still at the pool
          f'execute if score @s mg_dropper_l matches {_PICK + 1}.. run return run function {NS}:dropper/win',
-         'playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1.2',
-         'playsound minecraft:entity.generic.splash master @s ~ ~ ~ 0.6 1',
          f'function {NS}:dropper/cur', 'scoreboard players operation @s mg_dropper_lt = #dropper_t mg',
-         f'function {NS}:dropper/tp', 'title @s times 3 35 10']
+         f'function {NS}:dropper/tp',
+         # sounds only after the teleport (at the new ledge): a positional sound at the pool would be out of earshot right away
+         'execute at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1.2',
+         'execute at @s run playsound minecraft:entity.generic.splash master @s ~ ~ ~ 0.6 1',
+         f'execute if score #dropper_new mg matches 1..2 at @s run {_RSND}',
+         'title @s times 3 35 10']
 for _k in range(2, _PICK + 1):
     _done += [f'execute if score @s mg_dropper_l matches {_k} run title @s title {tc({"text": f"Level {_k}/{_PICK}", "color": "gold", "bold": True})}',
               f'execute if score @s mg_dropper_l matches {_k} run title @s subtitle {tc([{"text": "✔ Geschafft!  ", "color": "green", "bold": True}, {"text": "Weiter: ", "color": "white"}, _N(_k)])}',
@@ -541,6 +666,7 @@ _setup = [
 # ---- solo run: result (solo_end runs as the server, before the framework's "Solo-Runde vorbei" title)
 _SOLO_COINS = 3
 fn('dropper/solo_done', [   # as the player who cleared all levels of the round
+    f'function {NS}:dropper/rc',
     'scoreboard players operation #dropper_c mg = #dropper_t mg', f'scoreboard players remove #dropper_c mg {_GO}',
     *pb_fmt('#dropper_c mg', 'dropper_p'),
     f'title @s subtitle ' + tc([{'text': f'Alle {_PICK} Level in ', 'color': 'white'}] + pb_txt('dropper_p', 'yellow')),
@@ -567,6 +693,7 @@ _solo_end = [f'bossbar set {NS}:dropper visible false', f'title @a[tag={_T}] tim
              f'tag @a[tag={_T}] remove {_AL}']
 
 # ---- stats menu: number of levels with a personal record (one line, not one per level)
+PB_MENU.append(f'function {NS}:dropper/rc')
 PB_MENU.append(f'execute if score @s mg_dropper_rc matches 1.. run tellraw @s ' + tc(
     [{'text': '   Dropper: ', 'color': 'gray'}, {'score': {'name': '@s', 'objective': 'mg_dropper_rc'}, 'color': 'gold', 'bold': True},
      {'text': f'/{_NL} Level mit Rekord', 'color': 'gold'}]))
