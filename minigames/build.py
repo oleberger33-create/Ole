@@ -12,7 +12,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'minigames')
 NS = 'mg'
-BUILD_VERSION = 5
+BUILD_VERSION = 6
 files = {}
 
 
@@ -129,7 +129,7 @@ LANES = 6
 MODULES = 24
 NCP = MODULES                     # checkpoint n = island after module n (24 = finish)
 def map_x(mi):
-    return 20000 + mi * 1000          # fresh, never-built area: no clearing needed
+    return 30000 + mi * 1000          # fresh, never-built area: no clearing needed
 def lane_z(L):
     return 1000 * L
 
@@ -177,78 +177,138 @@ def gen_map(t):
             holos.append(label)
     x, y, z = 0, 0, 0
     island(0, 0, 0, 3, label=(0, 3.2, 0, [{'text': 'START\n', 'color': 'green', 'bold': True}, {'text': 'Map: ' + t['name'], 'color': t['color'], 'bold': False}], 1.4))
-    put(0, 0, 0, 'emerald_block')
+    put(0, 0, 0, 'lime_glazed_terracotta')
     x = 3
     path.append((x, y, z))
-    POOLS = [['hop', 'pillars', 'stairs', 'hop'],
-             ['hop', 'pillars', 'ladder', 'head', 'fence', 'drop', 'stairs'],
-             ['pillars', 'ladder', 'head', 'fence', 'drop', 'neo', 'hop', 'ice'],
-             ['pillars', 'head', 'fence', 'neo', 'neo', 'drop', 'ladder', 'ice', 'hop']]
+    EASY = ['hop', 'pillars', 'stairs', 'trapdoors', 'jumppad', 'ladder', 'slime', 'vines']
+    MID = EASY + ['ladderjump', 'head', 'fence', 'speedpad', 'elevator', 'waterdrop', 'scaffold', 'drop']
+    HARD = MID + ['neo', 'tightrope', 'ice', 'neo', 'ladderjump', 'head']
+    used = {}
+    last = None
+    def pick(pool):
+        for _ in range(200):
+            k = rnd.choice(pool)
+            if k != last and used.get(k, 0) < 2:
+                return k
+        return rnd.choice(pool)
+    def jump(dxr, dyr):
+        nonlocal x, y, z
+        dx = rnd.randint(*dxr); dy = rnd.randint(*dyr)
+        if dx >= 4 and dy == 1:
+            dy = 0
+        dz = rnd.randint(-1, 1) if dx >= 4 else rnd.randint(-2, 2)
+        if dx == 3 and dy == 1 and abs(dz) == 2:
+            dz = dz // 2
+        x, y, z = x + dx, y + dy, max(-20, min(20, z + dz))
+    def glass():
+        return 'glass' if t['name'] != 'Nether' else 'tinted_glass'
     for n in range(1, MODULES + 1):
         diff = 0 if n <= 6 else 1 if n <= 12 else 2 if n <= 18 else 3
         blk = t['jump'][diff]
-        kind = rnd.choice(POOLS[diff])
-        if kind == 'ice' and not t['ice']:
-            kind = 'pillars'
-        if kind == 'ladder' and y > 18:
+        kind = pick(EASY if diff == 0 else MID if diff == 1 else HARD)
+        if n in (9, 17) and y <= 12 and used.get('elevator', 0) < 1 + (n == 17):
+            kind = 'elevator'
+        if kind in ('elevator',) and y > 12:
+            kind = 'waterdrop'
+        if kind in ('ladder', 'vines', 'scaffold', 'jumppad', 'stairs') and y > 18:
             kind = 'drop'
-        if kind == 'stairs' and y > 20:
-            kind = 'hop'
-        if kind == 'drop' and y < -6:
-            kind = 'stairs'
-        def jump(dxr, dyr):
-            nonlocal x, y, z
-            dx = rnd.randint(*dxr); dy = rnd.randint(*dyr)
-            if dx >= 4 and dy == 1:
-                dy = 0
-            dz = rnd.randint(-1, 1) if dx >= 4 else rnd.randint(-2, 2)
-            if dx == 3 and dy == 1 and abs(dz) == 2:
-                dz = dz // 2
-            x, y, z = x + dx, y + dy, max(-20, min(20, z + dz))
+        if kind in ('waterdrop', 'drop', 'slime') and y < -2:
+            kind = 'ladder'
+        used[kind] = used.get(kind, 0) + 1
+        last = kind
+        core = t['core']
         if kind == 'hop':                                   # tiny 2x2 islands
-            for _ in range(rnd.randint(3, 5)):
+            for _ in range(3 + diff):
                 jump((3, 4), (0, 0) if diff == 0 else (-1, 1))
                 for ox in (0, 1):
                     for oz in (0, 1):
                         put(x + ox, y, z + oz, t['top']); put(x + ox, y - 1, z + oz, t['under'])
-                if rnd.random() < 0.4 and t['flower']:
+                if rnd.random() < 0.5 and t['flower']:
                     put(x + 1, y + 1, z + 1, rnd.choice(t['flower']))
                 x += 1
         elif kind == 'pillars':
-            for _ in range(rnd.randint(4, 6)):
+            for _ in range(4 + diff):
                 jump((2, 3) if diff == 0 else (3, 4), (0, 0) if diff == 0 else (-1, 1))
                 put(x, y, z, blk)
-                for py in range(1, rnd.randint(3, 6)):
-                    put(x, y - py, z, t['pillar'] if t['pillar'] != 'end_rod' else t['core'])
-        elif kind == 'stairs':
+                for py in range(1, rnd.randint(3, 7)):
+                    put(x, y - py, z, t['pillar'] if t['pillar'] != 'end_rod' else core)
+        elif kind == 'stairs':                              # real stair blocks going up
+            st = 'stone_brick_stairs' if t['name'] != 'Nether' else 'nether_brick_stairs'
+            if t['name'] == 'End': st = 'purpur_stairs'
+            if t['name'] == 'Dschungel': st = 'jungle_stairs'
+            if t['name'] == 'Eis': st = 'spruce_stairs'
             for _ in range(4):
                 x, y = x + 2, y + 1
-                z = max(-20, min(20, z + rnd.choice((-1, 0, 1))))
+                put(x, y, z, f'{st}[facing=west]')
+                put(x, y - 1, z, core)
+            x += 2; put(x, y, z, blk)
+        elif kind == 'trapdoors':                           # thin floating trapdoors
+            td = {'Himmel': 'birch_trapdoor', 'Nether': 'crimson_trapdoor', 'Eis': 'spruce_trapdoor',
+                  'Dschungel': 'jungle_trapdoor', 'End': 'iron_trapdoor'}[t['name']]
+            for _ in range(5 + diff):
+                jump((3, 3) if diff == 0 else (3, 4), (0, 0))
+                put(x, y, z, f'{td}[half=top,open=false]')
+            x += 3; put(x, y, z, blk)
+        elif kind == 'jumppad':                             # emerald pad -> jump boost, 2-high steps
+            x += 3; put(x, y, z, 'emerald_block')
+            for _ in range(3):
+                x, y = x + 3, y + 2
                 put(x, y, z, blk)
+        elif kind == 'speedpad':                            # redstone pad -> speed, wide gaps
+            x += 3; put(x, y, z, 'redstone_block')
+            for i in range(1, 3):
+                put(x + i, y, z, 'redstone_block')
+            x += 2
+            for _ in range(3):
+                x += 5
+                put(x, y, z, blk); put(x + 1, y, z, 'redstone_block')
+                x += 1
         elif kind == 'ladder':
             x += 3
             put(x, y, z, blk)
-            h = rnd.randint(4, 6)
+            h = 4 + diff
             for ly in range(1, h + 1):
-                put(x + 1, y + ly, z, t['core'])
+                put(x + 1, y + ly, z, core)
                 put(x, y + ly, z, 'ladder[facing=west]')
             x, y = x + 1, y + h
             put(x, y, z, t['accent'] if t['accent'] != 'end_rod' else blk)
             jump((3, 4), (-1, 0)); put(x, y, z, blk)
+        elif kind == 'vines':                               # climb a vine-covered wall
+            x += 3
+            put(x, y, z, blk)
+            h = 5 + diff
+            for ly in range(1, h + 1):
+                put(x + 1, y + ly, z, 'mossy_stone_bricks' if t['name'] != 'Nether' else 'nether_wart_block')
+                put(x, y + ly, z, 'vine[east=true]' if t['name'] != 'Nether' else 'twisting_vines_plant')
+            put(x, y + h + 1, z, 'air')
+            x, y = x + 1, y + h
+            put(x, y, z, t['top'])
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
+        elif kind == 'ladderjump':                          # grab floating ladders in mid-air
+            x += 3; put(x, y, z, blk)
+            for k in range(2 + (diff >= 2)):
+                lx = x + 3
+                for ly in range(1, 5):
+                    put(lx + 1, y + ly, z, core)
+                    put(lx, y + ly, z, 'ladder[facing=west]')
+                x, y = lx + 1, y + 4
+                put(x, y, z, t['accent'] if t['accent'] != 'end_rod' else blk)
+                x += 3; y -= 3
+                put(x, y, z, blk)
         elif kind == 'head':                               # jumps under a ceiling
-            for _ in range(3):
+            for _ in range(3 + (diff >= 2)):
                 x += 3
                 put(x, y, z, blk)
-                put(x, y + 3, z, t['core'])
+                put(x, y + 3, z, core)
             x += 3; put(x, y, z, blk)
         elif kind == 'fence':                              # thin fence posts
             x += 3; put(x, y, z, blk)
             fb = t['fence'] if t['fence'] != 'end_rod' else 'end_stone_brick_wall'
-            for _ in range(rnd.randint(3, 4)):
+            for _ in range(3 + diff):
                 x += 2 if diff < 3 else 3
                 put(x, y, z, fb)
-                put(x, y - 1, z, t['core'])
-            x += 2; put(x, y + 1 if False else y, z, blk)
+                put(x, y - 1, z, core)
+            x += 2; put(x, y, z, blk)
         elif kind == 'drop':
             for _ in range(2):
                 x, y = x + 4, y - 2
@@ -256,13 +316,14 @@ def gen_map(t):
                 put(x, y, z, blk)
             jump((3, 3), (0, 1)); put(x, y, z, blk)
         elif kind == 'neo':                                # jump around the end of a wall
-            x += 3; put(x, y, z, blk)
-            side = 1 if z <= 0 else -1
-            for wz in range(0, 4):
-                for wy in range(1, 4):
-                    put(x + 1, y + wy, z - side * wz, t['core'])
-            put(x + 1, y, z - side * 1, t['core'])
-            x += 2; put(x, y, z, blk)
+            for _ in range(1 + (diff >= 3)):
+                x += 3; put(x, y, z, blk)
+                side = 1 if z <= 0 else -1
+                for wz in range(0, 4):
+                    for wy in range(1, 4):
+                        put(x + 1, y + wy, z - side * wz, core)
+                put(x + 1, y, z - side * 1, core)
+                x += 2; put(x, y, z, blk)
             jump((3, 3), (0, 0)); put(x, y, z, blk)
         elif kind == 'ice':
             x += 3; put(x, y, z, blk)
@@ -271,6 +332,66 @@ def gen_map(t):
             x += 4 + 4
             put(x, y, z, 'blue_ice')
             jump((3, 3), (0, 0)); put(x, y, z, 'packed_ice')
+        elif kind == 'slime':                              # fall onto slime, bounce to the next ledge
+            x += 3; put(x, y, z, blk)
+            for ox in (3, 4):
+                for oz in (0, 1):
+                    put(x + ox, y - 5, z + oz, 'slime_block')
+            x, y = x + 7, y - 1
+            put(x, y, z, blk); put(x, y, z + 1, blk)
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
+        elif kind == 'elevator':                           # door into a bubble column, shoot up 11 blocks
+            x += 3; put(x, y, z, blk)
+            put(x + 1, y, z, blk)
+            sx = x + 2
+            put(sx, y, z, 'soul_sand')
+            H = 11
+            for wy in range(1, H + 1):
+                put(sx, y + wy, z, 'water')
+                for ox, oz in ((1, 0), (0, 1), (0, -1), (-1, 0)):
+                    if (ox, oz) == (-1, 0) and wy <= 2:
+                        continue
+                    if (ox, oz) == (1, 0) and wy == H:
+                        continue
+                    put(sx + ox, y + wy, z + oz, glass())
+            put(sx - 1, y + 1, z, 'oak_door[facing=east,half=lower,hinge=left,open=false]')
+            put(sx - 1, y + 2, z, 'oak_door[facing=east,half=upper,hinge=left,open=false]')
+            put(sx + 1, y + H, z, blk)
+            x, y = sx + 1, y + H
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
+        elif kind == 'waterdrop':                          # jump down into a small pool, climb out
+            x += 3; put(x, y, z, blk)
+            px, py = x + 3, y - 9
+            for ox in range(-1, 3):
+                for oz in range(-1, 3):
+                    put(px + ox, py - 1, z + oz, core)
+                    for wy in range(0, 3):
+                        if ox in (-1, 2) or oz in (-1, 2):
+                            put(px + ox, py + wy, z + oz, core)
+            for ox in (0, 1):
+                for oz in (0, 1):
+                    put(px + ox, py, z + oz, 'water'); put(px + ox, py + 1, z + oz, 'water')
+            for ly in range(0, 4):
+                put(px + 1, py + ly, z, 'ladder[facing=west,waterlogged=' + ('true' if ly < 2 else 'false') + ']')
+                put(px + 2, py + ly, z, core)
+            x, y = px + 2, py + 3
+            put(x, y, z, blk)
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
+        elif kind == 'tightrope':                          # balance on a line of iron bars
+            x += 3; put(x, y, z, blk)
+            for i in range(1, 7 + diff):
+                put(x + i, y, z, 'iron_bars[east=true,west=true]')
+            x += 7 + diff; put(x, y, z, blk)
+        elif kind == 'scaffold':                           # climb inside a scaffolding tower
+            x += 3; put(x, y, z, blk)
+            put(x + 2, y, z, core)
+            h = 6 + diff
+            for ly in range(1, h + 1):
+                put(x + 2, y + ly, z, 'scaffolding[distance=0,bottom=false]')
+            put(x + 1, y, z, blk)
+            x, y = x + 3, y + h - 1
+            put(x, y, z, blk)
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
         path.append((x, y, z))
         # checkpoint island n
         r = 4 if n == MODULES else 3
@@ -676,6 +797,8 @@ fn('rush/parkour_tick', [
       for mi in range(len(THEMES)) for L in range(1, LANES + 1)],
     *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] at @s if entity @s[y=-64,dy={Y + m["miny"] - 10 + 64}] run function {NS}:rush/back'
       for mi, m in enumerate(MAPGEN)],
+    'execute as @a[tag=mg_rush] at @s if block ~ ~-1 ~ minecraft:emerald_block run effect give @s minecraft:jump_boost 8 1 true',
+    'execute as @a[tag=mg_rush] at @s if block ~ ~-1 ~ minecraft:redstone_block run effect give @s minecraft:speed 6 1 true',
     'scoreboard players add #t mg 1',
     f'execute if score #t mg matches 20.. run function {NS}:rush/second',
 ])
