@@ -29,14 +29,25 @@ Jeder in der Lobby hat diese Items in der Hotbar (Rechtsklick):
 | 2 | Uhr | Modus wechseln |
 | 3 | Kompass / Blaze-Rute / Perle / Bett / Enderauge | Wunschrolle wechseln |
 | 5 | Fernrohr | Zuschauen an/aus |
+| 8 | Papier | Speedrun-Zettel (siehe unten) |
 | 9 | Buch | Speedrun-Menü |
 
 Die Items lassen sich nicht verlieren. Im Run sind sie weg. Über der Insel schweben Titel, aktueller Modus und Bestzeiten pro Modus.
 
+## Speedrun-Zettel
+Jeder Spieler hat immer ein Papier „Speedrun-Zettel“ (Slot 8): in der Lobby, im Run und als Zuschauer.
+Er geht nicht verloren: Wegwerfen, Tod, Inventar leeren oder Verbauen – er ist nach spätestens 4 Ticks wieder da (genau einer).
+Rechtsklick (oder Esc → Speedrun-Menü → Speedrun-Zettel, `/trigger sr_aktion set 9`) öffnet ein Fenster mit
+- Zeit, Team, deiner Rolle und deinem nächsten Schritt,
+- allen wichtigen Items als Bild mit Ziel und dem aktuellen Stand deines Teams (✔ wenn erreicht):
+  Spitzhacke, Eisenschwert, Schild, Eimer, Feuerzeug, Obsidian 10, Essen 20, Betten 7, Blaze-Ruten 7, Enderperlen 12, Gold 32, Enderaugen 12, Bogen, Pfeile 16, Blöcke 64,
+- den 13 Team-Aufgaben (✔/✘) und einem Tipp für die aktuelle Phase.
+Gezählt wird beim Öffnen (alle Online-Spieler des Teams). Technisch ist der Zettel ein Karottenrute-Item mit Papier-Aussehen (Rechtsklick wird über die Statistik erkannt).
+
 ## Während des Runs
 - Seitenleiste: Team-Checkliste mit 12 Aufgaben, die sich selbst abhaken
 - Bossbar: Team, Modus, Zeit, erledigte Aufgaben
-- Actionbar: deine Rolle und was du tun sollst
+- Actionbar (unten über der Hotbar): Zeit des Runs, deine Rolle und was du tun sollst, z. B. „⏱ 12:34 · [Kämpfer] Schritt 4/7 ▸ Blaze-Ruten farmen 3/7“ (Zuschauer und Lobby: Zeit). Ab einer Stunde h:mm:ss
 - Chat: Fortschritt der anderen Teams („[Blau] Festung gefunden“)
 - Ende: Siegertitel, Zeit, Feuerwerk, Sieg in der Tab-Liste, nach 20 s zurück zur Lobby
 - Drache aus einem alten Run schon tot: Wer ins End kommt, bekommt 4 Endkristalle zum Neu-Beschwören
@@ -48,6 +59,7 @@ Esc → **Speedrun-Menü** (alle Funktionen per Knopf). Alternativ:
 - `/trigger sr_aktion set 3`: Menü öffnen
 - `/trigger sr_aktion set 4`: Zuschauen an/aus
 - `/trigger sr_aktion set 6`: Run abbrechen
+- `/trigger sr_aktion set 9`: Speedrun-Zettel öffnen
 - `/trigger sr_aktion set 11` bis `15`: Modus Solo, Duo, Trio, Squad, Koop
 - `/trigger sr_rolle set 1` bis `4`: Wunschrolle Kämpfer, Portal & Perlen, Versorger, Späher
 

@@ -85,6 +85,9 @@ SLOTS = {1: 'gold', 2: 'light_purple', 3: 'green', 4: 'aqua', 5: 'red', 6: 'blue
          9: 'dark_green', 10: 'dark_aqua', 11: 'dark_red', 12: 'dark_purple', 13: 'gray', 14: 'dark_blue', 15: 'dark_gray', 16: 'black'}
 STEP_KEYS = sorted({k for steps in STEPS.values() for k, _ in steps})
 TEAM_LINES = [('blaze', 'Blaze-Ruten'), ('pearls', 'Enderperlen'), ('eyes', 'Enderaugen'), ('stronghold', 'Stronghold'), ('dragon', 'Drache')]
+# run time in the actionbar (sr:run tstr is formatted once per second by time/fmt)
+TIME_BAR = [{'text': '⏱ ', 'color': 'white', 'bold': False}, {'nbt': 'tstr', 'storage': 'sr:run', 'interpret': True, 'color': 'white', 'bold': True},
+            {'text': '  ·  ', 'color': 'dark_gray', 'bold': False}]
 BAR_COLOR = {'red': 'red', 'blue': 'blue', 'green': 'green', 'yellow': 'yellow', 'aqua': 'blue',
              'light_purple': 'pink', 'gold': 'yellow', 'white': 'white'}
 
@@ -121,6 +124,7 @@ actions.append(btn({'text': '▶ Run starten', 'color': 'green', 'bold': True}, 
 for p, (name, _, color, _) in PREFS.items():
     actions.append(btn({'text': f'Wunschrolle: {name}', 'color': color}, ROLES[p][1], f'trigger sr_rolle set {p}'))
 actions += [
+    btn({'text': '✎ Speedrun-Zettel', 'color': 'gold'}, 'Items, Team-Stand, Aufgaben und Zeit', 'trigger sr_aktion set 9'),
     btn({'text': '☰ Mein Plan', 'color': 'gold'}, 'Alle Schritte deiner Rolle', 'trigger sr_aktion set 7'),
     btn({'text': '➤ Position ans Team'}, 'Schickt deinem Team deine Koordinaten', 'trigger sr_aktion set 8'),
     btn({'text': '◎ Zuschauen an/aus'}, 'Beim nächsten Run zuschauen oder jetzt live zuschauen', 'trigger sr_aktion set 4'),
@@ -157,6 +161,7 @@ load = [
     'scoreboard objectives add sr_team dummy',
     'scoreboard objectives add sr_click minecraft.used:minecraft.carrot_on_a_stick',
     'scoreboard objectives add sr_slot dummy',
+    'scoreboard objectives add sr_zcd dummy',
     'scoreboard objectives add sr_sx dummy', 'scoreboard objectives add sr_sy dummy', 'scoreboard objectives add sr_sz dummy',
     'scoreboard objectives add sr_pu_blaze minecraft.picked_up:minecraft.blaze_rod',
     'scoreboard objectives add sr_pu_pearl minecraft.picked_up:minecraft.ender_pearl',
@@ -192,6 +197,8 @@ for k, color in SLOTS.items():
     ]
 load += [
     'scoreboard players set #20 sr 20', 'scoreboard players set #60 sr 60', 'scoreboard players set #2 sr 2', 'scoreboard players set #5 sr 5',
+    'scoreboard players set #3600 sr 3600',
+    'execute unless data storage sr:run tstr run data modify storage sr:run tstr set value "0:00"',
     f'scoreboard players set #npos sr {len(POS)}',
     'execute unless score #run sr matches 0.. run scoreboard players set #run sr 0',
     'execute unless score #active sr matches 0.. run scoreboard players set #active sr 0',
@@ -208,7 +215,6 @@ load += [
     f'{OW} forceload add -16 -16 15 15',
     f'function {NS}:sidebar/lobby',
     f'execute unless score #built sr matches {BUILD_VERSION} run schedule function {NS}:lobby/try_build 40t',
-    'execute unless score #resume_done sr matches 1 run scoreboard players set #resume sr 1',
 ]
 fn('load', load)
 
@@ -222,14 +228,12 @@ fn('tick', [
     f'execute as @a[scores={{sr_aktion=1..}}] run function {NS}:player/action',
     f'execute as @a[scores={{sr_click=1..}}] run function {NS}:item/click',
     'scoreboard players add #itick sr 1',
+    'scoreboard players add #ztick sr 1',
+    f'execute if score #ztick sr matches 4.. run function {NS}:zettel/tick',
     'execute if score #itick sr matches 10.. run function sr:item/sweep',
     f'execute as @a[tag=sr_lobby] run function {NS}:lobby/keep',
     f'execute if score #cd sr matches 1.. run function {NS}:start/cd_tick',
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
-    f'execute if score #resume sr matches 1 if entity @a[name=matsllll] if entity @a[name=Qelloxx] run function {NS}:fix/resume',
-    *[f'execute unless score #gb_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
-    *[f'execute unless score #gb2_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback2_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
-    f'execute unless score #gb3_fngreg sr matches 1 if entity @a[name=FNGreg] run function {NS}:fix/giveback3_fngreg',
 ])
 
 # ------------------------------------------------------------------ lobby island
@@ -349,6 +353,7 @@ fn('player/reset_state', [
     'effect give @s minecraft:saturation 1 20 true',
     'advancement revoke @s everything',
     'scoreboard players set @s sr_endt 0',
+    f'function {NS}:zettel/keep',
 ])
 clk = lambda t, cmd, color='aqua', hover=None: dict({'text': t, 'color': color, 'bold': False,
                                                     'click_event': {'action': 'run_command', 'command': cmd}},
@@ -370,6 +375,8 @@ welcome = [
     {'text': '\n ', 'bold': False}, clk('[▶ RUN STARTEN]', '/trigger sr_aktion set 1', 'green'),
     {'text': '   ', 'bold': False}, clk('[Menü]', '/trigger sr_aktion set 3', 'aqua'),
     {'text': '   Esc → Speedrun-Menü\n', 'color': 'dark_gray', 'bold': False},
+    {'text': ' Dein ', 'color': 'gray', 'bold': False}, {'text': 'Speedrun-Zettel', 'color': 'gold', 'bold': False},
+    {'text': ' (Slot 8, immer dabei): Rechtsklick zeigt alle Items, den Team-Stand und die Zeit.\n', 'color': 'gray', 'bold': False},
 ]
 fn('player/welcome', [f'tellraw @s {tc(welcome)}'])
 fn('player/first_join', [
@@ -395,6 +402,7 @@ fn('player/action', [
     f'execute if score @s sr_aktion matches 6 run function {NS}:run/abort',
     f'execute if score @s sr_aktion matches 7 run function {NS}:role/plan',
     f'execute if score @s sr_aktion matches 8 run function {NS}:fx/share_me',
+    f'execute if score @s sr_aktion matches 9 run function {NS}:zettel/open',
     *[f'execute if score @s sr_aktion matches {10 + m} run function {NS}:mode/set {{m:{m}}}' for m in MODES],
     'scoreboard players set @s sr_aktion 0',
 ])
@@ -462,12 +470,14 @@ fn('role/brief', [
     *[f'execute if entity @s[scores={{sr_team={n}}}] run title @s title {tc({"text": "Team " + cname, "color": color, "bold": True})}' for n, (color, cname) in TEAMS.items()],
     *brief,
     f'function {NS}:role/plan_chat',
+    f'tellraw @s {msg({"text": "Rechtsklick auf den Speedrun-Zettel: alle Items mit Ziel, Team-Stand und Aufgaben. Die Zeit steht unten über der Hotbar.", "color": "gold"})}',
     f'tellraw @s {msg({"text": "Rechts siehst du DEINE Schritte (▶ = jetzt dran) und unten den Team-Stand. Mitspieler leuchten, die Leiste über der Hotbar zeigt, wo sie sind. Wichtige Orte kommen automatisch mit Koordinaten. Plan & Position teilen: Esc → Speedrun-Menü", "color": "gray"})}',
     'execute if score #teams sr matches 2.. run tellraw @s ' + msg({'text': 'RENNEN! ', 'color': 'red', 'bold': True}, {'text': 'Jedes Team startet woanders. Wer zuerst den Drachen tötet, gewinnt.', 'color': 'white'}),
 ])
 hint_lines = []
 for r, (name, hint) in ROLES.items():
-    hint_lines.append(f'execute if score @s sr_role matches {r} run title @s actionbar {tc([{"text": name, "color": "yellow", "bold": True}, {"text": "  ·  " + hint, "color": "gray"}])}')
+    hint_lines.append(f'execute if score @s sr_role matches {r} run return run title @s actionbar {tc(TIME_BAR + [{"text": "[" + name + "] ", "color": "yellow", "bold": True}, {"text": hint, "color": "gray", "bold": False}])}')
+hint_lines.append(f'title @s actionbar {tc(TIME_BAR[:-1])}')
 fn('role/actionbar', hint_lines)
 plan_lines = []
 for r, steps in STEPS.items():
@@ -587,6 +597,7 @@ launch += [
     *[f'scoreboard players set @a[tag=sr_run] sr_v_{k} 0' for k in NEED],
     f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] run function {NS}:p/init',
     'scoreboard players set #ticks sr 0', 'scoreboard players set #st sr 0', 'scoreboard players set #empty sr 0', 'scoreboard players set #active sr 1',
+    'data modify storage sr:run tstr set value "0:00"',
     f'execute as @a[tag=sr_run] run function {NS}:role/brief',
     'execute as @a[tag=sr_run] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.6 1.2',
     f'execute as @a[tag=sr_watch] run function {NS}:player/spectate',
@@ -668,11 +679,15 @@ second = [
     'scoreboard players operation #s sr = #ticks sr', 'scoreboard players operation #s sr /= #20 sr',
     'scoreboard players operation #min sr = #s sr', 'scoreboard players operation #min sr /= #60 sr',
     'scoreboard players operation #sec sr = #s sr', 'scoreboard players operation #sec sr %= #60 sr',
+    f'function {NS}:time/fmt',
 ]
 for n in TEAMS:
     second.append(f'execute if entity @a[tag=sr_run,scores={{sr_team={n}}}] run function {NS}:team/second_t{n}')
 second += [
     f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] at @s run function {NS}:p/second',
+    f'execute as @a[tag=sr_run] unless score @s sr_slot matches 1..16 run function {NS}:role/actionbar',
+    f'title @a[tag=sr_spec] actionbar {tc(TIME_BAR + [{"text": "Zuschauer", "color": "aqua", "bold": False}])}',
+    f'title @a[tag=sr_lobby] actionbar {tc(TIME_BAR + [{"text": "Run läuft", "color": "yellow", "bold": False}, {"text": " · Zuschauen: Fernrohr (Slot 5)", "color": "gray", "bold": False}])}',
     f'execute as @a[tag=sr_run,gamemode=survival] at @s if dimension minecraft:overworld if entity @s[x=-40,dx=80,y=185,dy=120,z=-40,dz=80] run function {NS}:p/rescue',
     'scoreboard players operation #five sr = #s sr', 'scoreboard players operation #five sr %= #5 sr',
     'execute if score #five sr matches 0 run effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
@@ -891,6 +906,8 @@ hb += [
 fn('item/hotbar', hb)
 fn('item/click', [
     'scoreboard players set @s sr_click 0',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr_zettel:1b}}] run return run function {NS}:zettel/click',
+    f'execute unless items entity @s weapon.mainhand minecraft:carrot_on_a_stick if items entity @s weapon.offhand *[minecraft:custom_data~{{sr_zettel:1b}}] run return run function {NS}:zettel/click',
     'execute unless entity @s[tag=sr_lobby] run return 0',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"start"}}] run return run function {NS}:start/by_player',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{sr:"mode"}}] run return run function {NS}:mode/cycle',
@@ -950,7 +967,7 @@ for r, steps in STEPS.items():
     up = ['scoreboard players set #found sr 0']
     for i, (key, text) in enumerate(steps):
         up.append(f'execute if score @s sr_d_{key} matches 0 if function {NS}:pc/{key} run function {NS}:pd/{key}')
-        bar = [{'text': '[' + ROLES[r][0] + '] ', 'color': 'yellow', 'bold': True},
+        bar = TIME_BAR + [{'text': '[' + ROLES[r][0] + '] ', 'color': 'yellow', 'bold': True},
                {'text': f'Schritt {i + 1}/{len(steps)} ▸ ', 'color': 'gray', 'bold': False},
                {'text': text, 'color': 'white', 'bold': False}]
         if key in NEED:
@@ -965,7 +982,7 @@ for r, steps in STEPS.items():
         if key in NEED:
             up.append(f'$execute if score @s sr_d_{key} matches 0 run scoreboard players display numberformat s{i} sr_o$(k) fixed {tc(cnt(key))}')
         up.append(f'execute if score @s sr_d_{key} matches 0 run scoreboard players set #found sr 1')
-    up.append(f'execute if score #found sr matches 0 run title @s actionbar {tc([{"text": "[" + ROLES[r][0] + "] ", "color": "yellow", "bold": True}, {"text": "Alles erledigt – hilf deinem Team!", "color": "green", "bold": False}])}')
+    up.append(f'execute if score #found sr matches 0 run title @s actionbar {tc(TIME_BAR + [{"text": "[" + ROLES[r][0] + "] ", "color": "yellow", "bold": True}, {"text": "Alles erledigt – hilf deinem Team!", "color": "green", "bold": False}])}')
     if team_part:
         for j, (key, label) in enumerate(TEAM_LINES):
             e = f'g{j + 1}'
@@ -1054,71 +1071,246 @@ fn('p/fix_spawn', [
 fn('p/spawn_start', ['$execute in minecraft:overworld run spawnpoint @s $(x) $(y) $(z)'])
 
 
-# ------------------------------------------------------------------ one-shot: resume the run that the restart ended
-fn('fix/resume', [
-    'scoreboard players set #resume sr 0', 'scoreboard players set #resume_done sr 1',
-    'scoreboard players set #cd sr 0',
-    'team leave @a', 'tag @a remove sr_hasrole', 'tag @a remove sr_spec',
-    'tag @a[tag=!sr_watch] add sr_run', 'tag @a[tag=sr_run] remove sr_lobby',
-    'scoreboard players set @a[tag=sr_run] sr_team 1',
-    'clear @a[tag=sr_run] *[minecraft:custom_data~{sr_item:1b}]',
-    'gamemode survival @a[tag=sr_run]', 'effect clear @a[tag=sr_run]',
-    f'function {NS}:role/assign_t1',
-    'scoreboard players set #teams sr 1', 'scoreboard players set #finished sr 0',
-    'scoreboard players operation #slot sr = #nextslot sr', 'scoreboard players remove #slot sr 1',
-    'scoreboard players operation #slot sr %= #npos sr',
-    f'function {NS}:pos/pick',
-    'data modify storage sr:run place set value {n:1}',
-    'execute store result storage sr:run place.x int 1 run scoreboard players get #cx sr',
-    'execute store result storage sr:run place.z int 1 run scoreboard players get #cz sr',
-    'scoreboard players set #try sr 0',
-    f'function {NS}:pos/place with storage sr:run place',
-    'execute as @a[tag=sr_run] at @s run spawnpoint @s ~ ~ ~',
-    'execute as @a[tag=sr_run] store result score @s sr_sx run data get entity @s Pos[0]',
-    'execute as @a[tag=sr_run] store result score @s sr_sy run data get entity @s Pos[1]',
-    'execute as @a[tag=sr_run] store result score @s sr_sz run data get entity @s Pos[2]',
-    f'execute as @a[name=matsllll,tag=sr_run] run function {NS}:fix/to_grave',
-    'scoreboard players set #k sr 0',
-    f'execute as @a[tag=sr_run] run function {NS}:start/slot',
-    f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] run function {NS}:p/init',
-    'scoreboard players set #st sr 0', 'scoreboard players set #empty sr 0', 'scoreboard players set #active sr 1',
-    f'bossbar set {NS}:t1 visible true', f'bossbar set {NS}:t1 players @a[tag=sr_run]',
-    'effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
-    f'tellraw @a {msg({"text": "Run fortgesetzt! ", "color": "green", "bold": True}, {"text": "Mats ist bei seinem Grab, die anderen am Startpunkt.", "color": "white"})}',
+# ------------------------------------------------------------------ Speedrun-Zettel (everyone always has it, right click -> dialog)
+class Raw(str):
+    """SNBT fragment inserted verbatim (macro placeholder holding an SNBT text component)."""
+
+
+def snbt(o):
+    if isinstance(o, Raw):
+        return str(o)
+    if isinstance(o, bool):
+        return 'true' if o else 'false'
+    if isinstance(o, int):
+        return str(o)
+    if isinstance(o, str):
+        return json.dumps(o, ensure_ascii=False)
+    if isinstance(o, list):
+        return '[' + ','.join(snbt(v) for v in o) + ']'
+    if isinstance(o, dict):
+        return '{' + ','.join(f'{k}:{snbt(v)}' for k, v in o.items()) + '}'
+    raise TypeError(o)
+
+
+def sval(o):
+    """SNBT text component stored as a string in storage (for macro insertion)."""
+    t = snbt(o).replace('\\', '\\\\').replace("'", "\\'")
+    return f"'{t}'"
+
+
+ZSLOT = 'hotbar.7'          # slot 8 (lobby: 1 start, 2 mode, 3 role, 5 watch, 8 zettel, 9 menu book)
+ZTEST = '*[minecraft:custom_data~{sr_zettel:1b}]'
+ZETTEL = 'minecraft:carrot_on_a_stick[' + ','.join([
+    'minecraft:item_model="minecraft:paper"',
+    f'minecraft:custom_name={tc({"text": "Speedrun-Zettel", "color": "gold", "bold": True, "italic": False})}',
+    'minecraft:lore=[' + ','.join(tc({'text': l, 'color': c, 'italic': False}) for l, c in (
+        ('Rechtsklick: alles für den Run', 'yellow'), ('Items mit Ziel, Team-Stand, Aufgaben, Zeit', 'gray'),
+        ('Geht nicht verloren', 'dark_gray'))) + ']',
+    'minecraft:custom_data={sr_zettel:1b}',
+    'minecraft:unbreakable={}',
+    'minecraft:tooltip_display={hidden_components:["minecraft:unbreakable"]}',
+    'minecraft:use_cooldown={seconds:0.5f}',
+    'minecraft:enchantment_glint_override=true',
+]) + ']'
+ZSLOTS = [ZSLOT] + [f'hotbar.{i}' for i in range(9) if f'hotbar.{i}' != ZSLOT] + [f'inventory.{i}' for i in range(27)]
+
+fn('zettel/tick', [
+    'scoreboard players set #ztick sr 0',
+    f'execute as @e[type=minecraft:item] if items entity @s contents {ZTEST} run kill @s',
+    # @e[type=player] skips players on the death screen; they get it back after respawning
+    f'execute as @e[type=minecraft:player] run function {NS}:zettel/keep',
 ])
-fn('fix/to_grave', [
-    'execute unless data entity @s LastDeathLocation run return 0',
-    'data modify storage sr:tmp d.dim set from entity @s LastDeathLocation.dimension',
-    'execute store result storage sr:tmp d.x int 1 run data get entity @s LastDeathLocation.pos[0]',
-    'execute store result storage sr:tmp d.z int 1 run data get entity @s LastDeathLocation.pos[2]',
-    'execute store result score #dy sr run data get entity @s LastDeathLocation.pos[1]',
-    'scoreboard players add #dy sr 3',
-    'execute store result storage sr:tmp d.y int 1 run scoreboard players get #dy sr',
-    'scoreboard players set #ok sr 0',
-    f'function {NS}:p/to_death with storage sr:tmp d',
-    f'execute if score #ok sr matches 1 run tellraw @s {msg({"text": "Du bist bei deinem Todespunkt – dein Grab mit deinen Sachen ist hier.", "color": "aqua"})}',
+fn('zettel/keep', [
+    # count also sees the cursor and the crafting grid
+    f'execute store result score #zn sr run clear @s {ZTEST} 0',
+    'execute if score #zn sr matches 1 run return 0',
+    f'execute if score #zn sr matches 2.. run clear @s {ZTEST}',
+    f'function {NS}:zettel/give',
 ])
+# right click: use_cooldown does not apply to carrot_on_a_stick (its use() returns PASS), and a held
+# right click repeats every 4 ticks -> debounce: open only if the previous click was >= 10 ticks ago
+fn('zettel/click', [
+    'execute store result score #znow sr run time query gametime',
+    'execute unless score @s sr_zcd matches -2147483648..2147483647 run scoreboard players set @s sr_zcd -1000',
+    'scoreboard players operation #zgap sr = #znow sr',
+    'scoreboard players operation #zgap sr -= @s sr_zcd',
+    'scoreboard players operation @s sr_zcd = #znow sr',
+    'execute if score #zgap sr matches 0..9 run return 0',
+    f'function {NS}:zettel/open',
+])
+fn('zettel/give', [f'execute unless items entity @s {sl} * run return run item replace entity @s {sl} with {ZETTEL}' for sl in ZSLOTS])
 
+# time string "m:ss" / "h:mm:ss" in storage sr:run tstr (from #s = seconds)
+fn('time/fmt', [
+    'scoreboard players operation #th sr = #s sr', 'scoreboard players operation #th sr /= #3600 sr',
+    'scoreboard players operation #tm sr = #s sr', 'scoreboard players operation #tm sr /= #60 sr',
+    'execute if score #th sr matches 1.. run scoreboard players operation #tm sr %= #60 sr',
+    'scoreboard players operation #ts sr = #s sr', 'scoreboard players operation #ts sr %= #60 sr',
+    'execute store result storage sr:tmp t.h int 1 run scoreboard players get #th sr',
+    'execute store result storage sr:tmp t.m int 1 run scoreboard players get #tm sr',
+    'execute store result storage sr:tmp t.s int 1 run scoreboard players get #ts sr',
+    'data modify storage sr:tmp t.mp set value ""', 'data modify storage sr:tmp t.sp set value ""',
+    'execute if score #tm sr matches ..9 run data modify storage sr:tmp t.mp set value "0"',
+    'execute if score #ts sr matches ..9 run data modify storage sr:tmp t.sp set value "0"',
+    f'execute if score #th sr matches 1.. run return run function {NS}:time/hms with storage sr:tmp t',
+    f'function {NS}:time/ms with storage sr:tmp t',
+])
+fn('time/hms', ['$data modify storage sr:run tstr set value "$(h):$(mp)$(m):$(sp)$(s)"'])
+fn('time/ms', ['$data modify storage sr:run tstr set value "$(m):$(sp)$(s)"'])
 
-# ------------------------------------------------------------------ one-shot: give back items lost by the run reset
-GIVEBACK = {"Qelloxx": {"minecraft:spruce_log": 9, "minecraft:cobblestone": 28, "minecraft:iron_nugget": 3, "minecraft:bread": 8, "minecraft:glow_berries": 10, "minecraft:beef": 3, "minecraft:copper_axe": 1, "minecraft:coal": 20, "minecraft:copper_shovel": 1, "minecraft:leather": 2, "minecraft:white_wool": 15, "minecraft:mossy_cobblestone": 1, "minecraft:black_wool": 6, "minecraft:bundle": 1, "minecraft:oak_log": 6, "minecraft:stone_sword": 1, "minecraft:birch_log": 10, "minecraft:stick": 1, "minecraft:dark_oak_log": 3, "minecraft:cooked_mutton": 27}, "FNGreg": {"minecraft:spruce_log": 11, "minecraft:dirt": 19, "minecraft:cobblestone": 506, "minecraft:coal": 106, "minecraft:raw_iron": 8, "minecraft:iron_ingot": 5, "minecraft:andesite": 50, "minecraft:cobbled_deepslate": 229, "minecraft:diorite": 27, "minecraft:tuff": 33, "minecraft:netherrack": 1, "minecraft:torch": 4, "minecraft:rotten_flesh": 2, "minecraft:granite": 63, "minecraft:raw_copper": 64, "minecraft:gravel": 7, "minecraft:flint": 1, "minecraft:spruce_sapling": 1}}
-for who, items in GIVEBACK.items():
-    flag = '#gb_' + who.lower()
-    fn('fix/giveback_' + who.lower(), [f'scoreboard players set {flag} sr 1'] +
-       [f'give {who} {item} {count}' for item, count in sorted(items.items(), key=lambda x: -x[1])] +
-       [f'tellraw {who} ' + msg({'text': 'Deine Items von vor dem Neustart sind zurück.', 'color': 'green'})])
+PICKS = [f'minecraft:{m}_pickaxe' for m in ('wooden', 'stone', 'copper', 'iron', 'golden', 'diamond', 'netherite')]
+# (key, icon, icon count, label, [(item, factor)], divisor, target, team task that also ticks it off)
+ZSECTIONS = [
+    ('Oberwelt', [
+        ('pick', 'minecraft:stone_pickaxe', 1, 'Spitzhacke', [(p, 1) for p in PICKS], 1, 1, None),
+        ('sword', 'minecraft:iron_sword', 1, 'Eisenschwert', [('minecraft:iron_sword', 1), ('minecraft:diamond_sword', 1), ('minecraft:netherite_sword', 1)], 1, 1, 'gear'),
+        ('shield', 'minecraft:shield', 1, 'Schild', [('minecraft:shield', 1)], 1, 1, 'gear'),
+        ('bucket', 'minecraft:water_bucket', 1, 'Eimer (Wasser + Lava)', [('minecraft:bucket', 1), ('minecraft:water_bucket', 1), ('minecraft:lava_bucket', 1)], 1, 1, 'tools'),
+        ('flint', 'minecraft:flint_and_steel', 1, 'Feuerzeug', [('minecraft:flint_and_steel', 1)], 1, 1, 'tools'),
+        ('obsi', 'minecraft:obsidian', 10, 'Obsidian (oder Portal gießen)', [('minecraft:obsidian', 1)], 1, 10, 'nether'),
+        ('food', 'minecraft:cooked_beef', 20, 'Essen (gebraten)', [(f'minecraft:{f}', 1) for f in FOOD], 1, NEED['food'][0], 'food'),
+        ('beds', 'minecraft:red_bed', 1, 'Betten (Drache)', [('#minecraft:beds', 1)], 1, NEED['beds'][0], 'beds'),
+    ]),
+    ('Nether', [
+        ('blaze', 'minecraft:blaze_rod', NEED['blaze'][0], 'Blaze-Ruten', [('minecraft:blaze_rod', 2), ('minecraft:blaze_powder', 1), ('minecraft:ender_eye', 1)], 2, NEED['blaze'][0], 'blaze'),
+        ('pearls', 'minecraft:ender_pearl', NEED['pearls'][0], 'Enderperlen', [('minecraft:ender_pearl', 1), ('minecraft:ender_eye', 1)], 1, NEED['pearls'][0], 'pearls'),
+        ('gold', 'minecraft:gold_ingot', 32, 'Gold zum Tauschen', [('minecraft:gold_ingot', 1), ('minecraft:gold_block', 9)], 1, 32, 'pearls'),
+    ]),
+    ('End', [
+        ('eyes', 'minecraft:ender_eye', NEED['eyes'][0], 'Enderaugen', [('minecraft:ender_eye', 1)], 1, NEED['eyes'][0], 'eyes'),
+        ('bow', 'minecraft:bow', 1, 'Bogen (für Kristalle)', [('minecraft:bow', 1), ('minecraft:crossbow', 1)], 1, 1, None),
+        ('arrows', 'minecraft:arrow', 16, 'Pfeile', [('minecraft:arrow', 1), ('minecraft:spectral_arrow', 1), ('minecraft:tipped_arrow', 1)], 1, 16, None),
+        ('blocks', 'minecraft:cobblestone', 64, 'Blöcke zum Bauen', [('minecraft:cobblestone', 1), ('minecraft:cobbled_deepslate', 1), ('minecraft:netherrack', 1), ('minecraft:dirt', 1), ('minecraft:end_stone', 1)], 1, 64, None),
+    ]),
+]
+OK = lambda: {'text': ' ✔', 'color': 'green', 'bold': True}
+NO = lambda: {'text': '', 'color': 'gray'}
 
+z_open = [
+    # who counts: in a run the whole (online) team, otherwise only you
+    'tag @a remove sr_zg',
+    'scoreboard players set #zt sr 0',
+    'execute if entity @s[tag=sr_run] run scoreboard players operation #zt sr = @s sr_team',
+    # spectators see the team of the nearest runner (same dimension)
+    'execute if entity @s[tag=sr_spec] at @s as @p[tag=sr_run] run scoreboard players operation #zt sr = @s sr_team',
+    'execute if entity @s[tag=sr_spec] if score #zt sr matches 0 as @r[tag=sr_run] run scoreboard players operation #zt sr = @s sr_team',
+    'execute if score #zt sr matches 1.. as @a[tag=sr_run] if score @s sr_team = #zt sr run tag @s add sr_zg',
+    'execute if score #zt sr matches 0 run tag @s add sr_zg',
+]
+for _, rows in ZSECTIONS:
+    for key, icon, icnt, label, terms, div, target, task in rows:
+        z_open.append('scoreboard players set #zv sr 0')
+        for item, mult in terms:
+            z_open += [f'execute as @a[tag=sr_zg] store result score @s sr_tmp run clear @s {item} 0']
+            z_open += ['execute as @a[tag=sr_zg] run scoreboard players operation #zv sr += @s sr_tmp'] * mult
+        if div != 1:
+            z_open.append(f'scoreboard players operation #zv sr /= #{div} sr')
+        z_open += [f'execute store result storage sr:zettel d.v_{key} int 1 run scoreboard players get #zv sr',
+                   f'data modify storage sr:zettel d.c_{key} set value {sval(NO())}',
+                   f'execute if score #zv sr matches {target}.. run data modify storage sr:zettel d.c_{key} set value {sval(OK())}']
+# header: team, time, role
+z_open += [
+    f'data modify storage sr:zettel d.team set value {sval({"text": "Lobby", "color": "gray"})}',
+    'data modify storage sr:zettel d.time set value "–:––"',
+    'execute if score #active sr matches 1 run data modify storage sr:zettel d.time set from storage sr:run tstr',
+    'execute if entity @s[tag=sr_run] run data modify storage sr:zettel d.time set from storage sr:run tstr',
+    f'data modify storage sr:zettel d.who set value {sval({"text": "Zählt nur deine Items (im Run: das ganze Team)", "color": "dark_gray"})}',
+    f'execute if score #zt sr matches 1.. run data modify storage sr:zettel d.who set value {sval({"text": "Zahlen = alle Items deines Teams (online)", "color": "dark_gray"})}',
+    f'execute if entity @s[tag=sr_spec] run data modify storage sr:zettel d.team set value {sval({"text": "Zuschauer", "color": "aqua"})}',
+    f'data modify storage sr:zettel d.role set value {sval({"text": "noch keine – wird beim Start verteilt", "color": "gray"})}',
+    f'data modify storage sr:zettel d.hint set value {sval({"text": "Wunschrolle: Slot 3 in der Lobby", "color": "gray"})}',
+    f'data modify storage sr:zettel d.next set value {sval({"text": "Modus wählen, Netherstern: Run starten", "color": "white"})}',
+    f'data modify storage sr:zettel d.tip set value {sval({"text": "Lobby: Modus mit der Uhr wählen, mit dem Netherstern starten. Im Run zählt dieser Zettel die Items deines ganzen Teams und hakt alles ab.", "color": "gray"})}',
+    'data modify storage sr:zettel d.cnt set value 0',
+]
+for i, (key, label) in enumerate(TASKS):
+    z_open.append(f'data modify storage sr:zettel d.t{i} set value {sval([{"text": "☐ ", "color": "dark_gray"}, {"text": label, "color": "gray"}])}')
+for r, (name, hint) in ROLES.items():
+    z_open += [f'execute if entity @s[tag=sr_run] if score @s sr_role matches {r} run data modify storage sr:zettel d.role set value {sval({"text": name, "color": "yellow", "bold": True})}',
+               f'execute if entity @s[tag=sr_run] if score @s sr_role matches {r} run data modify storage sr:zettel d.hint set value {sval({"text": hint, "color": "gray"})}']
+# next personal step: last matching line wins -> iterate the steps backwards
+for r, steps in STEPS.items():
+    z_open.append(f'execute if entity @s[tag=sr_run] if score @s sr_role matches {r} run data modify storage sr:zettel d.next set value {sval({"text": "Alles erledigt – hilf deinem Team!", "color": "green"})}')
+    for i, (key, text) in reversed(list(enumerate(steps))):
+        z_open.append(f'execute if entity @s[tag=sr_run] if score @s sr_role matches {r} if score @s sr_d_{key} matches 0 run data modify storage sr:zettel d.next set value '
+                      + sval([{"text": f"Schritt {i + 1}/{len(steps)}: ", "color": "gold"}, {"text": text + (f' ({NEED[key][0]})' if key in NEED else ''), "color": "white"}]))
+z_open += [f'execute if score #zt sr matches {n} run function {NS}:zettel/team_t{n}' for n in TEAMS]
+z_open += [
+    f'execute if entity @s[tag=sr_spec] run data modify storage sr:zettel d.role set value {sval({"text": "Zuschauer", "color": "aqua", "bold": True})}',
+    f'execute if entity @s[tag=sr_spec] run data modify storage sr:zettel d.hint set value {sval({"text": "Du siehst den Stand des Teams, das dir am nächsten ist.", "color": "gray"})}',
+    f'execute if entity @s[tag=sr_spec] run data modify storage sr:zettel d.next set value {sval({"text": "Zurück zur Lobby: Esc → Speedrun-Menü", "color": "white"})}',
+    f'execute if entity @s[tag=sr_spec] if score #zt sr matches 1.. run data modify storage sr:zettel d.who set value {sval({"text": "Zahlen = alle Items dieses Teams (online)", "color": "dark_gray"})}',
+]
+z_open += [f'function {NS}:zettel/show with storage sr:zettel d',
+           'tag @a remove sr_zg',
+           'playsound minecraft:item.book.page_turn master @s ~ ~ ~ 0.8 1.1']
+fn('zettel/open', z_open)
 
-GIVEBACK2 = {'FNGreg': {'minecraft:shield': 1, 'minecraft:iron_sword': 1},
-             'Qelloxx': {'minecraft:copper_axe': 1, 'minecraft:copper_pickaxe': 1}}
-for who, items in GIVEBACK2.items():
-    fn('fix/giveback2_' + who.lower(), [f'scoreboard players set #gb2_{who.lower()} sr 1'] +
-       [f'give {who} {item} {count}' for item, count in items.items()] +
-       [f'tellraw {who} ' + msg({'text': 'Werkzeug zurück.', 'color': 'green'})])
+TIPS = [  # (unfinished team task, phase tip) - first unfinished one wins
+    ('nether', 'Oberwelt: Holz, Steinwerkzeug, Eisen für Eimer, Feuerzeug, Schild. Essen braten, Wolle für Betten. Portal: Wasser auf Lava gießen (Form 4×5) oder 10 Obsidian.'),
+    ('blaze', 'Nether: Festung suchen (Nether-Ziegel), 7 Blaze-Ruten farmen. Schild hoch, Feuerball zurückschlagen. Portal-Koordinaten merken!'),
+    ('pearls', 'Nether: Bastion oder Piglins: Gold hinwerfen, Perlen tauschen (12+). Goldrüstung anziehen, sonst greifen Piglins an.'),
+    ('eyes', 'Zurück in die Oberwelt: Blaze-Ruten zu Pulver, mit Perlen 12 Enderaugen craften.'),
+    ('stronghold', 'Enderauge werfen und hinterherlaufen, nach ca. 500 Blöcken nochmal. Fliegt es nach unten: dort graben.'),
+    ('end', 'Stronghold: Endportal-Raum suchen (Silberfisch-Spawner), fehlende Augen einsetzen, alle rein. Blöcke mitnehmen!'),
+    ('dragon', 'End: Endermen nicht anschauen. Kristalle mit Bogen abschießen, Käfige hochbauen. Sitzt der Drache auf dem Portal: Bett hinstellen, Block davor, klicken.'),
+]
+for n, (color, cname) in TEAMS.items():
+    t = [f'data modify storage sr:zettel d.team set value {sval({"text": "Team " + cname, "color": color, "bold": True})}',
+         f'execute store result storage sr:zettel d.cnt int 1 run scoreboard players get #t{n}_cnt sr']
+    for i, (key, label) in enumerate(TASKS):
+        t += [f'execute if score #t{n}_{key} sr_done matches 0 run data modify storage sr:zettel d.t{i} set value {sval([{"text": "✘ ", "color": "red"}, {"text": label, "color": "gray"}])}',
+              f'execute if score #t{n}_{key} sr_done matches 1 run data modify storage sr:zettel d.t{i} set value {sval([{"text": "✔ ", "color": "green", "bold": True}, {"text": label, "color": "green"}])}']
+    for _, rows in ZSECTIONS:
+        for key, icon, icnt, label, terms, div, target, task in rows:
+            if task:
+                t.append(f'execute if score #t{n}_{task} sr_done matches 1 run data modify storage sr:zettel d.c_{key} set value {sval(OK())}')
+    t.append(f'data modify storage sr:zettel d.tip set value {sval({"text": "Drache besiegt – GG!", "color": "green"})}')
+    for key, tip in reversed(TIPS):
+        t.append(f'execute if score #t{n}_{key} sr_done matches 0 run data modify storage sr:zettel d.tip set value {sval({"text": tip, "color": "white"})}')
+    fn(f'zettel/team_t{n}', t)
 
-
-fn('fix/giveback3_fngreg', ['scoreboard players set #gb3_fngreg sr 1', 'give FNGreg minecraft:flint_and_steel 1',
-                            'tellraw FNGreg ' + msg({'text': 'Feuerzeug zurück.', 'color': 'green'})])
+# the dialog (inline, built by macro from storage sr:zettel d)
+H = lambda txt: {'type': 'minecraft:plain_message', 'width': 300, 'contents': {'text': f'— {txt} —', 'color': 'gold', 'bold': True}}
+body = [
+    {'type': 'minecraft:plain_message', 'width': 300, 'contents': [
+        {'text': ''}, {'text': '⏱ $(time)', 'color': 'white', 'bold': True}, {'text': '   ·   ', 'color': 'dark_gray'}, Raw('$(team)'),
+        {'text': '\n'}, {'text': 'Rolle: ', 'color': 'gray'}, Raw('$(role)'), {'text': '\n'}, Raw('$(hint)'),
+        {'text': '\n'}, {'text': '▶ ', 'color': 'gold'}, Raw('$(next)')]},
+]
+for title, rows in ZSECTIONS:
+    body.append(H(title))
+    for key, icon, icnt, label, terms, div, target, task in rows:
+        body.append({'type': 'minecraft:item', 'item': {'id': icon, 'count': icnt}, 'show_decorations': True, 'show_tooltip': True,
+                     'description': {'width': 230, 'contents': [
+                         {'text': ''}, {'text': label + '  ', 'color': 'white'}, {'text': '$(v_' + key + ')', 'color': 'yellow', 'bold': True},
+                         {'text': f'/{target}', 'color': 'gray'}, Raw(f'$(c_{key})')]}})
+body.append({'type': 'minecraft:plain_message', 'width': 300, 'contents': Raw('$(who)')})
+body.append(H(f'Team-Aufgaben  $(cnt)/{NT}'))
+tl = [{'text': ''}]
+for i in range(NT):
+    tl.append(Raw(f'$(t{i})'))
+    tl.append({'text': '\n' if i % 2 else '     '})
+body.append({'type': 'minecraft:plain_message', 'width': 320, 'contents': tl})
+body.append(H('Tipp'))
+body.append({'type': 'minecraft:plain_message', 'width': 300, 'contents': Raw('$(tip)')})
+ZDIALOG = {
+    'type': 'minecraft:multi_action',
+    'title': {'text': 'SPEEDRUN-ZETTEL', 'color': 'gold', 'bold': True},
+    'external_title': {'text': 'Speedrun-Zettel'},
+    'body': body,
+    'columns': 3,
+    'actions': [
+        {'label': {'text': '↻ Aktualisieren', 'color': 'green'}, 'tooltip': {'text': 'Zahlen neu zählen'}, 'width': 100,
+         'action': {'type': 'minecraft:run_command', 'command': 'trigger sr_aktion set 9'}},
+        {'label': {'text': '☰ Mein Plan', 'color': 'gold'}, 'tooltip': {'text': 'Alle Schritte deiner Rolle'}, 'width': 100,
+         'action': {'type': 'minecraft:run_command', 'command': 'trigger sr_aktion set 7'}},
+        {'label': {'text': 'Speedrun-Menü'}, 'tooltip': {'text': 'Modus, Start, Rollen, Zuschauen'}, 'width': 100,
+         'action': {'type': 'minecraft:run_command', 'command': 'trigger sr_aktion set 3'}},
+    ],
+    'exit_action': {'label': {'text': 'Schließen'}, 'width': 200},
+}
+fn('zettel/show', ['$dialog show @s ' + snbt(ZDIALOG)])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
@@ -1129,6 +1321,7 @@ rows = [
     ('a4', [{'text': '2 ', 'color': 'dark_gray'}, {'text': 'Modus wechseln', 'color': 'yellow'}]),
     ('a5', [{'text': '3 ', 'color': 'dark_gray'}, {'text': 'Wunschrolle', 'color': 'gold'}]),
     ('a6', [{'text': '5 ', 'color': 'dark_gray'}, {'text': 'Zuschauen', 'color': 'aqua'}]),
+    ('a6z', [{'text': '8 ', 'color': 'dark_gray'}, {'text': 'Speedrun-Zettel', 'color': 'gold'}]),
     ('a7', [{'text': '9 ', 'color': 'dark_gray'}, {'text': 'Menü', 'color': 'white'}]),
     ('a8', {'text': '  '}),
     ('a9', [{'text': 'Siege: ', 'color': 'dark_gray'}, {'text': 'Tab-Liste', 'color': 'gray'}]),
