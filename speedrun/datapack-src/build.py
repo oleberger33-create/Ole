@@ -229,6 +229,7 @@ fn('tick', [
     f'execute if score #resume sr matches 1 if entity @a[name=matsllll] if entity @a[name=Qelloxx] run function {NS}:fix/resume',
     *[f'execute unless score #gb_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
     *[f'execute unless score #gb2_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback2_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
+    f'execute unless score #gb3_fngreg sr matches 1 if entity @a[name=FNGreg] run function {NS}:fix/giveback3_fngreg',
 ])
 
 # ------------------------------------------------------------------ lobby island
@@ -1114,6 +1115,10 @@ for who, items in GIVEBACK2.items():
     fn('fix/giveback2_' + who.lower(), [f'scoreboard players set #gb2_{who.lower()} sr 1'] +
        [f'give {who} {item} {count}' for item, count in items.items()] +
        [f'tellraw {who} ' + msg({'text': 'Werkzeug zurück.', 'color': 'green'})])
+
+
+fn('fix/giveback3_fngreg', ['scoreboard players set #gb3_fngreg sr 1', 'give FNGreg minecraft:flint_and_steel 1',
+                            'tellraw FNGreg ' + msg({'text': 'Feuerzeug zurück.', 'color': 'green'})])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
