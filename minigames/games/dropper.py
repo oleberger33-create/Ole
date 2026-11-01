@@ -2,6 +2,8 @@
 # Every player falls in a private copy of the course (8 slots, 30 blocks apart along z); the 4 levels sit side by side
 # along x. Land on anything that is not water -> back onto the start ledge of the current level. Splash into the pool
 # at the bottom -> next level. First through all 4 levels wins; after 5 minutes the furthest player (fewest fails) wins.
+# Solo run (1 starter, #dropper_np 1): race against the clock, the time from "LOS!" is a personal record (mg_dropper_pb).
+# No wins in solo, only a few coins for finishing (+ a small bonus for a new record); time up -> progress shown, no record.
 _K = 'dropper'
 DX, DY, DZ = 84000, Y, 0
 _T, _AL = 'mg_dropper', 'mg_al_dropper'
@@ -230,7 +232,7 @@ def _clock(src):
             'scoreboard players operation #dropper_s1 mg %= #10 mg']
 
 
-_done = ['scoreboard players add @s mg_dropper_l 1', 'scoreboard players add @s mg_coins 1',
+_done = ['scoreboard players add @s mg_dropper_l 1', 'execute if score #dropper_np mg matches 2.. run scoreboard players add @s mg_coins 1',
          'particle minecraft:splash ~ ~1 ~ 0.6 0.4 0.6 0.2 40',
          f'execute if score @s mg_dropper_l matches {_NL + 1}.. run return run function {NS}:dropper/win',
          'playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1.2',
@@ -248,6 +250,7 @@ fn('dropper/done', _done)
 
 fn('dropper/win', [
     'tag @s add mg_dropper_win',
+    f'execute if score #dropper_np mg matches ..1 run return run function {NS}:{_K}/end',     # solo -> solo_end (record)
     'scoreboard players operation #dropper_c mg = #dropper_t mg', f'scoreboard players remove #dropper_c mg {_GO}',
     'scoreboard players operation #dropper_c mg /= #20 mg', *_clock('#dropper_c mg'),
     f'tellraw @a[tag={_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' hat alle 4 Level geschafft! ', 'color': 'yellow'},
@@ -270,6 +273,7 @@ for _l in range(_NL + 1, 0, -1):
         [{'text': '   ▸ ', 'color': 'dark_gray'}, {'selector': '@s', 'color': 'white'}, {'text': '  '}, _st,
          {'text': '  ·  Fehlversuche: ', 'color': 'dark_gray'}, {'score': {'name': '@s', 'objective': 'mg_dropper_f'}, 'color': 'gray'}]))
 fn('dropper/end_go', [
+    f'execute if score #dropper_np mg matches ..1 run return run function {NS}:{_K}/end',     # solo (also: the player left)
     f'tag @a[tag={_T}] remove {_AL}',
     f'scoreboard players add {_W} mg_wins 1', f'scoreboard players add {_W} mg_coins 15',
     f'execute as {_W} run tellraw @a ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' gewinnt Dropper!', 'color': 'white'}),
@@ -281,6 +285,7 @@ fn('dropper/end_go', [
     f'bossbar set {NS}:dropper visible false',
     f'scoreboard players set #{_K} mg 3', f'schedule function {NS}:{_K}/finish 100t'])
 fn('dropper/end_time', [
+    f'execute if score #dropper_np mg matches ..1 run return run function {NS}:{_K}/end',
     f'tellraw @a[tag={_T}] ' + msg({'text': 'Zeit abgelaufen! Wer am weitesten gekommen ist, gewinnt (bei Gleichstand: weniger Fehlversuche).', 'color': 'red'}),
     'scoreboard players set #dropper_best mg 0', 'scoreboard players set #dropper_minf mg 999999',
     f'execute as {_RACE} run scoreboard players operation #dropper_best mg > @s mg_dropper_l',
@@ -354,7 +359,6 @@ _setup = [
     'tag @a remove mg_dropper_win',
     'scoreboard players set #dropper_n mg 0',
     f'execute as @a[tag={_T}] run function {NS}:dropper/assign',
-    f'execute store result score #dropper_np mg if entity @a[tag={_T}]',
     f'scoreboard players set @a[tag={_T}] mg_dropper_l 1', f'scoreboard players set @a[tag={_T}] mg_dropper_f 0',
     f'execute as @a[tag={_T}] run function {NS}:dropper/tp',
     f'effect give @a[tag={_T}] minecraft:saturation infinite 0 true',
@@ -364,16 +368,48 @@ _setup = [
     f'bossbar set {NS}:dropper color yellow', f'bossbar set {NS}:dropper players @a[tag={_T}]', f'bossbar set {NS}:dropper visible true',
 ]
 
+# ---- solo run: result + personal record (solo_end runs as the server, before the framework's "Solo-Runde vorbei" title)
+pb_register(_K, 'Dropper', 'gold')
+_SOLO_COINS, _SOLO_BONUS = 3, 2
+fn('dropper/solo_done', [   # as the player who cleared all 4 levels
+    'scoreboard players operation #pbv mg = #dropper_t mg', f'scoreboard players remove #pbv mg {_GO}',
+    *pb_fmt('#pbv mg', 'dropper_p'),
+    f'title @s subtitle ' + tc([{'text': 'Alle 4 Level in ', 'color': 'white'}] + pb_txt('dropper_p', 'yellow')),
+    f'tellraw @s ' + msg({'text': 'Ziel! ', 'color': 'green', 'bold': True}, {'text': 'Alle 4 Level in ', 'color': 'white'}, *pb_txt('dropper_p', 'yellow'),
+                         {'text': '  ·  Fehlversuche: ', 'color': 'gray'}, {'score': {'name': '@s', 'objective': 'mg_dropper_f'}, 'color': 'white'}),
+    f'function {NS}:dropper/pb',
+    f'scoreboard players add @s mg_coins {_SOLO_COINS}',
+    f'execute if score #pbn mg matches 0 run tellraw @s ' + msg({'text': f'+{_SOLO_COINS} Münzen', 'color': 'yellow'}),
+    f'execute if score #pbn mg matches 1 run scoreboard players add @s mg_coins {_SOLO_BONUS}',
+    f'execute if score #pbn mg matches 1 run tellraw @s ' + msg({'text': f'+{_SOLO_COINS} Münzen ', 'color': 'yellow'}, {'text': f'(+{_SOLO_BONUS} Rekord-Bonus)', 'color': 'gold'}),
+    'execute at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;16766720],has_twinkle:true}]}}}}',
+    'playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1'])
+fn('dropper/solo_fail', [   # as the player when the time ran out
+    'scoreboard players operation #dropper_c mg = @s mg_dropper_l', 'scoreboard players remove #dropper_c mg 1',
+    f'title @s subtitle ' + tc([{'score': {'name': '#dropper_c', 'objective': 'mg'}, 'color': 'yellow', 'bold': True},
+                                {'text': f'/{_NL} Level geschafft', 'color': 'white'}]),
+    f'tellraw @s ' + msg({'text': 'Zeit um! ', 'color': 'red', 'bold': True}, {'text': 'Du hast ', 'color': 'gray'},
+                         {'score': {'name': '#dropper_c', 'objective': 'mg'}, 'color': 'yellow', 'bold': True},
+                         {'text': f'/{_NL} Level geschafft', 'color': 'gray'}, {'text': '  ·  Fehlversuche: ', 'color': 'gray'},
+                         {'score': {'name': '@s', 'objective': 'mg_dropper_f'}, 'color': 'white'}),
+    f'tellraw @s ' + msg({'text': 'Für eine Bestzeit musst du alle 4 Level in 5 Minuten schaffen.', 'color': 'gray'}),
+    'playsound minecraft:block.note_block.didgeridoo master @s ~ ~ ~ 1 0.8'])
+_solo_end = [f'bossbar set {NS}:dropper visible false', f'title @a[tag={_T}] times 5 60 15',
+             f'execute as @a[tag={_T},tag=mg_dropper_win] at @s run function {NS}:dropper/solo_done',
+             f'execute as @a[tag={_T},tag=!mg_dropper_win] at @s run function {NS}:dropper/solo_fail',
+             f'tag @a[tag={_T}] remove {_AL}']
+
 EXTRA_LOAD.extend(['scoreboard objectives add mg_dropper_s dummy', 'scoreboard objectives add mg_dropper_l dummy',
                    'scoreboard objectives add mg_dropper_f dummy', 'scoreboard players set #10 mg 10',
                    f'bossbar add {NS}:dropper {tc({"text": "Dropper"})}',
                    f'execute unless score #{_K} mg matches 2 run bossbar set {NS}:dropper visible false'])
 ENTER_LINES.extend(['tag @s remove mg_dropper_win', 'attribute @s minecraft:gravity base reset'])
 
-party(_K, 'Dropper', 'gold', (DX, DY, DZ), trig=67, prof='fisherman', sub='4 Schächte · Fallen · Erster gewinnt',
-      menu='Fall durch 4 Schächte ins Wasser',
+party(_K, 'Dropper', 'gold', (DX, DY, DZ), trig=67, prof='fisherman', sub='4 Schächte · Erster gewinnt · auch solo',
+      menu='Fall durch 4 Schächte ins Wasser – auch solo',
       info='Spring in den Schacht und weich im Fallen allen Hindernissen aus. Landest du auf einem Block, geht es zurück nach oben. '
-           'Triffst du das Wasser unten, kommt das nächste Level. Wer zuerst alle 4 Level schafft, gewinnt – Zeitlimit 5 Minuten!',
+           'Triffst du das Wasser unten, kommt das nächste Level. Wer zuerst alle 4 Level schafft, gewinnt – Zeitlimit 5 Minuten! '
+           'Alleine spielst du gegen die Uhr und jagst deine Bestzeit.',
       title_sub='Triff das Wasser!', size=114, maxp=_SLOTS, build=_build, setup=_setup, game=_game, custom_end=True,
-      spect=(DX, _R + 8, DZ), coins_win=0, cleanup=[*_gate('light_blue_stained_glass'), f'bossbar set {NS}:dropper visible false',
+      spect=(DX, _R + 8, DZ), coins_win=0, solo=True, solo_end=_solo_end, cleanup=[*_gate('light_blue_stained_glass'), f'bossbar set {NS}:dropper visible false',
                                                    f'bossbar set {NS}:dropper players', 'tag @a remove mg_dropper_win'])

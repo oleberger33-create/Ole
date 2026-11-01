@@ -4,6 +4,8 @@
 # Falling below the course, touching rock/ground (0.4 s) or leaving the canyon -> back onto the pad on top of the last ring.
 # First through the golden finish ring wins; everybody else gets a placement; the race ends when all finished
 # or 3 minutes after the winner (6 minutes without any finisher -> whoever got furthest wins).
+# Solo run (one starter, #elytra_np = 1): against the clock, personal best time (mg_elytra_pb), no win, 2 coins for
+# finishing + 3 for a new record; time-out after 6 minutes ends with the reached ring.
 _K = 'elytra'
 EX, EY, EZ = 80000, Y, 0
 _T, _AL = 'mg_elytra', 'mg_al_elytra'
@@ -260,7 +262,7 @@ for _d in _RD:
 
 fn('elytra/pass', [
     'scoreboard players add @s mg_elytra_p 1', 'scoreboard players set @s mg_elytra_g 0',
-    f'execute if score @s mg_elytra_p matches ..{_N - 1} if score @s mg_elytra_p > #elytra_best mg unless entity @s[tag=mg_elytra_lead] run function {NS}:elytra/newlead',
+    f'execute if score #elytra_np mg matches 2.. if score @s mg_elytra_p matches ..{_N - 1} if score @s mg_elytra_p > #elytra_best mg unless entity @s[tag=mg_elytra_lead] run function {NS}:elytra/newlead',
     'execute if score @s mg_elytra_p > #elytra_best mg run scoreboard players operation #elytra_best mg = @s mg_elytra_p'])
 fn('elytra/newlead', [
     'effect clear @a[tag=mg_elytra_lead] minecraft:glowing', 'tag @a[tag=mg_elytra_lead] remove mg_elytra_lead',
@@ -279,6 +281,7 @@ fn('elytra/goal', [
     'scoreboard players operation #elytra_ten mg /= #2 mg', 'scoreboard players operation #elytra_sec mg /= #20 mg',
     'effect clear @s minecraft:glowing', 'tag @s remove mg_elytra_lead',
     'title @s times 5 50 15',
+    f'execute if score #elytra_np mg matches ..1 run return run function {NS}:elytra/solo_fin',
     f'execute if score #elytra_place mg matches 1 run function {NS}:elytra/first',
     f'execute if score #elytra_place mg matches 2.. run title @s title {tc({"text": "IM ZIEL!", "color": "aqua", "bold": True})}',
     f'execute if score #elytra_place mg matches 2.. run title @s subtitle ' + tc([{'text': 'Platz ', 'color': 'white'}, {'score': {'name': '@s', 'objective': 'mg_elytra_pl'}, 'color': 'gold', 'bold': True}, {'text': '  ·  ', 'color': 'dark_gray'}] + _TIME),
@@ -303,6 +306,39 @@ fn('elytra/first', [
 
 # the win is booked the moment it is decided, so leaving the round afterwards cannot cost it
 fn('elytra/award', ['scoreboard players add @s mg_wins 1', 'scoreboard players add @s mg_coins 15'])
+
+# ---- solo run: against the clock, personal best, never a win; coins capped at 2 per finish (+3 for a new record)
+pb_register(_K, 'Elytra-Rennen', 'dark_aqua')
+fn('elytra/solo_fin', [          # as the player who flew through the finish ring
+    'scoreboard players operation #pbv mg = #elytra_t mg', f'scoreboard players remove #pbv mg {_GO}',
+    *pb_fmt('#pbv mg', 'elys'),
+    f'tellraw @s ' + msg({'text': 'Ziel! ', 'color': 'aqua', 'bold': True}, {'text': 'Alle 15 Ringe in ', 'color': 'gray'}, *pb_txt('elys', 'yellow'),
+                         {'text': '  +2 Münzen', 'color': 'yellow'}),
+    'scoreboard players add @s mg_coins 2',
+    f'function {NS}:elytra/pb',
+    'execute if score #pbn mg matches 1 run scoreboard players add @s mg_coins 3',
+    f'execute if score #pbn mg matches 1 run tellraw @s ' + msg({'text': 'Rekord-Bonus: ', 'color': 'gold'}, {'text': '+3 Münzen', 'color': 'yellow'}),
+    'title @s subtitle ' + tc([{'text': 'Zeit: ', 'color': 'white'}] + pb_txt('elys', 'yellow')),
+    'execute if score #pbn mg matches 1 run title @s subtitle ' + tc([{'text': '★ Neuer Rekord: ', 'color': 'gold', 'bold': True}] + pb_txt('elys', 'yellow')),
+    'playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1',
+    'summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:15,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"star",colors:[I;16766720,65535],has_trail:true}]}}}}',
+    'clear @s', 'gamemode spectator @s',
+    f'function {NS}:{_K}/end'])          # solo -> elytra/solo_end (title, state 3, back to the hub in 5 s)
+fn('elytra/solo_time', [         # 6 minutes over without reaching the finish
+    f'execute as {_RACE} run tellraw @s ' + msg({'text': 'Zeit abgelaufen! ', 'color': 'red', 'bold': True}, {'text': 'Du hast ', 'color': 'gray'},
+                                               {'score': {'name': '@s', 'objective': 'mg_elytra_p'}, 'color': 'gold', 'bold': True},
+                                               {'text': f' von {_N} Ringen geschafft – keine Wertung.', 'color': 'gray'}),
+    f'execute as {_RACE} run title @s subtitle ' + tc([{'text': 'Zeit abgelaufen · Ring ', 'color': 'red'},
+                                                      {'score': {'name': '@s', 'objective': 'mg_elytra_p'}, 'color': 'gold', 'bold': True},
+                                                      {'text': f'/{_N}', 'color': 'gold'}]),
+    f'function {NS}:{_K}/end'])
+fn('elytra/solo_info', [         # as the player at "LOS!": show the record to beat
+    *pb_fmt('@s mg_elytra_pb', 'elyb'),
+    'execute if score @s mg_elytra_pb matches 1.. run tellraw @s ' + msg({'text': 'Solo-Lauf gegen die Uhr! ', 'color': 'aqua', 'bold': True},
+                                                                        {'text': 'Deine Bestzeit: ', 'color': 'gray'}, *pb_txt('elyb', 'gold'),
+                                                                        {'text': ' – schaffst du sie?', 'color': 'gray'}),
+    'execute unless score @s mg_elytra_pb matches 1.. run tellraw @s ' + msg({'text': 'Solo-Lauf gegen die Uhr! ', 'color': 'aqua', 'bold': True},
+                                                                            {'text': 'Flieg durch alle 15 Ringe und stell deine erste Bestzeit auf. Du hast 6 Minuten.', 'color': 'gray'})])
 
 # crashes / respawn
 _rsp = ['scoreboard players set @s mg_elytra_g 0']
@@ -354,6 +390,7 @@ fn('elytra/go', [
     f'execute as @a[tag={_T}] at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 2',
     f'execute as @a[tag={_T}] at @s run playsound minecraft:entity.firework_rocket.launch master @s ~ ~ ~ 1 1',
     f'give {_RACE} {_FW} 3',
+    f'execute if score #elytra_np mg matches ..1 as {_RACE} run function {NS}:elytra/solo_info',
     f'tellraw @a[tag={_T}] ' + msg({'text': 'Tipp: ', 'color': 'yellow'}, {'text': 'Lauf über die Kante und drück in der Luft ', 'color': 'gray'},
                                    {'text': 'Springen', 'color': 'white'}, {'text': ' zum Gleiten. ', 'color': 'gray'},
                                    {'text': 'Rechtsklick mit Rakete', 'color': 'white'}, {'text': ' = Schub. Die Funken zeigen zum nächsten Ring.', 'color': 'gray'}),
@@ -392,6 +429,7 @@ fn('elytra/end_go', [
 fn('elytra/end_late', [f'tellraw {_RACE} ' + msg({'text': 'Zeit abgelaufen – du hast es nicht mehr ins Ziel geschafft.', 'color': 'red'}),
                        f'function {NS}:elytra/end_go'])
 fn('elytra/end_time', [
+    f'execute if score #elytra_np mg matches ..1 run return run function {NS}:elytra/solo_time',
     f'tellraw @a[tag={_T}] ' + msg({'text': 'Zeit abgelaufen! Niemand hat das Ziel erreicht – wer am weitesten kam, gewinnt.', 'color': 'red'}),
     'scoreboard players set #elytra_best mg 0',
     f'execute as {_RACE} run scoreboard players operation #elytra_best mg > @s mg_elytra_p',
@@ -403,7 +441,9 @@ _warn = []
 for _ticks, _txt in ((1200, 'Noch 60 Sekunden!'), (600, 'Noch 30 Sekunden!'), (200, 'Noch 10 Sekunden!')):
     _warn += [f'execute if score #elytra_place mg matches 1.. if score #elytra_r2 mg matches {_ticks} run tellraw {_RACE} {msg({"text": _txt, "color": "red", "bold": True})}',
               f'execute if score #elytra_place mg matches 1.. if score #elytra_r2 mg matches {_ticks} as {_RACE} at @s run playsound minecraft:block.note_block.basedrum master @s ~ ~ ~ 1 0.6',
-              f'execute if score #elytra_place mg matches 0 if score #elytra_t mg matches {_LIMIT - _ticks} run tellraw {_RACE} {msg({"text": _txt + " Danach gewinnt, wer am weitesten ist.", "color": "red", "bold": True})}']
+              f'execute if score #elytra_place mg matches 0 if score #elytra_np mg matches 2.. if score #elytra_t mg matches {_LIMIT - _ticks} run tellraw {_RACE} {msg({"text": _txt + " Danach gewinnt, wer am weitesten ist.", "color": "red", "bold": True})}',
+              f'execute if score #elytra_place mg matches 0 if score #elytra_np mg matches ..1 if score #elytra_t mg matches {_LIMIT - _ticks} run tellraw {_RACE} {msg({"text": _txt, "color": "red", "bold": True})}',
+              f'execute if score #elytra_place mg matches 0 if score #elytra_np mg matches ..1 if score #elytra_t mg matches {_LIMIT - _ticks} as {_RACE} at @s run playsound minecraft:block.note_block.basedrum master @s ~ ~ ~ 1 0.6']
 
 _game = [
     f'execute if score #elytra_t mg matches {_GO - 60} run function {NS}:elytra/cd3',
@@ -418,6 +458,7 @@ _game = [
     'execute if score #elytra_place mg matches 1.. run scoreboard players operation #elytra_r2 mg = #elytra_dl mg',
     'execute if score #elytra_place mg matches 1.. run scoreboard players operation #elytra_r2 mg -= #elytra_t mg',
     *_warn,
+    f'execute unless score #{_K} mg matches 2 run return 0',
     f'execute unless entity @a[tag={_T}] run return run function {NS}:elytra/end_go',
     f'execute if score #elytra_place mg matches 1.. unless entity {_RACE} run return run function {NS}:elytra/end_go',
     f'execute if score #elytra_place mg matches 1.. if score #elytra_r2 mg matches ..0 run return run function {NS}:elytra/end_late',
@@ -442,9 +483,11 @@ EXTRA_LOAD.extend(['scoreboard objectives add mg_elytra_p dummy', 'scoreboard ob
                    'scoreboard objectives add mg_elytra_pl dummy'])
 ENTER_LINES.extend(['tag @s remove mg_elytra_fin', 'tag @s remove mg_elytra_win', 'tag @s remove mg_elytra_lead'])
 
-party(_K, 'Elytra-Rennen', 'dark_aqua', (EX, EY, EZ), trig=65, prof='toolsmith', sub='15 Ringe · Raketen · Erster gewinnt',
-      menu='Flieg durch die Ringe im Canyon',
+party(_K, 'Elytra-Rennen', 'dark_aqua', (EX, EY, EZ), trig=65, prof='toolsmith', sub='15 Ringe · Raketen · auch solo',
+      menu='Flieg durch die Ringe – auch solo',
       info='Gleite mit der Elytra vom Startturm durch alle 15 Ringe – in der richtigen Reihenfolge. Raketen geben Schub '
-           '(Nachschub an Ring 5 und 10). Absturz oder Bodenkontakt = zurück zum letzten Ring. Wer zuerst durchs goldene Ziel fliegt, gewinnt!',
+           '(Nachschub an Ring 5 und 10). Absturz oder Bodenkontakt = zurück zum letzten Ring. Wer zuerst durchs goldene Ziel fliegt, gewinnt! '
+           'Auch solo spielbar: Flieg gegen die Uhr und knack deine Bestzeit.',
       title_sub='Flieg durch alle 15 Ringe!', size=60, build=_build, setup=_setup, game=_game, custom_end=True,
-      spect=_SPECT, coins_win=0, cleanup=[_gate('red_stained_glass')])
+      spect=_SPECT, coins_win=0, cleanup=[_gate('red_stained_glass')], solo=True,
+      solo_end=[f'effect clear @a[tag={_T}] minecraft:glowing', f'tag @a[tag={_T}] remove {_AL}', f'title @a[tag={_T}] times 10 60 20'])
