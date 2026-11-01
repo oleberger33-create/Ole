@@ -157,6 +157,7 @@ load = [
     'scoreboard objectives add sr_team dummy',
     'scoreboard objectives add sr_click minecraft.used:minecraft.carrot_on_a_stick',
     'scoreboard objectives add sr_slot dummy',
+    'scoreboard objectives add sr_sx dummy', 'scoreboard objectives add sr_sy dummy', 'scoreboard objectives add sr_sz dummy',
     'scoreboard objectives add sr_pu_blaze minecraft.picked_up:minecraft.blaze_rod',
     'scoreboard objectives add sr_pu_pearl minecraft.picked_up:minecraft.ender_pearl',
     'scoreboard objectives add sr_cr_eye minecraft.crafted:minecraft.ender_eye',
@@ -207,6 +208,7 @@ load += [
     f'{OW} forceload add -16 -16 15 15',
     f'function {NS}:sidebar/lobby',
     f'execute unless score #built sr matches {BUILD_VERSION} run schedule function {NS}:lobby/try_build 40t',
+    'execute unless score #resume_done sr matches 1 run scoreboard players set #resume sr 1',
 ]
 fn('load', load)
 
@@ -224,6 +226,7 @@ fn('tick', [
     f'execute as @a[tag=sr_lobby] run function {NS}:lobby/keep',
     f'execute if score #cd sr matches 1.. run function {NS}:start/cd_tick',
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
+    f'execute if score #resume sr matches 1 if entity @a[name=matsllll] if entity @a[name=Qelloxx] run function {NS}:fix/resume',
 ])
 
 # ------------------------------------------------------------------ lobby island
@@ -569,6 +572,9 @@ for n in TEAMS:
                f'execute unless entity @a[scores={{sr_team={n}}}] run bossbar set {NS}:t{n} visible false']
 launch += [
     'execute as @a[tag=sr_run] at @s run spawnpoint @s ~ ~ ~',
+    'execute as @a[tag=sr_run] store result score @s sr_sx run data get entity @s Pos[0]',
+    'execute as @a[tag=sr_run] store result score @s sr_sy run data get entity @s Pos[1]',
+    'execute as @a[tag=sr_run] store result score @s sr_sz run data get entity @s Pos[2]',
     'scoreboard players set #k sr 0',
     f'execute as @a[tag=sr_run] run function {NS}:start/slot',
     'scoreboard players set @a[tag=sr_run] sr_pu_blaze 0', 'scoreboard players set @a[tag=sr_run] sr_pu_pearl 0',
@@ -577,7 +583,7 @@ launch += [
     *[f'scoreboard players set @a[tag=sr_run] sr_d_{k} 0' for k in STEP_KEYS],
     *[f'scoreboard players set @a[tag=sr_run] sr_v_{k} 0' for k in NEED],
     f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] run function {NS}:p/init',
-    'scoreboard players set #ticks sr 0', 'scoreboard players set #active sr 1',
+    'scoreboard players set #ticks sr 0', 'scoreboard players set #st sr 0', 'scoreboard players set #empty sr 0', 'scoreboard players set #active sr 1',
     f'execute as @a[tag=sr_run] run function {NS}:role/brief',
     'execute as @a[tag=sr_run] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.6 1.2',
     f'execute as @a[tag=sr_watch] run function {NS}:player/spectate',
@@ -646,12 +652,16 @@ fn('pos/retry', [
 
 # ------------------------------------------------------------------ run loop
 fn('run/tick', [
-    'scoreboard players add #ticks sr 1',
-    'scoreboard players operation #t sr = #ticks sr', 'scoreboard players operation #t sr %= #20 sr',
-    f'execute if score #t sr matches 0 run function {NS}:run/second',
+    'scoreboard players add #st sr 1',
+    'execute if entity @a[tag=sr_run] run scoreboard players add #ticks sr 1',
+    f'execute if score #st sr matches 20.. run function {NS}:run/second',
 ])
 second = [
-    f'execute unless entity @a[tag=sr_run] run return run function {NS}:run/empty',
+    'scoreboard players set #st sr 0',
+    'execute if entity @a[tag=sr_run] run scoreboard players set #empty sr 0',
+    'execute unless entity @a[tag=sr_run] run scoreboard players add #empty sr 1',
+    f'execute if score #empty sr matches 600.. run return run function {NS}:run/empty',
+    'execute unless entity @a[tag=sr_run] run return 0',
     'scoreboard players operation #s sr = #ticks sr', 'scoreboard players operation #s sr /= #20 sr',
     'scoreboard players operation #min sr = #s sr', 'scoreboard players operation #min sr /= #60 sr',
     'scoreboard players operation #sec sr = #s sr', 'scoreboard players operation #sec sr %= #60 sr',
@@ -660,6 +670,7 @@ for n in TEAMS:
     second.append(f'execute if entity @a[tag=sr_run,scores={{sr_team={n}}}] run function {NS}:team/second_t{n}')
 second += [
     f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] at @s run function {NS}:p/second',
+    f'execute as @a[tag=sr_run,gamemode=survival] at @s if dimension minecraft:overworld if entity @s[x=-40,dx=80,y=185,dy=120,z=-40,dz=80] run function {NS}:p/rescue',
     'scoreboard players operation #five sr = #s sr', 'scoreboard players operation #five sr %= #5 sr',
     'execute if score #five sr matches 0 run effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
     f'function {NS}:run/end_watch',
@@ -667,7 +678,7 @@ second += [
 fn('run/second', second)
 fn('run/empty', ['scoreboard players set #active sr 0',
                  *[f'bossbar set {NS}:t{n} visible false' for n in TEAMS],
-                 f'tellraw @a {msg({"text": "Run beendet – niemand mehr im Run.", "color": "gray"})}'])
+                 f'tellraw @a {msg({"text": "Run beendet – 10 Minuten lang war niemand mehr im Run.", "color": "gray"})}'])
 
 SHARE = {
     'nether': ('Nether-Portal', 'in minecraft:the_nether as @a[tag=sr_run,scores={{sr_team={n}}},distance=0..,limit=1]'),
@@ -1001,6 +1012,89 @@ for key in STEP_KEYS:
     fn(f'pd/{key}', [f'scoreboard players set @s sr_d_{key} 1',
                      f'tellraw @s {tc([{"text": "✔ ", "color": "green", "bold": True}, {"text": "Dein Schritt erledigt: ", "color": "gray"}, {"text": LBL[key], "color": "white"}])}',
                      'playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 0.8 1.2'])
+
+
+# ------------------------------------------------------------------ rescue: run player respawned on the lobby island
+fn('p/rescue', [
+    f'execute unless data entity @s LastDeathLocation run return run function {NS}:p/to_start',
+    'data modify storage sr:tmp d.dim set from entity @s LastDeathLocation.dimension',
+    'execute store result storage sr:tmp d.x int 1 run data get entity @s LastDeathLocation.pos[0]',
+    'execute store result storage sr:tmp d.z int 1 run data get entity @s LastDeathLocation.pos[2]',
+    'execute store result score #dy sr run data get entity @s LastDeathLocation.pos[1]',
+    'scoreboard players add #dy sr 3',
+    'execute store result storage sr:tmp d.y int 1 run scoreboard players get #dy sr',
+    'scoreboard players set #ok sr 0',
+    f'execute if score #dy sr matches 4.. run function {NS}:p/to_death with storage sr:tmp d',
+    f'execute if score #ok sr matches 0 run return run function {NS}:p/to_start',
+    f'function {NS}:p/fix_spawn',
+    f'tellraw @s {msg({"text": "Du warst in der Lobby gelandet – zurück zu deinem Todespunkt.", "color": "aqua"})}',
+])
+fn('p/to_death', [
+    '$execute in $(dim) store success score #ok sr run spreadplayers $(x) $(z) 0 6 under $(y) false @s',
+    '$execute if score #ok sr matches 0 in $(dim) store success score #ok sr run spreadplayers $(x) $(z) 0 24 under $(y) false @s',
+])
+fn('p/to_start', [
+    'execute store result storage sr:tmp s.x int 1 run scoreboard players get @s sr_sx',
+    'execute store result storage sr:tmp s.y int 1 run scoreboard players get @s sr_sy',
+    'execute store result storage sr:tmp s.z int 1 run scoreboard players get @s sr_sz',
+    f'function {NS}:p/tp_start with storage sr:tmp s',
+    f'function {NS}:p/fix_spawn',
+    f'tellraw @s {msg({"text": "Du warst in der Lobby gelandet – zurück zu deinem Startpunkt.", "color": "aqua"})}',
+])
+fn('p/tp_start', ['$execute in minecraft:overworld run tp @s $(x) $(y) $(z)'])
+fn('p/fix_spawn', [
+    'execute store result storage sr:tmp s.x int 1 run scoreboard players get @s sr_sx',
+    'execute store result storage sr:tmp s.y int 1 run scoreboard players get @s sr_sy',
+    'execute store result storage sr:tmp s.z int 1 run scoreboard players get @s sr_sz',
+    f'function {NS}:p/spawn_start with storage sr:tmp s',
+])
+fn('p/spawn_start', ['$execute in minecraft:overworld run spawnpoint @s $(x) $(y) $(z)'])
+
+
+# ------------------------------------------------------------------ one-shot: resume the run that the restart ended
+fn('fix/resume', [
+    'scoreboard players set #resume sr 0', 'scoreboard players set #resume_done sr 1',
+    'scoreboard players set #cd sr 0',
+    'team leave @a', 'tag @a remove sr_hasrole', 'tag @a remove sr_spec',
+    'tag @a[tag=!sr_watch] add sr_run', 'tag @a[tag=sr_run] remove sr_lobby',
+    'scoreboard players set @a[tag=sr_run] sr_team 1',
+    'clear @a[tag=sr_run] *[minecraft:custom_data~{sr_item:1b}]',
+    'gamemode survival @a[tag=sr_run]', 'effect clear @a[tag=sr_run]',
+    f'function {NS}:role/assign_t1',
+    'scoreboard players set #teams sr 1', 'scoreboard players set #finished sr 0',
+    'scoreboard players operation #slot sr = #nextslot sr', 'scoreboard players remove #slot sr 1',
+    'scoreboard players operation #slot sr %= #npos sr',
+    f'function {NS}:pos/pick',
+    'data modify storage sr:run place set value {n:1}',
+    'execute store result storage sr:run place.x int 1 run scoreboard players get #cx sr',
+    'execute store result storage sr:run place.z int 1 run scoreboard players get #cz sr',
+    'scoreboard players set #try sr 0',
+    f'function {NS}:pos/place with storage sr:run place',
+    'execute as @a[tag=sr_run] at @s run spawnpoint @s ~ ~ ~',
+    'execute as @a[tag=sr_run] store result score @s sr_sx run data get entity @s Pos[0]',
+    'execute as @a[tag=sr_run] store result score @s sr_sy run data get entity @s Pos[1]',
+    'execute as @a[tag=sr_run] store result score @s sr_sz run data get entity @s Pos[2]',
+    f'execute as @a[name=matsllll,tag=sr_run] run function {NS}:fix/to_grave',
+    'scoreboard players set #k sr 0',
+    f'execute as @a[tag=sr_run] run function {NS}:start/slot',
+    f'execute as @a[tag=sr_run,scores={{sr_slot=1..16}}] run function {NS}:p/init',
+    'scoreboard players set #st sr 0', 'scoreboard players set #empty sr 0', 'scoreboard players set #active sr 1',
+    f'bossbar set {NS}:t1 visible true', f'bossbar set {NS}:t1 players @a[tag=sr_run]',
+    'effect give @a[tag=sr_run] minecraft:glowing infinite 0 true',
+    f'tellraw @a {msg({"text": "Run fortgesetzt! ", "color": "green", "bold": True}, {"text": "Mats ist bei seinem Grab, die anderen am Startpunkt.", "color": "white"})}',
+])
+fn('fix/to_grave', [
+    'execute unless data entity @s LastDeathLocation run return 0',
+    'data modify storage sr:tmp d.dim set from entity @s LastDeathLocation.dimension',
+    'execute store result storage sr:tmp d.x int 1 run data get entity @s LastDeathLocation.pos[0]',
+    'execute store result storage sr:tmp d.z int 1 run data get entity @s LastDeathLocation.pos[2]',
+    'execute store result score #dy sr run data get entity @s LastDeathLocation.pos[1]',
+    'scoreboard players add #dy sr 3',
+    'execute store result storage sr:tmp d.y int 1 run scoreboard players get #dy sr',
+    'scoreboard players set #ok sr 0',
+    f'function {NS}:p/to_death with storage sr:tmp d',
+    f'execute if score #ok sr matches 1 run tellraw @s {msg({"text": "Du bist bei deinem Todespunkt – dein Grab mit deinen Sachen ist hier.", "color": "aqua"})}',
+])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
