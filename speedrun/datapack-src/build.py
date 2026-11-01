@@ -227,6 +227,7 @@ fn('tick', [
     f'execute if score #cd sr matches 1.. run function {NS}:start/cd_tick',
     f'execute if score #active sr matches 1 run function {NS}:run/tick',
     f'execute if score #resume sr matches 1 if entity @a[name=matsllll] if entity @a[name=Qelloxx] run function {NS}:fix/resume',
+    *[f'execute unless score #gb_{w.lower()} sr matches 1 if entity @a[name={w}] run function {NS}:fix/giveback_{w.lower()}' for w in ('FNGreg', 'Qelloxx')],
 ])
 
 # ------------------------------------------------------------------ lobby island
@@ -1095,6 +1096,15 @@ fn('fix/to_grave', [
     f'function {NS}:p/to_death with storage sr:tmp d',
     f'execute if score #ok sr matches 1 run tellraw @s {msg({"text": "Du bist bei deinem Todespunkt – dein Grab mit deinen Sachen ist hier.", "color": "aqua"})}',
 ])
+
+
+# ------------------------------------------------------------------ one-shot: give back items lost by the run reset
+GIVEBACK = {"Qelloxx": {"minecraft:spruce_log": 9, "minecraft:cobblestone": 28, "minecraft:iron_nugget": 3, "minecraft:bread": 8, "minecraft:glow_berries": 10, "minecraft:beef": 3, "minecraft:copper_axe": 1, "minecraft:coal": 20, "minecraft:copper_shovel": 1, "minecraft:leather": 2, "minecraft:white_wool": 15, "minecraft:mossy_cobblestone": 1, "minecraft:black_wool": 6, "minecraft:bundle": 1, "minecraft:oak_log": 6, "minecraft:stone_sword": 1, "minecraft:birch_log": 10, "minecraft:stick": 1, "minecraft:dark_oak_log": 3, "minecraft:cooked_mutton": 27}, "FNGreg": {"minecraft:spruce_log": 11, "minecraft:dirt": 19, "minecraft:cobblestone": 506, "minecraft:coal": 106, "minecraft:raw_iron": 8, "minecraft:iron_ingot": 5, "minecraft:andesite": 50, "minecraft:cobbled_deepslate": 229, "minecraft:diorite": 27, "minecraft:tuff": 33, "minecraft:netherrack": 1, "minecraft:torch": 4, "minecraft:rotten_flesh": 2, "minecraft:granite": 63, "minecraft:raw_copper": 64, "minecraft:gravel": 7, "minecraft:flint": 1, "minecraft:spruce_sapling": 1}}
+for who, items in GIVEBACK.items():
+    flag = '#gb_' + who.lower()
+    fn('fix/giveback_' + who.lower(), [f'scoreboard players set {flag} sr 1'] +
+       [f'give {who} {item} {count}' for item, count in sorted(items.items(), key=lambda x: -x[1])] +
+       [f'tellraw {who} ' + msg({'text': 'Deine Items von vor dem Neustart sind zurück.', 'color': 'green'})])
 
 # ------------------------------------------------------------------ lobby sidebar
 lob = ['scoreboard players reset * sr_lobby']
