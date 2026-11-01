@@ -12,7 +12,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'minigames')
 NS = 'mg'
-BUILD_VERSION = 3
+BUILD_VERSION = 4
 files = {}
 
 
@@ -42,8 +42,8 @@ DUELS = {                     # 1v1 games: key -> (name, centre, colour)
     'spleef': ('Spleef', (4000, Y, 0), 'aqua'),
     'duell':  ('Duell', (5000, Y, 0), 'red'),
 }
-RUSH_TIME = 360               # seconds of parkour before the arena
-FINISH_GRACE = 20             # seconds after the first finisher
+RUSH_TIME = 900               # seconds of parkour before the arena
+FINISH_GRACE = 30             # seconds after the first finisher
 
 # ------------------------------------------------------------------ meta / tags
 js('pack.mcmeta', {'pack': {'description': 'Minigames: Parkour-Rush, Sumo, Spleef, Duell',
@@ -80,6 +80,10 @@ LOOT = {
                             item('crossbow', 2, None, ench(quick_charge=2)), item('golden_apple', 3, (2, 3)),
                             item('splash_potion', 2, None, potion('strong_healing')), item('potion', 2, None, potion('strength')),
                             item('ender_pearl', 2, (1, 2)), item('arrow', 2, (16, 24)), item('iron_chestplate', 2, None, ench(protection=2))]),
+    'chest_elite': ((4, 4), [item('diamond_sword', 3, None, ench(sharpness=2)), item('diamond_chestplate', 3, None, ench(protection=1)),
+                             item('diamond_leggings', 3), item('diamond_boots', 2, None, ench(protection=2)), item('bow', 2, None, ench(power=3)),
+                             item('golden_apple', 3, (2, 4)), item('splash_potion', 2, None, potion('strong_healing')),
+                             item('potion', 2, None, potion('strength')), item('ender_pearl', 2, (2, 3)), item('arrow', 2, (20, 32))]),
     'chest_finish': ((4, 5), [item('diamond_sword', 3, None, ench(sharpness=3)), item('diamond_chestplate', 3, None, ench(protection=2)),
                               item('diamond_leggings', 2, None, ench(protection=2)), item('diamond_helmet', 2, None, ench(protection=2)),
                               item('bow', 2, None, ench(power=3, flame=1)), item('enchanted_golden_apple', 1), item('golden_apple', 3, (3, 4)),
@@ -120,168 +124,188 @@ def holo(tag, x, y, z, text, scale=1.0):
 def forceload(cx, cz, r):
     return f'{OW} forceload add {cx - r} {cz - r} {cx + r} {cz + r}'
 
-# ------------------------------------------------------------------ parkour lanes (one private copy of the map per player)
-LANE_X = 10000
-LANES = 8
+# ------------------------------------------------------------------ parkour: 24 modules on floating islands, one private lane per player
+LANES = 6
+MODULES = 24
+NCP = MODULES                     # checkpoint n = island after module n (24 = finish)
+def map_x(mi):
+    return 10000 + mi * 1000
 def lane_z(L):
     return 1000 * L
 
 THEMES = [
-    # name, colour, seed, section blocks, platform, accent, wall, weights
-    dict(name='Himmel', color='aqua', seed=26, blocks=['lime_concrete', 'yellow_concrete', 'orange_concrete', 'red_concrete'],
-         plat='smooth_quartz', accent='sea_lantern', wall='white_concrete', deco='cloud', ice=False),
-    dict(name='Nether', color='red', seed=7, blocks=['crimson_nylium', 'nether_bricks', 'blackstone', 'magma_block'],
-         plat='polished_blackstone_bricks', accent='shroomlight', wall='nether_brick_fence', deco='nether', ice=False),
-    dict(name='Eis', color='aqua', seed=99, blocks=['snow_block', 'packed_ice', 'packed_ice', 'blue_ice'],
-         plat='packed_ice', accent='sea_lantern', wall='packed_ice', deco='spike', ice=True),
-    dict(name='Dschungel', color='green', seed=42, blocks=['moss_block', 'jungle_log', 'oak_leaves', 'mossy_cobblestone'],
-         plat='mossy_stone_bricks', accent='glowstone', wall='jungle_log', deco='tree', ice=False),
-    dict(name='End', color='light_purple', seed=13, blocks=['end_stone_bricks', 'purpur_block', 'obsidian', 'crying_obsidian'],
-         plat='end_stone_bricks', accent='end_rod', wall='purpur_pillar', deco='endisle', ice=False),
+    dict(name='Himmel', color='aqua', seed=26, top='grass_block', under='dirt', core='stone', jump=['white_concrete', 'light_blue_concrete', 'yellow_concrete', 'orange_concrete'],
+         fence='oak_fence', pillar='quartz_pillar', accent='sea_lantern', flower=['dandelion', 'poppy', 'cornflower', 'azure_bluet'], deco='cloud', ice=False),
+    dict(name='Nether', color='red', seed=7, top='crimson_nylium', under='netherrack', core='blackstone', jump=['nether_bricks', 'red_nether_bricks', 'blackstone', 'magma_block'],
+         fence='nether_brick_fence', pillar='polished_basalt', accent='shroomlight', flower=['crimson_fungus', 'crimson_roots', 'warped_fungus'], deco='nether', ice=False),
+    dict(name='Eis', color='aqua', seed=99, top='snow_block', under='packed_ice', core='blue_ice', jump=['snow_block', 'packed_ice', 'packed_ice', 'blue_ice'],
+         fence='spruce_fence', pillar='packed_ice', accent='sea_lantern', flower=['fern', 'short_grass'], deco='spike', ice=True),
+    dict(name='Dschungel', color='green', seed=42, top='moss_block', under='rooted_dirt', core='mossy_cobblestone', jump=['moss_block', 'jungle_log', 'mossy_stone_bricks', 'jungle_planks'],
+         fence='jungle_fence', pillar='jungle_log', accent='glowstone', flower=['fern', 'azalea', 'flowering_azalea', 'large_fern'], deco='tree', ice=False),
+    dict(name='End', color='light_purple', seed=13, top='end_stone', under='end_stone', core='obsidian', jump=['end_stone_bricks', 'purpur_block', 'obsidian', 'crying_obsidian'],
+         fence='end_rod', pillar='purpur_pillar', accent='end_rod', flower=['chorus_flower'], deco='endisle', ice=False),
 ]
-SECTION_LEN = [14, 16, 18, 18]
-CHEST_TABLE = ['chest_easy', 'chest_mid', 'chest_hard', 'chest_finish']
+TIER = lambda n: ('chest_finish' if n >= MODULES else 'chest_elite' if n > 18 else 'chest_hard' if n > 12 else 'chest_mid' if n > 6 else 'chest_easy')
 
 def gen_map(t):
     rnd = random.Random(t['seed'])
-    B = {}                       # (x,y,z) -> block state
+    B = {}
     chests, cps, holos, path = [], [], [], []
     def put(x, y, z, b):
         B[(x, y, z)] = b
-    def plat(cx, cy, cz, r, block):
+    def island(cx, cy, cz, r, chest=None, label=None, big=False):
         for px in range(-r, r + 1):
             for pz in range(-r, r + 1):
-                put(cx + px, cy, cz + pz, block)
-    # start platform + gate
-    plat(0, 0, 0, 2, t['plat'])
+                d = px * px + pz * pz
+                if d <= r * r + r:
+                    put(cx + px, cy, cz + pz, t['top'])
+                    put(cx + px, cy - 1, cz + pz, t['under'])
+                    if d <= (r - 1) * (r - 1) + r - 1:
+                        put(cx + px, cy - 2, cz + pz, t['under'])
+                    if d <= (r - 2) * (r - 2):
+                        put(cx + px, cy - 3, cz + pz, t['core'])
+        put(cx, cy - 4, cz, t['core'])
+        # decoration on the island rim, away from the walking line (z == cz)
+        for _ in range(3 if not big else 6):
+            px, pz = rnd.randint(-r + 1, r - 1), rnd.choice([-r + 1, r - 1])
+            if t['flower'] and (px, pz) != (0, 0):
+                put(cx + px, cy + 1, cz + pz, rnd.choice(t['flower']))
+        put(cx - r + 1, cy + 1, cz - r + 1, 'lantern') if t['accent'] != 'end_rod' else put(cx - r + 1, cy + 1, cz - r + 1, 'end_rod')
+        if chest:
+            chests.append(chest)
+        if label:
+            holos.append(label)
+    x, y, z = 0, 0, 0
+    island(0, 0, 0, 3, label=(0, 3.2, 0, [{'text': 'START\n', 'color': 'green', 'bold': True}, {'text': 'Map: ' + t['name'], 'color': t['color'], 'bold': False}], 1.4))
     put(0, 0, 0, 'emerald_block')
-    for gz in (-3, 3):
-        for gy in range(1, 5):
-            put(1, gy, gz, t['wall'] if 'fence' not in t['wall'] else t['plat'])
-    for gz in range(-3, 4):
-        put(1, 5, gz, t['plat'])
-    put(1, 5, 0, t['accent'])
-    holos.append((0, 3.2, 0, [{'text': 'START\n', 'color': 'green', 'bold': True}, {'text': 'Map: ' + t['name'], 'color': t['color'], 'bold': False}], 1.4))
-    x, y, z = 2, 0, 0
+    x = 3
     path.append((x, y, z))
-    def clampz(nz):
-        return max(-24, min(24, nz))
-    for s, n in enumerate(SECTION_LEN):
-        blk = t['blocks'][s]
-        elems = []
-        for _ in range(n):
-            r = rnd.random()
-            if s == 0:
-                e = 'jump' if r < 0.7 else ('stairs' if r < 0.85 else 'pillar')
-            else:
-                e = ('jump' if r < 0.34 else 'headhitter' if r < 0.46 else 'ladder' if r < 0.54 else 'stairs' if r < 0.62
-                     else 'drop' if r < 0.70 else 'wall' if r < 0.80 else 'pillar' if r < 0.88 else 'bonus')
-                if t['ice'] and r > 0.80:
-                    e = 'iceRun'
-            elems.append(e)
-        for e in elems:
-            if e == 'ladder' and y > 12:
-                e = 'drop'
-            if e == 'stairs' and y > 16:
-                e = 'jump'
-            if e == 'drop' and y < -4:
-                e = 'jump'
-            if e == 'jump' or e == 'pillar':
-                dxr = (2, 3) if s == 0 else (3, 4) if s >= 2 else (2, 4)
-                dx = rnd.randint(*dxr)
-                dy = 0 if s == 0 else rnd.randint(-1, 1)
-                if dx == 4 and dy == 1:
-                    dy = 0
-                dz = rnd.randint(-2, 2) if dx <= 3 else rnd.randint(-1, 1)
-                if dx == 3 and dy == 1 and abs(dz) == 2:
-                    dz = dz // 2
-                x, y, z = x + dx, y + dy, clampz(z + dz)
+    POOLS = [['hop', 'pillars', 'stairs', 'hop'],
+             ['hop', 'pillars', 'ladder', 'head', 'fence', 'drop', 'stairs'],
+             ['pillars', 'ladder', 'head', 'fence', 'drop', 'neo', 'hop', 'ice'],
+             ['pillars', 'head', 'fence', 'neo', 'neo', 'drop', 'ladder', 'ice', 'hop']]
+    for n in range(1, MODULES + 1):
+        diff = 0 if n <= 6 else 1 if n <= 12 else 2 if n <= 18 else 3
+        blk = t['jump'][diff]
+        kind = rnd.choice(POOLS[diff])
+        if kind == 'ice' and not t['ice']:
+            kind = 'pillars'
+        if kind == 'ladder' and y > 18:
+            kind = 'drop'
+        if kind == 'stairs' and y > 20:
+            kind = 'hop'
+        if kind == 'drop' and y < -6:
+            kind = 'stairs'
+        def jump(dxr, dyr):
+            nonlocal x, y, z
+            dx = rnd.randint(*dxr); dy = rnd.randint(*dyr)
+            if dx >= 4 and dy == 1:
+                dy = 0
+            dz = rnd.randint(-1, 1) if dx >= 4 else rnd.randint(-2, 2)
+            if dx == 3 and dy == 1 and abs(dz) == 2:
+                dz = dz // 2
+            x, y, z = x + dx, y + dy, max(-20, min(20, z + dz))
+        if kind == 'hop':                                   # tiny 2x2 islands
+            for _ in range(rnd.randint(3, 5)):
+                jump((3, 4), (0, 0) if diff == 0 else (-1, 1))
+                for ox in (0, 1):
+                    for oz in (0, 1):
+                        put(x + ox, y, z + oz, t['top']); put(x + ox, y - 1, z + oz, t['under'])
+                if rnd.random() < 0.4 and t['flower']:
+                    put(x + 1, y + 1, z + 1, rnd.choice(t['flower']))
+                x += 1
+        elif kind == 'pillars':
+            for _ in range(rnd.randint(4, 6)):
+                jump((2, 3) if diff == 0 else (3, 4), (0, 0) if diff == 0 else (-1, 1))
                 put(x, y, z, blk)
-                if e == 'pillar':
-                    for py in range(1, 4):
-                        put(x, y - py, z, t['wall'] if 'fence' not in t['wall'] else t['plat'])
-            elif e == 'headhitter':
-                put(x, y + 3, z, blk)                       # ceiling over the take-off block
+                for py in range(1, rnd.randint(3, 6)):
+                    put(x, y - py, z, t['pillar'] if t['pillar'] != 'end_rod' else t['core'])
+        elif kind == 'stairs':
+            for _ in range(4):
+                x, y = x + 2, y + 1
+                z = max(-20, min(20, z + rnd.choice((-1, 0, 1))))
+                put(x, y, z, blk)
+        elif kind == 'ladder':
+            x += 3
+            put(x, y, z, blk)
+            h = rnd.randint(4, 6)
+            for ly in range(1, h + 1):
+                put(x + 1, y + ly, z, t['core'])
+                put(x, y + ly, z, 'ladder[facing=west]')
+            x, y = x + 1, y + h
+            put(x, y, z, t['accent'] if t['accent'] != 'end_rod' else blk)
+            jump((3, 4), (-1, 0)); put(x, y, z, blk)
+        elif kind == 'head':                               # jumps under a ceiling
+            for _ in range(3):
                 x += 3
                 put(x, y, z, blk)
-            elif e == 'ladder':
-                x += 2
-                put(x, y, z, t['plat'])
-                for ly in range(1, 5):
-                    put(x + 1, y + ly, z, t['plat'])
-                    put(x, y + ly, z, 'ladder[facing=west]')
-                x, y = x + 1, y + 4
-                put(x, y, z, t['accent'] if t['accent'] != 'end_rod' else t['plat'])
-            elif e == 'stairs':
-                for _ in range(3):
-                    x, y = x + 2, y + 1
-                    put(x, y, z, blk)
-            elif e == 'drop':
+                put(x, y + 3, z, t['core'])
+            x += 3; put(x, y, z, blk)
+        elif kind == 'fence':                              # thin fence posts
+            x += 3; put(x, y, z, blk)
+            fb = t['fence'] if t['fence'] != 'end_rod' else 'end_stone_brick_wall'
+            for _ in range(rnd.randint(3, 4)):
+                x += 2 if diff < 3 else 3
+                put(x, y, z, fb)
+                put(x, y - 1, z, t['core'])
+            x += 2; put(x, y + 1 if False else y, z, blk)
+        elif kind == 'drop':
+            for _ in range(2):
                 x, y = x + 4, y - 2
-                z = clampz(z + rnd.randint(-1, 1))
+                z = max(-20, min(20, z + rnd.choice((-1, 0, 1))))
                 put(x, y, z, blk)
-            elif e == 'wall':
-                sg = 1 if z <= 0 else -1
+            jump((3, 3), (0, 1)); put(x, y, z, blk)
+        elif kind == 'neo':                                # jump around the end of a wall
+            x += 3; put(x, y, z, blk)
+            side = 1 if z <= 0 else -1
+            for wz in range(0, 4):
                 for wy in range(1, 4):
-                    put(x + 1, y + wy, z, t['plat'])
-                x, z = x + 2, clampz(z + 2 * sg)
-                put(x, y, z, blk)
-            elif e == 'iceRun':
-                for i in range(1, 4):
-                    put(x + i, y, z, 'packed_ice')
-                x += 3 + 4
-                put(x, y, z, 'blue_ice')
-            elif e == 'bonus':
-                sg = 1 if z <= 0 else -1
-                bx, bz = x + 2, clampz(z + 4 * sg)
-                plat(bx, y, bz, 1, t['plat'])
-                chests.append((bx, y + 1, bz, 'chest_mid' if s < 3 else 'chest_hard'))
-                put(bx + 1, y + 1, bz + 1, 'lantern')
-            path.append((x, y, z))
-        # checkpoint / finish
-        x += 4
-        if s < len(SECTION_LEN) - 1:
-            plat(x, y, z, 2, t['plat'])
-            put(x, y, z, 'gold_block')
-            chests.append((x - 1, y + 1, z + 2, CHEST_TABLE[s]))
-            put(x + 2, y + 1, z - 2, 'lantern'); put(x - 2, y + 1, z - 2, 'lantern')
-            cps.append((x, y, z))
-            holos.append((x, y + 3.0, z, [{'text': f'Checkpoint {s + 1}\n', 'color': 'yellow', 'bold': True}, {'text': 'Truhe!', 'color': 'gold', 'bold': False}], 1.2))
-            x += 2
+                    put(x + 1, y + wy, z - side * wz, t['core'])
+            put(x + 1, y, z - side * 1, t['core'])
+            x += 2; put(x, y, z, blk)
+            jump((3, 3), (0, 0)); put(x, y, z, blk)
+        elif kind == 'ice':
+            x += 3; put(x, y, z, blk)
+            for i in range(1, 5):
+                put(x + i, y, z, 'packed_ice')
+            x += 4 + 4
+            put(x, y, z, 'blue_ice')
+            jump((3, 3), (0, 0)); put(x, y, z, 'packed_ice')
+        path.append((x, y, z))
+        # checkpoint island n
+        r = 4 if n == MODULES else 3
+        x += r + 3
+        island(x, y, z, r, big=(n == MODULES))
+        put(x, y, z, 'gold_block' if n < MODULES else 'diamond_block')
+        if n < MODULES:
+            cps.append((x, y, z, [(1, 1, 2)]))            # chest offsets relative to the island centre
+            holos.append((x, y + 3.0, z, [{'text': f'Checkpoint {n}', 'color': 'yellow', 'bold': True}], 1.1))
         else:
-            x += 1
-            plat(x, y, z, 3, t['plat'])
-            put(x, y, z, 'diamond_block')
-            chests.append((x - 1, y + 1, z + 3, 'chest_finish'))
-            chests.append((x + 1, y + 1, z + 3, 'chest_finish'))
-            for gz in (-4, 4):
+            cps.append((x, y, z, [(1, 1, 3), (-1, 1, 3)]))
+            for gz in (-5, 5):
                 for gy in range(1, 6):
-                    put(x + 3, y + gy, z + gz, t['plat'])
-            for gz in range(-4, 5):
-                put(x + 3, y + 6, z + gz, t['accent'] if t['accent'] != 'end_rod' else t['plat'])
-            cps.append((x, y, z))
-            holos.append((x, y + 3.4, z, [{'text': 'ZIEL\n', 'color': 'aqua', 'bold': True}, {'text': '2 Truhen!', 'color': 'gold', 'bold': False}], 1.6))
+                    put(x + 4, y + gy, z + gz, t['core'])
+            for gz in range(-5, 6):
+                put(x + 4, y + 6, z + gz, t['accent'] if t['accent'] != 'end_rod' else t['core'])
+            holos.append((x, y + 3.4, z, [{'text': 'ZIEL\n', 'color': 'aqua', 'bold': True}, {'text': '2 Truhen mit dem besten Loot', 'color': 'gold', 'bold': False}], 1.5))
+        x += r + 1
         path.append((x, y, z))
     length = x + 6
-    # scenery, kept 9+ blocks away from the path
-    deco_rnd = random.Random(t['seed'] * 7 + 1)
-    pz_at = {}
-    for (px, py, pz) in path:
-        pz_at[px] = pz
+    # scenery far from the path
+    drnd = random.Random(t['seed'] * 7 + 1)
     def near_path(dx, dz):
-        return any(abs(dx - px) < 9 and abs(dz - pz) < 9 for (px, py, pz) in path)
-    for k in range(34):
-        cx = deco_rnd.randint(0, length)
-        side = deco_rnd.choice((-1, 1))
-        cz = side * deco_rnd.randint(11, 30)
+        return any(abs(dx - px) < 10 and abs(dz - pz) < 10 for (px, py, pz) in path)
+    for k in range(70):
+        cx = drnd.randint(0, length)
+        cz = drnd.choice((-1, 1)) * drnd.randint(14, 34)
         if near_path(cx, cz):
             continue
-        cy = deco_rnd.randint(-8, 14)
+        cy = drnd.randint(-10, 22)
         d = t['deco']
         if d == 'cloud':
             for ox in range(-3, 4):
                 for oz in range(-2, 3):
-                    if ox * ox / 9 + oz * oz / 4 <= 1.05 and deco_rnd.random() < 0.9:
+                    if ox * ox / 9 + oz * oz / 4 <= 1.05 and drnd.random() < 0.9:
                         put(cx + ox, cy, cz + oz, 'white_wool')
                         if abs(ox) < 2 and abs(oz) < 2:
                             put(cx + ox, cy + 1, cz + oz, 'white_wool')
@@ -290,45 +314,41 @@ def gen_map(t):
                 for oz in range(-2, 3):
                     if ox * ox + oz * oz <= 5:
                         put(cx + ox, cy, cz + oz, 'netherrack')
-                        if ox * ox + oz * oz <= 2:
-                            put(cx + ox, cy - 1, cz + oz, 'netherrack')
-            put(cx, cy + 1, cz, 'glowstone'); put(cx + 1, cy, cz, 'magma_block'); put(cx - 1, cy - 2, cz, 'crying_obsidian')
+            put(cx, cy + 1, cz, 'glowstone'); put(cx + 1, cy, cz, 'magma_block'); put(cx - 1, cy - 1, cz, 'crying_obsidian')
         elif d == 'spike':
-            h = deco_rnd.randint(5, 11)
+            h = drnd.randint(5, 12)
             for oy in range(h):
                 put(cx, cy + oy, cz, 'packed_ice')
                 if oy < h // 2:
                     for ox, oz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                         put(cx + ox, cy + oy, cz + oz, 'packed_ice')
-            put(cx, cy + h, cz, 'ice')
         elif d == 'tree':
             for ox in range(-2, 3):
                 for oz in range(-2, 3):
                     if ox * ox + oz * oz <= 5:
-                        put(cx + ox, cy, cz + oz, 'grass_block'); put(cx + ox, cy - 1, cz + oz, 'dirt')
+                        put(cx + ox, cy, cz + oz, 'grass_block')
             for oy in range(1, 5):
                 put(cx, cy + oy, cz, 'jungle_log')
             for ox in range(-2, 3):
                 for oz in range(-2, 3):
-                    for oy in (4, 5):
-                        if ox * ox + oz * oz <= (5 if oy == 4 else 2) and (ox, oz) != (0, 0) or oy == 5 and (ox, oz) == (0, 0):
-                            put(cx + ox, cy + oy, cz + oz, 'jungle_leaves[persistent=true]')
+                    if ox * ox + oz * oz <= 5 and (ox, oz) != (0, 0):
+                        put(cx + ox, cy + 4, cz + oz, 'jungle_leaves[persistent=true]')
+            put(cx, cy + 5, cz, 'jungle_leaves[persistent=true]')
         elif d == 'endisle':
             for ox in range(-2, 3):
                 for oz in range(-2, 3):
                     if ox * ox + oz * oz <= 5:
                         put(cx + ox, cy, cz + oz, 'end_stone')
-            for oy in range(1, deco_rnd.randint(3, 6)):
+            for oy in range(1, drnd.randint(3, 6)):
                 put(cx, cy + oy, cz, 'purpur_pillar')
             put(cx + 1, cy + 1, cz, 'end_rod')
     ys = [p[1] for p in path]
-    return dict(blocks=B, chests=chests, cps=cps, holos=holos, length=length, miny=min(ys), maxy=max(ys))
+    return dict(blocks=B, cps=cps, holos=holos, length=length, miny=min(ys), maxy=max(ys))
 
 MAPGEN = [gen_map(t) for t in THEMES]
-NCP = len(SECTION_LEN)
 MAXLEN = max(m['length'] for m in MAPGEN) + 10
 for t, m in zip(THEMES, MAPGEN):
-    print(f"map {t['name']}: {len(m['blocks'])} blocks, {len(m['chests'])} chests, length {m['length']}, y {m['miny']}..{m['maxy']}")
+    print(f"map {t['name']}: {len(m['blocks'])} blocks, length {m['length']}, y {m['miny']}..{m['maxy']}, checkpoints {len(m['cps'])}")
 
 # ------------------------------------------------------------------ load
 load = [
@@ -341,7 +361,8 @@ load = [
     'scoreboard objectives add mg_deaths deathCount',
     'scoreboard objectives add mg_leave minecraft.custom:minecraft.leave_game',
     'scoreboard objectives add mg_cp dummy',
-    'scoreboard objectives add mg_lane dummy', 'scoreboard objectives add mg_cx dummy', 'scoreboard objectives add mg_cy dummy', 'scoreboard objectives add mg_cz dummy',
+    'scoreboard objectives add mg_lane dummy',
+    f'scoreboard objectives add mg_prog dummy {tc({"text": "Fortschritt (Inseln /24)", "color": "green", "bold": True})}', 'scoreboard objectives add mg_cx dummy', 'scoreboard objectives add mg_cy dummy', 'scoreboard objectives add mg_cz dummy',
     'scoreboard objectives add mg_loot dummy',
     'scoreboard objectives add mg_round dummy',
     'scoreboard objectives add mg_aktion trigger',
@@ -350,7 +371,7 @@ load = [
     f'scoreboard objectives add mg_side dummy {tc({"text": "MINIGAMES", "color": "gold", "bold": True})}',
     'scoreboard objectives modify mg_side numberformat blank',
     'scoreboard objectives setdisplay sidebar mg_side',
-    'scoreboard players set #20 mg 20', 'scoreboard players set #60 mg 60', f'scoreboard players set #{LANES} mg {LANES}',
+    'scoreboard players set #20 mg 20', 'scoreboard players set #60 mg 60', f'scoreboard players set #{LANES} mg {LANES}', 'scoreboard players set #6 mg 6',
     'execute unless score #rush mg matches 0.. run scoreboard players set #rush mg 0',
     *[f'execute unless score #{k} mg matches 0.. run scoreboard players set #{k} mg 0' for k in DUELS],
     'gamerule pvp true',
@@ -371,6 +392,7 @@ load = [
     f'bossbar set {NS}:rush color green',
     f'function {NS}:hub/sidebar',
     f'execute unless score #built mg matches {BUILD_VERSION} run schedule function {NS}:build/try 40t',
+    f'execute if score #built mg matches {BUILD_VERSION} unless score #lanes mg matches {BUILD_VERSION} run schedule function {NS}:build/lane_resume 40t',
 ]
 fn('load', load)
 
@@ -385,6 +407,7 @@ fn('build/all', [
     f'function {NS}:build/hub', f'function {NS}:build/arena',
     *[f'function {NS}:build/{k}' for k in DUELS],
     f'function {NS}:build/done',
+    'scoreboard players set #bq mg 0', 'scoreboard players set #lanes_done mg 0', f'function {NS}:build/lane_next',
 ])
 fn('build/done', [f'scoreboard players set #built mg {BUILD_VERSION}', f'tellraw @a {msg({"text": "Minigame-Welt gebaut.", "color": "gray"})}'])
 
@@ -478,7 +501,7 @@ fn('hub/click', [
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"info"}}] run return run function {NS}:hub/info',
 ])
 fn('hub/info', [f'tellraw @s {msg({"text": "Spielregeln", "color": "gold", "bold": True})}',
-                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": f"Jeder springt allein auf seiner eigenen Strecke – eine von 5 Maps (Himmel, Nether, Eis, Dschungel, End) mit Leitern, Kopfstoß-, Treppen- und Fall-Sprüngen. Loot gibt es nur aus Truhen: an jedem Checkpoint, auf Bonus-Plattformen und 2 im Ziel. Nach {RUSH_TIME // 60} Minuten (oder {FINISH_GRACE} s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt. Runterfallen = zurück zum Checkpoint.", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": f"Jeder springt auf seiner eigenen Strecke: 24 schwebende Inseln mit Sprung-Modulen (Säulen, Leitern, Kopfstoß, Zäune, Neo, Eis …) auf einer von 5 Maps. Auf jeder Insel wartet eine Truhe – je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind. Nach 15 Minuten (oder {FINISH_GRACE} s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt. Runterfallen = zurück zum Checkpoint.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Sumo: ", "color": "yellow", "bold": True}, {"text": "Ohne Waffen. Wer von der Plattform fällt, verliert die Runde.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Spleef: ", "color": "aqua", "bold": True}, {"text": "Mit der Schaufel den Schnee unter dem Gegner wegmachen.", "color": "white"}])}',
                 f'tellraw @s {tc([{"text": " Duell: ", "color": "red", "bold": True}, {"text": "Schwert, Bogen, Eisenrüstung. Wer stirbt, verliert die Runde.", "color": "white"}])}',
@@ -540,41 +563,63 @@ fn('tick', [
     *[f'execute if score #{k} mg matches 0 if entity @a[tag=mg_q_{k}] run function {NS}:q/try_{k}' for k in DUELS],
 ])
 
-# ------------------------------------------------------------------ PARKOUR-RUSH (private lanes)
-# #rush: 0 idle, 1 countdown, 2 parkour, 3 arena
-YLO, YHI = -20, 30
-def lane_box(L):
-    return (LANE_X - 16, lane_z(L) - 40, LANE_X + MAXLEN + 16, lane_z(L) + 40)
+# ------------------------------------------------------------------ PARKOUR-RUSH (24 modules, private lanes, progress board)
+YLO, YHI = -25, 40
+def lane_box(mi, L):
+    return (map_x(mi) - 12, lane_z(L) - 48, map_x(mi) + MAXLEN + 12, lane_z(L) + 48)
 for mi, (t, m) in enumerate(zip(THEMES, MAPGEN)):
-    i = mi + 1
     b = []
-    for sx in range(-8, MAXLEN + 1, 8):
-        b.append(f'fill ~{sx} ~{YLO} ~-34 ~{sx + 7} ~{YHI} ~34 minecraft:air')
+    for sx in range(-10, MAXLEN + 1, 6):
+        b.append(f'fill ~{sx} ~{YLO} ~-40 ~{sx + 5} ~{YHI} ~40 minecraft:air')
     for (bx, by, bz), st in sorted(m['blocks'].items()):
         b.append(f'setblock ~{bx} ~{by} ~{bz} minecraft:{st}')
-    for (cx, cy, cz, table) in m['chests']:
-        b.append(f'setblock ~{cx} ~{cy} ~{cz} minecraft:chest[facing=west]{{LootTable:"{NS}:{table}"}}')
     for (hx_, hy_, hz_, text, sc) in m['holos']:
         b.append(f'summon minecraft:text_display ~{hx_} ~{hy_} ~{hz_} {{Tags:["mg_holo","mg_lh"],billboard:"center",background:0,shadow:true,'
                  f'text:{tc(text)},transformation:{{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[{sc}f,{sc}f,{sc}f]}}}}')
-    fn(f'build/lane_m{i}', b)
-    checks = [f'execute if score @s mg_cp matches ..{ci} positioned ~{cx - 2} ~{cy} ~{cz - 2} if entity @s[dx=4,dy=3,dz=4] run function {NS}:rush/reach {{n:{ci + 1}}}'
-              for ci, (cx, cy, cz) in enumerate(m['cps'])]
-    fn(f'rush/cp_m{i}', checks)
-for L in range(1, LANES + 1):
-    x1, z1, x2, z2 = lane_box(L)
-    fn(f'rush/lane_load{L}', [f'{OW} forceload add {x1} {z1} {x2} {z2}'])
-    fn(f'rush/lane_unload{L}', [f'{OW} forceload remove {x1} {z1} {x2} {z2}'])
-    fn(f'rush/lane_build{L}', [f'execute if score #map mg matches {mi + 1} in minecraft:overworld positioned {LANE_X} {Y} {lane_z(L)} run function {NS}:build/lane_m{mi + 1}'
-                               for mi in range(len(THEMES))])
+    fn(f'build/lane_m{mi + 1}', b)
+    checks = []
+    for ci, (cx, cy, cz, chs) in enumerate(m['cps']):
+        n = ci + 1
+        r = 4 if n == MODULES else 3
+        a = chs[0]
+        args = f'n:{n},tier:"{TIER(n)}",ax:{r + a[0]},ay:{a[1]},az:{r + a[2]}'
+        if len(chs) > 1:
+            bb = chs[1]
+            args += f',bx:{r + bb[0]},by:{bb[1]},bz:{r + bb[2]}'
+            fnname = 'reach2'
+        else:
+            fnname = 'reach1'
+        checks.append(f'execute if score @s mg_cp matches {ci} positioned ~{cx - r} ~{cy} ~{cz - r} if entity @s[dx={2 * r},dy=3,dz={2 * r}] run function {NS}:rush/{fnname} {{{args}}}')
+    fn(f'rush/cp_m{mi + 1}', checks)
+
+# one-time background build of every lane (5 maps x LANES), one lane at a time
+JOBS = [(mi, L) for mi in range(len(THEMES)) for L in range(1, LANES + 1)]
+nxt = ['scoreboard players add #bq mg 1']
+for j, (mi, L) in enumerate(JOBS):
+    x1, z1, x2, z2 = lane_box(mi, L)
+    nxt.append(f'execute if score #bq mg matches {j + 1} run return run function {NS}:build/q{j + 1}')
+    fn(f'build/q{j + 1}', [f'{OW} forceload add {x1} {z1} {x2} {z2}', f'schedule function {NS}:build/q{j + 1}_try 20t'])
+    tries = ' '.join(f'if loaded {px} {Y} {lane_z(L)}' for px in (map_x(mi), map_x(mi) + MAXLEN // 3, map_x(mi) + 2 * MAXLEN // 3, map_x(mi) + MAXLEN))
+    fn(f'build/q{j + 1}_try', [
+        f'execute in minecraft:overworld {tries} run return run function {NS}:build/q{j + 1}_do',
+        f'schedule function {NS}:build/q{j + 1}_try 20t'])
+    fn(f'build/q{j + 1}_do', [
+        f'execute in minecraft:overworld positioned {map_x(mi)} {Y} {lane_z(L)} run function {NS}:build/lane_m{mi + 1}',
+        f'{OW} forceload remove {x1} {z1} {x2} {z2}',
+        f'scoreboard players set #lanes_done mg {j + 1}',
+        f'schedule function {NS}:build/lane_next 2t'])
+nxt.append(f'scoreboard players set #lanes mg {BUILD_VERSION}')
+nxt.append(f'tellraw @a {msg({"text": "Alle Parkour-Strecken sind fertig gebaut.", "color": "green"})}')
+fn('build/lane_next', nxt)
+fn('build/lane_resume', ['scoreboard players remove #bq mg 1', 'execute if score #bq mg matches ..-1 run scoreboard players set #bq mg 0', f'function {NS}:build/lane_next'])
 
 fn('rush/request', [
+    f'execute unless score #lanes mg matches {BUILD_VERSION} run return run tellraw @s {msg({"text": "Die Strecken werden noch gebaut (", "color": "red"}, {"score": {"name": "#lanes_done", "objective": "mg"}, "color": "white"}, {"text": f"/{len(JOBS)}). Gleich fertig!", "color": "red"})}',
     f'execute if score #rush mg matches 1.. run return run tellraw @s {msg({"text": "Parkour-Rush läuft schon.", "color": "red"})}',
     f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " startet ", "color": "gray"}, {"text": "PARKOUR-RUSH", "color": "green", "bold": True}, {"text": " für alle in der Lobby!", "color": "gray"})}',
-    'scoreboard players set #rush mg 1', 'scoreboard players set #cd mg 5', 'scoreboard players set #cdt mg 0', 'scoreboard players set #wait mg 0',
+    'scoreboard players set #rush mg 1', 'scoreboard players set #cd mg 5', 'scoreboard players set #cdt mg 0',
     'scoreboard players set #L mg 0', 'scoreboard players set @a mg_lane 0',
     f'execute as @a[tag=mg_hub] run function {NS}:rush/lane_assign',
-    *[f'execute if score #L mg matches {L}.. run function {NS}:rush/lane_load{L}' for L in range(1, LANES + 1)],
     f'function {NS}:rush/cd_show',
 ])
 fn('rush/lane_assign', ['scoreboard players add #L mg 1', 'scoreboard players operation @s mg_lane = #L mg',
@@ -582,38 +627,32 @@ fn('rush/lane_assign', ['scoreboard players add #L mg 1', 'scoreboard players op
                         'scoreboard players add @s mg_lane 1'])
 fn('rush/cd_show', ['title @a[tag=mg_hub] times 0 25 5',
                     f'title @a[tag=mg_hub] title {tc({"score": {"name": "#cd", "objective": "mg"}, "color": "green", "bold": True})}',
-                    f'title @a[tag=mg_hub] subtitle {tc({"text": "Parkour-Rush · jeder auf seiner eigenen Strecke", "color": "gray"})}',
+                    f'title @a[tag=mg_hub] subtitle {tc({"text": "Parkour-Rush · 24 Inseln · 15 Minuten", "color": "gray"})}',
                     'execute as @a[tag=mg_hub] at @s run playsound minecraft:block.note_block.hat master @s ~ ~ ~ 1 1'])
-fn('rush/cd_tick', ['execute if score #cd mg matches ..0 run return run function ' + f'{NS}:rush/try_start',
-                    'scoreboard players add #cdt mg 1',
+fn('rush/cd_tick', ['scoreboard players add #cdt mg 1',
                     'execute if score #cdt mg matches 20.. run scoreboard players remove #cd mg 1',
                     'execute if score #cdt mg matches 20.. run scoreboard players set #cdt mg 0',
-                    f'execute if score #cd mg matches 1.. if score #cdt mg matches 0 run function {NS}:rush/cd_show'])
-lane_ok = ['scoreboard players set #ok mg 1']
-for L in range(1, LANES + 1):
-    for px in (LANE_X, LANE_X + MAXLEN // 2, LANE_X + MAXLEN):
-        lane_ok.append(f'execute if score #L mg matches {L}.. in minecraft:overworld unless loaded {px} {Y} {lane_z(L)} run scoreboard players set #ok mg 0')
-fn('rush/try_start', lane_ok + [
-    'scoreboard players add #wait mg 1',
-    'execute if score #ok mg matches 0 if score #wait mg matches ..200 run return 0',
-    f'function {NS}:rush/start',
-])
+                    f'execute if score #cd mg matches ..0 run return run function {NS}:rush/start',
+                    f'execute if score #cdt mg matches 0 run function {NS}:rush/cd_show'])
 start = [
     'tag @a[tag=mg_hub,scores={mg_lane=1..}] add mg_rush', 'tag @a[tag=mg_rush] remove mg_hub',
     f'execute as @a[tag=mg_rush] run function {NS}:q/leave_all',
     'clear @a[tag=mg_rush]', 'effect clear @a[tag=mg_rush]', 'gamemode adventure @a[tag=mg_rush]',
     'scoreboard players set @a[tag=mg_rush] mg_cp 0',
     f'execute store result score #map mg run random value 1..{len(THEMES)}',
-    'kill @e[type=minecraft:text_display,tag=mg_lh]',
-    *[f'execute if score #L mg matches {L}.. run function {NS}:rush/lane_build{L}' for L in range(1, LANES + 1)],
+    'scoreboard players reset * mg_prog', 'scoreboard players set @a[tag=mg_rush] mg_prog 0',
+    'scoreboard objectives setdisplay sidebar mg_prog',
 ]
-for L in range(1, LANES + 1):
-    sel = f'@a[tag=mg_rush,scores={{mg_lane={L}}}]'
-    start += [f'{OW} tp {sel} {LANE_X} {Y + 1} {lane_z(L)} -90 0',
-              f'execute as {sel} run {OW} spawnpoint @s {LANE_X} {Y + 1} {lane_z(L)}',
-              f'scoreboard players set {sel} mg_cx {LANE_X}', f'scoreboard players set {sel} mg_cy {Y + 1}', f'scoreboard players set {sel} mg_cz {lane_z(L)}']
+for mi in range(len(THEMES)):
+    for L in range(1, LANES + 1):
+        sel = f'@a[tag=mg_rush,scores={{mg_lane={L}}}]'
+        c = f'execute if score #map mg matches {mi + 1} run'
+        start += [f'{c} {OW} tp {sel} {map_x(mi)} {Y + 1} {lane_z(L)} -90 0',
+                  f'{c} execute as {sel} run {OW} spawnpoint @s {map_x(mi)} {Y + 1} {lane_z(L)}',
+                  f'{c} scoreboard players set {sel} mg_cx {map_x(mi)}',
+                  f'{c} scoreboard players set {sel} mg_cz {lane_z(L)}']
 start += [
-    *[f'execute if score #L mg matches {L}.. run function {NS}:rush/lane_unload{L}' for L in range(1, LANES + 1)],
+    f'scoreboard players set @a[tag=mg_rush] mg_cy {Y + 1}',
     'effect give @a[tag=mg_rush] minecraft:saturation infinite 0 true',
     'effect give @a[tag=mg_rush] minecraft:resistance infinite 4 true',
     'scoreboard players set #rush mg 2', 'scoreboard players set #t mg 0', f'scoreboard players set #left mg {RUSH_TIME}',
@@ -621,8 +660,8 @@ start += [
     f'bossbar set {NS}:rush players @a[tag=mg_rush]', f'bossbar set {NS}:rush visible true', f'bossbar set {NS}:rush max {RUSH_TIME}',
     'title @a[tag=mg_rush] times 5 50 10',
     f'title @a[tag=mg_rush] title {tc({"text": "LOS!", "color": "green", "bold": True})}',
-    *[f'execute if score #map mg matches {mi + 1} run title @a[tag=mg_rush] subtitle ' + tc([{'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' · Truhen plündern!', 'color': 'white'}]) for mi, t in enumerate(THEMES)],
-    *[f'execute if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' – du bist allein auf deiner Strecke. Loot gibt es in den Truhen.', 'color': 'gray'}) for mi, t in enumerate(THEMES)],
+    *[f'execute if score #map mg matches {mi + 1} run title @a[tag=mg_rush] subtitle ' + tc([{'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' · 24 Inseln', 'color': 'white'}]) for mi, t in enumerate(THEMES)],
+    *[f'execute if score #map mg matches {mi + 1} run tellraw @a[tag=mg_rush] ' + msg({'text': 'Map: ', 'color': 'gray'}, {'text': t['name'], 'color': t['color'], 'bold': True}, {'text': ' – jeder hat seine eigene Strecke. Auf jeder Insel wartet eine Truhe, je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind.', 'color': 'gray'}) for mi, t in enumerate(THEMES)],
     'execute as @a[tag=mg_rush] at @s run playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1',
 ]
 fn('rush/start', start)
@@ -632,24 +671,32 @@ fn('rush/tick', [
     f'execute if score #rush mg matches 2 run function {NS}:rush/parkour_tick',
     f'execute if score #rush mg matches 3 run function {NS}:rush/arena_tick',
 ])
-fn('rush/lane_tick', [f'execute if score #map mg matches {mi + 1} run function {NS}:rush/cp_m{mi + 1}' for mi in range(len(THEMES))])
 fn('rush/parkour_tick', [
-    *[f'execute as @a[tag=mg_rush,scores={{mg_lane={L}}}] in minecraft:overworld positioned {LANE_X} {Y} {lane_z(L)} run function {NS}:rush/lane_tick' for L in range(1, LANES + 1)],
-    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] at @s if entity @s[y=-64,dy={Y + m["miny"] - 9 + 64}] run function {NS}:rush/back'
+    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush,scores={{mg_lane={L}}}] in minecraft:overworld positioned {map_x(mi)} {Y} {lane_z(L)} run function {NS}:rush/cp_m{mi + 1}'
+      for mi in range(len(THEMES)) for L in range(1, LANES + 1)],
+    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] at @s if entity @s[y=-64,dy={Y + m["miny"] - 10 + 64}] run function {NS}:rush/back'
       for mi, m in enumerate(MAPGEN)],
     'scoreboard players add #t mg 1',
     f'execute if score #t mg matches 20.. run function {NS}:rush/second',
 ])
-fn('rush/reach', [
+reach_common = [
     '$scoreboard players set @s mg_cp $(n)',
+    'scoreboard players operation @s mg_prog = @s mg_cp',
     'execute store result score @s mg_cx run data get entity @s Pos[0]',
     'execute store result score @s mg_cy run data get entity @s Pos[1]',
     'execute store result score @s mg_cz run data get entity @s Pos[2]',
     'execute at @s run spawnpoint @s ~ ~ ~',
+    '$setblock ~$(ax) ~$(ay) ~$(az) minecraft:chest[facing=west]{LootTable:"mg:$(tier)"}',
+]
+reach_tail = [
     f'execute if score @s mg_cp matches {NCP} run return run function {NS}:rush/finish_player',
-    '$title @s actionbar [{"text":"Checkpoint $(n) ✔ ","color":"yellow","bold":true},{"text":"Truhe nicht vergessen!","color":"gold","bold":false}]',
+    f'$title @s actionbar [{{"text":"Insel $(n)/{NCP} ✔ ","color":"yellow","bold":true}},{{"text":"Truhe geöffnet für dich bereit","color":"gold","bold":false}}]',
     'playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 1 1',
-])
+    'scoreboard players operation #m6 mg = @s mg_cp', 'scoreboard players operation #m6 mg %= #6 mg',
+    f'$execute if score #m6 mg matches 0 run tellraw @a[tag=mg_rush] {tc([PREFIX, {"selector": "@s", "color": "white"}, {"text": " ist auf Insel $(n)/" + str(NCP) + "!", "color": "yellow"}])}',
+]
+fn('rush/reach1', reach_common + reach_tail)
+fn('rush/reach2', reach_common + ['$setblock ~$(bx) ~$(by) ~$(bz) minecraft:chest[facing=west]{LootTable:"mg:$(tier)"}'] + reach_tail)
 fn('rush/back', [
     'execute store result storage mg:tmp p.x int 1 run scoreboard players get @s mg_cx',
     'execute store result storage mg:tmp p.y int 1 run scoreboard players get @s mg_cy',
@@ -665,7 +712,7 @@ fn('rush/finish_player', [
     'playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1.2',
     f'execute if score #finished mg matches 0 if score #left mg matches {FINISH_GRACE + 1}.. run scoreboard players set #left mg {FINISH_GRACE}',
     'scoreboard players set #finished mg 1',
-    f'tellraw @a[tag=mg_rush] {msg({"text": "Jemand ist im Ziel! ", "color": "aqua", "bold": True}, {"text": "Arena in ", "color": "gray"}, {"score": {"name": "#left", "objective": "mg"}, "color": "red"}, {"text": " Sekunden!", "color": "gray"})}',
+    f'tellraw @a[tag=mg_rush] {msg({"selector": "@s", "color": "aqua", "bold": True}, {"text": " ist im Ziel! ", "color": "white"}, {"text": "Arena in ", "color": "gray"}, {"score": {"name": "#left", "objective": "mg"}, "color": "red"}, {"text": " Sekunden!", "color": "gray"})}',
 ])
 def tbar(zero):
     return tc([{'text': 'Parkour-Rush', 'color': 'green', 'bold': True}, {'text': '   Arena in ', 'color': 'white'},
@@ -679,8 +726,9 @@ fn('rush/second', [
     f'execute if score #ls mg matches ..9 run bossbar set {NS}:rush name {tbar(True)}',
     f'execute store result bossbar {NS}:rush value run scoreboard players get #left mg',
     f'bossbar set {NS}:rush players @a[tag=mg_rush]',
-    f'execute as @a[tag=mg_rush,scores={{mg_cp=..{NCP - 1}}}] run title @s actionbar [{{"text":"Checkpoint ","color":"gray"}},{{"score":{{"name":"@s","objective":"mg_cp"}},"color":"yellow","bold":true}},{{"text":"/{NCP - 1}","color":"gray"}},{{"text":"  ·  Ziel danach","color":"dark_gray"}}]',
+    f'execute as @a[tag=mg_rush,scores={{mg_cp=..{NCP - 1}}}] run title @s actionbar [{{"text":"Insel ","color":"gray"}},{{"score":{{"name":"@s","objective":"mg_cp"}},"color":"yellow","bold":true}},{{"text":"/{NCP}","color":"gray"}}]',
     'execute if score #left mg matches 1..5 as @a[tag=mg_rush] at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.5',
+    'execute if score #left mg matches 60 run tellraw @a[tag=mg_rush] ' + msg({'text': 'Noch 1 Minute bis zur Arena!', 'color': 'red', 'bold': True}),
     f'execute unless entity @a[tag=mg_rush] run return run function {NS}:rush/stop',
     f'execute if score #left mg matches ..0 run function {NS}:rush/to_arena',
 ])
@@ -728,9 +776,10 @@ fn('rush/end', [
 ])
 fn('rush/stop', [
     'scoreboard players set #rush mg 0', f'bossbar set {NS}:rush visible false', f'bossbar set {NS}:rush color green',
+    'scoreboard objectives setdisplay sidebar mg_side',
     f'execute as @a[tag=mg_rush] run function {NS}:hub/enter',
     f'{OW} kill @e[type=minecraft:item,x={ARENA[0] - 30},dx=60,y={Y - 10},dy=40,z={ARENA[2] - 30},dz=60]',
-    f'{OW} kill @e[type=minecraft:item,x={LANE_X - 20},dx={MAXLEN + 40},y={Y - 40},dy=100,z={lane_z(1) - 60},dz={lane_z(LANES) - lane_z(1) + 120}]',
+    f'{OW} kill @e[type=minecraft:item,x={map_x(0) - 20},dx={map_x(len(THEMES) - 1) - map_x(0) + MAXLEN + 40},y={Y - 40},dy=110,z={lane_z(1) - 60},dz={lane_z(LANES) - lane_z(1) + 120}]',
 ])
 
 # ------------------------------------------------------------------ 1v1 (queue, rounds, best of 3)
