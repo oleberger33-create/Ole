@@ -970,7 +970,7 @@ fn('rush/stop', [
 # common flow: queue -> round (kit, teleport, 3 s freeze) -> go (arena reset) -> rules -> point/lose -> win
 ARENA_VERSION = 3
 # ================================================================== BIG MODES: new spawn with NPCs, SkyWars, BedWars, Stick-Fight Bett
-BIG_VERSION = 7
+BIG_VERSION = 8
 PLACE = ['white_wool', 'red_wool', 'blue_wool', 'lime_wool', 'yellow_wool', 'end_stone', 'oak_planks', 'sandstone', 'cobblestone',
          'stone_bricks', 'grass_block', 'dirt', 'stone', 'smooth_stone', 'quartz_block', 'polished_andesite', 'red_concrete',
          'blue_concrete', 'lime_concrete', 'yellow_concrete', 'oak_log', 'andesite', 'glass', 'mossy_cobblestone', 'cut_sandstone']

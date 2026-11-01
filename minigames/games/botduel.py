@@ -23,7 +23,7 @@ DIFFS = [(1, 'Leicht', 'green', 5635925, 1), (2, 'Mittel', 'yellow', 16777045, 2
 DN = {d: n for d, n, *_ in DIFFS}
 DC = {d: c for d, _, c, *_ in DIFFS}
 BOX_PLAYER = 10                                        # Boxen: hits the player needs
-BOX_BOT = {1: 12, 2: 10, 3: 8, 4: 7}                   # Boxen: hits the bot needs
+BOX_BOT = {1: 15, 2: 10, 3: 8, 4: 6}                   # Boxen: hits the bot needs
 
 # (id, key, name, colour, short description, player spawn, mob spawn)
 BMODES = [(1, 'schwert', 'Schwert-Duell', 'red', 'Eisenschwert und Eisenrüstung gegen einen Kämpfer', (-7, -90), (7, 90)),
@@ -103,27 +103,33 @@ def _ench(**lv):
     return {'"minecraft:enchantments"': '{' + ','.join(f'"minecraft:{k}":{v}' for k, v in lv.items()) + '}', '"minecraft:enchantment_glint_override"': 'true'}
 
 
+# Balance (measured on a test server against scripted players, see the playtest notes): melee mobs get a longer reach via
+# attack_range on the held item (default mob reach is ~0.8 blocks, a player's 3 -> a player who just clicks keeps any mob
+# away). The kit gives saturation, so a mob must deal more than ~2 HP/s to make progress early in a round.
 SPEC = {}
 for d, dn, dc, rgb, _c in DIFFS:
     # Schwert-Duell: zombie (Leicht..Schwer), vindicator (Extrem). Player: iron sword (6) + iron armour (15).
     sw = {1: dict(e='zombie', spd=0.23, dmg=2.5, hp=20, arm=4, tou=0, kbr=0.0, rch=2.0, eq=dict(_leather(rgb), mainhand=_eq('wooden_sword'))),
           2: dict(e='zombie', spd=0.26, dmg=4.5, hp=30, arm=8, tou=0, kbr=0.5, rch=2.8, eq=dict(_set('chainmail'), mainhand=_eq('stone_sword'))),
-          3: dict(e='zombie', spd=0.29, dmg=6, hp=34, arm=12, tou=0, kbr=0.65, rch=2.9, eq=dict(_set('iron'), mainhand=_eq('iron_sword'))),
+          3: dict(e='zombie', spd=0.29, dmg=6.5, hp=36, arm=12, tou=0, kbr=0.65, rch=2.9, eq=dict(_set('iron'), mainhand=_eq('iron_sword'))),
           4: dict(e='vindicator', spd=0.33, dmg=7, hp=34, arm=14, tou=2, kbr=0.7, rch=3.0, eq=dict(head=_eq('diamond_helmet'), mainhand=_eq('diamond_axe', _ench(sharpness=1))))}[d]
     SPEC[(1, d)] = sw
     # Boxen: fists only, 1 damage; difficulty = speed, knockback resistance, hits the bot needs
-    SPEC[(2, d)] = dict(e='zombie', spd=[0.22, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=60, arm=0, tou=0, kbr=[0.0, 0.2, 0.4, 0.6][d - 1], eq=_leather(rgb))
+    SPEC[(2, d)] = dict(e='zombie', spd=[0.2, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=60, arm=0, tou=0, kbr=[0.0, 0.3, 0.5, 0.65][d - 1], akb=[0, 0, 0.3, 0.6][d - 1],
+                        rch=[1.4, 2.0, 2.5, 2.8][d - 1], eq=_leather(rgb))
     # Sumo: no damage (resistance), the bot hits with extra attack knockback
-    SPEC[(3, d)] = dict(e='zombie', spd=[0.22, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=20, arm=0, tou=0, kbr=[0.0, 0.15, 0.3, 0.45][d - 1],
-                        akb=[0.0, 0.5, 1.0, 1.5][d - 1], res=True, eq=_leather(rgb))
-    # Knockback: stick with knockback 1/2/2/3, no damage
-    SPEC[(4, d)] = dict(e='zombie', spd=[0.22, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=20, arm=0, tou=0, kbr=[0.0, 0.2, 0.35, 0.5][d - 1],
-                        akb=[0.0, 0.0, 0.5, 0.5][d - 1], res=True, eq=dict(_leather(rgb), mainhand=_eq('stick', _ench(knockback=[1, 2, 2, 3][d - 1]))))
+    SPEC[(3, d)] = dict(e='zombie', spd=[0.19, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=20, arm=0, tou=0, kbr=[0.0, 0.15, 0.25, 0.4][d - 1],
+                        akb=[0.0, 0.3, 0.5, 0.8][d - 1], rch=[1.2, 1.8, 2.3, 2.6][d - 1], res=True, eq=_leather(rgb))
+    # Knockback: stick without / with knockback 2/2/3, no damage
+    kbl = [0, 2, 2, 3][d - 1]
+    SPEC[(4, d)] = dict(e='zombie', spd=[0.19, 0.26, 0.29, 0.32][d - 1], dmg=1, hp=20, arm=0, tou=0, kbr=[0.0, 0.3, 0.5, 0.65][d - 1],
+                        akb=[0.0, 0.0, 0.5, 0.5][d - 1], rch=[1.4, 2.2, 2.8, 3.0][d - 1], res=True,
+                        eq=dict(_leather(rgb), mainhand=_eq('stick', _ench(knockback=kbl) if kbl else None)))
     # Bogen: skeleton (Leicht/Mittel), stray with slowness arrows (Schwer/Extrem)
-    bw = {1: dict(e='skeleton', spd=0.22, dmg=2, hp=14, arm=0, tou=0, kbr=0.0, eq=dict(head=_eq('leather_helmet', {'"minecraft:dyed_color"': str(rgb)}), mainhand=_eq('bow'))),
-          2: dict(e='skeleton', spd=0.25, dmg=2, hp=20, arm=4, tou=0, kbr=0.0, eq=dict(_leather(rgb), mainhand=_eq('bow', _ench(power=1)))),
-          3: dict(e='stray', spd=0.27, dmg=2, hp=24, arm=8, tou=0, kbr=0.1, eq=dict(_set('chainmail'), mainhand=_eq('bow', _ench(power=2)))),
-          4: dict(e='stray', spd=0.30, dmg=2, hp=30, arm=12, tou=0, kbr=0.2, eq=dict(_set('iron'), mainhand=_eq('bow', _ench(power=3, punch=1))))}[d]
+    bw = {1: dict(e='skeleton', spd=0.22, dmg=2, hp=16, arm=0, tou=0, kbr=0.0, eq=dict(head=_eq('leather_helmet', {'"minecraft:dyed_color"': str(rgb)}), mainhand=_eq('bow'))),
+          2: dict(e='skeleton', spd=0.25, dmg=2, hp=22, arm=4, tou=0, kbr=0.0, eq=dict(_leather(rgb), mainhand=_eq('bow', _ench(power=2)))),
+          3: dict(e='stray', spd=0.27, dmg=2, hp=28, arm=8, tou=0, kbr=0.1, eq=dict(_set('chainmail'), mainhand=_eq('bow', _ench(power=5)))),
+          4: dict(e='stray', spd=0.30, dmg=2, hp=34, arm=12, tou=0, kbr=0.2, eq=dict(_set('iron'), mainhand=_eq('bow', _ench(power=5, punch=1, flame=1))))}[d]
     SPEC[(5, d)] = bw
 FOLLOW = {1: 24, 2: 16, 3: 16, 4: 16, 5: 40}
 
@@ -144,7 +150,8 @@ def summon_cmd(m, d):
     # the custom name is an SNBT text component (26.x): JSON object syntax is valid SNBT here
     extra = {'zombie': 'IsBaby:0b,CanBreakDoors:0b,', 'vindicator': 'PatrolLeader:0b,CanJoinRaid:0b,Johnny:0b,'}.get(s['e'], '')
     _, _, _, _, _, _, (mx, myaw) = BMODES[m - 1]
-    return (f'summon minecraft:{s["e"]} ~{mx} ~1 ~ {{Tags:["{_M}","{_M}_new"],NoAI:1b,PersistenceRequired:1b,CanPickUpLoot:0b,'
+    # NoAI + Invulnerable during the freeze (a bow shot at the frozen bot would otherwise win the round before it moves)
+    return (f'summon minecraft:{s["e"]} ~{mx} ~1 ~ {{Tags:["{_M}","{_M}_new"],NoAI:1b,Invulnerable:1b,PersistenceRequired:1b,CanPickUpLoot:0b,'
             f'DeathLootTable:"minecraft:empty",{extra}Health:{s["hp"]}f,Rotation:[{myaw}f,0f],CustomName:{name},CustomNameVisible:1b,'
             'drop_chances:{mainhand:0f,offhand:0f,head:0f,chest:0f,legs:0f,feet:0f},'
             f'equipment:{{{eq}}},attributes:[{at}]}}')
@@ -268,7 +275,7 @@ fn(f'{_K}/round', [
 ])
 fn(f'{_K}/go', [
     'scoreboard players set @s mg_bot_st 2', 'scoreboard players set @s mg_bot_t 0',
-    f'data merge entity @e[tag={_M},distance=..90,limit=1,sort=nearest] {{NoAI:0b}}',
+    f'execute as @e[tag={_M},distance=..90] run data merge entity @s {{NoAI:0b,Invulnerable:0b}}',
     'effect clear @s minecraft:slowness', 'effect clear @s minecraft:weakness',
     'scoreboard players set @s mg_bot_dd 0', 'scoreboard players set @s mg_bot_dt 0',
     f'title @s actionbar {tc(_bt("LOS!", "green", bold=True))}', 'playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 2',
@@ -286,12 +293,18 @@ fn(f'{_K}/fight', [
     f'execute if score @s mg_deaths matches 1.. run return run function {NS}:{_K}/r_bot',
     f'execute at @s if entity @s[y=-64,dy={_FALL_DY}] run return run function {NS}:{_K}/r_bot',
     f'execute as @e[tag={_M},distance=..90] at @s if entity @s[y=-64,dy={_FALL_DY}] run kill @s',
-    f'execute unless entity @e[tag={_M},distance=..90] run return run function {NS}:{_K}/r_player',
+    f'execute unless entity @e[tag={_M},distance=..90] run return run function {NS}:{_K}/nomob',
     f'execute if score @s mg_bot_t matches 600 run effect give @e[tag={_M},distance=..90] minecraft:glowing infinite 0 true',
     f'execute if score @s mg_bot_t matches {_ROUND_MAX}.. run return run function {NS}:{_K}/draw',
     f'execute if score @s mg_bot_md matches 2 run return run function {NS}:{_K}/boxhits',
     'scoreboard players operation #bot_m20 mg = @s mg_bot_t', 'scoreboard players operation #bot_m20 mg %= #20 mg',
     f'execute if score #bot_m20 mg matches 0 run title @s actionbar {tc(_SCORE)}',
+])
+fn(f'{_K}/nomob', [   # the bot is gone: killed / fallen = round won; despawned because the server was set to Friedlich = match aborted
+    'execute store result score #bot_dif mg run difficulty',
+    f'execute if score #bot_dif mg matches 0 run tellraw @s {msg(_bt("Der Server steht auf Friedlich – das Bot-Duell wurde abgebrochen.", "red"))}',
+    f'execute if score #bot_dif mg matches 0 run return run function {NS}:hub/enter',
+    f'function {NS}:{_K}/r_player',
 ])
 fn(f'{_K}/draw', [f'tellraw @s {msg(_bt("Zeit um – die Runde wird wiederholt.", "gray"))}', f'function {NS}:{_K}/round'])
 fn(f'{_K}/freeze', [
@@ -416,7 +429,10 @@ EXTRA_LOAD.extend([
     # load.mcfunction starts with "forceload remove all": re-add the slots of running matches
     *[f'execute if score #bot_s{i} mg matches 1.. run {OW} forceload add {_SX(i) - 24} -24 {_SX(i) + 24} 24' for i in range(1, _NS + 1)],
 ])
-AKTION_EXTRA.append(f'execute if score @s mg_aktion matches 211..{200 + len(BMODES) * 10 + 4} if entity @s[tag=mg_hub] run function {NS}:{_K}/pick')
+AKTION_EXTRA.extend([   # the buttons after a match appear while the player is still in the arena (state 3): let them work right away
+    f'execute if score @s mg_aktion matches 211..{200 + len(BMODES) * 10 + 4} if entity @s[tag={_T},scores={{mg_bot_st=3}}] run function {NS}:hub/enter',
+    f'execute if score @s mg_aktion matches {_TRIG} if entity @s[tag={_T},scores={{mg_bot_st=3}}] run function {NS}:{_K}/menu',
+    f'execute if score @s mg_aktion matches 211..{200 + len(BMODES) * 10 + 4} if entity @s[tag=mg_hub] run function {NS}:{_K}/pick'])
 register_game(_K, 'Bot-Duelle', 'dark_green', 'nitwit', _TRIG, f'function {NS}:{_K}/menu', '1v1 gegen Bots · 4 Stufen', '1v1 gegen Bots, 4 Stufen, alleine spielbar')
 INFO.append(('Bot-Duelle', 'dark_green', 'Spiel alleine 1v1 gegen einen Bot: Schwert-Duell, Boxen, Sumo, Knockback oder Bogen, jeweils in 4 Stufen '
              '(Leicht, Mittel, Schwer, Extrem). Best of 3 – wer zuerst 2 Runden holt. Du verlierst eine Runde, wenn du stirbst oder runterfällst, '
