@@ -29,6 +29,7 @@ def tc(obj):
 
 
 PREFIX = {'text': '» ', 'color': 'gold', 'bold': True}
+BRAND = [{'text': 'OLE GAMES ', 'color': 'gold', 'bold': True}, {'text': 'PVP', 'color': 'red', 'bold': True}]   # server name (titles, sidebar)
 def msg(*parts):
     return tc([PREFIX] + list(parts))
 
@@ -36,7 +37,13 @@ OW = 'execute in minecraft:overworld run'
 Y = 100                       # floor level of every build
 HUB = (0, Y, 0)
 SPAWN = (HUB[0], HUB[1] + 1, HUB[2] + 17)   # where players stand in the lobby (south of the core, facing north)
-HUB_R = 46                    # lobby radius incl. margin
+SAUCER_R = 60                 # radius of the floating hub saucer
+HUB_R = SAUCER_R + 6          # lobby radius incl. margin (hub/keep teleports back outside of it)
+HUB_LOAD = 63                 # half-size of the forceloaded / cleared hub square (saucer r60 + rim + lettering; = chunks -4..3, 64 chunks)
+HUB_TOP = 48                  # hub builds reach up to hy + HUB_TOP (top of the lettering)
+LOGO_DIST = 57                # lettering plane at z = hz - LOGO_DIST (north of the plaza, facing the spawn)
+LOGO_Y1 = 41                  # top row of 'OLE GAMES' at hy + LOGO_Y1
+LOGO_PYLON = 12               # the two lettering pylons at x = hx +- LOGO_PYLON
 RUSH = (1000, Y, 0)           # parkour start
 ARENA = (2000, Y, 0)          # rush final fight
 DUELS = {                     # 1v1 games: key -> (name, centre, colour)
@@ -48,7 +55,7 @@ RUSH_TIME = 900               # seconds of parkour before the arena
 FINISH_GRACE = 30             # seconds after the first finisher
 
 # ------------------------------------------------------------------ meta / tags
-js('pack.mcmeta', {'pack': {'description': 'Minigames: Parkour-Rush, Sumo, Spleef, Duell',
+js('pack.mcmeta', {'pack': {'description': 'Ole Games PVP: Minigames, BedWars, SkyWars, 1v1',
                             'min_format': MIN_FORMAT, 'max_format': [121, 999]}})
 js('data/minecraft/tags/function/load.json', {'values': [f'{NS}:load']})
 js('data/minecraft/tags/function/tick.json', {'values': [f'{NS}:tick']})
@@ -481,7 +488,7 @@ for t, m in zip(THEMES, MAPGEN):
 # ------------------------------------------------------------------ load
 load = [
     f'{OW} forceload remove all',               # drop leftovers of interrupted lane builds
-    forceload(HUB[0], HUB[2], 56),
+    forceload(HUB[0], HUB[2], HUB_LOAD),
     f'{OW} forceload remove 984 -96 1176 96',   # v1 left the old single parkour permanently loaded
     forceload(ARENA[0], ARENA[2], 32),
     *[forceload(c[0], c[2], 24) for _, c, _ in DUELS.values()],
@@ -499,7 +506,8 @@ load = [
     'scoreboard objectives add mg_trail dummy', 'scoreboard objectives add mg_hat dummy',
     f'scoreboard objectives add mg_wins dummy {tc({"text": "Siege", "color": "gold"})}',
     'scoreboard objectives setdisplay list mg_wins',
-    f'scoreboard objectives add mg_side dummy {tc({"text": "MINIGAMES", "color": "gold", "bold": True})}',
+    f'scoreboard objectives add mg_side dummy {tc(BRAND)}',
+    f'scoreboard objectives modify mg_side displayname {tc(BRAND)}',
     'scoreboard objectives modify mg_side numberformat blank',
     'scoreboard objectives setdisplay sidebar mg_side',
     'scoreboard players set #20 mg 20', 'scoreboard players set #1000 mg 1000', 'scoreboard players set #60 mg 60', f'scoreboard players set #{LANES} mg {LANES}', 'scoreboard players set #6 mg 6',
@@ -555,7 +563,7 @@ for i, a in enumerate(range(0, 360, 45)):
     lx, lz = hx + round(10 * math.cos(math.radians(a))), hz + round(10 * math.sin(math.radians(a)))
     hub += [f'{OW} setblock {lx} {hy + 1} {lz} minecraft:quartz_pillar', f'{OW} setblock {lx} {hy + 2} {lz} minecraft:lantern']
 hub += [
-    holo('mg_title', hx, hy + 6.2, hz - 6, {'text': 'MINIGAMES', 'color': 'gold', 'bold': True}, 4.0),
+    holo('mg_title', hx, hy + 6.2, hz - 6, BRAND, 4.0),
     holo('mg_sub', hx, hy + 5.4, hz - 6, {'text': 'Ole · Mats · Sammy · Qelloxx', 'color': 'gray'}, 1.4),
     holo('mg_help', hx, hy + 2.2, hz - 4, [{'text': 'Rechtsklick auf die Items in deiner Hotbar', 'color': 'white'}], 1.0),
     holo('mg_g1', hx - 7, hy + 3.2, hz + 6, [{'text': 'PARKOUR-RUSH\n', 'color': 'green', 'bold': True}, {'text': 'Springen, Loot sammeln,\nam Ende kämpfen', 'color': 'gray', 'bold': False}], 1.0),
@@ -664,7 +672,7 @@ fn('hub/keep', [
       for slot, key, *_ in HOTBAR],
 ])
 fn('hub/first', ['tag @s add mg_seen', f'function {NS}:hub/enter', 'title @s times 10 50 15',
-                 f'title @s title {tc({"text": "MINIGAMES", "color": "gold", "bold": True})}',
+                 f'title @s title {tc(BRAND)}',
                  f'title @s subtitle {tc({"text": "Rechtsklick auf die Items in deiner Hotbar", "color": "gray"})}'])
 fn('hub/rejoin', ['scoreboard players set @s mg_leave 0', f'function {NS}:q/leave_all', f'function {NS}:hub/enter'])
 fn('hub/sweep', [
@@ -970,7 +978,7 @@ fn('rush/stop', [
 # common flow: queue -> round (kit, teleport, 3 s freeze) -> go (arena reset) -> rules -> point/lose -> win
 ARENA_VERSION = 3
 # ================================================================== BIG MODES: new spawn with NPCs, SkyWars, BedWars, Stick-Fight Bett
-BIG_VERSION = 8
+BIG_VERSION = 9
 PLACE = ['white_wool', 'red_wool', 'blue_wool', 'lime_wool', 'yellow_wool', 'end_stone', 'oak_planks', 'sandstone', 'cobblestone',
          'stone_bricks', 'grass_block', 'dirt', 'stone', 'smooth_stone', 'quartz_block', 'polished_andesite', 'red_concrete',
          'blue_concrete', 'lime_concrete', 'yellow_concrete', 'oak_log', 'andesite', 'glass', 'mossy_cobblestone', 'cut_sandstone']
@@ -1914,7 +1922,7 @@ for _f in sorted(_glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file_
 # ---------------------------------------------------------------- SPAWN v2 with NPCs
 NPCS = [(g['key'], g['name'], g['color'], g['prof'], 120 + 300 * (i + 0.5) / len(GAMES), g['action'], g['sub']) for i, g in enumerate(GAMES)]
 hx, hy, hz = HUB
-# ---- futuristic sky-hub: floating saucer (r40) with a beacon core, halo sky-ring, spiral parkour, jump pads and portal pods
+# ---- futuristic sky-hub: floating saucer (r60) with block lettering 'OLE GAMES PVP', a beacon core, halo sky-ring, spiral parkour, jump pads and portal pods
 GLASS = {'green': 'lime', 'red': 'red', 'aqua': 'cyan', 'yellow': 'yellow', 'gold': 'orange', 'light_purple': 'magenta', 'blue': 'blue',
          'white': 'white', 'dark_aqua': 'cyan', 'dark_purple': 'purple', 'gray': 'gray', 'dark_red': 'red', 'dark_green': 'green'}
 def pts_ring(r, step=1.0):
@@ -1925,42 +1933,48 @@ def pts_ring(r, step=1.0):
         a += step
     return sorted(p)
 hub2 = ['kill @e[type=minecraft:villager,tag=mg_npc]', 'kill @e[type=minecraft:interaction,tag=mg_npc]',
-        f'kill @e[type=minecraft:text_display,tag=mg_holo,x={hx - 52},y={hy - 12},z={hz - 52},dx=104,dy=50,dz=104]']
-fn('build/hub_clear', clear_box(hx - 48, hy - 10, hz - 48, hx + 48, hy + 28, hz + 48, 6) + [f'schedule function {NS}:build/hub 10t'])
+        f'kill @e[type=minecraft:text_display,tag=mg_holo,x={hx - HUB_LOAD - 4},y={hy - 12},z={hz - HUB_LOAD - 4},dx={2 * HUB_LOAD + 8},dy={HUB_TOP + 16},dz={2 * HUB_LOAD + 8}]']
+# clears the whole old (r40 saucer, +-48) and new layout incl. the lettering, in slabs of 3 x 61 x 127 (< 32768 blocks per fill)
+fn('build/hub_clear', clear_box(hx - HUB_LOAD, hy - 12, hz - HUB_LOAD, hx + HUB_LOAD, hy + HUB_TOP, hz + HUB_LOAD, 3) + [f'schedule function {NS}:build/hub 10t'])
+SR = SAUCER_R
 L = []
 # saucer body: stepped underside, glowing rim
-for dy, r, blk in ((-6, 9, 'polished_deepslate'), (-5, 16, 'polished_deepslate'), (-4, 24, 'polished_deepslate'), (-3, 31, 'deepslate_tiles'),
-                   (-2, 36, 'polished_deepslate'), (-1, 39, 'light_gray_concrete')):
+for dy, r, blk in ((-8, 12, 'polished_deepslate'), (-7, 22, 'polished_deepslate'), (-6, 31, 'polished_deepslate'), (-5, 39, 'deepslate_tiles'),
+                   (-4, 46, 'polished_deepslate'), (-3, 52, 'deepslate_tiles'), (-2, 56, 'polished_deepslate'), (-1, SR - 1, 'light_gray_concrete')):
     L += disk(hx, hy + dy, hz, r, blk)
-L += [f'setblock {x} {hy - 1} {z} minecraft:sea_lantern' for x, z in pts_ring(39.5, 2)]
-L += [f'setblock {x} {hy - 4} {z} minecraft:sea_lantern' for x, z in pts_ring(24, 6)]
-# floor
-L += disk(hx, hy, hz, 40, 'light_gray_concrete') + disk(hx, hy, hz, 37, 'white_concrete')
-L += [f'setblock {x} {hy} {z} minecraft:cyan_concrete' for x, z in pts_ring(38.5, 1)]
-L += [f'setblock {x} {hy} {z} minecraft:sea_lantern' for x, z in pts_ring(35, 1)]
+L += [f'setblock {x} {hy - 1} {z} minecraft:sea_lantern' for x, z in pts_ring(SR - 0.5, 1.5)]
+L += [f'setblock {x} {hy - 3} {z} minecraft:sea_lantern' for x, z in pts_ring(52, 5)]
+L += [f'setblock {x} {hy - 6} {z} minecraft:sea_lantern' for x, z in pts_ring(31, 8)]
+# floor: white plaza, light-gray outer promenade, glowing rings
+L += disk(hx, hy, hz, SR, 'light_gray_concrete') + disk(hx, hy, hz, SR - 3, 'white_concrete') + disk(hx, hy, hz, 43, 'light_gray_concrete') + disk(hx, hy, hz, 41, 'white_concrete')
+L += [f'setblock {x} {hy} {z} minecraft:cyan_concrete' for x, z in pts_ring(SR - 1.5, 1)]
+L += [f'setblock {x} {hy} {z} minecraft:sea_lantern' for x, z in pts_ring(SR - 5, 1)]
+L += [f'setblock {x} {hy} {z} minecraft:light_blue_concrete' for x, z in pts_ring(42, 1)]
 L += [f'setblock {x} {hy} {z} minecraft:light_blue_concrete' for x, z in pts_ring(10, 1)]
 L += [f'setblock {x} {hy} {z} minecraft:sea_lantern' for x, z in pts_ring(21, 1.5)]
 spokes = set()
 for ang in range(0, 360, 45):
-    for r in range(11, 35):
+    for r in range(11, SR - 5):
         spokes.add((hx + round(r * math.cos(math.radians(ang))), hz + round(r * math.sin(math.radians(ang)))))
 L += [f'setblock {x} {hy} {z} minecraft:light_blue_concrete' for x, z in sorted(spokes)]
 # rim: glass rail + light pillars
-L += [f'setblock {x} {hy + 1} {z} minecraft:white_stained_glass' for x, z in pts_ring(40.5, 1)]
-for ang in range(0, 360, 15):
-    x, z = hx + round(40.5 * math.cos(math.radians(ang))), hz + round(40.5 * math.sin(math.radians(ang)))
+L += [f'setblock {x} {hy + 1} {z} minecraft:white_stained_glass' for x, z in pts_ring(SR + 0.5, 1)]
+for ang in range(0, 360, 10):
+    x, z = hx + round((SR + 0.5) * math.cos(math.radians(ang))), hz + round((SR + 0.5) * math.sin(math.radians(ang)))
     L += [f'fill {x} {hy + 1} {z} {x} {hy + 3} {z} minecraft:quartz_pillar', f'setblock {x} {hy + 4} {z} minecraft:end_rod']
-# street lights
-for ang in range(15, 360, 30):
-    x, z = hx + round(32 * math.cos(math.radians(ang))), hz + round(32 * math.sin(math.radians(ang)))
-    L += [f'fill {x} {hy + 1} {z} {x} {hy + 3} {z} minecraft:polished_deepslate_wall', f'setblock {x} {hy + 4} {z} minecraft:sea_lantern']
+# street lights: inner ring (r28, between the jump pads and the pods) and outer promenade (r48)
+for r, a0, step in ((28, 15, 30), (48, 10, 20)):
+    for ang in range(a0, 360, step):
+        x, z = hx + round(r * math.cos(math.radians(ang))), hz + round(r * math.sin(math.radians(ang)))
+        L += [f'fill {x} {hy + 1} {z} {x} {hy + 3} {z} minecraft:polished_deepslate_wall', f'setblock {x} {hy + 4} {z} minecraft:sea_lantern']
 # beacon core: glowing glass pool, four deepslate pylons, glass crown
 L += disk(hx, hy, hz, 7, 'polished_deepslate') + disk(hx, hy - 1, hz, 5, 'sea_lantern') + disk(hx, hy, hz, 5, 'light_blue_stained_glass')
 L += [f'fill {hx - 1} {hy - 1} {hz - 1} {hx + 1} {hy - 1} {hz + 1} minecraft:iron_block', f'setblock {hx} {hy} {hz} minecraft:beacon',
       f'setblock {hx} {hy + 1} {hz} minecraft:cyan_stained_glass']
 for sx in (-5, 5):
     for sz in (-5, 5):
-        L += [f'fill {hx + sx} {hy + 1} {hz + sz} {hx + sx} {hy + 9} {hz + sz} minecraft:polished_deepslate',
+        L += [f'setblock {hx + sx} {hy + 1} {hz + sz} minecraft:polished_deepslate',      # glass pylons: the lettering stays visible from the spawn
+              f'fill {hx + sx} {hy + 2} {hz + sz} {hx + sx} {hy + 9} {hz + sz} minecraft:cyan_stained_glass',
               f'setblock {hx + sx} {hy + 10} {hz + sz} minecraft:sea_lantern', f'setblock {hx + sx} {hy + 11} {hz + sz} minecraft:end_rod']
 L += [f'setblock {x} {hy + 10} {z} minecraft:light_blue_stained_glass' for x, z in pts_ring(6, 2)]
 # halo sky-ring (walkable, reached by the spiral parkour) + an outer floating ring
@@ -1983,13 +1997,99 @@ for ang in (45, 135, 225, 315):
     x, z = hx + round(20 * math.cos(math.radians(ang))), hz + round(20 * math.sin(math.radians(ang)))
     PADS.append((x, z))
     L += [f'fill {x - 1} {hy} {z - 1} {x + 1} {hy} {z + 1} minecraft:light_blue_concrete', f'setblock {x} {hy} {z} minecraft:cyan_glazed_terracotta']
+
+# ---- giant block lettering "OLE GAMES" / "PVP" above the north rim, facing the spawn (south, +z); reads left->right = +x
+FONT5 = {
+    'O': ['#####', '#...#', '#...#', '#...#', '#...#', '#...#', '#####'],
+    'L': ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+    'E': ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+    'G': ['#####', '#....', '#....', '#.###', '#...#', '#...#', '#####'],
+    'A': ['#####', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    'M': ['#...#', '##.##', '#.#.#', '#...#', '#...#', '#...#', '#...#'],
+    'S': ['#####', '#....', '#....', '#####', '....#', '....#', '#####'],
+    'P': ['#####', '#...#', '#...#', '#####', '#....', '#....', '#....'],
+    'V': ['#...#', '#...#', '#...#', '#...#', '.#.#.', '.#.#.', '..#..'],
+}
+def logo_blocks(text, scale):
+    """pixel font -> set of (bx, by) blocks, by = 0 is the TOP row; returns (blocks, width, height)"""
+    pix, cx = set(), 0
+    for ch in text:
+        if ch == ' ':
+            cx += 3
+            continue
+        for r, row in enumerate(FONT5[ch]):
+            pix |= {(cx + c, r) for c, v in enumerate(row) if v == '#'}
+        cx += 6
+    out = {(c * scale + i, r * scale + j) for c, r in pix for i in range(scale) for j in range(scale)}
+    for c, r in pix:   # chamfer outer corners (one block) for a sleeker look
+        for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+            if (c + dx, r) not in pix and (c, r + dy) not in pix and (c + dx, r + dy) not in pix and (c - dx, r) in pix and (c, r - dy) in pix:
+                out.discard((c * scale + (0 if dx < 0 else scale - 1), r * scale + (0 if dy < 0 else scale - 1)))
+    return out, (cx - 1) * scale, 7 * scale
+def dilate(s, n=1):
+    for _ in range(n):
+        s = s | {(x + dx, y + dy) for x, y in s for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    return s
+LOGO = {}          # (x, y, z) -> block
+LOGO_Z = hz - LOGO_DIST                        # front face of the letters
+def logo_line(text, scale, ytop, face, side):
+    b, w, h = logo_blocks(text, scale)
+    x0 = hx - w // 2
+    F = {(x0 + bx, ytop - by) for bx, by in b}
+    D1 = dilate(F) - F
+    D2 = dilate(F, 2) - F - D1
+    for x, y in D2:
+        LOGO[(x, y, LOGO_Z - 2)] = 'cyan_stained_glass'
+    for x, y in D1:
+        LOGO[(x, y, LOGO_Z - 1)] = 'black_concrete'
+        LOGO[(x, y, LOGO_Z - 2)] = 'black_concrete'
+    for x, y in F:
+        LOGO[(x, y, LOGO_Z)] = face
+        LOGO[(x, y, LOGO_Z - 1)] = side
+        LOGO[(x, y, LOGO_Z - 2)] = 'black_concrete'
+    return x0, x0 + w - 1, ytop - h + 1
+LOGO_TOP1 = hy + LOGO_Y1
+l1 = logo_line('OLE GAMES', 2, LOGO_TOP1, 'gold_block', 'orange_concrete')
+LOGO_TOP2 = l1[2] - 7                          # 1 free row between the 'OLE GAMES' beam and the PVP glow
+l2 = logo_line('PVP', 2, LOGO_TOP2, 'redstone_block', 'red_concrete')
+LOGO_BOX = (min(l1[0], l2[0]) - 3, l2[2] - 6, LOGO_Z - 4, max(l1[1], l2[1]) + 3, LOGO_TOP1 + 3, LOGO_Z + 1)
+# hover frame: a slim glowing beam under each line + two pylons rising from the rim
+for (xa, xb, yb), z in ((l1, LOGO_Z - 3), (l2, LOGO_Z - 3)):
+    for x in range(xa - 2, xb + 3):
+        LOGO[(x, yb - 3, z)] = 'sea_lantern' if (x - hx) % 4 == 0 else 'polished_deepslate'
+        LOGO[(x, yb - 3, z + 1)] = 'cyan_stained_glass' if (x - hx) % 4 == 0 else 'polished_deepslate'
+for px in (hx - LOGO_PYLON, hx + LOGO_PYLON):     # they stand on the rim and reach below the saucer edge
+    LOGO[(px, hy - 5, LOGO_Z - 3)] = 'end_rod'
+    for y in range(hy - 4, l1[2] - 3):
+        LOGO[(px, y, LOGO_Z - 4)] = 'sea_lantern' if (y - hy) % 6 == 0 else 'polished_deepslate'
+        for zz in range(LOGO_Z - 3, LOGO_Z - 1):
+            LOGO.setdefault((px, y, zz), 'polished_deepslate')
+    LOGO[(px, l1[2] - 3, LOGO_Z - 4)] = 'end_rod'
+def runs(vox):
+    """voxel dict -> fill commands (x-runs per row)"""
+    rows, out = {}, []
+    for (x, y, z), b in vox.items():
+        rows.setdefault((y, z, b), []).append(x)
+    for (y, z, b), xs in sorted(rows.items()):
+        xs.sort()
+        s = p = xs[0]
+        for x in xs[1:] + [None]:
+            if x is not None and x == p + 1:
+                p = x
+                continue
+            out.append(f'fill {s} {y} {z} {p} {y} {z} minecraft:{b}' if p > s else f'setblock {s} {y} {z} minecraft:{b}')
+            if x is not None:
+                s = p = x
+    return out
+assert all(abs(x - hx) <= HUB_LOAD - 2 and abs(z - hz) <= HUB_LOAD - 2 and hy - 12 <= y <= hy + HUB_TOP for x, y, z in LOGO) and SR + 2 <= HUB_LOAD
+L += runs(LOGO)
 hub2 += [f'{OW} {c}' for c in L]
 for x, z in PADS:
     hub2.append(holo('mg_padh', f'{c5(x)}', hy + 1.6, f'{c5(z)}', {'text': '⇧ Sprungfeld', 'color': 'aqua'}, 0.8))
 hub2.append(holo('mg_pkh', f'{c5(PK[0][0])}', hy + 1.8, f'{c5(PK[0][2])}', [{'text': 'SKY-PARKOUR\n', 'color': 'aqua', 'bold': True}, {'text': 'hoch auf den Halo-Ring', 'color': 'gray', 'bold': False}], 0.9))
 hub2.append(holo('mg_haloh', f'{c5(hx)}', hy + 20.5, f'{c5(hz - 12)}', {'text': 'Halo-Ring', 'color': 'aqua', 'bold': True}, 1.0))
 npc_tick = []
-NPC_R = 26
+NPC_R = 36
 for key, name, color, prof, ang, action, sub in NPCS:
     nx = hx + round(NPC_R * math.cos(math.radians(ang))); nz = hz + round(NPC_R * math.sin(math.radians(ang)))
     gl = GLASS.get(color, 'white')
@@ -2010,7 +2110,7 @@ for key, name, color, prof, ang, action, sub in NPCS:
     fn(f'npc/{key}', ['execute unless entity @s[tag=mg_hub] run return 0', action,
                       'execute at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.5'])
 fn('npc/tick', npc_tick)
-hub2 += [holo('mg_title', f'{c5(hx)}', hy + 28, f'{c5(hz)}', {'text': 'MINIGAMES', 'color': 'aqua', 'bold': True}, 7.0),
+hub2 += [holo('mg_title', f'{c5(hx)}', hy + 28, f'{c5(hz)}', [{'text': 'OLE GAMES ', 'color': 'aqua', 'bold': True}, {'text': 'PVP', 'color': 'red', 'bold': True}], 6.0),
          holo('mg_sub', f'{c5(hx)}', hy + 26.6, f'{c5(hz)}', {'text': 'Ole · Mats · Sammy · Qelloxx', 'color': 'white'}, 2.0),
          holo('mg_help', f'{c5(SPAWN[0])}', hy + 2.4, f'{c5(SPAWN[2] - 4)}', [{'text': 'Willkommen!\n', 'color': 'aqua', 'bold': True}, {'text': 'Klick einen NPC in den Kapseln an\noder benutze den Kompass', 'color': 'white', 'bold': False}], 1.0),
          f'function {NS}:hub/top', f'scoreboard players set #big mg {BIG_VERSION}']
@@ -2113,8 +2213,9 @@ fn('npc/hit_cos', [f'execute on target run function {NS}:npc/cos', 'data remove 
 fn('npc/cos', ['execute unless entity @s[tag=mg_hub] run return 0', f'function {NS}:cos/menu', 'execute at @s run playsound minecraft:block.note_block.chime master @s ~ ~ ~ 1 1.5'])
 npc_tick.append(f'execute as @e[type=minecraft:interaction,tag=mg_npc_cos] if data entity @s interaction run function {NS}:npc/hit_cos')
 fn('npc/tick', npc_tick)
-fn('build/hub', hub2)
-fn('build/big_try', [f'execute in minecraft:overworld if loaded {hx - 48} {Y} {hz - 48} if loaded {hx + 48} {Y} {hz + 48} run return run function {NS}:build/hub_clear',
+fn('build/hub', hub2 + [f'execute as @a[tag=mg_hub] run function {NS}:hub/tp'])   # hub players fell during build/hub_clear -> back onto the new floor
+fn('build/big_try', [f'execute in minecraft:overworld if loaded {hx - HUB_LOAD} {Y} {hz - HUB_LOAD} if loaded {hx + HUB_LOAD} {Y} {hz + HUB_LOAD} '
+                     f'if loaded {hx - HUB_LOAD} {Y} {hz + HUB_LOAD} if loaded {hx + HUB_LOAD} {Y} {hz - HUB_LOAD} run return run function {NS}:build/hub_clear',
                      f'schedule function {NS}:build/big_try 20t'])
 
 # ---------------------------------------------------------------- game menu (compass) + trigger ids
