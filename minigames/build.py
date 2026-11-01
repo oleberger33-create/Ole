@@ -117,6 +117,10 @@ def ring(cx, y, cz, r, block, h=1):
     return out
 
 
+def c5(v):
+    return '%.1f' % (v + 0.5)
+
+
 def holo(tag, x, y, z, text, scale=1.0):
     return (f'{OW} summon minecraft:text_display {x} {y} {z} {{Tags:["mg_holo","{tag}"],billboard:"center",'
             f'background:0,shadow:true,text:{tc(text)},transformation:{{left_rotation:[0f,0f,0f,1f],'
@@ -497,7 +501,7 @@ load = [
     f'scoreboard objectives add mg_side dummy {tc({"text": "MINIGAMES", "color": "gold", "bold": True})}',
     'scoreboard objectives modify mg_side numberformat blank',
     'scoreboard objectives setdisplay sidebar mg_side',
-    'scoreboard players set #20 mg 20', 'scoreboard players set #60 mg 60', f'scoreboard players set #{LANES} mg {LANES}', 'scoreboard players set #6 mg 6',
+    'scoreboard players set #20 mg 20', 'scoreboard players set #1000 mg 1000', 'scoreboard players set #60 mg 60', f'scoreboard players set #{LANES} mg {LANES}', 'scoreboard players set #6 mg 6',
     'execute unless score #rush mg matches 0.. run scoreboard players set #rush mg 0',
     *[f'execute unless score #{k} mg matches 0.. run scoreboard players set #{k} mg 0' for k in DUELS],
     'gamerule pvp true',
@@ -517,6 +521,7 @@ load = [
     f'bossbar add {NS}:rush {tc({"text": "Parkour-Rush"})}',
     f'bossbar set {NS}:rush color green',
     f'function {NS}:hub/sidebar',
+    'execute if score #rush mg matches 2.. run scoreboard objectives setdisplay sidebar mg_prog',
     f'execute unless score #built mg matches {BUILD_VERSION} run schedule function {NS}:build/try 40t',
     f'execute if score #built mg matches {BUILD_VERSION} unless score #lanes mg matches {BUILD_VERSION} run schedule function {NS}:build/lane_resume 40t',
 ]
@@ -560,7 +565,7 @@ fn('build/hub', hub)
 
 ax, ay, az = ARENA
 arena = [f'{OW} {c}' for c in (
-    [f'fill {ax - 24} {ay - 4} {az - 24} {ax + 24} {ay + 12} {az + 24} minecraft:air']
+    [f'fill {ax - 24} {ay - 4} {az - 24} {ax + 24} {ay + 4} {az + 24} minecraft:air', f'fill {ax - 24} {ay + 5} {az - 24} {ax + 24} {ay + 12} {az + 24} minecraft:air']
     + disk(ax, ay, az, 18, 'stone_bricks') + disk(ax, ay, az, 6, 'chiseled_stone_bricks')
     + disk(ax, ay - 1, az, 18, 'stone') + ring(ax, ay + 1, az, 18, 'barrier', 8) + ring(ax, ay + 1, az, 18, 'mossy_stone_brick_wall', 1)
 )]
@@ -638,7 +643,7 @@ fn('hub/info', [f'tellraw @s {msg({"text": "Spielregeln", "color": "gold", "bold
 fn('hub/tp', [f'{OW} tp @s {SPAWN[0]}.5 {SPAWN[1]} {SPAWN[2]}.5 180 0'])
 fn('hub/enter', [
     'tag @s remove mg_rush', 'tag @s remove mg_fight', 'tag @s remove mg_duel', 'tag @s remove mg_p1', 'tag @s remove mg_p2',
-    'tag @s remove mg_sw', 'tag @s remove mg_bw', 'tag @s remove mg_alive', 'team leave @s', 'scoreboard players set @s mg_rt 0',
+    'tag @s remove mg_sw', 'tag @s remove mg_bw', 'tag @s remove mg_al_sw', 'tag @s remove mg_al_bw', 'tag @s remove mg_rw', 'team leave @s', 'scoreboard players set @s mg_rt 0',
     'tag @s add mg_hub',
     'ride @s dismount', 'attribute @s minecraft:max_health base set 20',
     'clear @s', 'effect clear @s', 'experience set @s 0 levels', 'experience set @s 0 points',
@@ -710,14 +715,14 @@ for mi, (t, m) in enumerate(zip(THEMES, MAPGEN)):
         n = ci + 1
         r = 4 if n == MODULES else 3
         a = chs[0]
-        args = f'n:{n},tier:"{TIER(n)}",ax:{r + a[0]},ay:{a[1]},az:{r + a[2]}'
+        args = f'n:{n},tier:"{TIER(n)}",ax:{r + a[0]},ay:{a[1]},az:{r + a[2]},r:{r},cx:{map_x(mi) + cx},cy:{Y + cy + 1},cz:{cz}'
         if len(chs) > 1:
             bb = chs[1]
             args += f',bx:{r + bb[0]},by:{bb[1]},bz:{r + bb[2]}'
             fnname = 'reach2'
         else:
             fnname = 'reach1'
-        checks.append(f'execute if score @s mg_cp matches {ci} positioned ~{cx - r} ~{cy} ~{cz - r} if entity @s[dx={2 * r},dy=3,dz={2 * r}] run function {NS}:rush/{fnname} {{{args}}}')
+        checks.append(f'execute if score @s mg_cp matches ..{ci} positioned ~{cx - r} ~{cy} ~{cz - r} if entity @s[dx={2 * r},dy=3,dz={2 * r}] run function {NS}:rush/{fnname} {{{args}}}')
     fn(f'rush/cp_m{mi + 1}', checks)
 
 # one-time background build of every lane (5 maps x LANES), one lane at a time
@@ -742,13 +747,17 @@ nxt.append(f'tellraw @a {msg({"text": "Alle Parkour-Strecken sind fertig gebaut.
 fn('build/lane_next', nxt)
 fn('build/lane_resume', ['scoreboard players remove #bq mg 1', 'execute if score #bq mg matches ..-1 run scoreboard players set #bq mg 0', f'function {NS}:build/lane_next'])
 
+INQ = []   # filled at the end (all queue tags known)
 fn('rush/request', [
+    f'execute store result score #n mg if entity @a[tag=mg_hub]',
+    f'execute if score #n mg matches ..1 run return run tellraw @s {msg({"text": "Für Parkour-Rush braucht ihr mindestens 2 Spieler in der Lobby.", "color": "red"})}',
     f'execute unless score #lanes mg matches {BUILD_VERSION} run return run tellraw @s {msg({"text": "Die Strecken werden noch gebaut (", "color": "red"}, {"score": {"name": "#lanes_done", "objective": "mg"}, "color": "white"}, {"text": f"/{len(JOBS)}). Gleich fertig!", "color": "red"})}',
     f'execute if score #rush mg matches 1.. run return run tellraw @s {msg({"text": "Parkour-Rush läuft schon.", "color": "red"})}',
     f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " startet ", "color": "gray"}, {"text": "PARKOUR-RUSH", "color": "green", "bold": True}, {"text": " für alle in der Lobby!", "color": "gray"})}',
     'scoreboard players set #rush mg 1', 'scoreboard players set #cd mg 5', 'scoreboard players set #cdt mg 0',
     'scoreboard players set #L mg 0', 'scoreboard players set @a mg_lane 0',
-    f'execute as @a[tag=mg_hub] run function {NS}:rush/lane_assign',
+    f'execute as @a[tag=mg_hub] unless function {NS}:q/inq run function {NS}:rush/lane_assign',
+    f'execute as @a[tag=mg_hub] if function {NS}:q/inq run tellraw @s {msg({"text": "Du bist in einer Warteschlange und bleibst deshalb draußen. Verlass sie mit dem Barriere-Item, um mitzumachen.", "color": "gray"})}',
     f'function {NS}:rush/cd_show',
 ])
 fn('rush/lane_assign', ['scoreboard players add #L mg 1', 'scoreboard players operation @s mg_lane = #L mg',
@@ -764,6 +773,7 @@ fn('rush/cd_tick', ['scoreboard players add #cdt mg 1',
                     f'execute if score #cd mg matches ..0 run return run function {NS}:rush/start',
                     f'execute if score #cdt mg matches 0 run function {NS}:rush/cd_show'])
 start = [
+    f'execute as @a[tag=mg_hub,scores={{mg_lane=0}}] unless function {NS}:q/inq run function {NS}:rush/lane_assign',
     'tag @a[tag=mg_hub,scores={mg_lane=1..}] add mg_rush', 'tag @a[tag=mg_rush] remove mg_hub',
     f'execute as @a[tag=mg_rush] run function {NS}:q/leave_all',
     'clear @a[tag=mg_rush]', 'effect clear @a[tag=mg_rush]', 'gamemode adventure @a[tag=mg_rush]',
@@ -813,10 +823,9 @@ fn('rush/parkour_tick', [
 reach_common = [
     '$scoreboard players set @s mg_cp $(n)',
     'scoreboard players operation @s mg_prog = @s mg_cp',
-    'execute store result score @s mg_cx run data get entity @s Pos[0]',
-    'execute store result score @s mg_cy run data get entity @s Pos[1]',
-    'execute store result score @s mg_cz run data get entity @s Pos[2]',
-    'execute at @s run spawnpoint @s ~ ~ ~',
+    '$scoreboard players set @s mg_cx $(cx)', '$scoreboard players set @s mg_cy $(cy)',
+    'scoreboard players operation @s mg_cz = @s mg_lane', 'scoreboard players operation @s mg_cz *= #1000 mg', '$scoreboard players add @s mg_cz $(cz)',
+    '$execute positioned ~$(r) ~1 ~$(r) run spawnpoint @s ~ ~ ~',
     '$setblock ~$(ax) ~$(ay) ~$(az) minecraft:chest[facing=west]{LootTable:"mg:$(tier)"}',
 ]
 reach_tail = [
@@ -833,7 +842,7 @@ fn('rush/back', [
     'execute store result storage mg:tmp p.y int 1 run scoreboard players get @s mg_cy',
     'execute store result storage mg:tmp p.z int 1 run scoreboard players get @s mg_cz',
     f'function {NS}:rush/back_tp with storage mg:tmp p',
-    'playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.6 1',
+    'execute at @s run playsound minecraft:entity.enderman.teleport master @s ~ ~ ~ 0.6 1',
 ])
 fn('rush/back_tp', ['$execute in minecraft:overworld run tp @s $(x).5 $(y) $(z).5'])
 fn('rush/finish_player', [
@@ -849,7 +858,10 @@ def tbar(zero):
     return tc([{'text': 'Parkour-Rush', 'color': 'green', 'bold': True}, {'text': '   Arena in ', 'color': 'white'},
                {'score': {'name': '#lm', 'objective': 'mg'}, 'color': 'white'}, {'text': ':0' if zero else ':', 'color': 'white'},
                {'score': {'name': '#ls', 'objective': 'mg'}, 'color': 'white'}])
+TD = {'Himmel': 'birch_trapdoor', 'Nether': 'crimson_trapdoor', 'Eis': 'spruce_trapdoor', 'Dschungel': 'jungle_trapdoor'}
 fn('rush/second', [
+    *[f'execute if score #map mg matches {mi + 1} as @a[tag=mg_rush] at @s run fill ~-5 ~-3 ~-5 ~5 ~3 ~5 minecraft:{TD[t["name"]]}[half=top,open=false] replace minecraft:{TD[t["name"]]}[open=true]'
+      for mi, t in enumerate(THEMES) if t['name'] in TD],
     'scoreboard players set #t mg 0', 'scoreboard players remove #left mg 1',
     'scoreboard players operation #lm mg = #left mg', 'scoreboard players operation #lm mg /= #60 mg',
     'scoreboard players operation #ls mg = #left mg', 'scoreboard players operation #ls mg %= #60 mg',
@@ -865,6 +877,9 @@ fn('rush/second', [
 ])
 
 fn('rush/to_arena', [
+    f'{OW} kill @e[type=minecraft:ender_pearl]',
+    f'{OW} kill @e[type=minecraft:item,x={map_x(0) - 20},dx={map_x(len(THEMES) - 1) - map_x(0) + MAXLEN + 40},y={Y - 40},dy=110,z={lane_z(1) - 60},dz={lane_z(LANES) - lane_z(1) + 120}]',
+    'execute store result score #fighters mg if entity @a[tag=mg_rush]', 'scoreboard players set #arena_t mg 0',
     'scoreboard players set #rush mg 3', 'scoreboard players set #grace mg 100',
     'effect clear @a[tag=mg_rush] minecraft:resistance', 'effect clear @a[tag=mg_rush] minecraft:saturation',
     'tag @a[tag=mg_rush] add mg_fight',
@@ -882,7 +897,12 @@ fn('rush/to_arena', [
     'execute as @a[tag=mg_fight] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.7 1.2',
 ])
 fn('rush/arena_tick', [
-    'scoreboard players remove #grace mg 1',
+    'scoreboard players remove #grace mg 1', 'scoreboard players add #arena_t mg 1',
+    f'bossbar set {NS}:rush players @a[tag=mg_fight]',
+    f'execute as @a[tag=mg_fight] unless entity @s[x={ARENA[0] - 26},dx=52,y={Y - 8},dy=40,z={ARENA[2] - 26},dz=52] run function {NS}:rush/out_fall',
+    f'execute if score #arena_t mg matches 2400 run effect give @a[tag=mg_fight] minecraft:glowing infinite 0 true',
+    f'execute if score #arena_t mg matches 2400 run tellraw @a[tag=mg_fight] {msg({"text": "Noch 1 Minute – danach teilen sich alle Überlebenden den Sieg.", "color": "red"})}',
+    f'execute if score #arena_t mg matches 3600.. run return run function {NS}:rush/end',
     f'execute as @a[tag=mg_fight,scores={{mg_deaths=1..}}] run function {NS}:rush/out',
     f'execute as @a[tag=mg_fight] at @s if entity @s[y=-64,dy={Y - 6 + 64}] run function {NS}:rush/out_fall',
     'scoreboard players set #alive mg 0',
@@ -891,13 +911,13 @@ fn('rush/arena_tick', [
 ])
 fn('rush/out', [
     'scoreboard players set @s mg_deaths 0',
-    f'tellraw @a[tag=mg_rush] {msg({"selector": "@s", "color": "white"}, {"text": " ist raus!", "color": "red"})}',
+    f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " ist in der Parkour-Rush-Arena raus!", "color": "red"})}',
     'tag @s remove mg_fight', f'function {NS}:hub/enter',
 ])
 fn('rush/out_fall', ['clear @s', f'function {NS}:rush/out'])
 fn('rush/end', [
     f'execute as @a[tag=mg_fight] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt Parkour-Rush!", "color": "white"})}',
-    'scoreboard players add @a[tag=mg_fight] mg_wins 1', 'scoreboard players add @a[tag=mg_fight] mg_coins 10',
+    'execute if score #fighters mg matches 2.. run scoreboard players add @a[tag=mg_fight] mg_wins 1', 'execute if score #fighters mg matches 2.. run scoreboard players add @a[tag=mg_fight] mg_coins 10',
     'title @a[tag=mg_rush] times 10 60 20',
     f'execute as @a[tag=mg_fight] run title @a[tag=mg_rush] title [{{"selector":"@s","color":"gold","bold":true}}]',
     f'title @a[tag=mg_rush] subtitle {tc({"text": "gewinnt Parkour-Rush!", "color": "white"})}',
@@ -915,9 +935,9 @@ fn('rush/stop', [
 
 # ------------------------------------------------------------------ 1v1: 13 modes, one engine
 # common flow: queue -> round (kit, teleport, 3 s freeze) -> go (arena reset) -> rules -> point/lose -> win
-ARENA_VERSION = 2
+ARENA_VERSION = 3
 # ================================================================== BIG MODES: new spawn with NPCs, SkyWars, BedWars, Stick-Fight Bett
-BIG_VERSION = 4
+BIG_VERSION = 5
 PLACE = ['white_wool', 'red_wool', 'blue_wool', 'lime_wool', 'yellow_wool', 'end_stone', 'oak_planks', 'sandstone', 'cobblestone',
          'stone_bricks', 'grass_block', 'dirt', 'stone', 'smooth_stone', 'quartz_block', 'polished_andesite', 'red_concrete',
          'blue_concrete', 'lime_concrete', 'yellow_concrete', 'oak_log', 'andesite', 'glass', 'mossy_cobblestone', 'cut_sandstone']
@@ -978,7 +998,7 @@ mode('boden', name='Fallender Boden', color='green', desc='Wo du läufst, versch
 mode('boxen', name='Boxen', color='gray', desc='Nur Fäuste – zuerst 25 Treffer', center=C(7), spawns=[(-3, 1, 0, -90), (3, 1, 0, 90)],
      end='hits', need=1, kit=['attribute @s minecraft:max_health base set 200', 'effect give @s minecraft:instant_health 1 20 true'])
 mode('pferd', name='Pferderennen', color='gold', desc='2 Runden auf dem Pferd – wer zuerst im Ziel ist', center=C(8), spawns=[(20, 1, -3, 0), (24, 1, -3, 0)],
-     end='race', need=1, kit=[])
+     end='race', need=1, kit=['effect give @s minecraft:weakness infinite 255 true', 'effect give @s minecraft:resistance infinite 4 true'])
 mode('parkour', name='Parkour-Duell', color='light_purple', desc='Gleiche Strecke nebeneinander – wer zuerst oben ist', center=C(9), spawns=[(-30, 1, -6, -90), (-30, 1, 6, -90)],
      end='pkrace', fall=Y - 10, need=1, kit=[])
 
@@ -1113,7 +1133,7 @@ for e in seq:
     elif e == 'head':
         px_ += 3; PK[(px_, py_, 0)] = 'quartz_block'; PK[(px_, py_ + 3, 0)] = 'quartz_block'
     elif e == 'trap':
-        px_ += 3; PK[(px_, py_, 0)] = 'oak_trapdoor[half=top,open=false]'
+        px_ += 3; PK[(px_, py_, 0)] = 'iron_trapdoor[half=top,open=false]'
     elif e == 'ladder':
         px_ += 3; PK[(px_, py_, 0)] = 'quartz_block'
         for ly in range(1, 5):
@@ -1163,6 +1183,7 @@ for k in MODES:
     sel = f'@a[tag=mg_duel_{k}]'
     P1, P2 = f'@a[tag=mg_duel_{k},tag=mg_p1,limit=1]', f'@a[tag=mg_duel_{k},tag=mg_p2,limit=1]'
     SX = lambda extra: f'@a[tag=mg_duel_{k},{extra}]'
+    SXE = lambda extra: f'@e[type=minecraft:player,tag=mg_duel_{k},{extra}]'
     fn(f'q/toggle_{k}', [
         f'execute if entity @s[tag=mg_q_{k}] run return run function {NS}:q/leave_{k}',
         f'function {NS}:q/leave_all', f'tag @s add mg_q_{k}',
@@ -1200,29 +1221,32 @@ for k in MODES:
                     'gamemode adventure @s', 'scoreboard players set @s mg_deaths 0', 'scoreboard players set @s mg_dmg 0',
                     'scoreboard players set @s mg_lap 0', 'scoreboard players set @s mg_gate 0',
                     'effect give @s minecraft:slowness 3 255 true', 'effect give @s minecraft:resistance 3 4 true'] + m['kit'])
-    go = list(m.get('go', []))
+    go = []
+    reset = list(m.get('go', []))          # arena resets run at the start of every round, before players are teleported in
     if k == 'lava':
-        go += [f'{OW} fill {cx - 6} {cy + 1} {cz - 6} {cx + 6} {cy + 39} {cz + 6} minecraft:air', 'scoreboard players set #lava_lvl mg 0', 'scoreboard players set #lava_t mg -160', f'title {sel} actionbar {tc({"text": "Bau dich hoch – in 12 Sekunden steigt die Lava!", "color": "gold"})}']
+        reset += [f'{OW} fill {cx - 6} {cy + 1} {cz - 6} {cx + 6} {cy + 39} {cz + 6} minecraft:air', 'scoreboard players set #lava_lvl mg 0', 'scoreboard players set #lava_t mg -9999']
+        go += ['scoreboard players set #lava_lvl mg 0', 'scoreboard players set #lava_t mg -160', f'title {sel} actionbar {tc({"text": "Bau dich hoch – in 12 Sekunden steigt die Lava!", "color": "gold"})}']
     if k == 'boden':
-        go += [f'{OW} fill {cx - 8} {cy - 21} {cz - 8} {cx + 8} {cy + 3} {cz + 8} minecraft:air',
+        reset += [f'{OW} fill {cx - 8} {cy - 21} {cz - 8} {cx + 8} {cy + 3} {cz + 8} minecraft:air',
                f'{OW} fill {cx - 8} {cy} {cz - 8} {cx + 8} {cy} {cz + 8} minecraft:lime_concrete',
                f'{OW} fill {cx - 8} {cy - 7} {cz - 8} {cx + 8} {cy - 7} {cz + 8} minecraft:yellow_concrete',
                f'{OW} fill {cx - 8} {cy - 14} {cz - 8} {cx + 8} {cy - 14} {cz + 8} minecraft:orange_concrete']
     if k == 'bruecke':
-        go += [f'{OW} fill {cx - 11} {cy - 6} {cz - 12} {cx + 11} {cy + 12} {cz + 12} minecraft:air',
+        reset += [f'{OW} fill {cx - 20} {cy - 8} {cz - 16} {cx + 20} {cy + 14} {cz + 16} minecraft:air replace minecraft:white_wool',
+               f'{OW} fill {cx - 11} {cy - 6} {cz - 12} {cx + 11} {cy + 12} {cz + 12} minecraft:air',
                f'{OW} fill {cx - 1} {cy} {cz - 1} {cx + 1} {cy} {cz + 1} minecraft:white_concrete']
     if k == 'stickbett':
-        go += [f'{OW} fill {cx - 17} {cy - 6} {cz - 6} {cx + 17} {cy + 7} {cz + 6} minecraft:air replace minecraft:sandstone',
+        reset += [f'{OW} fill {cx - 20} {cy - 8} {cz - 12} {cx + 20} {cy + 10} {cz + 12} minecraft:air replace minecraft:sandstone',
                f'{OW} setblock {cx - 14} {cy + 1} {cz} minecraft:red_bed[facing=west,part=foot]', f'{OW} setblock {cx - 15} {cy + 1} {cz} minecraft:red_bed[facing=west,part=head]',
                f'{OW} setblock {cx + 14} {cy + 1} {cz} minecraft:blue_bed[facing=east,part=foot]', f'{OW} setblock {cx + 15} {cy + 1} {cz} minecraft:blue_bed[facing=east,part=head]']
     if k == 'pferd':
         for i, (P, tg) in enumerate(((P1, 'mg_h1'), (P2, 'mg_h2'))):
             hx, hy, hz, yaw = sp[i]
-            go += [f'execute in minecraft:overworld run summon minecraft:horse {cx + hx} {cy + 1} {cz + hz} {{Tags:["mg_horse_{k}","{tg}"],Tame:1b,PersistenceRequired:1b,Rotation:[0f,0f],attributes:[{{id:"minecraft:movement_speed",base:0.34d}},{{id:"minecraft:jump_strength",base:0.6d}},{{id:"minecraft:max_health",base:30d}}],equipment:{{saddle:{{id:"minecraft:saddle",count:1}}}}}}',
+            go += [f'execute in minecraft:overworld run summon minecraft:horse {cx + hx} {cy + 1} {cz + hz} {{Tags:["mg_horse_{k}","{tg}"],Tame:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f],attributes:[{{id:"minecraft:movement_speed",base:0.34d}},{{id:"minecraft:jump_strength",base:0.6d}},{{id:"minecraft:max_health",base:30d}}],equipment:{{saddle:{{id:"minecraft:saddle",count:1}}}}}}',
                    f'ride {P} mount @e[type=minecraft:horse,tag={tg},limit=1]']
-    if k in ('pfeil', 'kolben', 'duell', 'lava', 'bruecke'):
-        go += [f'{OW} kill @e[type=minecraft:item,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
-               f'{OW} kill @e[type=minecraft:arrow,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]']
+    reset += [f'{OW} kill @e[type=minecraft:item,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
+              f'{OW} kill @e[type=#minecraft:arrows,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]']
+    fn(f'{k}/round', reset + rnd_cmds)
     fn(f'{k}/go', go + [f'title {sel} actionbar {tc({"text": "LOS!", "color": color, "bold": True})}', f'execute as {sel} at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 2'])
 
     tick = [
@@ -1236,19 +1260,19 @@ for k in MODES:
     e = m['end']
     if e == 'fall':
         tick.append(f'execute as {sel} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run function {NS}:{k}/lose')
-        tick.append(f'execute as {SX('scores={mg_deaths=1..}')} run function {NS}:{k}/lose')
+        tick.append(f'execute as {SXE('scores={mg_deaths=1..}')} run function {NS}:{k}/lose')
     elif e == 'death':
-        tick.append(f'execute as {SX('scores={mg_deaths=1..}')} run function {NS}:{k}/lose')
+        tick.append(f'execute as {SXE('scores={mg_deaths=1..}')} run function {NS}:{k}/lose')
         tick.append(f'execute as {sel} at @s if entity @s[y=-64,dy={Y - 10 + 64}] run function {NS}:{k}/lose')
     elif e == 'kills':
-        tick.append(f'execute as {SX('scores={mg_deaths=1..}')} run function {NS}:{k}/died')
+        tick.append(f'execute as {SXE('scores={mg_deaths=1..}')} run function {NS}:{k}/died')
     elif e == 'bridge':
-        tick += [f'execute as {SX('scores={mg_deaths=1..}')} run function {NS}:{k}/respawn',
+        tick += [f'execute as {SXE('scores={mg_deaths=1..}')} run function {NS}:{k}/respawn',
                  f'execute as {sel} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run function {NS}:{k}/respawn',
                  f'execute as {P1} if entity @s[x={cx + 15 + 2 - 1},dx=2,y={cy - 4},dy=4,z={cz - 1},dz=2] run function {NS}:{k}/point',
                  f'execute as {P2} if entity @s[x={cx - 15 - 2 - 1},dx=2,y={cy - 4},dy=4,z={cz - 1},dz=2] run function {NS}:{k}/point']
     elif e == 'bed':
-        tick += [f'execute as {SX("scores={mg_deaths=1..}")} run function {NS}:{k}/respawn',
+        tick += [f'execute as {SXE("scores={mg_deaths=1..}")} run function {NS}:{k}/respawn',
                  f'execute as {sel} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run function {NS}:{k}/respawn',
                  f'execute in minecraft:overworld unless block {cx - 14} {cy + 1} {cz} minecraft:red_bed as {P2} run function {NS}:{k}/point',
                  f'execute in minecraft:overworld unless block {cx + 14} {cy + 1} {cz} minecraft:blue_bed as {P1} run function {NS}:{k}/point']
@@ -1283,6 +1307,11 @@ for k in MODES:
                  'execute if score #boden_t mg matches 8.. run scoreboard players set #boden_t mg 0']
     if k in ('pfeil', 'kolben'):
         tick.append(f'execute as {sel} at @s if entity @s[y=-64,dy={Y - 10 + 64}] run kill @s')
+    if k == 'pfeil':
+        tick += [f'execute in minecraft:overworld as @e[type=minecraft:arrow,x={cx - 30},dx=60,y={cy - 20},dy=60,z={cz - 30},dz=60,tag=!mg_np] run data merge entity @s {{pickup:0b,Tags:["mg_np"]}}',
+                 f'{OW} kill @e[type=minecraft:item,x={cx - 30},dx=60,y={cy - 20},dy=60,z={cz - 30},dz=60]']
+    if k in ('bruecke', 'stickbett'):
+        tick.append(f'{OW} kill @e[type=minecraft:item,x={cx - 30},dx=60,y={cy - 20},dy=60,z={cz - 30},dz=60,nbt={{Age:100s}}]')
     fn(f'{k}/tick', tick)
 
     fn(f'{k}/lose', [
@@ -1327,7 +1356,7 @@ for k in MODES:
         fn(f'{k}/gate', ['scoreboard players add @s mg_gate 1',
                          'execute if score @s mg_gate matches 4.. run scoreboard players add @s mg_lap 1',
                          'execute if score @s mg_gate matches 4.. run scoreboard players set @s mg_gate 0',
-                         'playsound minecraft:block.note_block.bell master @s ~ ~ ~ 1 1.4',
+                         'execute at @s run playsound minecraft:block.note_block.bell master @s ~ ~ ~ 1 1.4',
                          f'execute if score @s mg_lap matches 2.. run function {NS}:{k}/point'])
     fn(f'{k}/win', [
         f'scoreboard players add @a[tag=mg_rw,tag=mg_duel_{k}] mg_wins 1', f'scoreboard players add @a[tag=mg_rw,tag=mg_duel_{k}] mg_coins 5',
@@ -1335,7 +1364,7 @@ for k in MODES:
         f'title {sel} times 10 50 15',
         f'title @a[tag=mg_duel_{k},tag=mg_rw] title {tc({"text": "SIEG!", "color": "gold", "bold": True})}',
         f'title @a[tag=mg_duel_{k},tag=!mg_rw] title {tc({"text": "Verloren", "color": "red", "bold": True})}',
-        'execute as @a[tag=mg_rw] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"star",colors:[I;16766720],has_twinkle:true}]}}}}',
+        f'execute as @a[tag=mg_rw,tag=mg_duel_{k}] at @s run summon minecraft:firework_rocket ~ ~1 ~ {{LifeTime:20,FireworksItem:{{id:"minecraft:firework_rocket",count:1,components:{{"minecraft:fireworks":{{flight_duration:1,explosions:[{{shape:"star",colors:[I;16766720],has_twinkle:true}}]}}}}}}}}',
         f'function {NS}:{k}/stop',
     ])
     fn(f'{k}/forfeit', [
@@ -1351,7 +1380,8 @@ for k in MODES:
         f'{OW} kill @e[type=minecraft:item,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
         f'{OW} kill @e[type=minecraft:arrow,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
         *( [f'function {NS}:spleef/reset_floor'] if k == 'spleef' else [] ),
-        *( [f'{OW} fill {cx - 17} {cy - 6} {cz - 6} {cx + 17} {cy + 7} {cz + 6} minecraft:air replace minecraft:sandstone'] if k == 'stickbett' else [] ),
+        *( [f'{OW} fill {cx - 20} {cy - 8} {cz - 12} {cx + 20} {cy + 10} {cz + 12} minecraft:air replace minecraft:sandstone'] if k == 'stickbett' else [] ),
+        *( [f'{OW} fill {cx - 20} {cy - 8} {cz - 16} {cx + 20} {cy + 14} {cz + 16} minecraft:air replace minecraft:white_wool'] if k == 'bruecke' else [] ),
         *( [f'{OW} fill {D["lava"]["center"][0] - 6} {Y + 1} {D["lava"]["center"][2] - 6} {D["lava"]["center"][0] + 6} {Y + 39} {D["lava"]["center"][2] + 6} minecraft:air'] if k == 'lava' else [] ),
     ])
 lx, ly, lz = D['lava']['center']
@@ -1401,7 +1431,7 @@ BIG_TRIG = {'sw': 52, 'bw': 51}
 NSW = 8
 SW_IS = [(SW[0] + round(25 * math.cos(math.radians(k * 45))), SW[2] + round(25 * math.sin(math.radians(k * 45)))) for k in range(NSW)]
 big_queue('sw', 'SkyWars', 'aqua')
-swb = ['kill @e[type=minecraft:text_display,tag=mg_swh]'] + clear_box(SW[0] - 31, Y - 6, SW[2] - 31, SW[0] + 31, Y + 16, SW[2] + 31)
+swb = ['kill @e[type=minecraft:text_display,tag=mg_swh]', *[f'{OW} kill @e[type={e},x={SW[0] - 45},dx=90,y={Y - 40},dy=90,z={SW[2] - 45},dz=90]' for e in ('minecraft:item', '#minecraft:arrows', 'minecraft:ender_pearl', 'minecraft:snowball')]] + clear_box(SW[0] - 31, Y - 6, SW[2] - 31, SW[0] + 31, Y + 16, SW[2] + 31)
 for i, (ix, iz) in enumerate(SW_IS):
     swb += island_cmds(ix, Y, iz, 3)
     dx, dz = SW[0] - ix, SW[2] - iz
@@ -1441,39 +1471,47 @@ start = [f'function {NS}:sw/build',
          f'{OW} forceload remove {SW[0] - 40} {SW[2] - 40} {SW[0] + 40} {SW[2] + 40}',
          'tag @a[tag=mg_q_sw,tag=mg_hub,limit=8,sort=random] add mg_sw', 'tag @a[tag=mg_sw] remove mg_q_sw', 'tag @a[tag=mg_sw] remove mg_hub',
          f'execute as @a[tag=mg_sw] run function {NS}:q/leave_all',
-         'clear @a[tag=mg_sw]', 'effect clear @a[tag=mg_sw]', 'gamemode adventure @a[tag=mg_sw]', 'tag @a[tag=mg_sw] add mg_alive',
+         'clear @a[tag=mg_sw]', 'effect clear @a[tag=mg_sw]', 'gamemode adventure @a[tag=mg_sw]', 'tag @a[tag=mg_sw] add mg_al_sw',
          'scoreboard players set @a[tag=mg_sw] mg_deaths 0', 'scoreboard players set #k mg 0']
-for i, (ix, iz) in enumerate(SW_IS):
-    start.append(f'execute as @a[tag=mg_sw,tag=!mg_placed,limit=1,sort=random] run function {NS}:sw/place {{x:{ix},z:{iz}}}')
+for i in (0, 4, 2, 6, 1, 5, 3, 7):
+    ix, iz = SW_IS[i]
+    start.append(f'execute as @a[tag=mg_sw,tag=!mg_placed,limit=1,sort=random] run function {NS}:sw/place {{x:{c5(ix)},z:{c5(iz)}}}')
 start += ['tag @a remove mg_placed', 'scoreboard players set #sw mg 2', 'scoreboard players set #sw_cd mg 100',
           f'title @a[tag=mg_sw] title {tc({"text": "SKYWARS", "color": "aqua", "bold": True})}',
           f'title @a[tag=mg_sw] subtitle {tc({"text": "Truhen plündern – der Letzte gewinnt", "color": "white"})}']
 fn('sw/start', start)
-fn('sw/place', ['tag @s add mg_placed', f'$execute in minecraft:overworld run tp @s $(x).5 {Y + 1} $(z).5 facing {SW[0]}.5 {Y + 1} {SW[2]}.5',
+fn('sw/place', ['tag @s add mg_placed', f'$execute in minecraft:overworld run tp @s $(x) {Y + 1} $(z) facing {c5(SW[0])} {Y + 1} {c5(SW[2])}',
                 f'execute in minecraft:overworld run spawnpoint @s {SW[0]} {Y + 12} {SW[2]}'])
 fn('sw/cage', ['scoreboard players remove #sw_cd mg 1',
                'scoreboard players operation #s mg = #sw_cd mg', 'scoreboard players operation #s mg /= #20 mg',
                'execute if score #sw_cd mg matches 1.. run title @a[tag=mg_sw] actionbar [{"text":"Käfig öffnet in ","color":"gray"},{"score":{"name":"#s","objective":"mg"},"color":"white","bold":true}]',
                'execute if score #sw_cd mg matches ..0 run function ' + f'{NS}:sw/release'])
-fn('sw/release', [f'{OW} fill {SW[0] - 30} {Y + 1} {SW[2] - 30} {SW[0] + 30} {Y + 4} {SW[2] + 30} minecraft:air replace minecraft:glass',
+fn('sw/sudden', ['effect give @a[tag=mg_al_sw] minecraft:glowing infinite 0 true', f'title @a[tag=mg_sw] title {tc({"text": "SUDDEN DEATH", "color": "red", "bold": True})}',
+                  f'title @a[tag=mg_sw] subtitle {tc({"text": "Alle leuchten – in 4 Minuten ist Schluss", "color": "white"})}'])
+fn('sw/release', ['scoreboard players set #sw_t mg 0', f'{OW} fill {SW[0] - 30} {Y + 1} {SW[2] - 30} {SW[0] + 30} {Y + 4} {SW[2] + 30} minecraft:air replace minecraft:glass',
                   'scoreboard players set #sw mg 3', f'title @a[tag=mg_sw] title {tc({"text": "LOS!", "color": "aqua", "bold": True})}',
                   'execute as @a[tag=mg_sw] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.6 1.3'])
 fn('sw/game', [
-    f'execute as @a[tag=mg_sw,tag=mg_alive] at @s if entity @s[y=-64,dy={Y - 20 + 64}] run kill @s',
-    f'execute as @a[tag=mg_sw,tag=mg_alive,scores={{mg_deaths=1..}}] run function {NS}:sw/out',
-    'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_alive]',
+    f'execute as @a[tag=mg_sw,tag=mg_al_sw] at @s if entity @s[y=-64,dy={Y - 20 + 64}] run kill @s',
+    'scoreboard players add #sw_t mg 1',
+    f'execute if score #sw_t mg matches 9600 run function {NS}:sw/sudden',
+    f'execute if score #sw_t mg matches 14400.. run return run function {NS}:sw/end',
+    'execute store result score #surv mg if entity @a[tag=mg_al_sw,scores={mg_deaths=0}]',
+    f'execute if score #surv mg matches 0 if entity @a[tag=mg_al_sw] run return run function {NS}:sw/end',
+    f'execute as @a[tag=mg_sw,tag=mg_al_sw,scores={{mg_deaths=1..}}] run function {NS}:sw/out',
+    'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_al_sw]',
     f'execute if score #alive mg matches ..1 run function {NS}:sw/end',
 ])
-fn('sw/out', ['tag @s remove mg_alive', 'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_alive]', 'scoreboard players set @s mg_deaths 0', 'gamemode spectator @s',
+fn('sw/out', ['tag @s remove mg_al_sw', 'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_al_sw]', 'scoreboard players set @s mg_deaths 0', 'gamemode spectator @s',
               f'tellraw @a[tag=mg_sw] {msg({"selector": "@s", "color": "white"}, {"text": " ist raus! ", "color": "red"}, {"text": "Noch ", "color": "gray"}, {"score": {"name": "#alive", "objective": "mg"}, "color": "white"}, {"text": " übrig.", "color": "gray"})}',
-              f'execute in minecraft:overworld run tp @s {SW[0]} {Y + 15} {SW[2]}'])
+              f'execute in minecraft:overworld run tp @s {SW[0]} {Y + 15} {SW[2]}', f'tellraw @s {tc([{"text": "  "}, {"text": "[Zurück zur Lobby]", "color": "aqua", "click_event": {"action": "run_command", "command": "/trigger mg_aktion set 99"}}, {"text": " oder weiter zuschauen", "color": "gray"}])}'])
 fn('sw/end', [
-    f'execute as @a[tag=mg_sw,tag=mg_alive] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt SkyWars!", "color": "white"})}',
-    'scoreboard players add @a[tag=mg_sw,tag=mg_alive] mg_wins 1', 'scoreboard players add @a[tag=mg_sw,tag=mg_alive] mg_coins 10',
+    f'execute as @a[tag=mg_sw,tag=mg_al_sw] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt SkyWars!", "color": "white"})}',
+    'scoreboard players add @a[tag=mg_sw,tag=mg_al_sw] mg_wins 1', 'scoreboard players add @a[tag=mg_sw,tag=mg_al_sw] mg_coins 10',
     f'title @a[tag=mg_sw] title {tc({"text": "Spiel vorbei!", "color": "aqua", "bold": True})}',
-    'execute as @a[tag=mg_sw,tag=mg_alive] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;5636095],has_twinkle:true}]}}}}',
+    'execute as @a[tag=mg_sw,tag=mg_al_sw] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;5636095],has_twinkle:true}]}}}}',
     'scoreboard players set #sw mg 4', f'schedule function {NS}:sw/finish 100t'])
-fn('sw/finish', [f'execute as @a[tag=mg_sw] run function {NS}:hub/enter', 'tag @a remove mg_sw', 'tag @a remove mg_alive', 'scoreboard players set #sw mg 0',
+fn('sw/finish', [f'execute as @a[tag=mg_sw] run function {NS}:hub/enter', 'tag @a remove mg_sw', 'scoreboard players set #sw mg 0',
                  f'{OW} kill @e[type=minecraft:item,x={SW[0] - 40},dx=80,y={Y - 40},dy=80,z={SW[2] - 40},dz=80]'])
 
 # ---------------------------------------------------------------- BEDWARS
@@ -1486,7 +1524,7 @@ def tpos(t):
     return BW[0] + d[0] * BWD, BW[2] + d[1] * BWD
 def face(dx, dz):
     return {(0, 1): 'south', (0, -1): 'north', (1, 0): 'east', (-1, 0): 'west'}[(dx, dz)]
-bwb = ['kill @e[type=minecraft:villager,tag=mg_shop]', 'kill @e[type=minecraft:text_display,tag=mg_bwh]'] + clear_box(BW[0] - 50, Y - 6, BW[2] - 50, BW[0] + 50, Y + 16, BW[2] + 50)
+bwb = ['kill @e[type=minecraft:villager,tag=mg_shop]', 'kill @e[type=minecraft:text_display,tag=mg_bwh]', *[f'{OW} kill @e[type={e},x={BW[0] - 60},dx=120,y={Y - 40},dy=90,z={BW[2] - 60},dz=120]' for e in ('minecraft:item', '#minecraft:arrows', 'minecraft:ender_pearl')]] + clear_box(BW[0] - 50, Y - 6, BW[2] - 50, BW[0] + 50, Y + 16, BW[2] + 50)
 for t, (tn, tcol, wool, rgb, d) in BWT.items():
     tx, tz = tpos(t)
     for c in disk(tx, Y, tz, 5, f'{wool}_concrete') + disk(tx, Y, tz, 4, 'stone_bricks') + disk(tx, Y - 1, tz, 4, 'stone') + disk(tx, Y - 2, tz, 2, 'stone'):
@@ -1514,7 +1552,7 @@ for t, (tn, tcol, wool, rgb, d) in BWT.items():
     o('gold_ingot', 3, 'golden_apple'); o('gold_ingot', 12, 'bow'); o('gold_ingot', 2, 'arrow', 8); o('emerald', 4, 'ender_pearl')
     o('iron_ingot', 4, 'cooked_beef', 3); o('emerald', 2, 'stick', 1, {'minecraft:enchantments': {'minecraft:knockback': 1}})
     snbt = json.dumps({'Recipes': offers}).replace('"rewardExp": false', '"rewardExp": 0b')
-    bwb.append(f'{OW} summon minecraft:villager {sx}.5 {Y + 1} {sz}.5 {{Tags:["mg_shop"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
+    bwb.append(f'{OW} summon minecraft:villager {c5(sx)} {Y + 1} {c5(sz)} {{Tags:["mg_shop"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
                f'CustomName:{tc({"text": "Shop " + tn, "color": tcol, "bold": True})},CustomNameVisible:1b,'
                f'VillagerData:{{profession:"minecraft:weaponsmith",level:5,type:"minecraft:plains"}},Offers:{snbt}}}')
     bwb.append(holo('mg_bwh', tx, Y + 4, tz, {'text': 'Team ' + tn, 'color': tcol, 'bold': True}, 2.0))
@@ -1550,10 +1588,10 @@ bst = [f'function {NS}:bw/build', f'{OW} forceload remove {BW[0] - 56} {BW[2] - 
        'tag @a[tag=mg_q_bw,tag=mg_hub,limit=16] add mg_bw', 'tag @a[tag=mg_bw] remove mg_q_bw', 'tag @a[tag=mg_bw] remove mg_hub',
        f'execute as @a[tag=mg_bw] run function {NS}:q/leave_all',
        'execute store result score #n mg if entity @a[tag=mg_bw]',
-       'scoreboard players set #teams mg 4', 'execute if score #n mg matches ..3 run scoreboard players operation #teams mg = #n mg',
+       'scoreboard players operation #teams mg = #n mg', 'execute if score #n mg matches 5.. run scoreboard players add #teams mg 1', 'execute if score #n mg matches 5.. run scoreboard players operation #teams mg /= #2 mg', 'execute if score #teams mg matches 5.. run scoreboard players set #teams mg 4', 'scoreboard players set #bw_t mg 0',
        'scoreboard players set #k mg 0', 'scoreboard players set @a[tag=mg_bw] mg_bwt 0',
        f'execute as @a[tag=mg_bw,sort=random] run function {NS}:bw/assign',
-       'clear @a[tag=mg_bw]', 'effect clear @a[tag=mg_bw]', 'gamemode adventure @a[tag=mg_bw]', 'tag @a[tag=mg_bw] add mg_alive',
+       'clear @a[tag=mg_bw]', 'effect clear @a[tag=mg_bw]', 'gamemode adventure @a[tag=mg_bw]', 'tag @a[tag=mg_bw] add mg_al_bw',
        'scoreboard players set @a[tag=mg_bw] mg_deaths 0', 'scoreboard players set @a[tag=mg_bw] mg_rt 0',
        'scoreboard players set #gi mg 0', 'scoreboard players set #gg mg 0', 'scoreboard players set #gd mg 0', 'scoreboard players set #ge mg 0']
 for t, (tn, tcol, wool, rgb, d) in BWT.items():
@@ -1561,7 +1599,7 @@ for t, (tn, tcol, wool, rgb, d) in BWT.items():
     bst += [f'execute if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] run scoreboard players set #bed{t} mg 1',
             f'execute unless entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] run scoreboard players set #bed{t} mg 0',
             f'execute as @a[tag=mg_bw,scores={{mg_bwt={t}}}] run {OW} spawnpoint @s {tx} {Y + 1} {tz}',
-            f'{OW} tp @a[tag=mg_bw,scores={{mg_bwt={t}}}] {tx}.5 {Y + 1} {tz}.5 facing {BW[0]}.5 {Y + 1} {BW[2]}.5',
+            f'{OW} tp @a[tag=mg_bw,scores={{mg_bwt={t}}}] {c5(tx)} {Y + 1} {c5(tz)} facing {c5(BW[0])} {Y + 1} {c5(BW[2])}',
             f'team join mg_bw{t} @a[tag=mg_bw,scores={{mg_bwt={t}}}]']
 bst += [f'execute as @a[tag=mg_bw] run function {NS}:bw/kit', 'scoreboard players set #bw mg 2',
         f'title @a[tag=mg_bw] title {tc({"text": "BEDWARS", "color": "red", "bold": True})}',
@@ -1581,25 +1619,27 @@ gtick = ['scoreboard players add #gi mg 1', 'scoreboard players add #gg mg 1', '
 for t, (tn, tcol, wool, rgb, d) in BWT.items():
     tx, tz = tpos(t)
     gx, gz = tx + d[0] * 3, tz + d[1] * 3
-    gtick += [f'execute if score #gi mg matches 20.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {gx}.5 {Y + 1} {gz}.5 run function {NS}:bw/gen {{item:"iron_ingot"}}',
-              f'execute if score #gg mg matches 120.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {gx + d[1] * 2}.5 {Y + 1} {gz + d[0] * 2}.5 run function {NS}:bw/gen {{item:"gold_ingot"}}']
+    gtick += [f'execute if score #gi mg matches 20.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {c5(gx)} {Y + 1} {c5(gz)} run function {NS}:bw/gen {{item:"iron_ingot"}}',
+              f'execute if score #gg mg matches 120.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {c5(gx + d[1] * 2)} {Y + 1} {c5(gz + d[0] * 2)} run function {NS}:bw/gen {{item:"gold_ingot"}}']
 for (ox, oz) in ((26, 26), (-26, 26), (26, -26), (-26, -26)):
-    gtick.append(f'execute if score #gd mg matches 600.. in minecraft:overworld positioned {BW[0] + ox}.5 {Y + 1} {BW[2] + oz}.5 run function {NS}:bw/gen {{item:"diamond"}}')
+    gtick.append(f'execute if score #gd mg matches 600.. in minecraft:overworld positioned {c5(BW[0] + ox)} {Y + 1} {c5(BW[2] + oz)} run function {NS}:bw/gen {{item:"diamond"}}')
 for ox in (2, -2):
-    gtick.append(f'execute if score #ge mg matches 1200.. in minecraft:overworld positioned {BW[0] + ox}.5 {Y + 1} {BW[2]}.5 run function {NS}:bw/gen {{item:"emerald"}}')
+    gtick.append(f'execute if score #ge mg matches 1200.. in minecraft:overworld positioned {c5(BW[0] + ox)} {Y + 1} {c5(BW[2])} run function {NS}:bw/gen {{item:"emerald"}}')
 gtick += ['execute if score #gi mg matches 20.. run scoreboard players set #gi mg 0', 'execute if score #gg mg matches 120.. run scoreboard players set #gg mg 0',
           'execute if score #gd mg matches 600.. run scoreboard players set #gd mg 0', 'execute if score #ge mg matches 1200.. run scoreboard players set #ge mg 0']
 fn('bw/gen', ['execute store result score #c mg if entity @e[type=minecraft:item,distance=..2]',
               'execute if score #c mg matches 40.. run return 0',
               '$summon minecraft:item ~ ~ ~ {Item:{id:"minecraft:$(item)",count:1},PickupDelay:0,Motion:[0d,0.1d,0d]}'])
-game = gtick + [f'execute as @a[tag=mg_bw,tag=mg_alive] at @s if entity @s[y=-64,dy={Y - 25 + 64}] run kill @s']
+game = gtick + [f'execute as @a[tag=mg_bw,tag=mg_al_bw,gamemode=!spectator] at @s if entity @s[y=-64,dy={Y - 25 + 64}] run kill @s',
+                'scoreboard players add #bw_t mg 1', f'execute if score #bw_t mg matches 24000 run function {NS}:bw/sudden',
+                f'execute if score #bw_t mg matches 36000.. run return run function {NS}:bw/end']
 for t, (tn, tcol, wool, rgb, d) in BWT.items():
     tx, tz = tpos(t)
     game.append(f'execute if score #bed{t} mg matches 1 in minecraft:overworld unless block {tx - d[0] * 2} {Y + 1} {tz - d[1] * 2} minecraft:{wool}_bed run function {NS}:bw/bed_gone {{t:{t},n:"{tn}",c:"{tcol}"}}')
-game += [f'execute as @a[tag=mg_bw,tag=mg_alive,scores={{mg_deaths=1..}}] run function {NS}:bw/died',
-         f'execute as @a[tag=mg_bw,tag=mg_alive,scores={{mg_rt=1..}}] run function {NS}:bw/respawn_tick',
+game += [f'execute as @a[tag=mg_bw,tag=mg_al_bw,scores={{mg_deaths=1..}}] run function {NS}:bw/died',
+         f'execute as @a[tag=mg_bw,tag=mg_al_bw,scores={{mg_rt=1..}}] run function {NS}:bw/respawn_tick',
          'scoreboard players set #tl mg 0',
-         *[f'execute if entity @a[tag=mg_bw,tag=mg_alive,scores={{mg_bwt={t}}}] run scoreboard players add #tl mg 1' for t in BWT],
+         *[f'execute if entity @a[tag=mg_bw,tag=mg_al_bw,scores={{mg_bwt={t}}}] run scoreboard players add #tl mg 1' for t in BWT],
          f'execute if score #tl mg matches ..1 run function {NS}:bw/end']
 fn('bw/game', game)
 fn('bw/bed_gone', ['$scoreboard players set #bed$(t) mg 0',
@@ -1613,21 +1653,26 @@ for t in BWT:
 died += ['scoreboard players set @s mg_rt 100', 'gamemode spectator @s',
          f'tellraw @s {msg({"text": "Du respawnst in 5 Sekunden.", "color": "gray"})}']
 fn('bw/died', died)
-fn('bw/final', ['tag @s remove mg_alive', 'gamemode spectator @s',
+fn('bw/final', ['tag @s remove mg_al_bw', 'gamemode spectator @s', f'tellraw @s {tc([{"text": "  "}, {"text": "[Zurück zur Lobby]", "color": "aqua", "click_event": {"action": "run_command", "command": "/trigger mg_aktion set 99"}}, {"text": " oder weiter zuschauen", "color": "gray"}])}',
                 f'tellraw @a[tag=mg_bw] {msg({"selector": "@s", "color": "white"}, {"text": " ist endgültig raus!", "color": "red", "bold": True})}'])
 rt = ['scoreboard players remove @s mg_rt 1', 'execute unless score @s mg_rt matches 0 run return 0', 'gamemode adventure @s']
 for t in BWT:
     tx, tz = tpos(t)
-    rt.append(f'execute if score @s mg_bwt matches {t} in minecraft:overworld run tp @s {tx}.5 {Y + 1} {tz}.5')
-rt += [f'function {NS}:bw/kit']
+    rt.append(f'execute if score @s mg_bwt matches {t} in minecraft:overworld run tp @s {c5(tx)} {Y + 1} {c5(tz)}')
+rt += [f'function {NS}:bw/kit', 'effect give @s minecraft:resistance 3 4 true', 'effect give @s minecraft:glowing 3 0 true']
 fn('bw/respawn_tick', rt)
+fn('bw/sudden', [*[f'{OW} setblock {tpos(t)[0] - BWT[t][4][0] * 2} {Y + 1} {tpos(t)[1] - BWT[t][4][1] * 2} minecraft:air' for t in BWT],
+                 f'title @a[tag=mg_bw] title {tc({"text": "SUDDEN DEATH", "color": "red", "bold": True})}',
+                 f'title @a[tag=mg_bw] subtitle {tc({"text": "Alle Betten sind weg – kein Respawn mehr", "color": "white"})}'])
 fn('bw/end', [
-    f'execute as @a[tag=mg_bw,tag=mg_alive] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt BedWars!", "color": "white"})}',
-    'scoreboard players add @a[tag=mg_bw,tag=mg_alive] mg_wins 1', 'scoreboard players add @a[tag=mg_bw,tag=mg_alive] mg_coins 10',
+    'scoreboard players set #wt mg 0', 'execute as @a[tag=mg_al_bw,limit=1] run scoreboard players operation #wt mg = @s mg_bwt',
+    'execute if score #tl mg matches 1 as @a[tag=mg_bw,tag=!mg_al_bw] if score @s mg_bwt = #wt mg run tag @s add mg_al_bw',
+    f'execute as @a[tag=mg_bw,tag=mg_al_bw] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt BedWars!", "color": "white"})}',
+    'scoreboard players add @a[tag=mg_bw,tag=mg_al_bw] mg_wins 1', 'scoreboard players add @a[tag=mg_bw,tag=mg_al_bw] mg_coins 10',
     f'title @a[tag=mg_bw] title {tc({"text": "Spiel vorbei!", "color": "red", "bold": True})}',
-    'execute as @a[tag=mg_bw,tag=mg_alive] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;16711680],has_twinkle:true}]}}}}',
+    'execute as @a[tag=mg_bw,tag=mg_al_bw] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;16711680],has_twinkle:true}]}}}}',
     'scoreboard players set #bw mg 3', f'schedule function {NS}:bw/finish 100t'])
-fn('bw/finish', [f'execute as @a[tag=mg_bw] run function {NS}:hub/enter', 'tag @a remove mg_bw', 'tag @a remove mg_alive', 'scoreboard players set #bw mg 0',
+fn('bw/finish', [f'execute as @a[tag=mg_bw] run function {NS}:hub/enter', 'tag @a remove mg_bw', 'scoreboard players set #bw mg 0',
                  *[f'team leave @a[team=mg_bw{t}]' for t in BWT],
                  f'{OW} kill @e[type=minecraft:item,x={BW[0] - 56},dx=112,y={Y - 40},dy=80,z={BW[2] - 56},dz=112]'])
 
@@ -1639,6 +1684,8 @@ ENTER_LINES = []    # extra cleanup when a player returns to the hub
 EXTRA_TICK = []
 EXTRA_LOAD = ['scoreboard players set #2 mg 2', 'scoreboard players set #3 mg 3', 'scoreboard players set #4 mg 4', 'scoreboard players set #5 mg 5', 'scoreboard players set #100 mg 100']
 INFO = []           # (title, colour, text) for hub/info
+PARTY_KEYS = []
+WATCHDOG = []       # extra lines for hub/watchdog (run every 10 ticks): send players with stale game tags back to the hub
 def register_game(key, name, color, prof, trig, action, sub, menu, guard=None):
     GAMES.append(dict(key=key, name=name, color=color, prof=prof, trig=trig, action=action, sub=sub, menu=menu, guard=guard))
 SF_IDX = MODES.index('stickbett') + 1
@@ -1655,6 +1702,7 @@ def party(key, name, color, center, *, trig, prof, sub, menu, info, minp=2, maxp
     The fragment supplies: build (map), setup (after players are tagged, before state 2; run as server),
     game (every tick while running), cleanup (at finish).  Default win rule: last player alive (unless custom_end)."""
     cx, cy, cz = center
+    PARTY_KEYS.append(key)
     T, AL, Q = f'mg_{key}', f'mg_al_{key}', f'mg_q_{key}'
     spect = spect or (cx, cy + 12, cz)
     FL = f'{cx - size} {cz - size} {cx + size} {cz + size}'
@@ -1813,9 +1861,9 @@ for ang in (45, 135, 225, 315):
     L += [f'fill {x - 1} {hy} {z - 1} {x + 1} {hy} {z + 1} minecraft:light_blue_concrete', f'setblock {x} {hy} {z} minecraft:cyan_glazed_terracotta']
 hub2 += [f'{OW} {c}' for c in L]
 for x, z in PADS:
-    hub2.append(holo('mg_padh', f'{x}.5', hy + 1.6, f'{z}.5', {'text': '⇧ Sprungfeld', 'color': 'aqua'}, 0.8))
-hub2.append(holo('mg_pkh', f'{PK[0][0]}.5', hy + 1.8, f'{PK[0][2]}.5', [{'text': 'SKY-PARKOUR\n', 'color': 'aqua', 'bold': True}, {'text': 'hoch auf den Halo-Ring', 'color': 'gray', 'bold': False}], 0.9))
-hub2.append(holo('mg_haloh', f'{hx}.5', hy + 20.5, f'{hz - 12}.5', {'text': 'Halo-Ring', 'color': 'aqua', 'bold': True}, 1.0))
+    hub2.append(holo('mg_padh', f'{c5(x)}', hy + 1.6, f'{c5(z)}', {'text': '⇧ Sprungfeld', 'color': 'aqua'}, 0.8))
+hub2.append(holo('mg_pkh', f'{c5(PK[0][0])}', hy + 1.8, f'{c5(PK[0][2])}', [{'text': 'SKY-PARKOUR\n', 'color': 'aqua', 'bold': True}, {'text': 'hoch auf den Halo-Ring', 'color': 'gray', 'bold': False}], 0.9))
+hub2.append(holo('mg_haloh', f'{c5(hx)}', hy + 20.5, f'{c5(hz - 12)}', {'text': 'Halo-Ring', 'color': 'aqua', 'bold': True}, 1.0))
 npc_tick = []
 NPC_R = 26
 for key, name, color, prof, ang, action, sub in NPCS:
@@ -1828,25 +1876,25 @@ for key, name, color, prof, ang, action, sub in NPCS:
         pod += [f'fill {nx + ox} {hy + 1} {nz + oz} {nx + ox} {hy + 4} {nz + oz} minecraft:quartz_pillar']
     pod += disk(nx, hy + 5, nz, 2, f'{gl}_stained_glass') + [f'setblock {nx} {hy + 5} {nz} minecraft:sea_lantern', f'setblock {nx} {hy + 6} {nz} minecraft:end_rod']
     hub2 += [f'{OW} {c}' for c in pod]
-    hub2 += [f'{OW} summon minecraft:villager {nx}.5 {hy + 1} {nz}.5 {{Tags:["mg_npc"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
+    hub2 += [f'{OW} summon minecraft:villager {c5(nx)} {hy + 1} {c5(nz)} {{Tags:["mg_npc"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
              f'VillagerData:{{profession:"minecraft:{prof}",level:5,type:"minecraft:plains"}},Offers:{{Recipes:[]}}}}',
-             f'execute in minecraft:overworld positioned {nx}.5 {hy + 1} {nz}.5 run tp @e[type=minecraft:villager,tag=mg_npc,distance=..0.6,limit=1] ~ ~ ~ facing {hx}.5 {hy + 2} {hz}.5',
-             f'{OW} summon minecraft:interaction {nx}.5 {hy + 1} {nz}.5 {{Tags:["mg_npc","mg_npc_{key}"],width:1.4f,height:2.3f,response:1b}}',
-             holo('mg_npch', f'{nx}.5', hy + 3.0, f'{nz}.5', [{'text': name + '\n', 'color': color, 'bold': True}, {'text': sub + '\n', 'color': 'gray', 'bold': False}, {'text': '▶ Rechtsklick', 'color': 'yellow', 'bold': False}], 1.0)]
+             f'execute in minecraft:overworld positioned {c5(nx)} {hy + 1} {c5(nz)} run tp @e[type=minecraft:villager,tag=mg_npc,distance=..0.6,limit=1] ~ ~ ~ facing {c5(hx)} {hy + 2} {c5(hz)}',
+             f'{OW} summon minecraft:interaction {c5(nx)} {hy + 1} {c5(nz)} {{Tags:["mg_npc","mg_npc_{key}"],width:1.4f,height:2.3f,response:1b}}',
+             holo('mg_npch', f'{c5(nx)}', hy + 3.0, f'{c5(nz)}', [{'text': name + '\n', 'color': color, 'bold': True}, {'text': sub + '\n', 'color': 'gray', 'bold': False}, {'text': '▶ Rechtsklick', 'color': 'yellow', 'bold': False}], 1.0)]
     npc_tick.append(f'execute as @e[type=minecraft:interaction,tag=mg_npc_{key}] if data entity @s interaction run function {NS}:npc/hit_{key}')
     fn(f'npc/hit_{key}', [f'execute on target run function {NS}:npc/{key}', 'data remove entity @s interaction'])
     fn(f'npc/{key}', ['execute unless entity @s[tag=mg_hub] run return 0', action,
                       'execute at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.5'])
 fn('npc/tick', npc_tick)
-hub2 += [holo('mg_title', f'{hx}.5', hy + 28, f'{hz}.5', {'text': 'MINIGAMES', 'color': 'aqua', 'bold': True}, 7.0),
-         holo('mg_sub', f'{hx}.5', hy + 26.6, f'{hz}.5', {'text': 'Ole · Mats · Sammy · Qelloxx', 'color': 'white'}, 2.0),
-         holo('mg_help', f'{SPAWN[0]}.5', hy + 2.4, f'{SPAWN[2] - 4}.5', [{'text': 'Willkommen!\n', 'color': 'aqua', 'bold': True}, {'text': 'Klick einen NPC in den Kapseln an\noder benutze den Kompass', 'color': 'white', 'bold': False}], 1.0),
+hub2 += [holo('mg_title', f'{c5(hx)}', hy + 28, f'{c5(hz)}', {'text': 'MINIGAMES', 'color': 'aqua', 'bold': True}, 7.0),
+         holo('mg_sub', f'{c5(hx)}', hy + 26.6, f'{c5(hz)}', {'text': 'Ole · Mats · Sammy · Qelloxx', 'color': 'white'}, 2.0),
+         holo('mg_help', f'{c5(SPAWN[0])}', hy + 2.4, f'{c5(SPAWN[2] - 4)}', [{'text': 'Willkommen!\n', 'color': 'aqua', 'bold': True}, {'text': 'Klick einen NPC in den Kapseln an\noder benutze den Kompass', 'color': 'white', 'bold': False}], 1.0),
          f'function {NS}:hub/top', f'scoreboard players set #big mg {BIG_VERSION}']
 # hub effects: jump pads, sky-parkour reward, core particles (called from tick for hub players / every 10 ticks)
 EXTRA_KEEP = [f'execute at @s if block ~ ~-1 ~ minecraft:cyan_glazed_terracotta run function {NS}:hub/pad',
               f'execute if entity @s[tag=!mg_halo,y={hy + 18},dy=3] at @s if block ~ ~-1 ~ minecraft:light_blue_stained_glass run function {NS}:hub/halo']
-fn('hub/fx', [f'{OW} particle minecraft:end_rod {hx}.5 {hy + 6} {hz}.5 1.5 4 1.5 0.01 6 force',
-              f'{OW} particle minecraft:electric_spark {hx}.5 {hy + 18.5} {hz}.5 9 0.2 9 0 12 force'])
+fn('hub/fx', [f'{OW} particle minecraft:end_rod {c5(hx)} {hy + 6} {c5(hz)} 1.5 4 1.5 0.01 6 force',
+              f'{OW} particle minecraft:electric_spark {c5(hx)} {hy + 18.5} {c5(hz)} 9 0.2 9 0 12 force'])
 fn('hub/pad', ['effect give @s minecraft:levitation 1 14 true', 'effect give @s minecraft:slow_falling 7 0 true',
                'playsound minecraft:entity.breeze.wind_burst master @s ~ ~ ~ 0.8 1.2', 'particle minecraft:cloud ~ ~ ~ 0.3 0.1 0.3 0.05 15'])
 fn('hub/halo', ['tag @s add mg_halo', 'scoreboard players add @s mg_coins 5',
@@ -1856,16 +1904,16 @@ fn('hub/halo', ['tag @s add mg_halo', 'scoreboard players add @s mg_coins 5',
 TOP = (SPAWN[0] - 9, SPAWN[2] - 3)
 top = ['tag @a remove mg_top', *[f'tag @a remove mg_top_{i}' for i in range(1, 6)],
        f'kill @e[type=minecraft:text_display,tag=mg_toph]',
-       holo('mg_toph', f'{TOP[0]}.5', hy + 4.2, f'{TOP[1]}.5', {'text': 'TOP SIEGE (online)', 'color': 'gold', 'bold': True}, 1.2)]
+       holo('mg_toph', f'{c5(TOP[0])}', hy + 4.2, f'{c5(TOP[1])}', {'text': 'TOP SIEGE (online)', 'color': 'gold', 'bold': True}, 1.2)]
 for i in range(1, 6):
     top += ['scoreboard players set #max mg -1',
             'execute as @a[tag=!mg_top] run scoreboard players operation #max mg > @s mg_wins',
             f'execute if score #max mg matches 1.. as @a[tag=!mg_top] if score @s mg_wins = #max mg run function {NS}:hub/top_pick {{i:{i}}}',
-            f'execute if entity @a[tag=mg_top_{i}] run ' + holo('mg_toph', f'{TOP[0]}.5', round(hy + 4.0 - 0.45 * i, 2), f'{TOP[1]}.5',
+            f'execute if entity @a[tag=mg_top_{i}] run ' + holo('mg_toph', f'{c5(TOP[0])}', round(hy + 4.0 - 0.45 * i, 2), f'{c5(TOP[1])}',
                 [{'text': f'{i}. ', 'color': ['gold', 'gray', 'red', 'white', 'white'][i - 1], 'bold': True},
                  {'selector': f'@a[tag=mg_top_{i}]', 'color': 'white', 'bold': False}, {'text': '  ', 'bold': False},
                  {'score': {'name': f'@a[tag=mg_top_{i},limit=1]', 'objective': 'mg_wins'}, 'color': 'yellow', 'bold': False}], 1.0)]
-top.append('execute unless entity @a[tag=mg_top_1] run ' + holo('mg_toph', f'{TOP[0]}.5', hy + 3.5, f'{TOP[1]}.5', {'text': 'Noch keine Siege', 'color': 'gray'}, 1.0))
+top.append('execute unless entity @a[tag=mg_top_1] run ' + holo('mg_toph', f'{c5(TOP[0])}', hy + 3.5, f'{c5(TOP[1])}', {'text': 'Noch keine Siege', 'color': 'gray'}, 1.0))
 fn('hub/top', top)
 fn('hub/top_pick', ['$execute if entity @a[tag=mg_top_$(i)] run return 0', '$tag @s add mg_top_$(i)', 'tag @s add mg_top'])
 L2 = disk(TOP[0], hy, TOP[1], 2, 'polished_deepslate') + [f'setblock {TOP[0]} {hy} {TOP[1]} minecraft:gold_block']
@@ -1924,11 +1972,11 @@ EXTRA_KEEP_COS = [f'execute if score @s mg_hat matches 1.. unless items entity @
 SHOP = (SPAWN[0] + 9, SPAWN[2] - 3)
 hub2[-2:-2] = [f'{OW} {c}' for c in disk(SHOP[0], hy, SHOP[1], 2, 'polished_deepslate') + [f'setblock {SHOP[0]} {hy} {SHOP[1]} minecraft:cyan_stained_glass',
                f'setblock {SHOP[0]} {hy - 1} {SHOP[1]} minecraft:sea_lantern']] + [
-    f'{OW} summon minecraft:villager {SHOP[0]}.5 {hy + 1} {SHOP[1]}.5 {{Tags:["mg_npc"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
+    f'{OW} summon minecraft:villager {c5(SHOP[0])} {hy + 1} {c5(SHOP[1])} {{Tags:["mg_npc"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
     f'VillagerData:{{profession:"minecraft:cleric",level:5,type:"minecraft:plains"}},Offers:{{Recipes:[]}}}}',
-    f'execute in minecraft:overworld positioned {SHOP[0]}.5 {hy + 1} {SHOP[1]}.5 run tp @e[type=minecraft:villager,tag=mg_npc,distance=..0.6,limit=1] ~ ~ ~ facing {SPAWN[0]}.5 {hy + 2} {SPAWN[2]}.5',
-    f'{OW} summon minecraft:interaction {SHOP[0]}.5 {hy + 1} {SHOP[1]}.5 {{Tags:["mg_npc","mg_npc_cos"],width:1.4f,height:2.3f,response:1b}}',
-    holo('mg_npch', f'{SHOP[0]}.5', hy + 3.0, f'{SHOP[1]}.5', [{'text': 'KOSMETIK & STATS\n', 'color': 'aqua', 'bold': True}, {'text': 'Spuren & Hüte für Münzen\n', 'color': 'gray', 'bold': False}, {'text': '▶ Rechtsklick', 'color': 'yellow', 'bold': False}], 1.0)]
+    f'execute in minecraft:overworld positioned {c5(SHOP[0])} {hy + 1} {c5(SHOP[1])} run tp @e[type=minecraft:villager,tag=mg_npc,distance=..0.6,limit=1] ~ ~ ~ facing {c5(SPAWN[0])} {hy + 2} {c5(SPAWN[2])}',
+    f'{OW} summon minecraft:interaction {c5(SHOP[0])} {hy + 1} {c5(SHOP[1])} {{Tags:["mg_npc","mg_npc_cos"],width:1.4f,height:2.3f,response:1b}}',
+    holo('mg_npch', f'{c5(SHOP[0])}', hy + 3.0, f'{c5(SHOP[1])}', [{'text': 'KOSMETIK & STATS\n', 'color': 'aqua', 'bold': True}, {'text': 'Spuren & Hüte für Münzen\n', 'color': 'gray', 'bold': False}, {'text': '▶ Rechtsklick', 'color': 'yellow', 'bold': False}], 1.0)]
 fn('npc/hit_cos', [f'execute on target run function {NS}:npc/cos', 'data remove entity @s interaction'])
 fn('npc/cos', ['execute unless entity @s[tag=mg_hub] run return 0', f'function {NS}:cos/menu', 'execute at @s run playsound minecraft:block.note_block.chime master @s ~ ~ ~ 1 1.5'])
 npc_tick.append(f'execute as @e[type=minecraft:interaction,tag=mg_npc_cos] if data entity @s interaction run function {NS}:npc/hit_cos')
@@ -1958,6 +2006,16 @@ _ak += [f'execute if score @s mg_aktion matches 98 if entity @s[tag=mg_hub] run 
         'scoreboard players set @s mg_aktion 0']
 fn('hub/aktion', _ak)
 fn('hub/quit', [f'tellraw @a {msg({"selector": "@s", "color": "white"}, {"text": " hat das Spiel verlassen.", "color": "gray"})}', f'function {NS}:hub/enter'])
+fn('q/inq', [*[f'execute if entity @s[tag=mg_q_{k}] run return 1' for k in MODES], *[f'execute if entity @s[tag={t}] run return 1' for t in LEAVE_TAGS], 'return 0'])
+fn('hub/watchdog', [
+    f'execute if score #sw mg matches 0 as @a[tag=mg_sw] run function {NS}:hub/enter',
+    f'execute if score #bw mg matches 0 as @a[tag=mg_bw] run function {NS}:hub/enter',
+    f'execute if score #rush mg matches 0 as @a[tag=mg_rush] run function {NS}:hub/enter',
+    *[f'execute if score #{k} mg matches 0 as @a[tag=mg_duel_{k}] run function {NS}:hub/watchdog_duel' for k in MODES],
+    *[f'execute if score #{k} mg matches 0 as @a[tag=mg_{k}] run function {NS}:hub/enter' for k in PARTY_KEYS],
+    *WATCHDOG])
+fn('hub/watchdog_duel', [f'function {NS}:q/leave_all', f'function {NS}:hub/enter'])
+files[f'data/{NS}/function/hub/sweep.mcfunction'] += f'function {NS}:hub/watchdog\n'
 files[f'data/{NS}/function/tick.mcfunction'] += ''.join(l + '\n' for l in EXTRA_TICK) + (
     f'execute if score #itick mg matches 5 run function {NS}:hub/fx\n'
     f'function {NS}:cos/tick\n'
