@@ -12,7 +12,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'minigames')
 NS = 'mg'
-BUILD_VERSION = 4
+BUILD_VERSION = 5
 files = {}
 
 
@@ -129,7 +129,7 @@ LANES = 6
 MODULES = 24
 NCP = MODULES                     # checkpoint n = island after module n (24 = finish)
 def map_x(mi):
-    return 10000 + mi * 1000
+    return 20000 + mi * 1000          # fresh, never-built area: no clearing needed
 def lane_z(L):
     return 1000 * L
 
@@ -352,6 +352,7 @@ for t, m in zip(THEMES, MAPGEN):
 
 # ------------------------------------------------------------------ load
 load = [
+    f'{OW} forceload remove all',               # drop leftovers of interrupted lane builds
     forceload(HUB[0], HUB[2], 32),
     f'{OW} forceload remove 984 -96 1176 96',   # v1 left the old single parkour permanently loaded
     forceload(ARENA[0], ARENA[2], 32),
@@ -568,9 +569,7 @@ YLO, YHI = -25, 40
 def lane_box(mi, L):
     return (map_x(mi) - 12, lane_z(L) - 48, map_x(mi) + MAXLEN + 12, lane_z(L) + 48)
 for mi, (t, m) in enumerate(zip(THEMES, MAPGEN)):
-    b = []
-    for sx in range(-10, MAXLEN + 1, 6):
-        b.append(f'fill ~{sx} ~{YLO} ~-40 ~{sx + 5} ~{YHI} ~40 minecraft:air')
+    b = ['kill @e[type=minecraft:text_display,tag=mg_lh,distance=..700]']
     for (bx, by, bz), st in sorted(m['blocks'].items()):
         b.append(f'setblock ~{bx} ~{by} ~{bz} minecraft:{st}')
     for (hx_, hy_, hz_, text, sc) in m['holos']:
@@ -608,7 +607,7 @@ for j, (mi, L) in enumerate(JOBS):
         f'execute in minecraft:overworld positioned {map_x(mi)} {Y} {lane_z(L)} run function {NS}:build/lane_m{mi + 1}',
         *[f'{OW} forceload remove {a} {z1} {b} {z2}' for a, b in parts],
         f'scoreboard players set #lanes_done mg {j + 1}',
-        f'schedule function {NS}:build/lane_next 2t'])
+        f'schedule function {NS}:build/lane_next 60t'])
 nxt.append(f'scoreboard players set #lanes mg {BUILD_VERSION}')
 nxt.append(f'tellraw @a {msg({"text": "Alle Parkour-Strecken sind fertig gebaut.", "color": "green"})}')
 fn('build/lane_next', nxt)
