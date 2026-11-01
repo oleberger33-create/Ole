@@ -508,7 +508,7 @@ load = [
     'gamerule respawn_radius 0',
     'gamerule natural_health_regeneration true',
     'time set 6000', 'weather clear',
-    f'setworldspawn {HUB[0]} {HUB[1] + 1} {HUB[2]}',
+    f'setworldspawn {HUB[0]} {HUB[1] + 1} {HUB[2] + 9}',
     'difficulty normal',
     f'bossbar add {NS}:rush {tc({"text": "Parkour-Rush"})}',
     f'bossbar set {NS}:rush color green',
@@ -605,7 +605,9 @@ def citem(key, model, name, lore, glint=False):
 HOTBAR = [
     (0, 'rush', 'feather', {'text': '▶ PARKOUR-RUSH', 'color': 'green', 'bold': True},
      ['Startet für alle in der Lobby', '24 Inseln, Truhen-Loot, dann Arena-Kampf'], True),
-    (2, 'onevone', 'iron_sword', {'text': '⚔ 1v1-Modi (13)', 'color': 'red', 'bold': True},
+    (1, 'games', 'compass', {'text': '✦ Spiele-Menü', 'color': 'gold', 'bold': True},
+     ['BedWars, SkyWars, Stick-Fight Bett,', 'Parkour-Rush und alle 1v1-Modi', 'Rechtsklick: Spiel auswählen'], True),
+    (2, 'onevone', 'iron_sword', {'text': '⚔ 1v1-Modi (14)', 'color': 'red', 'bold': True},
      ['Sumo, Spleef, Duell, Windstoß, Knockback, Ein Pfeil,', 'Streitkolben, Brücke, Lava, Fallender Boden,', 'Boxen, Pferderennen, Parkour-Duell', 'Rechtsklick: Modus auswählen'], False),
     (4, 'leave', 'barrier', {'text': 'Warteschlange verlassen', 'color': 'gray', 'bold': True}, ['Rechtsklick: aus allen Warteschlangen raus'], False),
     (8, 'info', 'book', {'text': 'Info', 'color': 'white', 'bold': True}, ['Rechtsklick: Spielregeln'], False),
@@ -616,25 +618,30 @@ fn('hub/click', [
     'scoreboard players set @s mg_click 0',
     'execute unless entity @s[tag=mg_hub] run return 0',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"rush"}}] run return run function {NS}:rush/request',
+    f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"games"}}] run return run function {NS}:hub/games',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"onevone"}}] run return run function {NS}:q/menu',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"leave"}}] run return run function {NS}:q/leave_cmd',
     f'execute if items entity @s weapon.mainhand *[minecraft:custom_data~{{mg:"info"}}] run return run function {NS}:hub/info',
 ])
 fn('hub/info', [f'tellraw @s {msg({"text": "Spielregeln", "color": "gold", "bold": True})}',
                 f'tellraw @s {tc([{"text": " Parkour-Rush: ", "color": "green", "bold": True}, {"text": "Jeder springt auf seiner eigenen Strecke: 24 schwebende Inseln mit Sprung-Modulen auf einer von 5 Maps. Auf jeder Insel wartet eine Truhe – je weiter du kommst, desto besser der Loot. Rechts siehst du, wie weit die anderen sind. Nach 15 Minuten (oder 30 s nach dem Ersten im Ziel) geht es in die Arena – wer zuletzt steht, gewinnt.", "color": "white"}])}',
-                f'tellraw @s {tc([{"text": " 1v1 (Item 3): ", "color": "red", "bold": True}, {"text": "Sumo, Spleef, Duell, Windstoß, Knockback-Stock, Ein Pfeil, Streitkolben, Brücken-Duell, Steigende Lava, Fallender Boden, Boxen, Pferderennen, Parkour-Duell. Modus anklicken = Warteschlange, sobald ein Gegner da ist geht es los.", "color": "white"}])}'])
+                f'tellraw @s {tc([{"text": " 1v1 (Item 3): ", "color": "red", "bold": True}, {"text": "Sumo, Spleef, Duell, Windstoß, Knockback-Stock, Ein Pfeil, Streitkolben, Brücken-Duell, Steigende Lava, Fallender Boden, Boxen, Pferderennen, Parkour-Duell. Modus anklicken = Warteschlange, sobald ein Gegner da ist geht es los.", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " BedWars: ", "color": "red", "bold": True}, {"text": "Bis zu 4 Teams. Eisen und Gold kommen am Team-Generator, Diamanten auf den Ecken-Inseln, Smaragde in der Mitte. Beim Dorfbewohner kaufst du Wolle, Waffen, Rüstung und Spitzhacken. Solange dein Bett steht, respawnst du – zerstör die Betten der anderen!", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " SkyWars: ", "color": "aqua", "bold": True}, {"text": "Jeder startet in einem Glaskäfig auf seiner Insel. Truhen plündern, Brücken bauen, die Mitte hat den besten Loot. Wer zuletzt lebt, gewinnt.", "color": "white"}])}',
+                f'tellraw @s {tc([{"text": " Stick-Fight Bett: ", "color": "yellow", "bold": True}, {"text": "1v1 mit Rückstoß-Stock und Sandstein. Bau zum Gegner, bau sein Bett ab – wer zuerst 5 Betten holt, gewinnt.", "color": "white"}])}'])
 
 # ------------------------------------------------------------------ hub / player state
-fn('hub/tp', [f'{OW} tp @s {HUB[0]} {HUB[1] + 1} {HUB[2]} 180 0'])
+fn('hub/tp', [f'{OW} tp @s {HUB[0]}.5 {HUB[1] + 1} {HUB[2] + 9}.5 180 0'])
 fn('hub/enter', [
     'tag @s remove mg_rush', 'tag @s remove mg_fight', 'tag @s remove mg_duel', 'tag @s remove mg_p1', 'tag @s remove mg_p2',
+    'tag @s remove mg_sw', 'tag @s remove mg_bw', 'tag @s remove mg_alive', 'team leave @s', 'scoreboard players set @s mg_rt 0',
     'tag @s add mg_hub',
     'ride @s dismount', 'attribute @s minecraft:max_health base set 20',
     'clear @s', 'effect clear @s', 'experience set @s 0 levels', 'experience set @s 0 points',
     'effect give @s minecraft:instant_health 1 10 true', 'effect give @s minecraft:saturation 1 20 true',
     'gamemode adventure @s',
     f'function {NS}:hub/tp',
-    f'{OW} spawnpoint @s {HUB[0]} {HUB[1] + 1} {HUB[2]}',
+    f'{OW} spawnpoint @s {HUB[0]} {HUB[1] + 1} {HUB[2] + 9}',
     f'function {NS}:hub/hotbar',
 ])
 fn('hub/keep', [
@@ -656,9 +663,10 @@ fn('hub/sweep', [
 ])
 side = ['scoreboard players reset * mg_side']
 rows = [('a1', {'text': ' '}),
-        ('a2', [{'text': 'Rechtsklick auf die Items', 'color': 'gray'}]),
+        ('a2', [{'text': 'NPC anklicken oder Items', 'color': 'gray'}]),
         ('a3', [{'text': '1 ', 'color': 'dark_gray'}, {'text': 'Parkour-Rush', 'color': 'green'}]),
-        ('a4', [{'text': '3 ', 'color': 'dark_gray'}, {'text': '1v1-Modi (13)', 'color': 'red'}]),
+        ('a3b', [{'text': '2 ', 'color': 'dark_gray'}, {'text': 'Spiele-Menü', 'color': 'gold'}]),
+        ('a4', [{'text': '3 ', 'color': 'dark_gray'}, {'text': '1v1-Modi (14)', 'color': 'red'}]),
         ('a5', [{'text': '5 ', 'color': 'dark_gray'}, {'text': 'Warteschlange raus', 'color': 'gray'}]),
         ('a6', [{'text': '9 ', 'color': 'dark_gray'}, {'text': 'Spielregeln', 'color': 'white'}]),
         ('a7', {'text': '  '}),
@@ -903,7 +911,21 @@ fn('rush/stop', [
 
 # ------------------------------------------------------------------ 1v1: 13 modes, one engine
 # common flow: queue -> round (kit, teleport, 3 s freeze) -> go (arena reset) -> rules -> point/lose -> win
-ARENA_VERSION = 1
+ARENA_VERSION = 2
+# ================================================================== BIG MODES: new spawn with NPCs, SkyWars, BedWars, Stick-Fight Bett
+BIG_VERSION = 1
+PLACE = ['white_wool', 'red_wool', 'blue_wool', 'lime_wool', 'yellow_wool', 'end_stone', 'oak_planks', 'sandstone', 'cobblestone',
+         'stone_bricks', 'grass_block', 'dirt', 'stone', 'smooth_stone', 'quartz_block', 'polished_andesite', 'red_concrete',
+         'blue_concrete', 'lime_concrete', 'yellow_concrete', 'oak_log', 'andesite', 'glass', 'mossy_cobblestone', 'cut_sandstone']
+PLACE_C = '{blocks:[' + ','.join(f'"minecraft:{b}"' for b in PLACE) + ']}'
+BREAKABLE = ['white_wool', 'red_wool', 'blue_wool', 'lime_wool', 'yellow_wool', 'end_stone', 'oak_planks', 'sandstone', 'cobblestone',
+             'red_bed', 'blue_bed', 'lime_bed', 'yellow_bed']
+BREAK_C = '{blocks:[' + ','.join(f'"minecraft:{b}"' for b in BREAKABLE) + ']}'
+def placeable(item, count=1):
+    return f'minecraft:{item}[minecraft:can_place_on={PLACE_C}] {count}'
+def breaker(item):
+    return f'minecraft:{item}[minecraft:can_break={BREAK_C},minecraft:unbreakable={{}}]'
+
 def C(i):
     return (6000 + i * 1000, Y, 0)
 D = {}
@@ -953,6 +975,13 @@ mode('pferd', name='Pferderennen', color='gold', desc='2 Runden auf dem Pferd �
      end='race', need=1, kit=[])
 mode('parkour', name='Parkour-Duell', color='light_purple', desc='Gleiche Strecke nebeneinander – wer zuerst oben ist', center=C(9), spawns=[(-30, 1, -6, -90), (-30, 1, 6, -90)],
      end='pkrace', fall=Y - 10, need=1, kit=[])
+
+SF = C(10)
+mode('stickbett', name='Stick-Fight Bett', color='yellow', desc='Rückstoß-Stock, Sandstein bauen, gegnerisches Bett abbauen. Zuerst 5',
+     center=SF, spawns=[(-11, 1, 0, -90), (11, 1, 0, 90)], end='bed', fall=Y - 8, need=5,
+     kit=['give @s minecraft:stick[minecraft:enchantments={"minecraft:knockback":1},minecraft:enchantment_glint_override=true]',
+          'give @s ' + breaker('wooden_pickaxe'),
+          'give @s ' + placeable('sandstone', 64), 'give @s ' + placeable('sandstone', 64), 'give @s ' + placeable('sandstone', 64)])
 MODES = list(D.keys())
 NEW_MODES = MODES[3:]
 
@@ -1047,6 +1076,13 @@ def arena_build(k):
         S(f'setblock {cx} {cy + 1} {cz} minecraft:oak_sapling')
     elif k == 'parkour':
         out += [f'execute in minecraft:overworld positioned {cx - 30} {cy} {cz + side} run function {NS}:build/pkduel_course' for side in (-6, 6)]
+    elif k == 'stickbett':
+        for side, col in ((-1, 'red'), (1, 'blue')):
+            S(f'fill {cx + side * 10} {cy} {cz - 2} {cx + side * 16} {cy} {cz + 2} minecraft:{col}_concrete')
+            S(f'fill {cx + side * 10} {cy - 1} {cz - 2} {cx + side * 16} {cy - 1} {cz + 2} minecraft:smooth_stone')
+            S(f'setblock {cx + side * 16} {cy + 1} {cz + 2} minecraft:lantern'); S(f'setblock {cx + side * 16} {cy + 1} {cz - 2} minecraft:lantern')
+        S(f'fill {cx - 1} {cy} {cz - 1} {cx + 1} {cy} {cz + 1} minecraft:cut_sandstone')
+        S(f'fill {cx - 17} {cy + 8} {cz - 6} {cx + 17} {cy + 8} {cz + 6} minecraft:barrier')
     for i, (sx, sy, sz, yaw) in enumerate(D[k]['spawns']):
         pass
     out.append(holo('mg_d', cx, cy + 9, cz, [{'text': D[k]['name'].upper() + '\n', 'color': D[k]['color'], 'bold': True}, {'text': D[k]['desc'], 'color': 'gray', 'bold': False}], 2.0))
@@ -1143,8 +1179,8 @@ for k in MODES:
         f'execute as {sel} run function {NS}:{k}/kit',
         f'{OW} tp {P1} {cx + sp[0][0]} {cy + sp[0][1]} {cz + sp[0][2]} {sp[0][3]} 0',
         f'{OW} tp {P2} {cx + sp[1][0]} {cy + sp[1][1]} {cz + sp[1][2]} {sp[1][3]} 0',
-        f'execute as {P1} run {OW} spawnpoint @s {cx + sp[0][0]} {cy + sp[0][1]} {cz + sp[0][2]}' if m['end'] in ('kills', 'bridge') else f'execute as {sel} run {OW} spawnpoint @s {HUB[0]} {HUB[1] + 1} {HUB[2]}',
-        *( [f'execute as {P2} run {OW} spawnpoint @s {cx + sp[1][0]} {cy + sp[1][1]} {cz + sp[1][2]}'] if m['end'] in ('kills', 'bridge') else [] ),
+        f'execute as {P1} run {OW} spawnpoint @s {cx + sp[0][0]} {cy + sp[0][1]} {cz + sp[0][2]}' if m['end'] in ('kills', 'bridge', 'bed') else f'execute as {sel} run {OW} spawnpoint @s {HUB[0]} {HUB[1] + 1} {HUB[2]}',
+        *( [f'execute as {P2} run {OW} spawnpoint @s {cx + sp[1][0]} {cy + sp[1][1]} {cz + sp[1][2]}'] if m['end'] in ('kills', 'bridge', 'bed') else [] ),
         f'kill @e[type=minecraft:horse,tag=mg_horse_{k}]',
         f'scoreboard players set #{k}_cd mg 60', f'scoreboard players set #{k} mg 1',
         f'title {sel} times 0 30 10',
@@ -1168,6 +1204,10 @@ for k in MODES:
     if k == 'bruecke':
         go += [f'{OW} fill {cx - 11} {cy - 6} {cz - 12} {cx + 11} {cy + 12} {cz + 12} minecraft:air',
                f'{OW} fill {cx - 1} {cy} {cz - 1} {cx + 1} {cy} {cz + 1} minecraft:white_concrete']
+    if k == 'stickbett':
+        go += [f'{OW} fill {cx - 17} {cy - 6} {cz - 6} {cx + 17} {cy + 7} {cz + 6} minecraft:air replace minecraft:sandstone',
+               f'{OW} setblock {cx - 14} {cy + 1} {cz} minecraft:red_bed[facing=west,part=foot]', f'{OW} setblock {cx - 15} {cy + 1} {cz} minecraft:red_bed[facing=west,part=head]',
+               f'{OW} setblock {cx + 14} {cy + 1} {cz} minecraft:blue_bed[facing=east,part=foot]', f'{OW} setblock {cx + 15} {cy + 1} {cz} minecraft:blue_bed[facing=east,part=head]']
     if k == 'pferd':
         for i, (P, tg) in enumerate(((P1, 'mg_h1'), (P2, 'mg_h2'))):
             hx, hy, hz, yaw = sp[i]
@@ -1200,6 +1240,11 @@ for k in MODES:
                  f'execute as {sel} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run function {NS}:{k}/respawn',
                  f'execute as {P1} if entity @s[x={cx + 15 + 2 - 1},dx=2,y={cy - 4},dy=4,z={cz - 1},dz=2] run function {NS}:{k}/point',
                  f'execute as {P2} if entity @s[x={cx - 15 - 2 - 1},dx=2,y={cy - 4},dy=4,z={cz - 1},dz=2] run function {NS}:{k}/point']
+    elif e == 'bed':
+        tick += [f'execute as {SX("scores={mg_deaths=1..}")} run function {NS}:{k}/respawn',
+                 f'execute as {sel} at @s if entity @s[y=-64,dy={m["fall"] + 64}] run function {NS}:{k}/respawn',
+                 f'execute in minecraft:overworld unless block {cx - 14} {cy + 1} {cz} minecraft:red_bed as {P2} run function {NS}:{k}/point',
+                 f'execute in minecraft:overworld unless block {cx + 14} {cy + 1} {cz} minecraft:blue_bed as {P1} run function {NS}:{k}/point']
     elif e == 'hits':
         tick += [f'execute as {SX('scores={mg_dmg=250..}')} run function {NS}:{k}/point',
                  f'execute as {sel} run scoreboard players operation @s mg_hits = @s mg_dmg',
@@ -1249,8 +1294,8 @@ for k in MODES:
           f'tag {sel} remove mg_rw', 'tag @s add mg_rw',
           f'execute as {sel} at @s run playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 1 1',
           f'execute if score @s mg_round matches {m["need"]}.. run return run function {NS}:{k}/win']
-    if e == 'bridge':
-        pt += [f'tellraw {sel} {msg({"selector": "@s", "color": "white"}, {"text": " trifft ins Tor! ", "color": color}, {"score": {"name": P1, "objective": "mg_round"}, "color": "white"}, {"text": " : ", "color": "gray"}, {"score": {"name": P2, "objective": "mg_round"}, "color": "white"})}',
+    if e in ('bridge', 'bed'):
+        pt += [f'tellraw {sel} {msg({"selector": "@s", "color": "white"}, {"text": (" trifft ins Tor! " if e == "bridge" else " zerstört das Bett! "), "color": color}, {"score": {"name": P1, "objective": "mg_round"}, "color": "white"}, {"text": " : ", "color": "gray"}, {"score": {"name": P2, "objective": "mg_round"}, "color": "white"})}',
                f'scoreboard players set #{k} mg 1', f'function {NS}:{k}/round']
     fn(f'{k}/point', pt)
     if e == 'kills':
@@ -1263,12 +1308,12 @@ for k in MODES:
             'effect clear @s minecraft:slowness', 'tag @s remove mg_dead',
             f'title {sel} actionbar [{{"text":"Kills  ","color":"gray"}},{{"score":{{"name":"{P1}","objective":"mg_round"}},"color":"white"}},{{"text":" : ","color":"gray"}},{{"score":{{"name":"{P2}","objective":"mg_round"}},"color":"white"}},{{"text":"  (bis 5)","color":"gray"}}]',
         ])
-    if e == 'bridge':
+    if e in ('bridge', 'bed'):
         fn(f'{k}/respawn', [
             'scoreboard players set @s mg_deaths 0',
             f'execute if entity @s[tag=mg_p1] run {OW} tp @s {cx + sp[0][0]} {cy + 1} {cz + sp[0][2]} -90 0',
             f'execute if entity @s[tag=mg_p2] run {OW} tp @s {cx + sp[1][0]} {cy + 1} {cz + sp[1][2]} 90 0',
-            f'execute unless items entity @s container.* minecraft:stone_sword run function {NS}:{k}/kit',
+            f'execute unless items entity @s container.* minecraft:{"stone_sword" if e == "bridge" else "stick"} run function {NS}:{k}/kit',
             'effect clear @s minecraft:slowness',
         ])
     if e == 'race':
@@ -1299,6 +1344,7 @@ for k in MODES:
         f'{OW} kill @e[type=minecraft:item,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
         f'{OW} kill @e[type=minecraft:arrow,x={cx - 45},dx=90,y={cy - 30},dy=80,z={cz - 45},dz=90]',
         *( [f'function {NS}:spleef/reset_floor'] if k == 'spleef' else [] ),
+        *( [f'{OW} fill {cx - 17} {cy - 6} {cz - 6} {cx + 17} {cy + 7} {cz + 6} minecraft:air replace minecraft:sandstone'] if k == 'stickbett' else [] ),
         *( [f'{OW} fill {D["lava"]["center"][0] - 6} {Y + 1} {D["lava"]["center"][2] - 6} {D["lava"]["center"][0] + 6} {Y + 39} {D["lava"]["center"][2] + 6} minecraft:air'] if k == 'lava' else [] ),
     ])
 lx, ly, lz = D['lava']['center']
@@ -1307,6 +1353,355 @@ fn('lava/rise', ['scoreboard players set #lava_t mg 0', 'scoreboard players add 
                  f'function {NS}:lava/fill with storage mg:tmp l',
                  f'title @a[tag=mg_duel_lava] actionbar {tc({"text": "Die Lava steigt!", "color": "red", "bold": True})}'])
 fn('lava/fill', [f'$execute in minecraft:overworld positioned {lx} {ly} {lz} run fill ~-6 ~$(y) ~-6 ~6 ~$(y) ~6 minecraft:lava replace minecraft:air'])
+
+# ================================================================== SKYWARS + BEDWARS + SPAWN v2
+SW = (40000, Y, 0)
+BW = (50000, Y, 0)
+def clear_box(x1, y1, z1, x2, y2, z2, step=6):
+    out = []
+    for sx in range(x1, x2 + 1, step):
+        out.append(f'{OW} fill {sx} {y1} {z1} {min(x2, sx + step - 1)} {y2} {z2} minecraft:air')
+    return out
+def island_cmds(cx, cy, cz, r, top='grass_block'):
+    out = []
+    for c in disk(cx, cy, cz, r, top) + disk(cx, cy - 1, cz, r, 'dirt') + disk(cx, cy - 2, cz, max(1, r - 1), 'stone') + disk(cx, cy - 3, cz, max(1, r - 2), 'stone'):
+        out.append(f'{OW} {c}')
+    return out
+def lt(name, rolls, entries):
+    js(f'data/{NS}/loot_table/{name}.json', {'type': 'minecraft:chest', 'pools': [{'rolls': {'type': 'minecraft:uniform', 'min': rolls[0], 'max': rolls[1]}, 'entries': entries}]})
+def comp_place():
+    return [{'type': 'minecraft:set_components', 'components': {'minecraft:can_place_on': {'blocks': [f'minecraft:{b}' for b in PLACE]}}}]
+lt('sw_island', (5, 7), [item('stone_sword', 3), item('iron_sword', 2), item('iron_chestplate', 2), item('iron_helmet', 2), item('chainmail_leggings', 3),
+                         item('iron_boots', 2), item('bow', 2), item('arrow', 3, (6, 12)), item('cooked_beef', 3, (3, 6)), item('golden_apple', 1),
+                         item('snowball', 2, (8, 16)), item('oak_planks', 5, (16, 32), comp_place()), item('cobblestone', 4, (16, 32), comp_place()),
+                         item('ender_pearl', 1), item('shield', 1)])
+lt('sw_center', (5, 7), [item('diamond_sword', 3, None, ench(sharpness=1)), item('diamond_chestplate', 2), item('diamond_helmet', 2), item('iron_leggings', 3),
+                         item('bow', 2, None, ench(power=2)), item('arrow', 3, (12, 24)), item('golden_apple', 3, (1, 3)), item('ender_pearl', 2, (1, 2)),
+                         item('splash_potion', 2, None, potion('strong_healing')), item('oak_planks', 4, (32, 48), comp_place()),
+                         item('diamond_axe', 1), item('potion', 1, None, potion('swiftness'))])
+
+# ---------------------------------------------------------------- generic queue for big games
+def big_queue(key, name, color, minp=2):
+    fn(f'{key}/toggle', [
+        f'execute if entity @s[tag=mg_q_{key}] run return run function {NS}:{key}/leave',
+        f'function {NS}:q/leave_all', f'tag @s add mg_q_{key}',
+        f'tellraw @a[tag=mg_hub] {msg({"selector": "@s", "color": "white"}, {"text": " wartet auf ", "color": "gray"}, {"text": name, "color": color, "bold": True}, {"text": " – ", "color": "gray"}, {"text": "[Mitspielen]", "color": "green", "click_event": {"action": "run_command", "command": f"/trigger mg_aktion set {BIG_TRIG[key]}"}})}',
+    ])
+    fn(f'{key}/leave', [f'tag @s remove mg_q_{key}', f'tellraw @s {msg({"text": name + "-Warteschlange verlassen.", "color": "gray"})}'])
+BIG_TRIG = {'sw': 52, 'bw': 51}
+
+# ---------------------------------------------------------------- SKYWARS
+NSW = 8
+SW_IS = [(SW[0] + round(25 * math.cos(math.radians(k * 45))), SW[2] + round(25 * math.sin(math.radians(k * 45)))) for k in range(NSW)]
+big_queue('sw', 'SkyWars', 'aqua')
+swb = ['kill @e[type=minecraft:text_display,tag=mg_swh]'] + clear_box(SW[0] - 31, Y - 6, SW[2] - 31, SW[0] + 31, Y + 16, SW[2] + 31)
+for i, (ix, iz) in enumerate(SW_IS):
+    swb += island_cmds(ix, Y, iz, 3)
+    dx, dz = SW[0] - ix, SW[2] - iz
+    swb += [f'{OW} setblock {ix} {Y + 1} {iz - 2} minecraft:chest[facing=south]{{LootTable:"{NS}:sw_island"}}',
+            f'{OW} setblock {ix} {Y + 1} {iz + 2} minecraft:chest[facing=north]{{LootTable:"{NS}:sw_island"}}',
+            f'{OW} fill {ix - 1} {Y + 1} {iz - 1} {ix + 1} {Y + 4} {iz + 1} minecraft:glass hollow',
+            f'{OW} fill {ix} {Y + 1} {iz} {ix} {Y + 3} {iz} minecraft:air',
+            f'{OW} setblock {ix + 2} {Y + 1} {iz + 1} minecraft:oak_log', f'{OW} setblock {ix + 2} {Y + 2} {iz + 1} minecraft:oak_leaves[persistent=true]']
+swb += island_cmds(SW[0], Y, SW[2], 6, 'smooth_stone')
+for (ox, oz, fc) in ((2, 0, 'west'), (-2, 0, 'east'), (0, 2, 'north'), (0, -2, 'south')):
+    swb.append(f'{OW} setblock {SW[0] + ox} {Y + 1} {SW[2] + oz} minecraft:chest[facing={fc}]{{LootTable:"{NS}:sw_center"}}')
+swb.append(f'{OW} setblock {SW[0]} {Y + 1} {SW[2]} minecraft:enchanting_table')
+swb.append(holo('mg_swh', SW[0], Y + 4, SW[2], {'text': 'SKYWARS', 'color': 'aqua', 'bold': True}, 3.0))
+fn('sw/build', swb)
+fn('sw/tick', [
+    'execute if score #sw mg matches 0 run return run function ' + f'{NS}:sw/idle',
+    f'execute if score #sw mg matches 1 run return run function {NS}:sw/countdown',
+    f'execute if score #sw mg matches 2 run return run function {NS}:sw/cage',
+    f'execute if score #sw mg matches 3 run return run function {NS}:sw/game',
+])
+fn('sw/idle', [f'execute store result score #n mg if entity @a[tag=mg_q_sw,tag=mg_hub]',
+               'execute if score #n mg matches 2.. run scoreboard players set #sw_cd mg 300',
+               f'execute if score #n mg matches 2.. run {OW} forceload add {SW[0] - 40} {SW[2] - 40} {SW[0] + 40} {SW[2] + 40}',
+               f'execute if score #n mg matches 2.. run tellraw @a[tag=mg_q_sw] {msg({"text": "SkyWars startet in 15 Sekunden!", "color": "aqua"})}',
+               'execute if score #n mg matches 2.. run scoreboard players set #sw mg 1'])
+fn('sw/countdown', [
+    f'execute store result score #n mg if entity @a[tag=mg_q_sw,tag=mg_hub]',
+    f'execute if score #n mg matches ..1 run {OW} forceload remove {SW[0] - 40} {SW[2] - 40} {SW[0] + 40} {SW[2] + 40}',
+    f'execute if score #n mg matches ..1 run tellraw @a[tag=mg_q_sw] {msg({"text": "Zu wenig Spieler – SkyWars abgebrochen.", "color": "red"})}',
+    'execute if score #n mg matches ..1 run return run scoreboard players set #sw mg 0',
+    'scoreboard players remove #sw_cd mg 1',
+    'scoreboard players operation #s mg = #sw_cd mg', 'scoreboard players operation #s mg /= #20 mg',
+    f'execute as @a[tag=mg_q_sw] run title @s actionbar [{{"text":"SkyWars startet in ","color":"aqua"}},{{"score":{{"name":"#s","objective":"mg"}},"color":"white","bold":true}},{{"text":" s","color":"aqua"}}]',
+    f'execute if score #sw_cd mg matches ..0 in minecraft:overworld if loaded {SW[0] - 32} {Y} {SW[2] - 32} if loaded {SW[0] + 32} {Y} {SW[2] + 32} run function {NS}:sw/start',
+])
+start = [f'function {NS}:sw/build',
+         f'{OW} forceload remove {SW[0] - 40} {SW[2] - 40} {SW[0] + 40} {SW[2] + 40}',
+         'tag @a[tag=mg_q_sw,tag=mg_hub,limit=8,sort=random] add mg_sw', 'tag @a[tag=mg_sw] remove mg_q_sw', 'tag @a[tag=mg_sw] remove mg_hub',
+         f'execute as @a[tag=mg_sw] run function {NS}:q/leave_all',
+         'clear @a[tag=mg_sw]', 'effect clear @a[tag=mg_sw]', 'gamemode adventure @a[tag=mg_sw]', 'tag @a[tag=mg_sw] add mg_alive',
+         'scoreboard players set @a[tag=mg_sw] mg_deaths 0', 'scoreboard players set #k mg 0']
+for i, (ix, iz) in enumerate(SW_IS):
+    start.append(f'execute as @a[tag=mg_sw,tag=!mg_placed,limit=1,sort=random] run function {NS}:sw/place {{x:{ix},z:{iz}}}')
+start += ['tag @a remove mg_placed', 'scoreboard players set #sw mg 2', 'scoreboard players set #sw_cd mg 100',
+          f'title @a[tag=mg_sw] title {tc({"text": "SKYWARS", "color": "aqua", "bold": True})}',
+          f'title @a[tag=mg_sw] subtitle {tc({"text": "Truhen plündern – der Letzte gewinnt", "color": "white"})}']
+fn('sw/start', start)
+fn('sw/place', ['tag @s add mg_placed', f'$execute in minecraft:overworld run tp @s $(x).5 {Y + 1} $(z).5 facing {SW[0]}.5 {Y + 1} {SW[2]}.5',
+                f'execute in minecraft:overworld run spawnpoint @s {SW[0]} {Y + 12} {SW[2]}'])
+fn('sw/cage', ['scoreboard players remove #sw_cd mg 1',
+               'scoreboard players operation #s mg = #sw_cd mg', 'scoreboard players operation #s mg /= #20 mg',
+               'execute if score #sw_cd mg matches 1.. run title @a[tag=mg_sw] actionbar [{"text":"Käfig öffnet in ","color":"gray"},{"score":{"name":"#s","objective":"mg"},"color":"white","bold":true}]',
+               'execute if score #sw_cd mg matches ..0 run function ' + f'{NS}:sw/release'])
+fn('sw/release', [f'{OW} fill {SW[0] - 30} {Y + 1} {SW[2] - 30} {SW[0] + 30} {Y + 4} {SW[2] + 30} minecraft:air replace minecraft:glass',
+                  'scoreboard players set #sw mg 3', f'title @a[tag=mg_sw] title {tc({"text": "LOS!", "color": "aqua", "bold": True})}',
+                  'execute as @a[tag=mg_sw] at @s run playsound minecraft:entity.ender_dragon.growl master @s ~ ~ ~ 0.6 1.3'])
+fn('sw/game', [
+    f'execute as @a[tag=mg_sw,tag=mg_alive] at @s if entity @s[y=-64,dy={Y - 20 + 64}] run kill @s',
+    f'execute as @a[tag=mg_sw,tag=mg_alive,scores={{mg_deaths=1..}}] run function {NS}:sw/out',
+    'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_alive]',
+    f'execute if score #alive mg matches ..1 run function {NS}:sw/end',
+])
+fn('sw/out', ['tag @s remove mg_alive', 'execute store result score #alive mg if entity @a[tag=mg_sw,tag=mg_alive]', 'scoreboard players set @s mg_deaths 0', 'gamemode spectator @s',
+              f'tellraw @a[tag=mg_sw] {msg({"selector": "@s", "color": "white"}, {"text": " ist raus! ", "color": "red"}, {"text": "Noch ", "color": "gray"}, {"score": {"name": "#alive", "objective": "mg"}, "color": "white"}, {"text": " übrig.", "color": "gray"})}',
+              f'execute in minecraft:overworld run tp @s {SW[0]} {Y + 15} {SW[2]}'])
+fn('sw/end', [
+    f'execute as @a[tag=mg_sw,tag=mg_alive] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt SkyWars!", "color": "white"})}',
+    'scoreboard players add @a[tag=mg_sw,tag=mg_alive] mg_wins 1',
+    f'title @a[tag=mg_sw] title {tc({"text": "Spiel vorbei!", "color": "aqua", "bold": True})}',
+    'execute as @a[tag=mg_sw,tag=mg_alive] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;5636095],has_twinkle:true}]}}}}',
+    'scoreboard players set #sw mg 4', f'schedule function {NS}:sw/finish 100t'])
+fn('sw/finish', [f'execute as @a[tag=mg_sw] run function {NS}:hub/enter', 'tag @a remove mg_sw', 'tag @a remove mg_alive', 'scoreboard players set #sw mg 0',
+                 f'{OW} kill @e[type=minecraft:item,x={SW[0] - 40},dx=80,y={Y - 40},dy=80,z={SW[2] - 40},dz=80]'])
+
+# ---------------------------------------------------------------- BEDWARS
+BWT = {1: ('Rot', 'red', 'red', 16711680, (0, -1)), 2: ('Blau', 'blue', 'blue', 3949738, (1, 0)),
+       3: ('Grün', 'green', 'lime', 8439583, (0, 1)), 4: ('Gelb', 'yellow', 'yellow', 16701501, (-1, 0))}
+BWD = 38
+big_queue('bw', 'BedWars', 'red')
+def tpos(t):
+    d = BWT[t][4]
+    return BW[0] + d[0] * BWD, BW[2] + d[1] * BWD
+def face(dx, dz):
+    return {(0, 1): 'south', (0, -1): 'north', (1, 0): 'east', (-1, 0): 'west'}[(dx, dz)]
+bwb = ['kill @e[type=minecraft:villager,tag=mg_shop]', 'kill @e[type=minecraft:text_display,tag=mg_bwh]'] + clear_box(BW[0] - 50, Y - 6, BW[2] - 50, BW[0] + 50, Y + 16, BW[2] + 50)
+for t, (tn, tcol, wool, rgb, d) in BWT.items():
+    tx, tz = tpos(t)
+    for c in disk(tx, Y, tz, 5, f'{wool}_concrete') + disk(tx, Y, tz, 4, 'stone_bricks') + disk(tx, Y - 1, tz, 4, 'stone') + disk(tx, Y - 2, tz, 2, 'stone'):
+        bwb.append(f'{OW} {c}')
+    inx, inz = -d[0], -d[1]
+    bf = face(inx, inz)
+    bwb += [f'{OW} setblock {tx + inx * 2} {Y + 1} {tz + inz * 2} minecraft:{wool}_bed[facing={bf},part=foot]',
+            f'{OW} setblock {tx + inx * 3} {Y + 1} {tz + inz * 3} minecraft:{wool}_bed[facing={bf},part=head]',
+            f'{OW} setblock {tx + d[0] * 3} {Y} {tz + d[1] * 3} minecraft:iron_block',
+            f'{OW} setblock {tx + d[0] * 3 + d[1] * 2} {Y} {tz + d[1] * 3 + d[0] * 2} minecraft:gold_block']
+    px, pz = d[1], d[0]          # perpendicular
+    sx, sz = tx + px * 4, tz + pz * 4
+    offers = []
+    def o(buy, bc, sell, sc=1, comps=None):
+        e = {'buy': {'id': f'minecraft:{buy}', 'count': bc}, 'sell': {'id': f'minecraft:{sell}', 'count': sc}, 'maxUses': 99999, 'rewardExp': False}
+        if comps:
+            e['sell']['components'] = comps
+        offers.append(e)
+    pc = {'minecraft:can_place_on': {'blocks': [f'minecraft:{b}' for b in PLACE]}}
+    bc_ = {'minecraft:can_break': {'blocks': [f'minecraft:{b}' for b in BREAKABLE]}, 'minecraft:unbreakable': {}}
+    o('iron_ingot', 4, f'{wool}_wool', 16, pc); o('iron_ingot', 24, 'end_stone', 12, pc); o('gold_ingot', 4, 'oak_planks', 16, pc)
+    o('iron_ingot', 10, 'stone_sword'); o('gold_ingot', 7, 'iron_sword'); o('emerald', 4, 'diamond_sword')
+    o('iron_ingot', 24, 'chainmail_chestplate'); o('gold_ingot', 12, 'iron_chestplate'); o('emerald', 6, 'diamond_chestplate')
+    o('iron_ingot', 10, 'stone_pickaxe', 1, bc_); o('gold_ingot', 3, 'iron_pickaxe', 1, bc_); o('iron_ingot', 20, 'shears', 1, bc_)
+    o('gold_ingot', 3, 'golden_apple'); o('gold_ingot', 12, 'bow'); o('gold_ingot', 2, 'arrow', 8); o('emerald', 4, 'ender_pearl')
+    o('iron_ingot', 4, 'cooked_beef', 3); o('emerald', 2, 'stick', 1, {'minecraft:enchantments': {'minecraft:knockback': 1}})
+    snbt = json.dumps({'Recipes': offers}).replace('"rewardExp": false', '"rewardExp": 0b')
+    bwb.append(f'{OW} summon minecraft:villager {sx}.5 {Y + 1} {sz}.5 {{Tags:["mg_shop"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
+               f'CustomName:{tc({"text": "Shop " + tn, "color": tcol, "bold": True})},CustomNameVisible:1b,'
+               f'VillagerData:{{profession:"minecraft:weaponsmith",level:5,type:"minecraft:plains"}},Offers:{snbt}}}')
+    bwb.append(holo('mg_bwh', tx, Y + 4, tz, {'text': 'Team ' + tn, 'color': tcol, 'bold': True}, 2.0))
+for (ox, oz) in ((26, 26), (-26, 26), (26, -26), (-26, -26)):
+    bwb += island_cmds(BW[0] + ox, Y, BW[2] + oz, 2, 'grass_block')
+    bwb.append(f'{OW} setblock {BW[0] + ox} {Y} {BW[2] + oz} minecraft:diamond_block')
+for c in disk(BW[0], Y, BW[2], 6, 'quartz_block') + disk(BW[0], Y - 1, BW[2], 5, 'stone') + disk(BW[0], Y - 2, BW[2], 3, 'stone'):
+    bwb.append(f'{OW} {c}')
+bwb += [f'{OW} setblock {BW[0] + 2} {Y} {BW[2]} minecraft:emerald_block', f'{OW} setblock {BW[0] - 2} {Y} {BW[2]} minecraft:emerald_block',
+        holo('mg_bwh', BW[0], Y + 5, BW[2], {'text': 'BEDWARS', 'color': 'red', 'bold': True}, 3.0)]
+fn('bw/build', bwb)
+fn('bw/tick', [
+    'execute if score #bw mg matches 0 run return run function ' + f'{NS}:bw/idle',
+    f'execute if score #bw mg matches 1 run return run function {NS}:bw/countdown',
+    f'execute if score #bw mg matches 2 run return run function {NS}:bw/game',
+])
+fn('bw/idle', [f'execute store result score #n mg if entity @a[tag=mg_q_bw,tag=mg_hub]',
+               'execute if score #n mg matches 2.. run scoreboard players set #bw_cd mg 300',
+               f'execute if score #n mg matches 2.. run {OW} forceload add {BW[0] - 56} {BW[2] - 56} {BW[0] + 56} {BW[2] + 56}',
+               f'execute if score #n mg matches 2.. run tellraw @a[tag=mg_q_bw] {msg({"text": "BedWars startet in 15 Sekunden!", "color": "red"})}',
+               'execute if score #n mg matches 2.. run scoreboard players set #bw mg 1'])
+fn('bw/countdown', [
+    f'execute store result score #n mg if entity @a[tag=mg_q_bw,tag=mg_hub]',
+    f'execute if score #n mg matches ..1 run {OW} forceload remove {BW[0] - 56} {BW[2] - 56} {BW[0] + 56} {BW[2] + 56}',
+    f'execute if score #n mg matches ..1 run tellraw @a[tag=mg_q_bw] {msg({"text": "Zu wenig Spieler – BedWars abgebrochen.", "color": "red"})}',
+    'execute if score #n mg matches ..1 run return run scoreboard players set #bw mg 0',
+    'scoreboard players remove #bw_cd mg 1',
+    'scoreboard players operation #s mg = #bw_cd mg', 'scoreboard players operation #s mg /= #20 mg',
+    f'execute as @a[tag=mg_q_bw] run title @s actionbar [{{"text":"BedWars startet in ","color":"red"}},{{"score":{{"name":"#s","objective":"mg"}},"color":"white","bold":true}},{{"text":" s","color":"red"}}]',
+    f'execute if score #bw_cd mg matches ..0 in minecraft:overworld if loaded {BW[0] - 48} {Y} {BW[2] - 48} if loaded {BW[0] + 48} {Y} {BW[2] + 48} if loaded {BW[0] - 48} {Y} {BW[2] + 48} if loaded {BW[0] + 48} {Y} {BW[2] - 48} run function {NS}:bw/start',
+])
+bst = [f'function {NS}:bw/build', f'{OW} forceload remove {BW[0] - 56} {BW[2] - 56} {BW[0] + 56} {BW[2] + 56}',
+       'tag @a[tag=mg_q_bw,tag=mg_hub,limit=16] add mg_bw', 'tag @a[tag=mg_bw] remove mg_q_bw', 'tag @a[tag=mg_bw] remove mg_hub',
+       f'execute as @a[tag=mg_bw] run function {NS}:q/leave_all',
+       'execute store result score #n mg if entity @a[tag=mg_bw]',
+       'scoreboard players set #teams mg 4', 'execute if score #n mg matches ..3 run scoreboard players operation #teams mg = #n mg',
+       'scoreboard players set #k mg 0', 'scoreboard players set @a[tag=mg_bw] mg_bwt 0',
+       f'execute as @a[tag=mg_bw,sort=random] run function {NS}:bw/assign',
+       'clear @a[tag=mg_bw]', 'effect clear @a[tag=mg_bw]', 'gamemode adventure @a[tag=mg_bw]', 'tag @a[tag=mg_bw] add mg_alive',
+       'scoreboard players set @a[tag=mg_bw] mg_deaths 0', 'scoreboard players set @a[tag=mg_bw] mg_rt 0',
+       'scoreboard players set #gi mg 0', 'scoreboard players set #gg mg 0', 'scoreboard players set #gd mg 0', 'scoreboard players set #ge mg 0']
+for t, (tn, tcol, wool, rgb, d) in BWT.items():
+    tx, tz = tpos(t)
+    bst += [f'execute if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] run scoreboard players set #bed{t} mg 1',
+            f'execute unless entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] run scoreboard players set #bed{t} mg 0',
+            f'execute as @a[tag=mg_bw,scores={{mg_bwt={t}}}] run {OW} spawnpoint @s {tx} {Y + 1} {tz}',
+            f'{OW} tp @a[tag=mg_bw,scores={{mg_bwt={t}}}] {tx}.5 {Y + 1} {tz}.5 facing {BW[0]}.5 {Y + 1} {BW[2]}.5',
+            f'team join mg_bw{t} @a[tag=mg_bw,scores={{mg_bwt={t}}}]']
+bst += [f'execute as @a[tag=mg_bw] run function {NS}:bw/kit', 'scoreboard players set #bw mg 2',
+        f'title @a[tag=mg_bw] title {tc({"text": "BEDWARS", "color": "red", "bold": True})}',
+        f'title @a[tag=mg_bw] subtitle {tc({"text": "Schütze dein Bett – zerstöre die anderen!", "color": "white"})}',
+        f'tellraw @a[tag=mg_bw] {msg({"text": "Eisen & Gold kommen am Team-Generator, Diamanten auf den Ecken-Inseln, Smaragde in der Mitte. Einkaufen beim Dorfbewohner.", "color": "gray"})}']
+fn('bw/start', bst)
+fn('bw/assign', ['scoreboard players add #k mg 1', 'execute if score #k mg > #teams mg run scoreboard players set #k mg 1',
+                 'scoreboard players operation @s mg_bwt = #k mg'])
+kit = ['clear @s', 'effect give @s minecraft:instant_health 1 10 true', 'effect give @s minecraft:saturation 1 20 true',
+       'give @s minecraft:wooden_sword[minecraft:unbreakable={}]', 'give @s ' + breaker('wooden_pickaxe')]
+for t, (tn, tcol, wool, rgb, d) in BWT.items():
+    for slot, it in (('head', 'leather_helmet'), ('chest', 'leather_chestplate'), ('legs', 'leather_leggings'), ('feet', 'leather_boots')):
+        kit.append(f'execute if score @s mg_bwt matches {t} run item replace entity @s armor.{slot} with minecraft:{it}[minecraft:dyed_color={rgb},minecraft:unbreakable={{}}]')
+fn('bw/kit', kit)
+gtick = ['scoreboard players add #gi mg 1', 'scoreboard players add #gg mg 1', 'scoreboard players add #gd mg 1', 'scoreboard players add #ge mg 1']
+for t, (tn, tcol, wool, rgb, d) in BWT.items():
+    tx, tz = tpos(t)
+    gx, gz = tx + d[0] * 3, tz + d[1] * 3
+    gtick += [f'execute if score #gi mg matches 20.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {gx}.5 {Y + 1} {gz}.5 run function {NS}:bw/gen {{item:"iron_ingot"}}',
+              f'execute if score #gg mg matches 120.. if entity @a[tag=mg_bw,scores={{mg_bwt={t}}}] in minecraft:overworld positioned {gx + d[1] * 2}.5 {Y + 1} {gz + d[0] * 2}.5 run function {NS}:bw/gen {{item:"gold_ingot"}}']
+for (ox, oz) in ((26, 26), (-26, 26), (26, -26), (-26, -26)):
+    gtick.append(f'execute if score #gd mg matches 600.. in minecraft:overworld positioned {BW[0] + ox}.5 {Y + 1} {BW[2] + oz}.5 run function {NS}:bw/gen {{item:"diamond"}}')
+for ox in (2, -2):
+    gtick.append(f'execute if score #ge mg matches 1200.. in minecraft:overworld positioned {BW[0] + ox}.5 {Y + 1} {BW[2]}.5 run function {NS}:bw/gen {{item:"emerald"}}')
+gtick += ['execute if score #gi mg matches 20.. run scoreboard players set #gi mg 0', 'execute if score #gg mg matches 120.. run scoreboard players set #gg mg 0',
+          'execute if score #gd mg matches 600.. run scoreboard players set #gd mg 0', 'execute if score #ge mg matches 1200.. run scoreboard players set #ge mg 0']
+fn('bw/gen', ['execute store result score #c mg if entity @e[type=minecraft:item,distance=..2]',
+              'execute if score #c mg matches 40.. run return 0',
+              '$summon minecraft:item ~ ~ ~ {Item:{id:"minecraft:$(item)",count:1},PickupDelay:0,Motion:[0d,0.1d,0d]}'])
+game = gtick + [f'execute as @a[tag=mg_bw,tag=mg_alive] at @s if entity @s[y=-64,dy={Y - 25 + 64}] run kill @s']
+for t, (tn, tcol, wool, rgb, d) in BWT.items():
+    tx, tz = tpos(t)
+    game.append(f'execute if score #bed{t} mg matches 1 in minecraft:overworld unless block {tx - d[0] * 2} {Y + 1} {tz - d[1] * 2} minecraft:{wool}_bed run function {NS}:bw/bed_gone {{t:{t},n:"{tn}",c:"{tcol}"}}')
+game += [f'execute as @a[tag=mg_bw,tag=mg_alive,scores={{mg_deaths=1..}}] run function {NS}:bw/died',
+         f'execute as @a[tag=mg_bw,tag=mg_alive,scores={{mg_rt=1..}}] run function {NS}:bw/respawn_tick',
+         'scoreboard players set #tl mg 0',
+         *[f'execute if entity @a[tag=mg_bw,tag=mg_alive,scores={{mg_bwt={t}}}] run scoreboard players add #tl mg 1' for t in BWT],
+         f'execute if score #tl mg matches ..1 run function {NS}:bw/end']
+fn('bw/game', game)
+fn('bw/bed_gone', ['$scoreboard players set #bed$(t) mg 0',
+                   '$tellraw @a[tag=mg_bw] [{"text":"» ","color":"gold","bold":true},{"text":"Das Bett von Team $(n) wurde zerstört!","color":"$(c)","bold":true}]',
+                   '$title @a[tag=mg_bw,scores={mg_bwt=$(t)}] title {"text":"BETT ZERSTÖRT!","color":"red","bold":true}',
+                   '$title @a[tag=mg_bw,scores={mg_bwt=$(t)}] subtitle {"text":"Du kannst nicht mehr respawnen","color":"gray"}',
+                   'execute as @a[tag=mg_bw] at @s run playsound minecraft:entity.wither.death master @s ~ ~ ~ 0.4 1.4'])
+died = ['scoreboard players set @s mg_deaths 0']
+for t in BWT:
+    died.append(f'execute if score @s mg_bwt matches {t} if score #bed{t} mg matches 0 run return run function {NS}:bw/final')
+died += ['scoreboard players set @s mg_rt 100', 'gamemode spectator @s',
+         f'tellraw @s {msg({"text": "Du respawnst in 5 Sekunden.", "color": "gray"})}']
+fn('bw/died', died)
+fn('bw/final', ['tag @s remove mg_alive', 'gamemode spectator @s',
+                f'tellraw @a[tag=mg_bw] {msg({"selector": "@s", "color": "white"}, {"text": " ist endgültig raus!", "color": "red", "bold": True})}'])
+rt = ['scoreboard players remove @s mg_rt 1', 'execute unless score @s mg_rt matches 0 run return 0', 'gamemode adventure @s']
+for t in BWT:
+    tx, tz = tpos(t)
+    rt.append(f'execute if score @s mg_bwt matches {t} in minecraft:overworld run tp @s {tx}.5 {Y + 1} {tz}.5')
+rt += [f'function {NS}:bw/kit']
+fn('bw/respawn_tick', rt)
+fn('bw/end', [
+    f'execute as @a[tag=mg_bw,tag=mg_alive] run tellraw @a {msg({"selector": "@s", "color": "gold", "bold": True}, {"text": " gewinnt BedWars!", "color": "white"})}',
+    'scoreboard players add @a[tag=mg_bw,tag=mg_alive] mg_wins 1',
+    f'title @a[tag=mg_bw] title {tc({"text": "Spiel vorbei!", "color": "red", "bold": True})}',
+    'execute as @a[tag=mg_bw,tag=mg_alive] at @s run summon minecraft:firework_rocket ~ ~1 ~ {LifeTime:20,FireworksItem:{id:"minecraft:firework_rocket",count:1,components:{"minecraft:fireworks":{flight_duration:1,explosions:[{shape:"large_ball",colors:[I;16711680],has_twinkle:true}]}}}}',
+    'scoreboard players set #bw mg 3', f'schedule function {NS}:bw/finish 100t'])
+fn('bw/finish', [f'execute as @a[tag=mg_bw] run function {NS}:hub/enter', 'tag @a remove mg_bw', 'tag @a remove mg_alive', 'scoreboard players set #bw mg 0',
+                 *[f'team leave @a[team=mg_bw{t}]' for t in BWT],
+                 f'{OW} kill @e[type=minecraft:item,x={BW[0] - 56},dx=112,y={Y - 40},dy=80,z={BW[2] - 56},dz=112]'])
+
+# ---------------------------------------------------------------- SPAWN v2 with NPCs
+SPAWN = (HUB[0], HUB[1] + 1, HUB[2] + 9)
+NPCS = [  # key, name, colour, profession, angle, action, subtitle
+    ('rush', 'Parkour-Rush', 'green', 'farmer', 198, f'function {NS}:rush/request', '24 Inseln · Truhen · Arena'),
+    ('bw', 'BedWars', 'red', 'weaponsmith', 234, f'function {NS}:bw/toggle', 'Teams · Betten · Händler'),
+    ('sw', 'SkyWars', 'aqua', 'cartographer', 270, f'function {NS}:sw/toggle', 'Inseln · Truhen · Letzter gewinnt'),
+    ('sf', 'Stick-Fight Bett', 'yellow', 'fletcher', 306, f'function {NS}:q/toggle_stickbett', '1v1 · Bett abbauen · bis 5'),
+    ('duel', '1v1-Modi', 'gold', 'armorer', 342, f'function {NS}:q/menu', f'{len(MODES)} Modi zur Auswahl'),
+]
+hx, hy, hz = HUB
+hub2 = ['kill @e[type=minecraft:villager,tag=mg_npc]', 'kill @e[type=minecraft:interaction,tag=mg_npc]',
+        'kill @e[type=minecraft:text_display,tag=mg_holo,x=-40,y=90,z=-40,dx=80,dy=40,dz=80]']
+hub2 += clear_box(hx - 26, hy - 6, hz - 26, hx + 26, hy + 14, hz + 26, 8)
+for c in (disk(hx, hy, hz, 22, 'smooth_quartz') + disk(hx, hy - 1, hz, 21, 'quartz_bricks') + disk(hx, hy - 2, hz, 18, 'quartz_bricks')
+          + disk(hx, hy - 3, hz, 13, 'quartz_bricks') + disk(hx, hy - 4, hz, 7, 'quartz_bricks')
+          + disk(hx, hy, hz, 16, 'polished_andesite') + disk(hx, hy, hz, 15, 'smooth_quartz') + disk(hx, hy, hz, 4, 'quartz_bricks')
+          + disk(hx, hy, hz, 3, 'water') + ring(hx, hy + 1, hz, 22, 'quartz_slab', 1)):
+    hub2.append(f'{OW} {c}')
+hub2 += [f'{OW} setblock {hx} {hy - 1} {hz} minecraft:sea_lantern', f'{OW} fill {hx} {hy} {hz} {hx} {hy + 3} {hz} minecraft:quartz_pillar',
+         f'{OW} setblock {hx} {hy + 4} {hz} minecraft:sea_lantern']
+for a in range(15, 360, 30):
+    lx, lz = hx + round(19 * math.cos(math.radians(a))), hz + round(19 * math.sin(math.radians(a)))
+    hub2 += [f'{OW} fill {lx} {hy + 1} {lz} {lx} {hy + 3} {lz} minecraft:quartz_pillar', f'{OW} setblock {lx} {hy + 4} {lz} minecraft:lantern']
+npc_tick = []
+for key, name, color, prof, ang, action, sub in NPCS:
+    nx = hx + round(12 * math.cos(math.radians(ang))); nz = hz + round(12 * math.sin(math.radians(ang)))
+    for c in disk(nx, hy, nz, 2, 'polished_blackstone_bricks'):
+        hub2.append(f'{OW} {c}')
+    hub2 += [f'{OW} setblock {nx} {hy} {nz} minecraft:{"gold_block" if key == "rush" else "chiseled_polished_blackstone"}',
+             f'{OW} summon minecraft:villager {nx}.5 {hy + 1} {nz}.5 {{Tags:["mg_npc"],NoAI:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,'
+             f'VillagerData:{{profession:"minecraft:{prof}",level:5,type:"minecraft:plains"}},Offers:{{Recipes:[]}}}}',
+             f'execute in minecraft:overworld positioned {nx}.5 {hy + 1} {nz}.5 run tp @e[type=minecraft:villager,tag=mg_npc,distance=..0.6,limit=1] ~ ~ ~ facing {SPAWN[0]}.5 {hy + 2} {SPAWN[2]}.5',
+             f'{OW} summon minecraft:interaction {nx}.5 {hy + 1} {nz}.5 {{Tags:["mg_npc","mg_npc_{key}"],width:1.4f,height:2.3f,response:1b}}',
+             holo('mg_npch', f'{nx}.5', hy + 3.3, f'{nz}.5', [{'text': name + '\n', 'color': color, 'bold': True}, {'text': sub + '\n', 'color': 'gray', 'bold': False}, {'text': '▶ Rechtsklick', 'color': 'yellow', 'bold': False}], 1.2)]
+    npc_tick.append(f'execute as @e[type=minecraft:interaction,tag=mg_npc_{key}] if data entity @s interaction run function {NS}:npc/hit_{key}')
+    fn(f'npc/hit_{key}', [f'execute on target run function {NS}:npc/{key}', 'data remove entity @s interaction'])
+    fn(f'npc/{key}', ['execute unless entity @s[tag=mg_hub] run return 0', action,
+                      'execute at @s run playsound minecraft:block.note_block.pling master @s ~ ~ ~ 1 1.5'])
+fn('npc/tick', npc_tick)
+hub2 += [holo('mg_title', f'{hx}.5', hy + 8.2, f'{hz}.5', {'text': 'MINIGAMES', 'color': 'gold', 'bold': True}, 5.0),
+         holo('mg_sub', f'{hx}.5', hy + 7.2, f'{hz}.5', {'text': 'Ole · Mats · Sammy · Qelloxx', 'color': 'gray'}, 1.5),
+         holo('mg_help', f'{hx}.5', hy + 2.6, f'{hz + 5}.5', [{'text': 'Klick einen NPC an oder benutze den Kompass', 'color': 'white'}], 1.1),
+         f'scoreboard players set #big mg {BIG_VERSION}']
+fn('build/hub', hub2)
+fn('build/big_try', [f'execute in minecraft:overworld if loaded {hx - 26} {Y} {hz - 26} if loaded {hx + 26} {Y} {hz + 26} run return run function {NS}:build/hub',
+                     f'schedule function {NS}:build/big_try 20t'])
+
+# ---------------------------------------------------------------- game menu (compass) + trigger ids
+SF_IDX = MODES.index('stickbett') + 1
+G = [('Parkour-Rush', 'green', 50, '24 Inseln, Loot, Arena'), ('BedWars', 'red', 51, 'bis 4 Teams'), ('SkyWars', 'aqua', 52, 'bis 8 Spieler'),
+     ('Stick-Fight Bett', 'yellow', SF_IDX, '1v1, Bett abbauen'), ('1v1-Modi', 'gold', 54, f'{len(MODES)} Modi')]
+gparts = [PREFIX, {'text': 'Spiele', 'color': 'gold', 'bold': True}, {'text': ' – klick zum Mitspielen:', 'color': 'gray', 'bold': False}]
+for name, color, tid, sub in G:
+    gparts += [{'text': '\n ', 'color': 'gray'}, {'text': f'[{name}]', 'color': color, 'bold': True,
+               'click_event': {'action': 'run_command', 'command': f'/trigger mg_aktion set {tid}'}},
+               {'text': '  ' + sub, 'color': 'gray', 'bold': False}]
+fn('hub/games', [f'tellraw @s {tc(gparts)}'])
+
+# ---------------------------------------------------------------- wiring of the big modes
+fn('q/leave_all', [*[f'tag @s remove mg_q_{k}' for k in MODES], *[f'tag @s remove mg_duel_{k}' for k in MODES], 'tag @s remove mg_q_sw', 'tag @s remove mg_q_bw'])
+fn('hub/aktion', [*[f'execute if score @s mg_aktion matches {i + 1} if entity @s[tag=mg_hub] unless entity @s[tag=mg_q_{k}] run function {NS}:q/toggle_{k}' for i, k in enumerate(MODES)],
+                  f'execute if score @s mg_aktion matches 50 if entity @s[tag=mg_hub] run function {NS}:rush/request',
+                  f'execute if score @s mg_aktion matches 51 if entity @s[tag=mg_hub] unless entity @s[tag=mg_q_bw] run function {NS}:bw/toggle',
+                  f'execute if score @s mg_aktion matches 52 if entity @s[tag=mg_hub] unless entity @s[tag=mg_q_sw] run function {NS}:sw/toggle',
+                  f'execute if score @s mg_aktion matches 54 if entity @s[tag=mg_hub] run function {NS}:q/menu',
+                  'scoreboard players set @s mg_aktion 0'])
+files[f'data/{NS}/function/tick.mcfunction'] += (
+    f'function {NS}:npc/tick\n'
+    f'execute unless score #sw mg matches 0 run function {NS}:sw/tick\n'
+    f'execute if score #sw mg matches 0 if entity @a[tag=mg_q_sw] run function {NS}:sw/idle\n'
+    f'execute unless score #bw mg matches 0 run function {NS}:bw/tick\n'
+    f'execute if score #bw mg matches 0 if entity @a[tag=mg_q_bw] run function {NS}:bw/idle\n')
+files[f'data/{NS}/function/load.mcfunction'] += (
+    'scoreboard objectives add mg_bwt dummy\nscoreboard objectives add mg_rt dummy\n'
+    'execute unless entity @a[tag=mg_sw] run scoreboard players set #sw mg 0\n'
+    'execute unless entity @a[tag=mg_bw] run scoreboard players set #bw mg 0\n'
+    + ''.join(f'team add mg_bw{t}\nteam modify mg_bw{t} color {BWT[t][1]}\nteam modify mg_bw{t} friendlyFire false\n'
+              f'team modify mg_bw{t} prefix {tc({"text": "[" + BWT[t][0] + "] ", "color": BWT[t][1]})}\n' for t in BWT)
+    + f'execute unless score #big mg matches {BIG_VERSION} run schedule function {NS}:build/big_try 60t\n')
 
 files[f'data/{NS}/function/tick.mcfunction'] = files[f'data/{NS}/function/tick.mcfunction'].replace(
     'scoreboard players enable @a mg_aktion\n',
