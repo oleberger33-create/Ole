@@ -283,7 +283,7 @@ def _N(k, bold=False):
 _overview = [{'text': 'Diese Runde: ', 'color': 'gray'}]
 for _k in range(1, _PICK + 1):
     _overview += [{'text': f'{_k}. ', 'color': 'dark_gray'}, _N(_k), {'text': ' '},
-                  {'nbt': f's{_k}', 'storage': f'{NS}:dropper', 'color': 'gold'}]
+                  {'nbt': f's{_k}', 'storage': f'{NS}:dropper', 'interpret': True, 'color': 'gold'}]
     if _k < _PICK:
         _overview.append({'text': '  →  ', 'color': 'dark_gray'})
 
