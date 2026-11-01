@@ -598,14 +598,15 @@ nxt = ['scoreboard players add #bq mg 1']
 for j, (mi, L) in enumerate(JOBS):
     x1, z1, x2, z2 = lane_box(mi, L)
     nxt.append(f'execute if score #bq mg matches {j + 1} run return run function {NS}:build/q{j + 1}')
-    fn(f'build/q{j + 1}', [f'{OW} forceload add {x1} {z1} {x2} {z2}', f'schedule function {NS}:build/q{j + 1}_try 20t'])
+    parts = [(x1 + k * 160, min(x2, x1 + k * 160 + 159)) for k in range((x2 - x1) // 160 + 1)]
+    fn(f'build/q{j + 1}', [f'{OW} forceload add {a} {z1} {b} {z2}' for a, b in parts] + [f'schedule function {NS}:build/q{j + 1}_try 20t'])
     tries = ' '.join(f'if loaded {px} {Y} {lane_z(L)}' for px in (map_x(mi), map_x(mi) + MAXLEN // 3, map_x(mi) + 2 * MAXLEN // 3, map_x(mi) + MAXLEN))
     fn(f'build/q{j + 1}_try', [
         f'execute in minecraft:overworld {tries} run return run function {NS}:build/q{j + 1}_do',
         f'schedule function {NS}:build/q{j + 1}_try 20t'])
     fn(f'build/q{j + 1}_do', [
         f'execute in minecraft:overworld positioned {map_x(mi)} {Y} {lane_z(L)} run function {NS}:build/lane_m{mi + 1}',
-        f'{OW} forceload remove {x1} {z1} {x2} {z2}',
+        *[f'{OW} forceload remove {a} {z1} {b} {z2}' for a, b in parts],
         f'scoreboard players set #lanes_done mg {j + 1}',
         f'schedule function {NS}:build/lane_next 2t'])
 nxt.append(f'scoreboard players set #lanes mg {BUILD_VERSION}')
