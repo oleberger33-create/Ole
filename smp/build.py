@@ -133,6 +133,21 @@ js('data/minecraft/tags/function/tick.json', {'values': [f'{NS}:tick']})
 # ------------------------------------------------------------------ core functions (generated at the end, after the modules)
 fn('core/tp', ['$execute in $(dim) run tp @s $(x) $(y) $(z)'])       # with storage {x,y,z,dim}
 fn('core/dim', dim_lines())
+# "back" position: modules call `function smp:core/back_save` as the player BEFORE every teleport (home/spawn/tpa/rtp);
+# `function smp:core/back_go` teleports the player to the saved position (storage smp:back p<id>).
+fn('core/back_save', [
+    'execute store result storage smp:tmp id int 1 run scoreboard players get @s smp_id',
+    'execute store result storage smp:tmp x double 1 run data get entity @s Pos[0]',
+    'execute store result storage smp:tmp y double 1 run data get entity @s Pos[1]',
+    'execute store result storage smp:tmp z double 1 run data get entity @s Pos[2]',
+    f'function {NS}:core/dim',
+    f'function {NS}:core/back_put with storage smp:tmp',
+])
+fn('core/back_put', ['$data modify storage smp:back p$(id) set value {x:$(x),y:$(y),z:$(z),dim:"$(dim)"}', '$data modify storage smp:back p$(id).has set value 1b'])
+fn('core/back_go', ['execute store result storage smp:tmp id int 1 run scoreboard players get @s smp_id',
+                    f'function {NS}:core/back_go2 with storage smp:tmp'])
+fn('core/back_go2', ['$execute unless data storage smp:back p$(id).has run return run tellraw @s ' + msg({'text': 'Keine letzte Position gespeichert.', 'color': 'red'}),
+                     '$function smp:core/tp with storage smp:back p$(id)'])
 fn('core/death', [
     'tag @s add smp_dead', 'scoreboard players set @s smp_deaths 0',
     'execute store result score #x smp run data get entity @s Pos[0]',
