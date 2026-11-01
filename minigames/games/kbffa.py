@@ -241,7 +241,8 @@ fn(f'{_K}/refill', ['clear @s minecraft:sandstone',
 fn(f'{_K}/join', [
     'execute unless entity @s[tag=mg_hub] run return 0',
     f'function {NS}:q/leave_all', 'tag @s remove mg_hub', f'tag @s add {_T}', f'tag @s add {_W}',
-    *[f'scoreboard players set @s mg_kbffa_{o} 0' for o in ('k', 'd', 'best', 'use', 'pad', 'cn', 'hold')],
+    *[f'scoreboard players set @s mg_kbffa_{o} 0' for o in ('k', 'd', 'best', 'use', 'pad', 'hold')],
+    'execute unless score @s mg_kbffa_cn matches 0.. run scoreboard players set @s mg_kbffa_cn 0',
     'execute unless score @s mg_kbffa_pid matches 1.. run scoreboard players add #kbffa_pid mg 1',      # persistent id (survives rejoin)
     'execute unless score @s mg_kbffa_pid matches 1.. run scoreboard players operation @s mg_kbffa_pid = #kbffa_pid mg',
     'scoreboard players add #kbffa_id mg 1', 'scoreboard players operation @s mg_kbffa_id = #kbffa_id mg',
@@ -304,7 +305,7 @@ fn(f'{_K}/fall', [
     f'function {NS}:{_K}/respawn'])
 fn(f'{_K}/kill', [
     'scoreboard players set #kbffa_kf mg 1', 'tag @s add mg_kbffa_klr',
-    # anti coin farming: no coins for killing the same player twice in a row, max ~30 coins per visit
+    # anti coin farming: no coins for killing the same player twice in a row, max ~30 coins, refilling by 1 per minute
     'scoreboard players set #kbffa_pay mg 1',
     'execute if score @s mg_kbffa_lv = #kbffa_vid mg run scoreboard players set #kbffa_pay mg 0',
     f'execute if score @s mg_kbffa_cn matches {_COIN_CAP}.. run scoreboard players set #kbffa_pay mg 0',
@@ -454,6 +455,10 @@ ENTER_LINES.extend([f'execute if entity @s[tag={_T}] run function {NS}:{_K}/bye'
                     'attribute @s minecraft:fall_damage_multiplier base reset',
                     f'attribute @s minecraft:knockback_resistance modifier remove {NS}:kbffa_safe'])
 EXTRA_TICK.append(f'execute if score #kbffa mg matches 1.. run function {NS}:{_K}/tick')
+# coin cap refills by 1 per minute (not per visit, so leaving and rejoining does not reset it)
+EXTRA_TICK.extend(['scoreboard players add #kbffa_cnt mg 1', 'execute if score #kbffa_cnt mg matches 1200.. run scoreboard players remove @a[scores={mg_kbffa_cn=1..}] mg_kbffa_cn 1',
+                   'execute if score #kbffa_cnt mg matches 1200.. run scoreboard players set #kbffa_cnt mg 0'])
+WATCHDOG.append(f'execute if score #kbffa mg matches 0 as @a[tag={_T}] run function {NS}:hub/enter')
 EXTRA_LOAD.extend([
     *[f'scoreboard objectives add mg_kbffa_{o} dummy' for o in ('k', 's', 'd', 'best', 'id', 'lh', 'lt', 'pc', 'ps', 'sp', 'pv', 'pad', 'col', 'n', 'hold', 'pid', 'lv', 'cn')],
     'scoreboard objectives add mg_kbffa_dd minecraft.custom:minecraft.damage_dealt',

@@ -215,6 +215,8 @@ EXTRA_LOAD.extend([
     'team modify mg_murder_t friendlyFire true', 'team modify mg_murder_t seeFriendlyInvisibles false',
     f'bossbar add {NS}:murder {tc({"text": "Murder Mystery"})}', f'bossbar set {NS}:murder max {_LEN}', f'bossbar set {NS}:murder style notched_10',
     f'scoreboard players set #murder_len mg {_LEN}', 'scoreboard players set #murder_200 mg 200',
+    f'execute unless entity @a[tag={_T}] run bossbar set {NS}:murder visible false',
+    f'execute unless entity @a[tag={_T}] run bossbar set {NS}:murder players',
 ])
 
 fn('murder/spawn_one', ['tp @s @e[type=minecraft:marker,tag=mg_murder_sp,tag=!mg_murder_used,sort=random,limit=1]',

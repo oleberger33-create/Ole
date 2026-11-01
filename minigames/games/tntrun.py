@@ -12,6 +12,9 @@ _game = [void_kill('mg_al_tntrun', _cy - 24),
          'scoreboard players operation #m mg = #tntrun_t mg', 'scoreboard players operation #m mg %= #4 mg',
          f'execute if score #m mg matches 0 run function {NS}:tntrun/decay',
          'execute if score #tntrun_t mg matches 60 run title @a[tag=mg_tntrun] actionbar {"text":"Der Boden zerfällt jetzt!","color":"red","bold":true}',
+         f'execute as @a[tag=mg_al_tntrun] at @s if block ~ ~-1 ~ minecraft:barrier run kill @s',
+         *[f'execute if score #tntrun_t mg matches {3600 + 200 * i} run {OW} fill {_cx - 14} {_cy + dy} {_cz - 14} {_cx + 14} {_cy + dy} {_cz + 14} minecraft:orange_concrete replace #minecraft:wool' for i, (dy, blk) in enumerate(_LAYERS)],
+         'execute if score #tntrun_t mg matches 3600 run title @a[tag=mg_tntrun] actionbar {"text":"Zeit um – der Boden löst sich auf!","color":"red","bold":true}',
          'execute if score #tntrun_t mg matches 20 run title @a[tag=mg_tntrun] actionbar {"text":"3 Sekunden Schonzeit ...","color":"gray"}']
 _decay = []
 for dy, blk in _LAYERS:
@@ -21,7 +24,8 @@ fn('tntrun/decay', _decay)
 party('tntrun', 'TNT-Run', 'red', TR, trig=60, prof='mason', sub='Boden zerfällt · Letzter gewinnt', menu='Lauf, bevor der Boden weg ist',
       info='Jeder Block, auf den du trittst, zerfällt nach einem Moment. Drei Ebenen übereinander – wer zuletzt noch steht, gewinnt.',
       title_sub='Bleib in Bewegung!', size=24, build=_b,
-      setup=[f'{OW} spreadplayers {_cx} {_cz} 3 11 false @a[tag=mg_tntrun]',
+      setup=[f'{OW} spreadplayers {_cx} {_cz} 3 9 under {_cy + 1} false @a[tag=mg_tntrun]',
              'effect give @a[tag=mg_tntrun] minecraft:saturation infinite 0 true',
-             'effect give @a[tag=mg_tntrun] minecraft:resistance infinite 4 true'],
+             'effect give @a[tag=mg_tntrun] minecraft:resistance infinite 4 true',
+             'effect give @a[tag=mg_tntrun] minecraft:weakness infinite 255 true'],
       game=_game, spect=(_cx, _cy + 10, _cz))

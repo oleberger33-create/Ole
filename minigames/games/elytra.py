@@ -324,7 +324,7 @@ for _n, _m in (('low', 'Abgestürzt!'), ('ground', 'Bodenkontakt!'), ('out', 'Au
         f'function {NS}:elytra/respawn'])
 fn('elytra/died', [
     'scoreboard players set @s mg_deaths 0', f'item replace entity @s armor.chest with {_ELY}',
-    'effect give @s minecraft:saturation infinite 0 true', 'effect give @s minecraft:resistance infinite 4 true',
+    'effect give @s minecraft:saturation infinite 0 true', 'effect give @s minecraft:resistance infinite 4 true', 'effect give @s minecraft:weakness infinite 255 true',
     'execute if entity @s[tag=mg_elytra_lead] run effect give @s minecraft:glowing infinite 0 true',
     f'execute if score #elytra_t mg matches {_GO}.. run give @s {_FW} 2',
     f'function {NS}:elytra/respawn'])
@@ -393,6 +393,8 @@ fn('elytra/end_late', [f'tellraw {_RACE} ' + msg({'text': 'Zeit abgelaufen – d
                        f'function {NS}:elytra/end_go'])
 fn('elytra/end_time', [
     f'tellraw @a[tag={_T}] ' + msg({'text': 'Zeit abgelaufen! Niemand hat das Ziel erreicht – wer am weitesten kam, gewinnt.', 'color': 'red'}),
+    'scoreboard players set #elytra_best mg 0',
+    f'execute as {_RACE} run scoreboard players operation #elytra_best mg > @s mg_elytra_p',
     f'execute if score #elytra_best mg matches 1.. as {_RACE} if score @s mg_elytra_p = #elytra_best mg run tag @s add mg_elytra_win',
     f'execute as @a[tag={_T},tag=mg_elytra_win] run function {NS}:elytra/award',
     f'execute as @a[tag={_T},tag=mg_elytra_win] run tellraw @a[tag=!{_T}] ' + msg({'selector': '@s', 'color': 'gold', 'bold': True}, {'text': ' gewinnt Elytra-Rennen!', 'color': 'white'}),
@@ -433,7 +435,7 @@ _setup = [
     f'execute as @a[tag={_T}] at @s run tp @s ~ ~ ~ facing {_c3(_RD[0]["c"])}',
     f'item replace entity @a[tag={_T}] armor.chest with {_ELY}',
     f'effect give @a[tag={_T}] minecraft:saturation infinite 0 true',
-    f'effect give @a[tag={_T}] minecraft:resistance infinite 4 true',
+    f'effect give @a[tag={_T}] minecraft:resistance infinite 4 true', f'effect give @a[tag={_T}] minecraft:weakness infinite 255 true',
 ]
 
 EXTRA_LOAD.extend(['scoreboard objectives add mg_elytra_p dummy', 'scoreboard objectives add mg_elytra_g dummy',

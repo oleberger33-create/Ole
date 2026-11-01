@@ -125,12 +125,12 @@ def _side(t):
               S(20, 3, Z(6), 'mossy_stone_bricks')]
         # hay and crates near the flanks
         o += [F(11, 1, Z(13), 12, 1, Z(13), 'hay_block[axis=x]'), S(11, 2, Z(13), 'hay_block[axis=x]'), S(12, 1, Z(14), 'hay_block[axis=z]')]
-        o += [F(16, 1, Z(15), 17, 2, Z(16), 'barrel[facing=up]'), S(17, 1, Z(14), 'barrel[facing=up]')]
+        o += [F(16, 1, Z(15), 17, 2, Z(16), 'stripped_spruce_wood'), S(17, 1, Z(14), 'stripped_spruce_wood')]
         # lamp posts along the path
         o += [S(5, 1, Z(3), 'spruce_fence'), S(5, 2, Z(3), 'spruce_fence'), S(5, 3, Z(3), 'lantern'),
               S(24, 1, Z(3), 'spruce_fence'), S(24, 2, Z(3), 'spruce_fence'), S(24, 3, Z(3), 'lantern')]
     # crate cluster on the centre line (cover in front of the gate)
-    o += [F(15, 1, -1, 16, 2, 0, 'barrel[facing=up]'), S(15, 1, 1, 'spruce_planks'), S(16, 1, 1, 'barrel[facing=up]'),
+    o += [F(15, 1, -1, 16, 2, 0, 'stripped_spruce_wood'), S(15, 1, 1, 'spruce_planks'), S(16, 1, 1, 'stripped_spruce_wood'),
           S(15, 3, -1, 'spruce_slab[type=bottom]')]
     # trees
     for tx, tz in ((7, 14), (7, -14), (22, 15), (22, -15), (13, -9), (13, 9)):
@@ -203,7 +203,7 @@ _b.append(f'{OW} kill @e[type=minecraft:item,{_AREA}]')
 _TAGS = ('mg_ctf_r', 'mg_ctf_b', 'mg_ctf_c', 'mg_ctf_kl', 'mg_ctf_cam')
 ENTER_LINES.extend([f'tag @s remove {t}' for t in _TAGS] + ['scoreboard players set @s mg_ctf_rs 0'])
 EXTRA_LOAD.extend([
-    'scoreboard objectives add mg_ctf_k playerKillCount', 'scoreboard objectives add mg_ctf_rs dummy', 'scoreboard objectives add mg_ctf_a dummy',
+    'scoreboard objectives add mg_ctf_k playerKillCount', 'scoreboard objectives add mg_ctf_rs dummy', 'scoreboard objectives add mg_ctf_cn dummy', 'scoreboard objectives add mg_ctf_a dummy',
     'scoreboard objectives add mg_ctf_cap dummy',
     f'bossbar add {NS}:ctf {tc({"text": "Capture the Flag"})}', f'bossbar set {NS}:ctf max {_LEN}', f'bossbar set {NS}:ctf style notched_10',
     f'scoreboard players set #ctf_len mg {_LEN}',
@@ -389,7 +389,7 @@ _setup = [
     'scoreboard players set #ctf_fr mg 0', 'scoreboard players set #ctf_fb mg 0', 'scoreboard players set #ctf_sr mg 0',
     'scoreboard players set #ctf_sb mg 0', 'scoreboard players set #ctf_sd mg 0',
     *[f'tag @a[tag={_T}] remove {t}' for t in _TAGS],
-    f'scoreboard players set @a[tag={_T}] mg_ctf_rs 0', f'scoreboard players set @a[tag={_T}] mg_ctf_k 0', f'scoreboard players set @a[tag={_T}] mg_ctf_cap 0',
+    f'scoreboard players set @a[tag={_T}] mg_ctf_rs 0', f'scoreboard players set @a[tag={_T}] mg_ctf_k 0', f'scoreboard players set @a[tag={_T}] mg_ctf_cap 0', f'scoreboard players set @a[tag={_T}] mg_ctf_cn 0',
     f'execute as @a[tag={_T},sort=random] run function {NS}:ctf/assign',
     f'execute as @a[tag={_T},tag=mg_ctf_r] run function {NS}:ctf/spawn_r',
     f'execute as @a[tag={_T},tag=mg_ctf_b] run function {NS}:ctf/spawn_b',
@@ -403,7 +403,8 @@ _game = [
     # deaths (killer is tagged first for the kill message), respawn timers
     f'execute as @a[tag={_AL},scores={{mg_ctf_k=1..}}] run tag @s add mg_ctf_kl',
     f'execute as @a[tag={_AL},scores={{mg_ctf_k=1..}}] at @s run playsound minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 1 0.8',
-    f'scoreboard players add @a[tag={_AL},scores={{mg_ctf_k=1..}}] mg_coins 1',
+    f'scoreboard players add @a[tag={_AL},scores={{mg_ctf_k=1..,mg_ctf_cn=..9}}] mg_coins 1',
+    f'scoreboard players add @a[tag={_AL},scores={{mg_ctf_k=1..}}] mg_ctf_cn 1',
     f'execute as @a[tag={_AL},scores={{mg_deaths=1..}}] run function {NS}:ctf/died',
     'tag @a[tag=mg_ctf_kl] remove mg_ctf_kl', f'scoreboard players set @a[tag={_T},scores={{mg_ctf_k=1..}}] mg_ctf_k 0',
     f'execute as @a[tag={_AL},scores={{mg_ctf_rs=1..}}] run function {NS}:ctf/rs',

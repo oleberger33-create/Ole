@@ -250,7 +250,7 @@ fn('farben/revive2', [
     'gamemode adventure @a[tag=mg_farben_rev]',
     f'{OW} spreadplayers {_cx} {_cz} 2 12 false @a[tag=mg_farben_rev]',
     'effect give @a[tag=mg_farben_rev] minecraft:saturation infinite 0 true',
-    'effect give @a[tag=mg_farben_rev] minecraft:resistance infinite 4 true',
+    'effect give @a[tag=mg_farben_rev] minecraft:resistance infinite 4 true', 'effect give @a[tag=mg_farben_rev] minecraft:weakness infinite 255 true',
     'title @a[tag=mg_farben_rev] title {"text":"Zurück im Spiel!","color":"green","bold":true}',
     'tag @a[tag=mg_farben_rev] remove mg_farben_rev',
 ])
@@ -292,7 +292,7 @@ _game = [
 _setup = [
     f'{OW} spreadplayers {_cx} {_cz} 3 12 false @a[tag={_T}]',
     f'effect give @a[tag={_T}] minecraft:saturation infinite 0 true',
-    f'effect give @a[tag={_T}] minecraft:resistance infinite 4 true',
+    f'effect give @a[tag={_T}] minecraft:resistance infinite 4 true', f'effect give @a[tag={_T}] minecraft:weakness infinite 255 true',
     'scoreboard players set #farben_r mg 0', 'scoreboard players set #farben_ph mg 3', 'scoreboard players set #farben_pt mg 70',
     'scoreboard players set #farben_7 mg 7',
     f'tag @a[tag={_T}] remove mg_farben_fell', f'tag @a[tag={_T}] remove mg_farben_rev',
