@@ -6,7 +6,7 @@ Rein vanilla, laeuft komplett auf dem Server (keine Client-Mods noetig). Spieler
 
 Run:  python3 build.py <out_dir> [min_format]   -> <out_dir>/smp/ und <out_dir>/smp.zip
 Module: jede Datei in modules/*.py wird am Ende ausgefuehrt (alle Globals von hier sind verfuegbar).
-        SMP_MODULES=homes,tpa baut nur diese Module (zum Entwickeln).
+        SMP_MODULES=info,spawn,tp baut nur diese Module (zum Entwickeln).
 """
 import json, os, sys, zipfile
 
@@ -15,7 +15,7 @@ MIN_FORMAT = int(sys.argv[2]) if len(sys.argv) > 2 else 121
 ROOT = os.path.join(OUT, 'smp')
 NS = 'smp'
 SERVER_NAME = 'OLE SMP'
-PACK_VERSION = 1
+PACK_VERSION = 2
 files = {}
 
 
@@ -33,13 +33,13 @@ def tc(obj):
 
 PREFIX = {'text': '» ', 'color': 'green', 'bold': True}
 def msg(*parts):
-    """chat message with the green » prefix (parts = text components)"""
-    return tc([PREFIX] + list(parts))
+    """chat message with the green » prefix (parts = text components; they do not inherit the prefix style)"""
+    return tc([{'text': ''}, PREFIX] + list(parts))
 
 
-def clk(label, cmd, color='yellow', hover=None):
-    """clickable text component running a command (use for /trigger buttons)"""
-    c = {'text': label, 'color': color, 'click_event': {'action': 'run_command', 'command': cmd}}
+def clk(label, cmd, color='yellow', hover=None, action='run_command'):
+    """clickable text component running (or with action='suggest_command': suggesting) a command"""
+    c = {'text': label, 'color': color, 'click_event': {'action': action, 'command': cmd}}
     if hover:
         c['hover_event'] = {'action': 'show_text', 'value': hover}
     return c
@@ -92,7 +92,7 @@ def warmup(key, target):
     moving to another block, <target> runs as the player (at the player). Moving cancels it."""
     WARMUPS.append((key, target))
     fn(f'core/warm_{key}', [
-        *[f'tag @s remove smp_wu_{k}' for k, _ in WARMUPS],
+        f'function {NS}:core/warm_clear',          # only ONE warm-up at a time (generated in finish() with all keys)
         f'tag @s add smp_wu_{key}',
         'scoreboard players operation @s smp_wu = #warm_t smp',
         'execute store result score @s smp_wx run data get entity @s Pos[0]',
@@ -137,9 +137,9 @@ fn('core/dim', dim_lines())
 # `function smp:core/back_go` teleports the player to the saved position (storage smp:back p<id>).
 fn('core/back_save', [
     'execute store result storage smp:tmp id int 1 run scoreboard players get @s smp_id',
-    'execute store result storage smp:tmp x double 1 run data get entity @s Pos[0]',
-    'execute store result storage smp:tmp y double 1 run data get entity @s Pos[1]',
-    'execute store result storage smp:tmp z double 1 run data get entity @s Pos[2]',
+    'data modify storage smp:tmp x set from entity @s Pos[0]',      # exact doubles (store result would floor)
+    'data modify storage smp:tmp y set from entity @s Pos[1]',
+    'data modify storage smp:tmp z set from entity @s Pos[2]',
     f'function {NS}:core/dim',
     f'function {NS}:core/back_put with storage smp:tmp',
 ])
@@ -150,6 +150,7 @@ fn('core/back_go2', ['$execute unless data storage smp:back p$(id).has run retur
                      '$function smp:core/tp with storage smp:back p$(id)'])
 fn('core/death', [
     'tag @s add smp_dead', 'scoreboard players set @s smp_deaths 0',
+    'scoreboard players add @s smp_tode 1',          # persistent death counter (stats, leaderboards)
     'execute store result score #x smp run data get entity @s Pos[0]',
     'execute store result score #y smp run data get entity @s Pos[1]',
     'execute store result score #z smp run data get entity @s Pos[2]',
@@ -183,7 +184,20 @@ fn('core/welcome', [
     f'tellraw @s {tc([{"text": "Willkommen auf ", "color": "gray"}, {"text": SERVER_NAME, "color": "green", "bold": True}, {"text": " – Survival mit Freunden.", "color": "gray"}])}',
     f'tellraw @s {tc([{"text": "Alle Befehle: ", "color": "gray"}, clk("[/trigger hilfe]", "/trigger hilfe", "yellow"), {"text": "   Regeln: ", "color": "gray"}, clk("[/trigger regeln]", "/trigger regeln", "yellow"), {"text": "   Menue: ", "color": "gray"}, {"text": "Esc -> SMP-Menue", "color": "yellow"}])}',
 ])
-fn('core/rejoin', ['scoreboard players set @s smp_leave 0', f'function {NS}:core/welcome'])
+fn('core/rejoin', ['scoreboard players set @s smp_leave 0', f'execute if score @s smp_id matches 1 run function {NS}:core/reid', f'function {NS}:core/welcome'])
+# player number 1 is reserved: a bare "/trigger <obj>" sets the value 1, so "set <nr>" arguments must never collide with it.
+# Players from pack version 1 may still have number 1 -> they get a new number (and their storage moves along).
+fn('core/reid', [
+    'scoreboard players add #next_id smp 1', 'scoreboard players operation @s smp_id = #next_id smp',
+    'execute store result storage smp:tmp id int 1 run scoreboard players get @s smp_id',
+    f'function {NS}:core/reid2 with storage smp:tmp',
+])
+fn('core/reid2', [
+    '$execute if data storage smp:back p1 run data modify storage smp:back p$(id) set from storage smp:back p1',
+    'data remove storage smp:back p1',
+    '$execute if data storage smp:homes p1 run data modify storage smp:homes p$(id) set from storage smp:homes p1',
+    'data remove storage smp:homes p1',
+])
 
 
 def finish():
@@ -195,6 +209,8 @@ def finish():
         'scoreboard objectives add smp_dim dummy',
         'scoreboard objectives add smp_wu dummy', 'scoreboard objectives add smp_wx dummy', 'scoreboard objectives add smp_wy dummy', 'scoreboard objectives add smp_wz dummy',
         'scoreboard objectives add smp_deaths deathCount',
+        'scoreboard objectives add smp_tode dummy',
+        'scoreboard objectives add smp_mkills minecraft.custom:minecraft.mob_kills',
         'scoreboard objectives add smp_leave minecraft.custom:minecraft.leave_game',
         'scoreboard objectives add smp_pt minecraft.custom:minecraft.play_time',
         f'scoreboard objectives add smp_hours dummy {tc({"text": "Stunden", "color": "gray"})}',
@@ -202,7 +218,8 @@ def finish():
         *[f'scoreboard objectives add {o} trigger' for o, *_ in TRIGGERS],
         'scoreboard players set #warm_s smp 3', 'scoreboard players set #warm_t smp 60',
         'scoreboard players set #72000 smp 72000', 'scoreboard players set #20 smp 20', 'scoreboard players set #60 smp 60',
-        'execute unless score #next_id smp matches 0.. run scoreboard players set #next_id smp 0',
+        'execute unless score #next_id smp matches 1.. run scoreboard players set #next_id smp 1',     # first player gets number 2 (1 is reserved)
+        f'execute as @a[scores={{smp_id=1}}] run function {NS}:core/reid',
         'gamerule players_sleeping_percentage 1',
         'gamerule spawn_phantoms false',
         *EXTRA_LOAD,
@@ -247,16 +264,19 @@ def finish():
         f'execute if score @s smp_wu matches 1.. run title @s actionbar {tc([{"text": "Teleport in ", "color": "gray"}, {"score": {"name": "#ws", "objective": "smp"}, "color": "yellow", "bold": True}, {"text": " ... nicht bewegen", "color": "gray"}])}',
         f'execute if score @s smp_wu matches 0 run function {NS}:core/warm_fire',
     ])
+    fn('core/warm_clear', [f'tag @s remove smp_wu_{k}' for k, _ in WARMUPS])
     fn('core/warm_fire', [*[f'execute if entity @s[tag=smp_wu_{k}] run function {t}' for k, t in WARMUPS],
-                          *[f'tag @s remove smp_wu_{k}' for k, _ in WARMUPS]])
-    fn('core/warm_cancel', ['scoreboard players set @s smp_wu 0', *[f'tag @s remove smp_wu_{k}' for k, _ in WARMUPS],
+                          f'function {NS}:core/warm_clear'])
+    fn('core/warm_cancel', ['scoreboard players set @s smp_wu 0', f'function {NS}:core/warm_clear',
                             f'tellraw @s {msg({"text": "Teleport abgebrochen – du hast dich bewegt.", "color": "red"})}'])
     help_lines = [f'tellraw @s {tc({"text": SERVER_NAME + " – Befehle", "color": "green", "bold": True})}',
                   f'tellraw @s {tc({"text": "Tipp: Esc -> SMP-Menue hat alles als Knoepfe.", "color": "gray"})}']
     for cat, entries in HELP.items():
         help_lines.append(f'tellraw @s {tc({"text": " " + cat, "color": "gold", "bold": True})}')
         for usage, text in entries:
-            help_lines.append(f'tellraw @s {tc([{"text": "  "}, clk(usage, usage.split(" <")[0], "yellow", "Anklicken"), {"text": "  " + text, "color": "gray"}])}')
+            cmd = usage.split(' <')[0]
+            btn = clk(usage, cmd + ' ', 'yellow', 'Anklicken, dann den Wert eintippen', 'suggest_command') if '<' in usage else clk(usage, cmd, 'yellow', 'Anklicken')
+            help_lines.append(f'tellraw @s {tc([{"text": "  "}, btn, {"text": "  " + text, "color": "gray"}])}')
     fn('core/help', help_lines)
     # Esc menu (dialog registry: needs a server restart to change, functions only need /reload)
     js('data/minecraft/tags/dialog/pause_screen_additions.json', {'values': [f'{NS}:menu']})
