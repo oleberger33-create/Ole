@@ -62,6 +62,9 @@ HELP = {}            # category -> [(usage, text)]
 MENU = []            # (label text component, tooltip, command, width) buttons of the Esc dialog "SMP-Menue"
 COOLDOWNS = []       # objectives decremented by 1 every second while > 0
 WARMUPS = []         # (key, target function) teleport warm-ups (see warmup())
+HUD_PRE = []         # commands run as+at the player inside info/hud before the actionbar line (other modules add segments)
+HUD_PARTS = []       # text components appended to the info HUD actionbar line
+EXTRA_FINISH = []    # callables run at the start of finish(): generate functions that depend on registries of later modules
 RULES = [
     'Nicht griefen, nichts klauen – auch nicht aus fremden Kisten.',
     'Fremde Bauten und Claims respektieren (Claim-Anker schuetzen dein Gebiet).',
@@ -202,6 +205,8 @@ fn('core/reid2', [
 
 def finish():
     """Writes load/tick/help/menu from the registries and the zip. Called once at the very end."""
+    for _cb in EXTRA_FINISH:
+        _cb()
     load = [
         'scoreboard objectives add smp dummy',
         'scoreboard objectives add smp_id dummy',

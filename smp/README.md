@@ -46,6 +46,10 @@ Wird das Pack in eine bestehende Welt eingebaut, den Spawn-Platz einmal von Hand
 | `/trigger top` | Top 5 der Online-Spieler |
 | `/trigger online` | wer ist online (mit AFK) |
 | `/trigger pos` | eigene Position fuer alle posten |
+| `/trigger wp` | Wegpunkt-Menue (Dialog): verfolgen, speichern |
+| `/trigger wpset` | Wegpunkt an der eigenen Position speichern (bis 10; `set 1<n>` ueberschreibt Platz n), danach Namens-Dialog |
+| `/trigger wpgo set <n>` | Wegpunkt verfolgen: Richtungspfeil + Entfernung in der Actionbar, Lichtsaeule am Ziel (nur fuer dich sichtbar); 99 = Todesort |
+| `/trigger wpoff` / `wpliste` / `wpdel set <n>` / `wpshare set <n>` | Verfolgung aus / Chat-Liste mit Knoepfen / loeschen (Rueckfrage) / mit allen teilen (Knopf zum Uebernehmen) |
 
 Spieler-Nummern (`smp_id`) beginnen bei 2: der Wert 1 ist das, was ein nacktes `/trigger <x>` setzt.
 
@@ -55,14 +59,17 @@ Spieler-Nummern (`smp_id`) beginnen bei 2: der Wert 1 ist das, was ein nacktes `
 - Der **Spawn-Platz** (Ringstrasse, Podest, Laternen, Baenke, 3 Info-Waende mit Hologrammen: Befehle, Regeln,
   Willkommen, Leaderboards Spielzeit/Tode/Mob-Kills) wird automatisch an der Join-Position des ersten wirklich
   neuen Spielers (= Weltspawn) gebaut und setzt den Weltspawn dorthin. Admin: `/function smp:spawn/build_here`.
-- Tod: Koordinaten im Chat, persistenter Todeszaehler (`smp_tode`).
+- Tod: Koordinaten im Chat, persistenter Todeszaehler (`smp_tode`), Todesort als Wegpunkt (wird verfolgt, wenn gerade kein anderer aktiv ist).
 - AFK nach 5 min ohne Bewegung (grauer `[AFK]`-Suffix), Schlaf-Hinweis (1 Spieler reicht, `players_sleeping_percentage 1`),
   keine Phantome, Spielstunden in der Tab-Liste.
 
 ## Daten
 
 - Scoreboard: `smp` (Konstanten/Scratch, `#next_id`, `#smp_v`), `smp_id`, `smp_tode`, `smp_mkills`, Trigger-Objectives, Cooldowns `smp_cd_*`.
-- Storage: `smp:back p<id>` (Zurueck-Position), `smp:homes p<id>.h<n>`, `smp:tp center` (RTP-Mitte), `smp:spawn` (Platz, Spielernamen), `smp:tmp` (Scratch).
+- Storage: `smp:back p<id>` (Zurueck-Position), `smp:homes p<id>.h<n>`, `smp:tp center` (RTP-Mitte), `smp:spawn` (Platz, Spielernamen),
+  `smp:wp p<id>.s<n>` / `p<id>.tod` / `shared.c<code>` (Wegpunkte), `smp:tmp` (Scratch).
+- Modul-Hooks fuer das Info-HUD: `HUD_PRE` (Befehle vor der Actionbar-Zeile) und `HUD_PARTS` (angehaengte Textbausteine), `EXTRA_FINISH`
+  (Generatoren, die erst in `finish()` laufen, damit spaetere Module ihre Teile eintragen koennen).
 
 ## Testen
 

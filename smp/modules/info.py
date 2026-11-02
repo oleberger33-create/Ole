@@ -108,16 +108,21 @@ fn('info/direction', [      # Himmelsrichtung aus der Blickrichtung (Rotation[0]
     'scoreboard players operation #inf_r smp /= #450 smp',
     *[f'execute if score #inf_r smp matches {i} run data modify storage smp:tmp hud.dir set value {{text:"{d}"}}' for i, d in enumerate(_DIRS)],
 ])
-fn('info/hud', [            # als + an dem Spieler (Uhrzeit-Scores kommen aus info/clock)
-    f'function {NS}:info/blockpos',
-    f'function {NS}:info/dimname',
-    f'function {NS}:info/direction',
-    'title @s actionbar ' + tc([
-        _t('X '), _sc('#inf_x'), _t(' Y '), _sc('#inf_y'), _t(' Z '), _sc('#inf_z'),
-        _t(' · ', 'dark_gray'), _NBT('hud.dim', 'yellow'),
-        _t(' · ', 'dark_gray'), _t('↑ '), _NBT('hud.dir', 'white'),
-        _t(' · ', 'dark_gray'), _sc('#inf_h10'), _sc('#inf_h1'), _t(':', 'white'), _sc('#inf_m10'), _sc('#inf_m1')]),
-])
+def _gen_hud():             # erst in finish(): spaetere Module haengen Segmente an (HUD_PRE / HUD_PARTS, z.B. Wegpunkt-Kompass)
+    fn('info/hud', [        # als + an dem Spieler (Uhrzeit-Scores kommen aus info/clock)
+        f'function {NS}:info/blockpos',
+        f'function {NS}:info/dimname',
+        f'function {NS}:info/direction',
+        *HUD_PRE,
+        'title @s actionbar ' + tc([
+            _t('X '), _sc('#inf_x'), _t(' Y '), _sc('#inf_y'), _t(' Z '), _sc('#inf_z'),
+            _t(' · ', 'dark_gray'), _NBT('hud.dim', 'yellow'),
+            _t(' · ', 'dark_gray'), _t('↑ '), _NBT('hud.dir', 'white'),
+            _t(' · ', 'dark_gray'), _sc('#inf_h10'), _sc('#inf_h1'), _t(':', 'white'), _sc('#inf_m10'), _sc('#inf_m1'), *HUD_PARTS]),
+    ])
+
+
+EXTRA_FINISH.append(_gen_hud)
 
 # ---------------------------------------------------------------- Stats: /trigger stats
 trigger('stats', f'{NS}:info/stats', '/trigger stats', 'Deine Statistiken (Spielzeit, Tode, Kills, Strecke, Spruenge)', _C,
