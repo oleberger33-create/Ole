@@ -68,3 +68,11 @@ Spieler-Nummern (`smp_id`) beginnen bei 2: der Wert 1 ist das, was ein nacktes `
 
 26.3: Testserver mit dem 121-Build, `/reload`, Log auf Fehler pruefen. 26.1 + mineflayer-Bots (101-Build) fuer
 Spielerpfade (Join, Warm-ups, TPA, RTP, Tod). Siehe `/tmp/mc/AGENT_GUIDE.md` in der Session.
+
+## Ole's Farmhelper (nur fuer einen Spieler)
+
+Das bestehende Datapack `OlesFarmhelper.zip` (Namespace `ofh`, Farm-Baupläne mit Geisterblöcken) läuft auf dem SMP nur
+für einen Spieler: `tools/farmhelper_nur_fuer.py <original.zip> <Spielername> <ausgabe.zip>` beschränkt Item-Vergabe,
+Rechtsklick-Menü und `/trigger ofh.t` auf diesen Namen und entfernt das Craft-Rezept. Item erneut holen:
+`/trigger ofh.t set 9099` (oder als Op `/function ofh:item`). Das Item-Modell braucht client-seitig das Resourcepack
+`ole_farmhelper_ressourcen.zip` (liegt im Server-Root).
