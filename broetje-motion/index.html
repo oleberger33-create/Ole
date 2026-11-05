@@ -49,7 +49,7 @@
   .tile .ico{position:absolute;left:40px;top:40px;width:132px;height:132px;overflow:visible}
   .tile .num{position:absolute;right:38px;top:44px;font-family:"Inter";font-size:18px;font-weight:600;letter-spacing:.2em;color:var(--mute-d)}
   .tile .name{position:absolute;left:40px;bottom:112px;color:#fff;font-size:48px;font-weight:700;letter-spacing:-.03em}
-  .tile .desc{position:absolute;left:40px;bottom:70px;color:var(--mute-d);font-size:23px;font-weight:500}
+  .tile .desc{position:absolute;left:40px;bottom:70px;color:var(--mute-d);font-size:21px;font-weight:500}
   .tile .bar{position:absolute;left:40px;right:40px;bottom:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
   .tile .bar i{position:absolute;inset:0;border-radius:2px}
   .tile .ring{position:absolute;inset:0;border-radius:30px;pointer-events:none}
@@ -300,7 +300,7 @@ function fadeUp(el, t, s, d=0.7, o=null, od=0.4, dist=14){
   if (o !== null){ const q = P(t, o, od, E.inOut); y -= q*dist; op *= 1-q; blur += q*6; }
   css(el, { y, op, blur });
 }
-function draw(path, k){ const L = path._L || (path._L = path.getTotalLength()); path.style.strokeDasharray = `${L} ${L}`; path.style.strokeDashoffset = L * (1 - k); }
+function draw(path, k){ path.style.visibility = k > 0.004 ? 'visible' : 'hidden'; const L = path._L || (path._L = path.getTotalLength()); path.style.strokeDasharray = `${L} ${L}`; path.style.strokeDashoffset = L * (1 - k); }
 const NS = 'http://www.w3.org/2000/svg';
 const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
 
@@ -499,6 +499,7 @@ function render(t){
       T.ring.style.boxShadow = `inset 0 0 0 ${1.5 + on}px ${T.T.c}${Math.round(clamp(on * .9 + allOn * .5) * 255).toString(16).padStart(2, '0')}, 0 0 ${60 * on}px -10px ${T.T.c}`;
       T.bar.style.clipPath = `inset(0 ${100 - 100 * clamp(P(t, sp, .6, E.inOut) * 1 + 0)}% 0 0)`;
       T.st.forEach((p, j) => draw(p, P(t, 9.7 + i * .09 + j * .05, 1.0, E.inOut)));
+      const hub = T.el.querySelector('.hub'); if (hub) { const hk = S(t, 10.3 + i * .09, .5, .3); hub.setAttribute('r', (5 * Math.max(.0001, hk)).toFixed(2)); }
       // icon micro-animations
       const ic = T.sub;
       if (ic.dr) {
