@@ -40,7 +40,12 @@ FARBEN = {
     "pink_petals": (240, 170, 200), "wildflowers": (240, 220, 90), "poppy": (220, 40, 40),
     "dandelion": (250, 230, 60), "cornflower": (80, 110, 230), "allium": (190, 120, 230),
     "azure_bluet": (230, 230, 240), "oxeye_daisy": (240, 240, 220), "lily_of_the_valley": (250, 250, 250),
+    "barrel": (130, 95, 55), "hay_block": (200, 170, 40), "composter": (110, 80, 45), "bell": (240, 200, 60),
+    "blast_furnace": (90, 90, 95), "target": (220, 200, 180), "fletching_table": (190, 170, 120),
+    "oak_log": (110, 85, 50),
 }
+WOLLE = {"lime": (120, 200, 40), "white": (235, 235, 235), "orange": (230, 120, 30), "red": (170, 40, 40),
+         "black": (30, 30, 35), "brown": (115, 75, 45)}
 PFLANZEN = {"short_grass", "tall_grass", "fern", "pink_petals", "wildflowers", "poppy", "dandelion",
             "cornflower", "allium", "azure_bluet", "oxeye_daisy", "lily_of_the_valley", "vine",
             "glow_lichen", "hanging_roots", "cave_vines", "cave_vines_plant", "lantern", "soul_lantern",
@@ -54,6 +59,8 @@ def farbe(blk):
         return {"purple": (120, 50, 170), "yellow": (240, 200, 50), "red": (170, 40, 40),
                 "light_blue": (90, 160, 220), "orange": (230, 120, 30), "lime": (120, 200, 40),
                 "cyan": (30, 140, 150), "green": (80, 110, 30)}.get(name[:-7], (200, 200, 200))
+    if name.endswith("_wool"):
+        return WOLLE.get(name[:-5], (200, 200, 200))
     if name.endswith("candle"):
         return (255, 220, 140)
     return FARBEN.get(name, (200, 0, 200))
@@ -153,6 +160,7 @@ if __name__ == "__main__":
         ("Absprung ins Tal", (0, F + 1, 37), (-6, 11)),
         ("Fluchhändler", (-17, F + 6, 17), (-12, 5)),
         ("Aussichtspunkt", (-31, F + 2, 0), (-7, -9)),
+        ("Marktinsel – Waren gegen Smaragde", (37, F + 5, -29), (6, -12)),
     ]
     print(zeichnen(m, ziel, richtung, a=10, b=5, c=11.7, schilder=schilder, strahl=(0, F + 1, 0),
                    titel=("Himmelsinsel-Spawn", "Schwebende Spawn-Insel mit allen Verzauberungsbüchern"),

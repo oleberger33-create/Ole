@@ -6,7 +6,7 @@ Bodenstation darunter. Alle Zufallswerte sind fest geseedet, jeder Build sieht g
 import math
 import random
 
-from haendler import HAENDLER
+from haendler import ANKAUF, BLICK, HAENDLER
 
 F = 224                       # Oberkante der Insel (Grasblöcke), man läuft auf F + 1
 SPAWN = (0, F + 1, 6)         # Weltspawn auf dem Platz
@@ -17,6 +17,8 @@ BRETT = (32, 38)              # Sprungbrett bei x = 0 von z bis z
 LANDUNG = (0, 41)             # Mitte der Bodenstation (x, z)
 BEREICH = (-48, -48, 47, 47)  # Chunks, die zum Bauen geladen werden (x1, z1, x2, z2)
 AMBOSSE = [(15, F + 1, -5), (17, F + 1, -5), (19, F + 1, -5)]
+MARKT = (37, -29)             # Mitte der Marktinsel im Nordosten
+PAVILLON = (37, -10)          # Pavillon, an dem die Brücke nach Norden abknickt
 
 
 # ---------------------------------------------------------------- Modell & Rauschen
@@ -557,6 +559,135 @@ def bepflanzen(m, rng):
             m.set(x, y + 1, z, f"wildflowers[facing={richtung},flower_amount={rng.randint(1, 4)}]")
 
 
+# ---------------------------------------------------------------- Marktinsel
+
+PFLANZEN = ("short_grass", "tall_grass", "fern", "pink_petals", "wildflowers") + tuple(BLUMEN)
+
+
+def pflanzen_entfernen(m, zellen):
+    """Räumt Gras und Blumen von Feldern, die nachträglich zu Weg oder Brücke werden."""
+    for x, z in zellen:
+        for y in (F + 2, F + 1):
+            blk = m.get(x, y, z)
+            if blk and blk.split("[")[0] in PFLANZEN:
+                m.set(x, y, z, "air")
+
+
+def bruecke(m, x1, z1, x2, z2, achse):
+    """Holzbrücke, 3 breit plus Geländer; achse = Laufrichtung ("x" oder "z")."""
+    for x in range(x1, x2 + 1):
+        for z in range(z1, z2 + 1):
+            m.frei.add((x, z))
+            m.set(x, F, z, "spruce_planks")
+            rand = (z in (z1, z2)) if achse == "x" else (x in (x1, x2))
+            if rand:
+                if m.get(x, F - 1, z) is None:
+                    m.set(x, F - 1, z, f"spruce_log[axis={achse}]")
+                m.set(x, F + 1, z, "spruce_fence")
+
+
+def stand(m, h):
+    """Marktstand 3 × 3: hinten Kisten, in der Mitte der Händler, vorne die Theke, Dach aus Wolle."""
+    fx, fz, _ = BLICK[h["blick"]]
+    rx, rz = -fz, fx
+    vx, vz = h["x"], h["z"]
+    for s in (-1, 0, 1):
+        hinten = (vx - fx + s * rx, vz - fz + s * rz)
+        mitte = (vx + s * rx, vz + s * rz)
+        vorne = (vx + fx + s * rx, vz + fz + s * rz)
+        for x, z in (hinten, mitte, vorne):
+            m.frei.add((x, z))
+            m.set(x, F, z, "spruce_planks")
+            m.set(x, F + 4, z, f"{h['wolle'][abs(s)]}_wool")
+        if s:
+            m.set(hinten[0], F + 1, hinten[1], "barrel[facing=up]")
+            m.box(hinten[0], F + 2, hinten[1], hinten[0], F + 3, hinten[1], "spruce_fence")
+            m.box(vorne[0], F + 1, vorne[1], vorne[0], F + 3, vorne[1], "spruce_fence")
+        else:
+            m.set(hinten[0], F + 1, hinten[1], h["deko"])
+            m.set(vorne[0], F + 1, vorne[1], h["theke"])
+            m.set(vorne[0], F + 3, vorne[1], "lantern[hanging=true]")
+
+
+def markt(m):
+    """Marktinsel mit vier Ankaufständen, verbunden über eine Brücke mit Pavillon."""
+    rng = random.Random(4711)  # eigene Zufallszahlen: der Rest der Insel bleibt Block für Block gleich
+    cx, cz = MARKT
+    unten = insel(m, cx, cz, F, 9.5, 16, seed=53, amp=0.5)
+    # Weg vom Hauptplatz zur Brücke
+    alt_frei = set(m.frei)
+    weg(m, [(6, -6), (12, -10), (29, -10)], 1)
+    pflanzen_entfernen(m, m.frei - alt_frei)
+    # Brücke nach Osten, Pavillon, Brücke nach Norden
+    px, pz = PAVILLON
+    bruecke(m, 28, pz - 2, px - 3, pz + 2, "x")
+    bruecke(m, px - 2, cz + 7, px + 2, pz - 3, "z")
+    pflanzen_entfernen(m, [(x, z) for x in range(26, 32) for z in range(pz - 2, pz + 3)])
+    for x in range(px - 2, px + 3):
+        for z in range(pz - 2, pz + 3):
+            m.frei.add((x, z))
+            m.set(x, F, z, "spruce_planks")
+            if m.get(x, F - 1, z) is None:
+                m.set(x, F - 1, z, "stripped_spruce_log[axis=y]" if abs(x - px) == 2 and abs(z - pz) == 2
+                      else "spruce_planks")
+    for x, z in [(px - 2, pz - 2), (px + 2, pz - 2), (px - 2, pz + 2), (px + 2, pz + 2)]:
+        m.box(x, F + 1, z, x, F + 3, z, "stripped_spruce_log[axis=y]")
+    for z in range(pz - 1, pz + 2):
+        m.set(px + 2, F + 1, z, "spruce_fence")
+    for x in range(px - 1, px + 2):
+        m.set(x, F + 1, pz + 2, "spruce_fence")
+    for x in range(px - 3, px + 4):
+        for z in range(pz - 3, pz + 4):
+            rand = abs(x - px) == 3 or abs(z - pz) == 3
+            m.set(x, F + 4, z, "spruce_slab[type=bottom]" if rand else "spruce_planks")
+    m.set(px, F + 5, pz, "spruce_slab[type=bottom]")
+    m.set(px, F + 3, pz, "lantern[hanging=true]")
+    for x, z in [(31, pz - 2), (31, pz + 2), (px - 2, pz - 7), (px + 2, pz - 7)]:
+        m.box(x, F + 1, z, x, F + 2, z, "spruce_fence")
+        m.set(x, F + 3, z, "lantern[hanging=false]")
+    # Marktplatz mit Glocke
+    for x in range(cx - 6, cx + 7):
+        for z in range(cz - 6, cz + 7):
+            r = math.hypot(x - cx, z - cz)
+            if r > 4.6:
+                continue
+            m.frei.add((x, z))
+            if r <= 0.5:
+                blk = "chiseled_stone_bricks"
+            elif r <= 1.5:
+                blk = "polished_andesite"
+            elif r > 3.6:
+                blk = "polished_andesite"
+            else:
+                w = rng.random()
+                blk = "mossy_stone_bricks" if w < 0.2 else "cracked_stone_bricks" if w < 0.28 else "stone_bricks"
+            m.set(x, F, z, blk)
+    m.set(cx, F + 1, cz, "bell[attachment=floor,facing=south]")
+    for x in range(cx - 1, cx + 2):
+        for z in range(cz + 5, cz + 10):
+            m.frei.add((x, z))
+            if m.get(x, F, z) == "grass_block":
+                m.set(x, F, z, "dirt_path")
+    for x, z in [(cx - 3, cz + 4), (cx + 3, cz + 4)]:
+        laternenpfahl(m, x, F, z)
+    for h in ANKAUF:
+        stand(m, h)
+    # Kisten und Heu zwischen den Ständen
+    for x, z, blk in [(cx - 5, cz - 3, "barrel[facing=up]"), (cx + 5, cz - 3, "hay_block[axis=y]"),
+                      (cx - 5, cz + 3, "hay_block[axis=x]"), (cx + 5, cz + 3, "barrel[facing=up]"),
+                      (cx, cz - 6, "composter")]:
+        m.frei.add((x, z))
+        m.set(x, F + 1, z, blk)
+    kirschbaum(m, cx - 6, F, cz + 5, rng, 4, 2.4)
+    busch(m, cx + 6, F, cz + 5, rng)
+    # Gras und Blumen nur auf der Marktinsel, mit eigenem Zufall
+    teil = Modell()
+    teil.b = {p: b for p, b in m.b.items() if (p[0], p[2]) in unten}
+    teil.frei = m.frei
+    bepflanzen(teil, rng)
+    m.b.update(teil.b)
+
+
 # ---------------------------------------------------------------- Zäune & Licht
 
 ZAUN_FREI = ("_slab", "_stairs", "glass", "leaves", "lantern", "candle", "carpet", "water",
@@ -673,7 +804,7 @@ def ausleuchten(m, stufe=12):
 
 # ---------------------------------------------------------------- Gesamtmodelle
 
-def himmelsinsel():
+def himmelsinsel(mit_markt=True):
     rng = random.Random(1904)
     m = Modell()
     insel(m, 0, 0, F, 31, 34, seed=11, amp=2.2)
@@ -699,6 +830,8 @@ def himmelsinsel():
         busch(m, x, F, z, rng)
     busch(m, 40, F + 2, 25, rng)
     bepflanzen(m, rng)
+    if mit_markt:
+        markt(m)
     zaeune_verbinden(m)
     lichter = ausleuchten(m)
     return m, lichter
