@@ -22,7 +22,7 @@ VERSIONEN = {"1.21.5": True, "1.21.10": True, "1.21.11": False, "26.3": False}
 SELEKTOR_SCHLUESSEL = {"x", "y", "z", "dx", "dy", "dz", "distance", "scores", "tag", "team", "limit",
                        "sort", "level", "gamemode", "name", "x_rotation", "y_rotation", "type", "nbt",
                        "advancements", "predicate"}
-TEXT_SCHLUESSEL = {"text", "translate", "score", "color", "bold", "italic", "underlined",
+TEXT_SCHLUESSEL = {"text", "translate", "score", "color", "bold", "italic", "underlined", "type", "object", "atlas", "sprite",
                    "strikethrough", "obfuscated", "click_event", "hover_event", "extra", "with",
                    "shadow_color", "font", "insertion"}
 ZAHL = re.compile(r"^-?(\d+\.?\d*|\.\d+)$")
@@ -76,6 +76,13 @@ class Pruefer:
         self.fehler = []
 
     # ---------------------------------------------------------- Einzelprüfungen
+    def blocktag_ok(self, name):
+        ns, _, pfad = name.partition(":")
+        if ns != "minecraft":
+            return os.path.isfile(os.path.join(PACK, "data", ns, "tags", "block", pfad + ".json"))
+        vanilla = os.path.join(MCMETA, f"mcmeta-{self.version}-data", "data", "minecraft", "tags", "block")
+        return not os.path.isdir(vanilla) or os.path.isfile(os.path.join(vanilla, pfad + ".json"))
+
     def id_ok(self, registry, wert):
         name = wert.split(":", 1)[1] if ":" in wert else wert
         return name in self.reg.get(registry, set())
@@ -85,7 +92,7 @@ class Pruefer:
         if not m:
             return f"Blockzustand unlesbar: {tok}"
         if m.group(1):
-            return None if m.group(2) in ("minecraft:replaceable",) else f"unbekannter Blocktag {tok}"
+            return None if self.blocktag_ok(m.group(2)) else f"unbekannter Blocktag {tok}"
         name = m.group(2).split(":", 1)[-1]
         if name not in self.bloecke:
             return f"unbekannter Block {name}"
@@ -133,8 +140,11 @@ class Pruefer:
     def text(self, tok):
         try:
             obj = json.loads(tok)
-        except json.JSONDecodeError as e:
-            return f"Textkomponente kein gültiges JSON/SNBT: {e}"
+        except json.JSONDecodeError:
+            try:  # SNBT mit unquotierten Schlüsseln, z. B. {text:"x",color:"gray"}
+                obj = json.loads(snbt_als_json(tok))
+            except json.JSONDecodeError as e:
+                return f"Textkomponente kein gültiges JSON/SNBT: {e}"
         return self.text_obj(obj)
 
     def text_obj(self, obj):
@@ -228,12 +238,13 @@ class Pruefer:
                 return 1, None
             return (1, None) if self.id_ok(reg, k) else (None, f"{k} fehlt im Register {reg}")
         elif p in ("minecraft:item_stack", "minecraft:item_predicate"):
-            if k == "*" or k.startswith("#"):
+            if k == "*" or k.startswith("#") or k.startswith("*["):
                 return 1, None
             name = re.match(r"^[a-z0-9_.:/-]+", k).group(0)
             return (1, None) if self.id_ok("item", name) else (None, f"Gegenstand {name} unbekannt")
         elif p == "minecraft:particle":
-            return (1, None) if self.id_ok("particle_type", k) else (None, f"Partikel {k} unbekannt")
+            name = k.split("{", 1)[0]
+            return (1, None) if self.id_ok("particle_type", name) else (None, f"Partikel {name} unbekannt")
         elif p == "minecraft:component":
             f = self.text(k)
             return (None, f) if f else (1, None)
@@ -317,6 +328,32 @@ class Pruefer:
         if not self.passt(self.baum, toks, 0, fehler):
             return "; ".join(dict.fromkeys(fehler)) or "Befehl passt nicht zum Befehlsbaum"
         return None
+
+
+def snbt_als_json(s):
+    """Setzt unquotierte Schlüssel außerhalb von Zeichenketten in Anführungszeichen."""
+    out, i, in_str = [], 0, False
+    while i < len(s):
+        c = s[i]
+        if in_str:
+            out.append(c)
+            if c == "\\":
+                out.append(s[i + 1])
+                i += 1
+            elif c == '"':
+                in_str = False
+        elif c == '"':
+            in_str = True
+            out.append(c)
+        else:
+            m = re.match(r"([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)", s[i:])
+            if m:
+                out.append(f'{m.group(1)}"{m.group(2)}"{m.group(3)}')
+                i += m.end()
+                continue
+            out.append(c)
+        i += 1
+    return "".join(out).replace(":1b", ":true").replace(":0b", ":false")
 
 
 def tokens_komma(s):
