@@ -37,3 +37,31 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
 
 Die Pläne sind die Lern-Modelle aus dem Farm-Handbuch (Eisen- und Bambusfarm genau wie auf dem Server). Wo die
 besten Designs größer oder anders sind, steht das mit Quelle in den Farm-Infos.
+
+## Server-Version (OLE SMP, Welt „welt“)
+
+Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. Sie entsteht in vier Schritten:
+
+```bash
+# 1. Original bauen
+python3 generator/farmhelper.py generator/plaene.json aus/
+# 2. Auf einen Spieler beschränken, Geister als Partikel nur für ihn (Werkzeug liegt im Branch speedrun-plan)
+python3 smp/tools/farmhelper_nur_fuer.py aus/OlesFarmhelper.zip FNGreg nur.zip
+# 3. Für mehrere Spieler freigeben; jeder sieht nur die Geister seiner eigenen Pläne
+python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris
+# 4. Ersatzblöcke und Bausteinauswahl
+python3 server/baustein.py mehrere.zip OlesFarmhelper.zip server/baustein.json
+```
+
+Das Ergebnis kommt nach `welt/datapacks/OlesFarmhelper.zip`, danach `/reload`.
+
+**Ersatzblöcke (`server/baustein.json`):** Wo ein Plan Steinziegel, Bruchstein, Stein, Glatten Stein oder Endstein
+verlangt, akzeptiert die Prüfung jeden Block der Gruppe `stein` (41 Steinsorten: voll, undurchsichtig, nicht brennbar,
+leitet Redstone, Mobs spawnen darauf, Explosionswiderstand ≥ 6). Netherrack in der Gold-Farm nimmt zusätzlich die
+Steingruppe ohne Netherziegel, Obsidian in der Enderman-Farm die Steingruppe, Leuchtstein auch Seelaterne, Strohballen
+auch Stein und das Weizenfeld auch Karotten, Kartoffeln und Rote Bete. Fest bleiben Netherziegel (Festungs-Spawns),
+Magma, Seelensand, Wasser, Lava und alle Funktionsblöcke. Grundlage ist eine Prüfung aller 33 Farmen gegen 26.3
+(Spawnregeln, Redstone, Kolben, Feuer, Wasser, Explosionen) mit anschließender Gegenprüfung.
+
+**Bausteinauswahl:** Im Plan-Menü öffnet „Baustein“ eine Auswahl von 14 Steinsorten. Die Wahl gilt für den eigenen Plan:
+Geisterblöcke und der Zähler in der Aktionsleiste zeigen dann diesen Stein. „Vorgabe des Plans“ stellt zurück.
