@@ -66,6 +66,24 @@ for rel in list(dateien):
     setze(rel, '\n'.join(neu) + '\n')
 
 # ---- HUDs
+def titel_mit_wahl(zeile, zaehler):
+    """Tauscht im Aktionsleisten-Titel das Symbol direkt vor jedem genannten Zähler gegen $(bild).
+    Gibt None zurück, wenn nichts zu tauschen ist (dann bleibt die Zeile, wie sie ist)."""
+    kopf = 'title @s actionbar '
+    teile = json.loads(zeile[len(kopf):])
+    if not isinstance(teile, list):
+        return None
+    getauscht = False
+    for i, el in enumerate(teile):
+        if isinstance(el, dict) and el.get('score', {}).get('name') in zaehler:
+            for k in range(i - 1, 0, -1):          # Stelle 0 ist das Farm-Logo und bleibt
+                if isinstance(teile[k], dict) and 'sprite' in teile[k]:
+                    if teile[k]['sprite'].startswith('block/'):
+                        teile[k] = dict(teile[k], sprite='$(bild)')
+                        getauscht = True
+                    break
+    return kopf + json.dumps(teile, ensure_ascii=False) if getauscht else None
+
 farmen_mit_stein = set()
 CLEAR = re.compile(r'^execute store result score (#h\d+) ofh run clear @s (' + bet + r') 0$')
 def CLEAR_FIX(m):
@@ -75,6 +93,8 @@ for rel in list(dateien):
     if not re.match(FN + r'f/[^/]+/s\d+/hud\.mcfunction$', rel):
         continue
     t, neu, geaendert, waehl = txt(rel), [], False, False
+    # Zähler (#hN), deren clear-Ziel ein wählbarer Block ist: nur deren Symbol folgt der Wahl
+    gewaehlte_zaehler = {m.group(1) for m in map(CLEAR.match, t.splitlines()) if m and m.group(2) in WAEHLBAR}
     for z in t.splitlines():
         m = CLEAR.match(z)
         if m and m.group(2) in NUR_FLEXIBEL:
@@ -88,10 +108,8 @@ for rel in list(dateien):
             zaehl['hud_zaehler'] += 1
             geaendert = waehl = True
             continue
-        if z.startswith('title ') and any(f'"sprite": "block/{b.split(":")[1]}"' in z for b in WAEHLBAR):
-            ersetzt = z
-            for b in WAEHLBAR:
-                ersetzt = ersetzt.replace(f'"sprite": "block/{b.split(":")[1]}"', '"sprite": "$(bild)"')
+        ersetzt = titel_mit_wahl(z, gewaehlte_zaehler) if z.startswith('title @s actionbar ') else None
+        if ersetzt:
             assert '$(' not in z
             neu.append('execute if score #wahl ofh matches 0 run ' + z)
             neu.append('$execute unless score #wahl ofh matches 0 run ' + ersetzt)
@@ -135,14 +153,14 @@ for rel in list(dateien):
 d = txt(FN + 'plan/daten.mcfunction').splitlines()
 pos = next(k for k, z in enumerate(d) if z.startswith('execute store result entity @s data.s'))
 d[pos:pos] = ['# Baustein dieses Plans (0 = Vorgabe des Plans)',
-              'execute unless data entity @s data.stein run data merge entity @s {data:{wahl:0,stein:"minecraft:stone_bricks",bild:"block/stone_bricks"}}',
+              'execute unless data entity @s data.name run data merge entity @s {data:{wahl:0,stein:"minecraft:stone_bricks",bild:"block/stone_bricks",name:"Vorgabe des Plans"}}',
               'execute store result score #wahl ofh run data get entity @s data.wahl']
 setze(FN + 'plan/daten.mcfunction', '\n'.join(d) + '\n')
 
 # ---- Trigger
 t = txt(FN + 'trigger.mcfunction').splitlines()
 t[1:1] = ['execute if score @s ofh.t matches 9500 run return run function ofh:wahl/menu',
-          'execute if score @s ofh.t matches 9501..9599 run return run function ofh:wahl/gewaehlt']
+          f'execute if score @s ofh.t matches 9501..{9501 + len(AUSWAHL)} run return run function ofh:wahl/gewaehlt']
 setze(FN + 'trigger.mcfunction', '\n'.join(t) + '\n')
 
 # ---- neue Funktionen
@@ -162,12 +180,12 @@ assert 9500 + len(AUSWAHL) + 1 <= 9599
 setzen += ['scoreboard players set #gefunden ofh 1',
            'function ofh:plan/zeigen',
            'data modify storage ofh:tmp w set from entity @s data',
-           'execute as @a if score @s ofh.id = #cur ofh.id run function ofh:wahl/bestaetigt with storage ofh:tmp w']
+           'execute as @a if score @s ofh.id = #cur ofh.id at @s run function ofh:wahl/bestaetigt with storage ofh:tmp w']
 menu = {"type": "minecraft:multi_action",
         "title": [{"type": "object", "object": "atlas", "atlas": "minecraft:blocks", "sprite": "block/stone_bricks"},
                   {"text": "  Baustein wählen", "bold": True, "color": "gold"}],
         "external_title": {"text": "Baustein"},
-        "body": [{"type": "minecraft:plain_message", "width": 300, "contents": {"text": "Welchen Stein willst du für diesen Plan nehmen? Die Geisterblöcke und der Zähler zeigen dann diesen Stein. Andere passende Steine nimmt die Farm trotzdem an. Blöcke, die für die Farm wichtig sind, bleiben fest.", "color": "gray"}}],
+        "body": [{"type": "minecraft:plain_message", "width": 300, "contents": {"text": "Welchen Stein willst du für diesen Plan nehmen? Die Geisterblöcke und der Zähler zeigen dann diesen Stein. Andere passende Steine nimmt die Farm trotzdem an. Blöcke, die für die Farm wichtig sind, bleiben fest. Die Material-Liste und der Menütext nennen weiter die Vorgabe des Plans.", "color": "gray"}}],
         "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 3, "actions": aktionen}
 neu = {
     'wahl/menu': ['dialog show @s ' + json.dumps(menu, ensure_ascii=False)],
