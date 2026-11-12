@@ -795,7 +795,8 @@ f.schritt("Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wart
     **{y: "X" for y in range(0, 28)}})
 f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
-         bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72},
+         bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72,
+                  "oberflaeche": True},
          bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 1}})
 
 f = farm("lohe")

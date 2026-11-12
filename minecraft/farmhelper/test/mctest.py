@@ -1,6 +1,8 @@
 """Testet Farm-Pläne auf einem lokalen Minecraft-Server (26.3, Fabric + Carpet, RCON).
 
-Aufruf:  python3 mctest.py <plaene.json> <tests.json> [farm-id ...] [--ticks N]
+Aufruf:  python3 mctest.py <plaene.json> <tests.json> [farm-id ...] [--ticks=N] [--zufall=N] [--behalten]
+         (ohne --behalten werden vorher alle dauerhaft geladenen Chunks entladen und alle Wesen entfernt –
+          Mobs alter Testorte füllen sonst das Monster-Limit und nichts spawnt mehr)
 
 Für jede Farm:
 - Ort vorbereiten (Dimension, Biom, Bauwerk, eigene Befehle aus tests.json),
@@ -273,6 +275,14 @@ class Test:
             mx, my, mz = min(treffer, key=lambda p: (p[0] - mx) ** 2 + (p[1] - my) ** 2 + (p[2] - mz) ** 2)
         ax, ay, az = bw.get('anker', [0, 0, 0])
         self.x, self.y, self.z = mx - ax, my - ay, mz - az
+        if bw.get('oberflaeche'):          # Plan auf den echten Boden an dieser Stelle setzen (nicht in einen Hügel)
+            for yy in range(self.y + 40, self.y - 41, -1):
+                if 'passed' not in self.r(f'execute in {self.dim} if block {self.x} {yy} {self.z} '
+                                          f'#minecraft:replaceable').lower() and \
+                        'passed' not in self.r(f'execute in {self.dim} if block {self.x} {yy} {self.z} '
+                                               f'#minecraft:leaves').lower():
+                    self.y = yy + 1
+                    break
         if bw.get('suchen'):
             return
         x1, y1, z1, x2, y2, z2 = self.box(6)
@@ -439,6 +449,10 @@ def main():
     auswahl = args[2:] or list(tests)
     r = Rcon()
     r('scoreboard objectives add mctest dummy')
+    if '--behalten' not in sys.argv:       # alte Testorte entladen: ihre Mobs zählen sonst zum Monster-Limit
+        for d in DIM.values():
+            r(f'execute in {d} run forceload remove all')
+            r(f'execute in {d} run kill @e[type=!minecraft:player]')
     for c in ('gamerule spawn_mobs true', 'gamerule advance_weather false', 'weather clear',
               'gamerule max_entity_cramming 100', 'gamerule players_sleeping_percentage 101',
               f'gamerule random_tick_speed {zufall}'):

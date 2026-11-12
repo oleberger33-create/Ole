@@ -342,7 +342,8 @@
     0
    ],
    "suchen": true,
-   "hoehe": 72
+   "hoehe": 72,
+   "oberflaeche": true
   },
   "bereich": [
    -1,
