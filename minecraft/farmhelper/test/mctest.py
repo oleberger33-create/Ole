@@ -19,7 +19,8 @@ tests.json: {"<farm>": {"dimension": "overworld|the_nether|the_end", "biom": "mi
              "hoechstens": {"boden": {"minecraft:glass_bottle": 0}},   (items = in Behältern/Loren, boden = Items am Boden)
              "erwartet": {"items": {"minecraft:iron_ingot": 1}, "bloecke": {"minecraft:lava_cauldron": 1},
                           "wesen": {"minecraft:iron_golem": 1}, "inventar": {"minecraft:cod": 1}},
-             "spieler": {"hand": "minecraft:fishing_rod", "aktion": "use continuous"}}}
+             "spieler": {"hand": "minecraft:fishing_rod", "aktion": "use continuous"},
+             "behaelter": [[dx, dy, dz], …]}}   (weitere Behälter zählen, z. B. einen nur im Test gesetzten Werfer)
 """
 import json, os, re, socket, struct, sys, time
 
@@ -162,7 +163,7 @@ class Test:
         return self.x + b['x'], self.y + b['y'], self.z + b['z']
 
     def box(self, rand=2):
-        bl = self.f['fertig']
+        bl = self.f['fertig'] + [q for st in self.f['steps'] for q in st.get('luft', [])]   # auch Aushub
         xs = [b['x'] for b in bl]; ys = [b['y'] for b in bl]; zs = [b['z'] for b in bl]
         return (self.x + min(xs) - rand, self.y + min(ys) - rand, self.z + min(zs) - rand,
                 self.x + max(xs) + rand, self.y + max(ys) + rand, self.z + max(zs) + rand)
@@ -349,6 +350,8 @@ class Test:
                 x, y, z = self.p(b)
                 zaehle(self.cmd(f'data get block {x} {y} {z} Items'), erg['items'])
         sel = f'x={x1},y={y1},z={z1},dx={x2 - x1},dy={y2 - y1},dz={z2 - z1}'
+        for dx, dy, dz in self.t.get('behaelter', []):     # Behälter, die nur der Test setzt
+            zaehle(self.cmd(f'data get block {self.x + dx} {self.y + dy} {self.z + dz} Items'), erg['items'])
         for typ in ('minecraft:hopper_minecart', 'minecraft:chest_minecart'):
             zaehle(self.r(f'execute in {self.dim} as @e[type={typ},{sel}] run data get entity @s Items'), erg['items'])
         # Items am Boden: je erwartetem Item-Typ die Anzahl aufsummieren

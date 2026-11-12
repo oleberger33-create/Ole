@@ -47,7 +47,7 @@
   "zeit": "day",
   "nachher": [
    "kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..8]",
-   "summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:wheat_seeds\",count:64}]}",
+   "summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},CanPickUpLoot:1b,Inventory:[{id:\"minecraft:wheat_seeds\",count:64}]}",
    "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:wheat[age=7]"
   ],
   "erwartet": {
@@ -80,9 +80,17 @@
  },
  "blumen": {
   "boden": "minecraft:grass_block",
+  "behaelter": [
+   [
+    1,
+    0,
+    0
+   ]
+  ],
   "nachher": [
    "setblock {x} {y} {z} minecraft:sunflower[half=lower]",
    "setblock {x} {y+1} {z} minecraft:sunflower[half=upper]",
+   "setblock {x+1} {y} {z} minecraft:dispenser[facing=west]",
    "item replace block {x+1} {y} {z} container.0 with minecraft:bone_meal 64",
    "setblock {x+1} {y} {z-1} minecraft:observer[facing=north]",
    "setblock {x+1} {y} {z-2} minecraft:observer[facing=south]"
@@ -224,6 +232,13 @@
    6400,
    4016
   ],
+  "welt": "struktur",
+  "vorher": [
+   "fill {x-6} {y+5} {z-6} {x+21} {y+31} {z+21} minecraft:stone"
+  ],
+  "nachher": [
+   "fill {x+8} {y+25} {z+8} {x+8} {y+26} {z+8} minecraft:air"
+  ],
   "erwartet": {
    "wesen": {
     "minecraft:slime": 1
@@ -303,12 +318,23 @@
   "zeit": "day",
   "nachher": [
    "kill @e[type=minecraft:endermite,x={x},y={y},z={z},distance=..8]",
-   "kill @e[type=minecraft:minecart,x={x},y={y},z={z},distance=..8]",
-   "summon minecraft:minecart {x+4}.5 {y} {z+4}.5 {Passengers:[{id:\"minecraft:endermite\",PersistenceRequired:1b}]}"
+   "kill @e[type=minecraft:oak_boat,x={x},y={y},z={z},distance=..8]",
+   "summon minecraft:oak_boat {x+4}.5 {y} {z+4}.5 {Passengers:[{id:\"minecraft:endermite\",PersistenceRequired:1b}]}"
+  ],
+  "bereich": [
+   3,
+   0,
+   3,
+   5,
+   2,
+   5
   ],
   "erwartet": {
-   "inventar": {
+   "boden": {
     "minecraft:ender_pearl": 1
+   },
+   "wesen": {
+    "minecraft:endermite": 1
    }
   }
  },
@@ -324,6 +350,7 @@
    -20,
    3
   ],
+  "hoehe": 100,
   "erwartet": {
    "wesen": {
     "minecraft:drowned": 1
@@ -394,9 +421,9 @@
  },
  "stockcrafter": {
   "nachher": [
-   "data merge block {x} {y+1} {z} {disabled_slots:[I;1,2,4,5,6,7,8]}",
-   "item replace block {x} {y+2} {z} container.0 with minecraft:bamboo 64",
-   "item replace block {x} {y+2} {z} container.1 with minecraft:bamboo 64"
+   "data merge block {x} {y} {z} {disabled_slots:[I;1,2,4,5,6,7,8]}",
+   "item replace block {x} {y+1} {z} container.0 with minecraft:bamboo 64",
+   "item replace block {x} {y+1} {z} container.1 with minecraft:bamboo 64"
   ],
   "erwartet": {
    "items": {

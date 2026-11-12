@@ -36,12 +36,12 @@ WACHSEN = {"sugar_cane", "kelp", "bamboo", "cactus"}        # wachsen von selbst
 SEITEN4 = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}
 # Was in Behälter gehört oder eingestellt werden muss (Farm: [(Block, Prüfung, Item, Name, Text im Spiel)])
 INHALT = {
-    "wolle": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears", "Schere im Spender",
-               "Schere in den Spender legen")],
+    "wolle": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears", "Schere im Werfer",
+               "Schere in den Werfer legen")],
     "honig": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears",
-               "Schere im Spender", "Schere in den Spender legen")],
+               "Schere im Werfer", "Schere in den Werfer legen")],
     "blumen": [("dispenser", "items block ~ ~ ~ container.* minecraft:bone_meal", "minecraft:bone_meal",
-                "Knochenmehl im Spender", "Knochenmehl in den Spender legen")],
+                "Knochenmehl im Werfer", "Knochenmehl in den Werfer legen")],
     "stockcrafter": [("crafter", "block ~ ~ ~ minecraft:crafter{disabled_slots:[I;1,2,4,5,6,7,8]}", None,
                       "Crafter: 7 Felder gesperrt", "Im Crafter alles sperren außer links oben und links Mitte")],
 }

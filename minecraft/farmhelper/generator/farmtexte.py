@@ -140,9 +140,9 @@ TEXTE = {
         name="Blumen-Farm", cat="Pflanzen", diff=1, out="Blumen → Farbstoffe",
         where="In einem Biom mit passenden Blumen (z. B. Blumenwald)", afk="Nein – Knopf drücken",
         why="Knochenmehl auf eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose) lässt eine Kopie "
-            "fallen, die Blume bleibt stehen. Ein Spender daneben macht das auf Knopfdruck – beliebig oft. Gelb, "
+            "fallen, die Blume bleibt stehen. Ein Werfer daneben macht das auf Knopfdruck – beliebig oft. Gelb, "
             "Magenta, Rot und Rosa als Farbstoff; andere Blumen wachsen mit Knochenmehl auf Gras je nach Biom.",
-        help=[("Nichts passiert", "Der Spender muss auf die untere Hälfte der Blume zeigen; Knochenmehl hinein."),
+        help=[("Nichts passiert", "Der Werfer muss auf die untere Hälfte der Blume zeigen; Knochenmehl hinein."),
               ("Andere Farben", "Kleine Blumen wachsen mit Knochenmehl auf Gras – welche, bestimmt das Biom "
                                 "(Blumenwald hat fast alle).")],
         meta=m("Keine belegte Zahl",
@@ -154,13 +154,13 @@ TEXTE = {
     "huehner": dict(
         name="Hühner-Farm (automatisch)", cat="Tiere", diff=2, out="Gebratenes Hühnchen, Federn", where="Überall",
         afk="In der Nähe",
-        why="Hühner legen Eier in den Trichter unter sich, der füllt den Spender. Zwei Beobachter, die sich "
-            "anschauen, geben einen dauernden Takt – der Spender wirft jedes Ei auf den Steinschneider. Küken "
+        why="Hühner legen Eier in den Trichter unter sich, der füllt den Werfer. Zwei Beobachter, die sich "
+            "anschauen, geben einen dauernden Takt – der Werfer wirft jedes Ei auf den Steinschneider. Küken "
             "wachsen dort heran. Erwachsene Hühner sind größer und berühren mit dem Kopf die Lava im Kessel darüber – "
             "sie werden gegart, das Hühnchen fällt durch den Steinschneider in den Trichter.",
         help=[("Kein gebratenes Hühnchen", "Kessel genau über dem Steinschneider, mit Lava gefüllt; rundherum Glas, "
                                            "sonst entkommen Küken."),
-              ("Eier bleiben im Spender", "Die zwei Beobachter müssen sich gegenseitig anschauen (Takt)."),
+              ("Eier bleiben im Werfer", "Die zwei Beobachter müssen sich gegenseitig anschauen (Takt)."),
               ("Beobachter zeigt falsch", "Ein Beobachter schaut in die Richtung, in die du beim Setzen schaust – "
                                           "notfalls einen Hilfsblock setzen und danach wieder abbauen."),
               ("Wie kommen die Hühner hinein?", "Eier in den Schacht über dem Trichter werfen oder ein Huhn mit "
@@ -184,23 +184,23 @@ TEXTE = {
     "wolle": dict(
         name="Wolle-Farm", cat="Tiere", diff=2, out="Wolle (jede Farbe)", where="Überall", afk="Ja",
         why="Das Schaf steht auf einem Grasblock. Frisst es, wird das Gras zu Erde und seine Wolle wächst nach – "
-            "der Beobachter merkt den Wechsel, und der Spender mit der Schere schert es. Die Wolle fällt auf das "
+            "der Beobachter merkt den Wechsel, und der Werfer mit der Schere schert es. Die Wolle fällt auf das "
             "Gras; die Trichterlore darunter saugt sie durch den vollen Block an.",
         help=[("Schaf frisst nicht", "Echter Grasblock nötig; Gras daneben (Boden) lässt die Erde wieder grün "
                                      "werden."),
-              ("Spender schert nicht", "Redstone auf dem Block hinter dem Beobachter, Spender direkt daneben.")],
+              ("Werfer schert nicht", "Redstone auf dem Block hinter dem Beobachter, Werfer direkt daneben.")],
         meta=m("Ein Schaf hat nach 50 s zu 63 % und nach 2 min zu über 90 % neue Wolle (Wiki)",
                [("Überall; das Schaf steht auf einem echten Grasblock.", W + "Tutorial:Wool_farming")],
-               [("Wiki-Design: Spender mit Schere, Beobachter schaut aufs Gras, Trichterlore unter dem Gras.",
+               [("Wiki-Design: Werfer mit Schere, Beobachter schaut aufs Gras, Trichterlore unter dem Gras.",
                  W + "Tutorial:Wool_farming"),
                 ("Fehlversuche (Schaf ohne Wolle) nutzen die Schere nicht ab.", W + "Shears"),
                 (TEST + "ein Schaf, die Wolle landet in der Truhe.", None)])),
     "honig": dict(
         name="Honigwaben-Farm", cat="Tiere", diff=2, out="Honigwaben (Kerzen, Bienenstöcke)", where="Bei Blumen",
         afk="Ja",
-        why="Ein Spender mit Schere zeigt auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der "
-            "Spender versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen "
-            "vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts. Ernten per Spender macht die Bienen "
+        why="Ein Werfer mit Schere zeigt auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der "
+            "Werfer versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen "
+            "vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts. Ernten per Werfer macht die Bienen "
             "nicht wütend. Honigflaschen erntest du von Hand (Lagerfeuer unter das Nest).",
         help=[("Keine Waben", "Bienen brauchen Blumen in der Nähe. Vorne vor dem Nest muss frei sein."),
               ("Waben liegen daneben", "Links, rechts und hinter dem Nest Blöcke – nur vorne frei, dort der "
@@ -208,7 +208,7 @@ TEXTE = {
         meta=m("Keine belegte Zahl",
                [("Bei Blumen; Bienen kommen aus Bienennestern (mit Behutsamkeit umziehen).",
                  W + "Tutorial:Honey_farming")],
-               [("Ernten per Spender macht die Bienen nicht wütend.", W + "Tutorial:Honey_farming"),
+               [("Ernten per Werfer macht die Bienen nicht wütend.", W + "Tutorial:Honey_farming"),
                 (TEST + "Glasflaschen werden bei nicht vollem Nest herausgeworfen – Scheren nicht. Darum Schere + "
                         "Takt.", None)])),
     "eisen": dict(
@@ -528,9 +528,9 @@ TEXTE["handel"].update(
         "Tag seine Angebote auf). Vorne ist unten ein Block und auf Höhe 2 ein Block, dazwischen ein Fenster: Du "
         "handelst ganz normal, er kommt nicht heraus. Ein Pfeilmacher kauft z. B. 32 Stöcke für 1 Smaragd.")
 TEXTE["honig"].update(
-    why="Ein Spender mit Schere zeigt seitlich auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der "
-        "Spender versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen vorne "
-        "heraus in den Trichter. Fehlversuche kosten die Schere nichts, und Ernten per Spender macht die Bienen nicht "
+    why="Ein Werfer mit Schere zeigt seitlich auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der "
+        "Werfer versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen vorne "
+        "heraus in den Trichter. Fehlversuche kosten die Schere nichts, und Ernten per Werfer macht die Bienen nicht "
         "wütend.")
 TEXTE["mobfarm"].update(
     afk="Unten am Schacht (24–32 Blöcke unter dem Raum)",
@@ -552,3 +552,119 @@ TEXTE["eisen"]["help"] = TEXTE["eisen"]["help"] + [
     ["Golem steht woanders", "In 16 Blöcken darf kein lebender Golem sein – auch keiner, der auf einem Dach "
                              "oder Hügel in der Nähe gespawnt ist. Flächen bis 8 Blöcke um die Dorfbewohner aus "
                              "Glas oder weit genug weg."]]
+
+# ---------------------------------------------------------------------------------------------------------------
+# Zweite Gegenprüfung (unabhängige Prüfer je Farm, jeder Befund gegengeprüft) und Tests in einer Welt mit Bauwerken
+def _hilfe(fid, titel, text=None):
+    """Hilfe-Eintrag ersetzen (text) oder streichen (text=None)."""
+    h = [list(e) for e in TEXTE[fid]["help"] if e[0] != titel]
+    if text:
+        h.append([titel, text])
+    TEXTE[fid]["help"] = h
+
+
+TEXTE["mobfarm"]["where"] = "Unter der Erde, weit weg von Höhlen"
+TEXTE["creeper"]["where"] = "Unter der Erde, weit weg von Höhlen"
+TEXTE["wolle"].update(
+    where="Auf einer Wiese (Gras an den 4 Ecken neben dem Schaf)",
+    meta=m("Etwa 1 Wolle alle paar Minuten: Nach jedem Fressen muss die Erde erst vom Gras an den Ecken wieder "
+           "zuwachsen (nur bei Tageslicht).",
+           [("Überall, wo Gras ist; das Schaf steht auf einem echten Grasblock.", W + "Tutorial:Wool_farming")],
+           [("Wiki-Design: Werfer mit Schere, Beobachter schaut aufs Gras, Trichterlore unter dem Gras.",
+             W + "Tutorial:Wool_farming"),
+            ("Fehlversuche (Schaf ohne Wolle) nutzen die Schere nicht ab.", W + "Shears"),
+            (TEST + "ein Schaf, die Wolle landet in der Truhe.", None)]))
+_hilfe("wolle", "Schaf frisst nicht", "Echter Grasblock nötig. Die 4 Grasblöcke schräg neben dem Gras (an den Ecken) "
+                                      "müssen Gras bleiben und frei liegen – nur von dort wächst die Erde nach jedem "
+                                      "Fressen wieder zu.")
+TEXTE["xpspawner"]["why"] = TEXTE["xpspawner"]["why"].replace(
+    "Darum liegt das Wasser eine Ebene unter dem Spawner: Die Mobs spawnen darüber, fallen hinein und werden unter "
+    "dem Spawner durch",
+    "Darum liegt das Wasser zwei Ebenen unter dem Spawner, dazwischen eine Ebene Luft: Die Mobs spawnen darüber, "
+    "fallen hinein und passen im Wasser genau unter dem Spawner durch")
+_hilfe("xpspawner", "Baby-Zombie kommt heraus")
+_hilfe("xpspawner", "Baby-Zombies", "Sie kommen nicht heraus, sind aber kleiner – durch den Spalt etwas tiefer "
+                                    "zielen.")
+_hilfe("hexe", "Keine Hexen", "Der Boden muss genau unter der Box liegen: deine Füße eine Ebene unter dem alten "
+                              "Hüttenboden, dann den Plan im Plan-Menü verschieben und drehen, bis er genau unter "
+                              "der Hütte liegt.")
+_hilfe("hexe", "Hexen schwimmen weg oder leben unten noch", "Kanal oder Schacht ist nicht dicht – Wasser daneben "
+                                                            "durch Blöcke ersetzen, im Schacht darf kein Wasser "
+                                                            "stehen.")
+TEXTE["hexe"]["why"] = TEXTE["hexe"]["why"] + " Im Test an einer echten Hexenhütte (26.3) gespawnt und gefallen."
+TEXTE["schleim"]["why"] = TEXTE["schleim"]["why"].replace("und mach ihn mit Fackeln hell", "und stell 2 Fackeln auf")
+TEXTE["waechter"]["why"] = TEXTE["waechter"]["why"].replace(
+    "die Wächter kommen hoch, du triffst sie mit Dreizack oder Schwert.",
+    "die Wächter kommen in Reichweite, du triffst sie mit dem Dreizack (Durchbohren); geworfen fliegt er auch "
+    "unter Wasser weit.")
+TEXTE["stockcrafter"]["why"] = TEXTE["stockcrafter"]["why"].replace(
+    "entsteht ein Stock und fällt nach unten in die Truhe", "entsteht ein Stock und landet in der Truhe davor")
+_hilfe("stockcrafter", "Keine Stöcke", "Das Crafter-Gesicht muss zur Truhe zeigen; genau 7 Felder sperren.")
+TEXTE["schnee"]["where"] = "Überall außer Wüste, Savanne, Tafelberg (Badlands) und Nether – dort schmilzt der Golem"
+_hilfe("schnee", "Golem schmilzt", "In Wüste, Savanne, Tafelberg und im Nether schmilzt er – woanders bauen.")
+_hilfe("schnee", "Kein Schnee", "Spielregel mob_griefing („Zerstörung durch Kreaturen“) muss an sein.")
+_hilfe("ueberfall", "Dorfbewohner kommt nicht ins Bett", "Die Lücke vorne offen lassen, bis er das Bett beansprucht "
+                                                        "hat (grüne Partikel) – erst dann zumachen.")
+TEXTE["enderman"].update(
+    afk="Unten in der Mitte der Landestelle",
+    why="Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot in der Mitte, rundherum "
+        "ein 3 × 3-Feld und dann ein Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen "
+        "44 Blöcke und sterben. Der Ring liegt 2 Blöcke von der Endermilbe weg: Näher dran würden die Endermen sie "
+        "erschlagen (8 Leben, ein Schlag 7). Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur "
+        "42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.")
+_hilfe("enderman", "Endermilbe ist tot", "Der Lochring muss 2 Blöcke von ihr weg sein (3 × 3-Feld in der Mitte) – "
+                                         "direkt daneben schlagen die Endermen sie.")
+TEXTE["gold"]["why"] = (
+    "Zombifizierte Piglins spawnen auf Netherrack. Sie wollen das Schildkrötenei zertrampeln – erreichbar ist es nur "
+    "über ein Loch mit einer offenen Falltür, die sie für Boden halten. Sie fallen 25 Blöcke und sterben. Seit 1.21.5 "
+    "gibt es XP und Goldbarren nur, wenn du selbst tötest: Dafür die Plattform 22 statt 25 Blöcke über dem Trichter "
+    "bauen – dann kommen sie mit ½ Herz an. Warte dann aber nicht am Trichter, sondern 14 Blöcke weiter östlich (sonst "
+    "bist du näher als 24 Blöcke an der Plattform und es spawnt nichts) und geh nur zum Zuschlagen kurz hin.")
+_hilfe("gold", "Wenig Gold", "Piglins spawnen bei jedem Licht auf allen Flächen bis 128 Blöcke um dich – auch in "
+                             "Höhlen unter dem Dach (Fackeln helfen nicht). Mehr Plattform = mehr Piglins: Netherrack "
+                             "ist billig, die Plattform darf viel größer sein.")
+TEXTE["lava"]["meta"]["ort"] = [["Überall – auch im Nether muss eine Lavaquelle über dem Block liegen (ohne Lava "
+                                 "tropft es dort nur zum Schein, der Kessel bleibt leer).", W + "Pointed_Dripstone"]]
+TEXTE["weizen"].update(
+    why="Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte und pflanzt mit seinem "
+        "eigenen Vorrat nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie "
+        "die Ernte an, bevor der Bauer sie aufhebt. Darum gibst du ihm vorher einen Vorrat: am besten Karotten oder "
+        "Kartoffeln (Samen über 10 Stück kompostiert er). Die Wand ist 2 hoch: Durch einen Zaun schlagen Zombies zu.")
+_hilfe("weizen", "Bauer erntet nicht", "Er braucht den Komposter als Arbeitsplatz (kein Baby), arbeitet tagsüber; "
+                                       "die Spielregel mob_griefing („Zerstörung durch Kreaturen“) muss an sein.")
+_hilfe("weizen", "Felder bleiben leer", "Sein Vorrat ist aufgebraucht. Unten in der Südwand einen Block abbauen (der "
+                                        "obere bleibt, so kommt er nicht hinaus) und neue Stapel Karotten oder "
+                                        "Kartoffeln in die Lücke werfen – dort ist normaler Boden ohne Trichter, er "
+                                        "holt sie sich. Danach wieder zumachen.")
+_hilfe("weizen", "Er kommt nicht hinein", "Dorfbewohner lassen sich nicht anleinen, und ein Boot braucht 2 Blöcke "
+                                          "Breite. Darum die Lücke im Süden erst schließen, wenn er drin ist.")
+TEXTE["weizen"]["meta"]["ort"] = TEXTE["weizen"]["meta"]["ort"] + [
+    ["Durch einen Zaun schlagen Zombies den Bauern; hinter einer 2 hohen Wand sieht er sie nicht.", None]]
+TEXTE["baum"].update(
+    why="Echtes Holz lässt sich in Vanilla nicht einfach vollautomatisch ernten. Die Schwarzeiche (4 Setzlinge im "
+        "Quadrat) ist der beste Kompromiss: dicker 2 × 2-Stamm, aber nur 6–9 Blöcke hoch – viel Holz, ohne zu "
+        "klettern. Riesenfichte und Riesen-Tropenbaum geben noch mehr, werden aber bis zu 30 Blöcke hoch. Knochenmehl "
+        "drauf, mit Effizienz-Axt fällen, Setzlinge wieder pflanzen.",
+    meta=m("Schwarzeiche: im Schnitt ca. 42 Holz und 6 Setzlinge pro Baum (Wiki)",
+           [("Die Schwarzeiche wächst nur aus 4 Setzlingen im Quadrat und braucht nach oben Platz.",
+             W + "Tutorial:Tree_farming")],
+           [("Glück (Fortune) auf dem Werkzeug erhöht die Setzlings-Chance.", W + "Tutorial:Tree_farming")]))
+_hilfe("baum", "Baum wächst nicht", "Nach oben mindestens 10 Blöcke frei (oben auch zur Seite), Licht ≥ 9, "
+                                    "4 Schwarzeichensetzlinge genau im Quadrat.")
+TEXTE["blumen"].update(
+    where="Überall – die erste hohe Blume findest du im Wald, Birkenwald, Dunklen Wald oder Blumenwald (Flieder, "
+          "Rosenstrauch, Pfingstrose) oder in der Sonnenblumenebene (Sonnenblume)",
+    afk="Nein – Knochenmehl per Hand",
+    why="Knochenmehl auf eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose) lässt eine Kopie fallen, "
+        "die Blume bleibt stehen – beliebig oft, ganz ohne Bau. Rechtsklick gedrückt halten geht schneller als jeder "
+        "Knopf. Gelb, Magenta, Rot und Rosa als Farbstoff; andere Blumen wachsen mit Knochenmehl auf Gras je nach "
+        "Biom.")
+_hilfe("blumen", "Nichts passiert", "Das Knochenmehl muss auf die Blume selbst, nicht aufs Gras daneben.")
+TEXTE["blumen"]["meta"]["ort"] = [["Das Biom zählt nur für die erste hohe Blume; danach geht es überall.",
+                                   W + "Tutorial:Flower_farming"]]
+TEXTE["witherskelett"]["why"] = (
+    "In einer Netherfestung spawnen Wither-Skelette auf Netherziegeln im Dunkeln (Licht ≤ 7) – überall in den "
+    "Gängen. Eine freie Fläche 9 × 9 mit 3 Blöcken Platz (sie sind 2,4 hoch) gibt ihnen zusätzlichen Platz, den du "
+    "im Blick hast. Näher als 24 Blöcke spawnt nichts – warte etwas weg und kämpfe dann mit Plünderung III. Im Test "
+    "spawnten sie in der Festung, auf der Fläche selbst in 30 Minuten aber keins: Je mehr andere Flächen der Festung "
+    "du mit Stufen belegst, desto mehr kommen hierher.")

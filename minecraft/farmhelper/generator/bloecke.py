@@ -21,6 +21,7 @@ LEBEWESEN = {
     "snow_golem": ("minecraft:snow_golem", "Schneegolem"), "endermite": ("minecraft:endermite", "Endermilbe"),
     "enderman": ("minecraft:enderman", "Enderman"), "cat": ("minecraft:cat", "Katze"),
     "hopper_minecart": ("minecraft:hopper_minecart", "Trichterlore"), "minecart": ("minecraft:minecart", "Lore"),
+    "oak_boat": ("minecraft:oak_boat", "Boot"),
 }
 AFK = "player"                                   # „Hier stehen“: nur ein Schild, keine Prüfung
 
@@ -76,7 +77,9 @@ EINFACH = {
     "kelp": ("kelp", "#ofh:seetang", "minecraft:kelp", "Seetang"),
     "wheat": ("wheat", "minecraft:wheat", "minecraft:wheat_seeds", "Weizen (Samen)"),
     "melon_stem": ("melon_stem", "#ofh:staengel", "minecraft:melon_seeds", "Melonen-/Kürbiskerne"),
-    "oak_sapling": ("dark_oak_sapling", "#minecraft:saplings", "#minecraft:saplings", "Setzling"),
+    "dark_oak_sapling": ("dark_oak_sapling", "minecraft:dark_oak_sapling", "minecraft:dark_oak_sapling",
+                         "Schwarzeichensetzling"),
+    "torch": ("torch", "minecraft:torch", "minecraft:torch", "Fackel"),
     "poppy": ("poppy", "#minecraft:small_flowers", "#minecraft:small_flowers", "Blume"),
     "tall_flower": ("sunflower", "minecraft:sunflower[half=lower]|minecraft:lilac[half=lower]|"
                                  "minecraft:rose_bush[half=lower]|minecraft:peony[half=lower]",
@@ -96,7 +99,7 @@ GERICHTET = {
     "observer": ("observer", "minecraft:observer", "minecraft:observer", "Beobachter"),
     "piston": ("piston", "minecraft:piston", "minecraft:piston", "Kolben"),
     "sticky_piston": ("sticky_piston", "minecraft:sticky_piston", "minecraft:sticky_piston", "Klebriger Kolben"),
-    "dispenser": ("dispenser", "minecraft:dispenser", "minecraft:dispenser", "Spender"),
+    "dispenser": ("dispenser", "minecraft:dispenser", "minecraft:dispenser", "Werfer"),
     "comparator": ("comparator", "minecraft:comparator", "minecraft:comparator", "Komparator"),
     "repeater": ("repeater", "minecraft:repeater", "minecraft:repeater", "Verstärker"),
     "wall_sign": ("oak_wall_sign", "#minecraft:wall_signs", "#minecraft:signs", "Schild (Wand)"),
@@ -142,8 +145,14 @@ def block(b, r):
                 pr = f"{pr}[facing={RICHTUNG[f]}]"
         if i in ("white_bed", "red_bed"):                 # Bett = 2 Blöcke; Richtung zeigt vom Fußende zum Kopf
             props = {"part": p.get("part", "foot")} | ({"facing": RICHTUNG[f]} if f else {})
-        if i == "crafter":                                # Vorderseite nach unten (Spieler schaut beim Setzen nach oben)
-            props = {"orientation": "down_north"}
+        if i == "crafter":
+            if f in ("n", "e", "s", "w"):                  # liegend: Gesicht zeigt nach f (zur Truhe), oben ist oben
+                props = {"orientation": f"{RICHTUNG[f]}_up"}
+                pr = f"minecraft:crafter[orientation={RICHTUNG[f]}_up]"
+                name = "Crafter (Gesicht zur Truhe)"
+                return {"art": "block", "anzeige": anz, "props": props, "pruefen": pr, "item": item, "name": name,
+                        "schluessel": f"crafter:{RICHTUNG[f]}"}
+            props = {"orientation": "down_north"}          # Vorderseite nach unten
         if i == "pointed_dripstone":
             props = {"vertical_direction": "down", "thickness": "tip"}
         if i == "tall_flower":

@@ -6350,19 +6350,19 @@
   "out": "Weizen, Karotten, Kartoffeln, Rote Bete",
   "where": "Überall, weit weg von Dörfern",
   "afk": "In der Nähe",
-  "why": "Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte und pflanzt mit seinem eigenen Vorrat nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie die Ernte an, bevor der Bauer sie aufhebt. Darum gibst du ihm vorher einen Vorrat: am besten Karotten oder Kartoffeln (Samen über 10 Stück kompostiert er).",
+  "why": "Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte und pflanzt mit seinem eigenen Vorrat nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie die Ernte an, bevor der Bauer sie aufhebt. Darum gibst du ihm vorher einen Vorrat: am besten Karotten oder Kartoffeln (Samen über 10 Stück kompostiert er). Die Wand ist 2 hoch: Durch einen Zaun schlagen Zombies zu.",
   "help": [
    [
     "Bauer erntet nicht",
-    "Er braucht den Komposter als Arbeitsplatz (kein Baby), arbeitet tagsüber; die Spielregel mobGriefing muss an sein."
+    "Er braucht den Komposter als Arbeitsplatz (kein Baby), arbeitet tagsüber; die Spielregel mob_griefing („Zerstörung durch Kreaturen“) muss an sein."
    ],
    [
     "Felder bleiben leer",
-    "Sein Vorrat ist aufgebraucht – Tor auf, ihn kurz herausholen, ihm auf normalem Boden wieder einen Stapel zuwerfen (auf dem Feld schlucken die Trichter alles)."
+    "Sein Vorrat ist aufgebraucht. Unten in der Südwand einen Block abbauen (der obere bleibt, so kommt er nicht hinaus) und neue Stapel Karotten oder Kartoffeln in die Lücke werfen – dort ist normaler Boden ohne Trichter, er holt sie sich. Danach wieder zumachen."
    ],
    [
     "Er kommt nicht hinein",
-    "Mit Leine, Boot oder Lore durchs Zauntor bringen."
+    "Dorfbewohner lassen sich nicht anleinen, und ein Boot braucht 2 Blöcke Breite. Darum die Lücke im Süden erst schließen, wenn er drin ist."
    ]
   ],
   "verified": true,
@@ -6376,6 +6376,10 @@
     [
      "Dach drauf, wenn Gewitter häufig sind: Blitze verwandeln Dorfbewohner in Hexen.",
      "https://minecraft.wiki/w/Tutorial:Crop_farming"
+    ],
+    [
+     "Durch einen Zaun schlagen Zombies den Bauern; hinter einer 2 hohen Wand sieht er sie nicht.",
+     null
     ]
    ],
    "meta": [
@@ -6680,14 +6684,14 @@
     ]
    },
    {
-    "text": "Zaun rundherum, links ein Komposter mit Block darüber (Arbeitsplatz des Bauern).",
+    "text": "Wand 2 hoch rund ums Feld (durch einen Zaun schlagen Zombies zu; hinter einer Wand sieht der Bauer sie nicht), links ein Komposter mit Block darüber (Arbeitsplatz des Bauern). Vorne (Süden) 2 Blöcke breit offen lassen.",
     "luft": [],
     "added": [
      {
       "x": -1,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6695,7 +6699,7 @@
       "x": 0,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6703,7 +6707,7 @@
       "x": 1,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6711,7 +6715,7 @@
       "x": 2,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6719,7 +6723,7 @@
       "x": 3,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6727,7 +6731,7 @@
       "x": 4,
       "y": 0,
       "z": -1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6735,7 +6739,7 @@
       "x": -1,
       "y": 0,
       "z": 0,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6743,7 +6747,7 @@
       "x": 4,
       "y": 0,
       "z": 0,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6759,7 +6763,7 @@
       "x": 4,
       "y": 0,
       "z": 1,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6767,7 +6771,7 @@
       "x": -1,
       "y": 0,
       "z": 2,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6775,23 +6779,7 @@
       "x": 0,
       "y": 0,
       "z": 2,
-      "id": "oak_fence",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": 0,
-      "z": 2,
-      "id": "fence_gate",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": 0,
-      "z": 2,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6799,7 +6787,7 @@
       "x": 3,
       "y": 0,
       "z": 2,
-      "id": "oak_fence",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6807,7 +6795,71 @@
       "x": 4,
       "y": 0,
       "z": 2,
-      "id": "oak_fence",
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 0,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": 0,
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
@@ -6818,11 +6870,51 @@
       "id": "stone_bricks",
       "p": {},
       "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
      }
     ]
    },
    {
-    "text": "Weizen säen. Dann einen Dorfbewohner durchs Zauntor bringen – vorher (auf normalem Boden, nicht auf dem Feld!) wirfst du ihm einen Stapel Karotten oder Kartoffeln zu: Auf dem Feld würden die Trichter sie schneller schlucken. Mit dem Komposter wird er Bauer, erntet und pflanzt mit seinem Vorrat nach.",
+    "text": "Weizen säen. Dann einen Dorfbewohner ohne Beruf holen (keinen Nichtsnutz im grünen Kittel). Auf normalem Boden, nicht auf dem Feld (dort schlucken die Trichter alles), wirfst du ihm ein paar Stapel Karotten oder Kartoffeln zu. Anleinen lassen sich Dorfbewohner nicht: Schieb ihn in ein Boot, steig dazu und rudere durch die Lücke aufs Feld (an Land langsam, geht aber), dann aussteigen, hinausgehen, das Boot von außen abbauen. Mit dem Komposter wird er Bauer, erntet und pflanzt mit seinem Vorrat nach.",
     "luft": [],
     "added": [
      {
@@ -6902,6 +6994,44 @@
       "id": "villager",
       "p": {},
       "ent": true
+     }
+    ]
+   },
+   {
+    "text": "Lücke schließen.",
+    "luft": [],
+    "added": [
+     {
+      "x": 1,
+      "y": 0,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 0,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
      }
     ]
    }
@@ -7081,7 +7211,7 @@
     "x": -1,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7089,7 +7219,7 @@
     "x": 0,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7097,7 +7227,7 @@
     "x": 1,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7105,7 +7235,7 @@
     "x": 2,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7113,7 +7243,7 @@
     "x": 3,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7121,7 +7251,7 @@
     "x": 4,
     "y": 0,
     "z": -1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7129,7 +7259,7 @@
     "x": -1,
     "y": 0,
     "z": 0,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7137,7 +7267,7 @@
     "x": 4,
     "y": 0,
     "z": 0,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7153,7 +7283,7 @@
     "x": 4,
     "y": 0,
     "z": 1,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7161,7 +7291,7 @@
     "x": -1,
     "y": 0,
     "z": 2,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7169,23 +7299,7 @@
     "x": 0,
     "y": 0,
     "z": 2,
-    "id": "oak_fence",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": 0,
-    "z": 2,
-    "id": "fence_gate",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": 0,
-    "z": 2,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7193,7 +7307,7 @@
     "x": 3,
     "y": 0,
     "z": 2,
-    "id": "oak_fence",
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7201,7 +7315,71 @@
     "x": 4,
     "y": 0,
     "z": 2,
-    "id": "oak_fence",
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 0,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": 0,
+    "id": "stone_bricks",
     "p": {},
     "ent": false
    },
@@ -7209,6 +7387,46 @@
     "x": -1,
     "y": 1,
     "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": 2,
     "id": "stone_bricks",
     "p": {},
     "ent": false
@@ -7284,6 +7502,38 @@
     "id": "villager",
     "p": {},
     "ent": true
+   },
+   {
+    "x": 1,
+    "y": 0,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": 0,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
    }
   ]
  },
@@ -7295,19 +7545,19 @@
   "out": "Holz, Setzlinge, Äpfel",
   "where": "Überall",
   "afk": "Nein – halbautomatisch",
-  "why": "Echtes Holz lässt sich in Vanilla nicht einfach vollautomatisch ernten. Am meisten Holz pro Baum gibt die Dunkle Eiche (2 × 2 Setzlinge). Knochenmehl drauf, mit Effizienz-Axt fällen, Setzlinge wieder pflanzen.",
+  "why": "Echtes Holz lässt sich in Vanilla nicht einfach vollautomatisch ernten. Die Schwarzeiche (4 Setzlinge im Quadrat) ist der beste Kompromiss: dicker 2 × 2-Stamm, aber nur 6–9 Blöcke hoch – viel Holz, ohne zu klettern. Riesenfichte und Riesen-Tropenbaum geben noch mehr, werden aber bis zu 30 Blöcke hoch. Knochenmehl drauf, mit Effizienz-Axt fällen, Setzlinge wieder pflanzen.",
   "help": [
    [
     "Baum wächst nicht",
-    "Nach oben mindestens 10 Blöcke frei (oben auch zur Seite), Licht ≥ 9, 4 Setzlinge der Dunklen Eiche genau im Quadrat."
+    "Nach oben mindestens 10 Blöcke frei (oben auch zur Seite), Licht ≥ 9, 4 Schwarzeichensetzlinge genau im Quadrat."
    ]
   ],
   "verified": true,
   "meta": {
-   "rate": "Dunkle Eiche: im Schnitt ca. 42 Holz und 6 Setzlinge pro Baum (Wiki)",
+   "rate": "Schwarzeiche: im Schnitt ca. 42 Holz und 6 Setzlinge pro Baum (Wiki)",
    "ort": [
     [
-     "Dunkle Eiche wächst nur aus 4 Setzlingen im Quadrat und braucht nach oben Platz.",
+     "Die Schwarzeiche wächst nur aus 4 Setzlingen im Quadrat und braucht nach oben Platz.",
      "https://minecraft.wiki/w/Tutorial:Tree_farming"
     ]
    ],
@@ -7320,14 +7570,14 @@
   },
   "steps": [
    {
-    "text": "Freier Platz mit Gras oder Erde, nach oben mindestens 10 Blöcke frei. 4 Setzlinge der Dunklen Eiche im 2 × 2-Quadrat pflanzen, dann Knochenmehl drauf. Fällen, Setzlinge aufsammeln, von vorn.",
+    "text": "Freier Platz mit Gras oder Erde, nach oben mindestens 10 Blöcke frei. 4 Schwarzeichensetzlinge im 2 × 2-Quadrat pflanzen, dann Knochenmehl drauf. Fällen, Setzlinge aufsammeln, von vorn.",
     "luft": [],
     "added": [
      {
       "x": 0,
       "y": 0,
       "z": 0,
-      "id": "oak_sapling",
+      "id": "dark_oak_sapling",
       "p": {},
       "ent": false
      },
@@ -7335,7 +7585,7 @@
       "x": 1,
       "y": 0,
       "z": 0,
-      "id": "oak_sapling",
+      "id": "dark_oak_sapling",
       "p": {},
       "ent": false
      },
@@ -7343,7 +7593,7 @@
       "x": 0,
       "y": 0,
       "z": 1,
-      "id": "oak_sapling",
+      "id": "dark_oak_sapling",
       "p": {},
       "ent": false
      },
@@ -7351,7 +7601,7 @@
       "x": 1,
       "y": 0,
       "z": 1,
-      "id": "oak_sapling",
+      "id": "dark_oak_sapling",
       "p": {},
       "ent": false
      }
@@ -7363,7 +7613,7 @@
     "x": 0,
     "y": 0,
     "z": 0,
-    "id": "oak_sapling",
+    "id": "dark_oak_sapling",
     "p": {},
     "ent": false
    },
@@ -7371,7 +7621,7 @@
     "x": 1,
     "y": 0,
     "z": 0,
-    "id": "oak_sapling",
+    "id": "dark_oak_sapling",
     "p": {},
     "ent": false
    },
@@ -7379,7 +7629,7 @@
     "x": 0,
     "y": 0,
     "z": 1,
-    "id": "oak_sapling",
+    "id": "dark_oak_sapling",
     "p": {},
     "ent": false
    },
@@ -7387,7 +7637,7 @@
     "x": 1,
     "y": 0,
     "z": 1,
-    "id": "oak_sapling",
+    "id": "dark_oak_sapling",
     "p": {},
     "ent": false
    }
@@ -7523,17 +7773,17 @@
   "cat": "Pflanzen",
   "diff": 1,
   "out": "Blumen → Farbstoffe",
-  "where": "In einem Biom mit passenden Blumen (z. B. Blumenwald)",
-  "afk": "Nein – Knopf drücken",
-  "why": "Knochenmehl auf eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose) lässt eine Kopie fallen, die Blume bleibt stehen. Ein Spender daneben macht das auf Knopfdruck – beliebig oft. Gelb, Magenta, Rot und Rosa als Farbstoff; andere Blumen wachsen mit Knochenmehl auf Gras je nach Biom.",
+  "where": "Überall – die erste hohe Blume findest du im Wald, Birkenwald, Dunklen Wald oder Blumenwald (Flieder, Rosenstrauch, Pfingstrose) oder in der Sonnenblumenebene (Sonnenblume)",
+  "afk": "Nein – Knochenmehl per Hand",
+  "why": "Knochenmehl auf eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose) lässt eine Kopie fallen, die Blume bleibt stehen – beliebig oft, ganz ohne Bau. Rechtsklick gedrückt halten geht schneller als jeder Knopf. Gelb, Magenta, Rot und Rosa als Farbstoff; andere Blumen wachsen mit Knochenmehl auf Gras je nach Biom.",
   "help": [
-   [
-    "Nichts passiert",
-    "Der Spender muss auf die untere Hälfte der Blume zeigen; Knochenmehl hinein."
-   ],
    [
     "Andere Farben",
     "Kleine Blumen wachsen mit Knochenmehl auf Gras – welche, bestimmt das Biom (Blumenwald hat fast alle)."
+   ],
+   [
+    "Nichts passiert",
+    "Das Knochenmehl muss auf die Blume selbst, nicht aufs Gras daneben."
    ]
   ],
   "verified": true,
@@ -7541,7 +7791,7 @@
    "rate": "Keine belegte Zahl",
    "ort": [
     [
-     "Welche Blumen wachsen, bestimmt das Biom. Im Blumenwald gibt es fast alle.",
+     "Das Biom zählt nur für die erste hohe Blume; danach geht es überall.",
      "https://minecraft.wiki/w/Tutorial:Flower_farming"
     ]
    ],
@@ -7558,7 +7808,7 @@
   },
   "steps": [
    {
-    "text": "Eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch oder Pfingstrose) auf Gras pflanzen.",
+    "text": "Eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch oder Pfingstrose) auf Gras pflanzen. Mit Knochenmehl in der Hand Rechtsklick auf die Blume gedrückt halten – jede Anwendung wirft eine Kopie ab, die Blume bleibt stehen. Aufsammeln, zu Farbstoff verarbeiten.",
     "luft": [],
     "added": [
      {
@@ -7566,30 +7816,6 @@
       "y": 0,
       "z": 0,
       "id": "tall_flower",
-      "p": {},
-      "ent": false
-     }
-    ]
-   },
-   {
-    "text": "Daneben einen Spender, der zur Blume zeigt, Knochenmehl hinein, Knopf oben drauf. Jeder Druck lässt die Blume eine Kopie fallen – sie selbst bleibt stehen. Aufsammeln von Hand (Farbstoffe!).",
-    "luft": [],
-    "added": [
-     {
-      "x": 1,
-      "y": 0,
-      "z": 0,
-      "id": "dispenser",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": 1,
-      "z": 0,
-      "id": "stone_button",
       "p": {},
       "ent": false
      }
@@ -7604,24 +7830,6 @@
     "id": "tall_flower",
     "p": {},
     "ent": false
-   },
-   {
-    "x": 1,
-    "y": 0,
-    "z": 0,
-    "id": "dispenser",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": 1,
-    "z": 0,
-    "id": "stone_button",
-    "p": {},
-    "ent": false
    }
   ]
  },
@@ -7633,14 +7841,14 @@
   "out": "Gebratenes Hühnchen, Federn",
   "where": "Überall",
   "afk": "In der Nähe",
-  "why": "Hühner legen Eier in den Trichter unter sich, der füllt den Spender. Zwei Beobachter, die sich anschauen, geben einen dauernden Takt – der Spender wirft jedes Ei auf den Steinschneider. Küken wachsen dort heran. Erwachsene Hühner sind größer und berühren mit dem Kopf die Lava im Kessel darüber – sie werden gegart, das Hühnchen fällt durch den Steinschneider in den Trichter.",
+  "why": "Hühner legen Eier in den Trichter unter sich, der füllt den Werfer. Zwei Beobachter, die sich anschauen, geben einen dauernden Takt – der Werfer wirft jedes Ei auf den Steinschneider. Küken wachsen dort heran. Erwachsene Hühner sind größer und berühren mit dem Kopf die Lava im Kessel darüber – sie werden gegart, das Hühnchen fällt durch den Steinschneider in den Trichter.",
   "help": [
    [
     "Kein gebratenes Hühnchen",
     "Kessel genau über dem Steinschneider, mit Lava gefüllt; rundherum Glas, sonst entkommen Küken."
    ],
    [
-    "Eier bleiben im Spender",
+    "Eier bleiben im Werfer",
     "Die zwei Beobachter müssen sich gegenseitig anschauen (Takt)."
    ],
    [
@@ -7714,7 +7922,7 @@
     ]
    },
    {
-    "text": "Auf die Stützen einen Trichter nach Osten und einen Spender, der nach Osten zeigt. Auf den unteren Trichter einen Steinschneider, Glas drumherum (über der Truhe auch). Blöcke um den oberen Trichter. Hinter den Spender (Norden) zwei Beobachter, die sich gegenseitig anschauen (Takt).",
+    "text": "Auf die Stützen einen Trichter nach Osten und einen Werfer, der nach Osten zeigt. Auf den unteren Trichter einen Steinschneider, Glas drumherum (über der Truhe auch). Blöcke um den oberen Trichter. Hinter den Werfer (Norden) zwei Beobachter, die sich gegenseitig anschauen (Takt).",
     "luft": [],
     "added": [
      {
@@ -7894,7 +8102,7 @@
     ]
    },
    {
-    "text": "Hühner auf den oberen Trichter: Ihre Eier fallen hinein, der Spender wirft sie auf den Steinschneider. Küken wachsen dort auf; erwachsene Hühner berühren mit dem Kopf die Lava im Kessel und werden gegart – das Hühnchen fällt durch den Steinschneider in den Trichter. Tipp: Eier in den Schacht werfen.",
+    "text": "Hühner auf den oberen Trichter: Ihre Eier fallen hinein, der Werfer wirft sie auf den Steinschneider. Küken wachsen dort auf; erwachsene Hühner berühren mit dem Kopf die Lava im Kessel und werden gegart – das Hühnchen fällt durch den Steinschneider in den Trichter. Tipp: Eier in den Schacht werfen.",
     "luft": [],
     "added": [
      {
@@ -8467,31 +8675,31 @@
   "cat": "Tiere",
   "diff": 2,
   "out": "Wolle (jede Farbe)",
-  "where": "Überall",
+  "where": "Auf einer Wiese (Gras an den 4 Ecken neben dem Schaf)",
   "afk": "Ja",
-  "why": "Das Schaf steht auf einem Grasblock. Frisst es, wird das Gras zu Erde und seine Wolle wächst nach – der Beobachter merkt den Wechsel, und der Spender mit der Schere schert es. Die Wolle fällt auf das Gras; die Trichterlore darunter saugt sie durch den vollen Block an.",
+  "why": "Das Schaf steht auf einem Grasblock. Frisst es, wird das Gras zu Erde und seine Wolle wächst nach – der Beobachter merkt den Wechsel, und der Werfer mit der Schere schert es. Die Wolle fällt auf das Gras; die Trichterlore darunter saugt sie durch den vollen Block an.",
   "help": [
    [
-    "Schaf frisst nicht",
-    "Echter Grasblock nötig; Gras daneben (Boden) lässt die Erde wieder grün werden."
+    "Werfer schert nicht",
+    "Redstone auf dem Block hinter dem Beobachter, Werfer direkt daneben."
    ],
    [
-    "Spender schert nicht",
-    "Redstone auf dem Block hinter dem Beobachter, Spender direkt daneben."
+    "Schaf frisst nicht",
+    "Echter Grasblock nötig. Die 4 Grasblöcke schräg neben dem Gras (an den Ecken) müssen Gras bleiben und frei liegen – nur von dort wächst die Erde nach jedem Fressen wieder zu."
    ]
   ],
   "verified": true,
   "meta": {
-   "rate": "Ein Schaf hat nach 50 s zu 63 % und nach 2 min zu über 90 % neue Wolle (Wiki)",
+   "rate": "Etwa 1 Wolle alle paar Minuten: Nach jedem Fressen muss die Erde erst vom Gras an den Ecken wieder zuwachsen (nur bei Tageslicht).",
    "ort": [
     [
-     "Überall; das Schaf steht auf einem echten Grasblock.",
+     "Überall, wo Gras ist; das Schaf steht auf einem echten Grasblock.",
      "https://minecraft.wiki/w/Tutorial:Wool_farming"
     ]
    ],
    "meta": [
     [
-     "Wiki-Design: Spender mit Schere, Beobachter schaut aufs Gras, Trichterlore unter dem Gras.",
+     "Wiki-Design: Werfer mit Schere, Beobachter schaut aufs Gras, Trichterlore unter dem Gras.",
      "https://minecraft.wiki/w/Tutorial:Wool_farming"
     ],
     [
@@ -8652,7 +8860,7 @@
     ]
    },
    {
-    "text": "Redstone-Staub auf den Block hinter dem Beobachter, auf den Beobachter ein Spender, der nach Osten zeigt. Scheren in den Spender. Glaswände 2 hoch um das Gras.",
+    "text": "Redstone-Staub auf den Block hinter dem Beobachter, auf den Beobachter ein Werfer, der nach Osten zeigt. Scheren in den Werfer. Glaswände 2 hoch um das Gras.",
     "luft": [],
     "added": [
      {
@@ -8732,7 +8940,7 @@
     ]
    },
    {
-    "text": "Schaf hinein – frisst es Gras, merkt es der Beobachter und der Spender schert es.",
+    "text": "Schaf hinein – frisst es Gras, merkt es der Beobachter und der Werfer schert es.",
     "luft": [],
     "added": [
      {
@@ -8931,7 +9139,7 @@
   "out": "Honigwaben (Kerzen, Bienenstöcke)",
   "where": "Bei Blumen",
   "afk": "Ja",
-  "why": "Ein Spender mit Schere zeigt seitlich auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der Spender versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts, und Ernten per Spender macht die Bienen nicht wütend.",
+  "why": "Ein Werfer mit Schere zeigt seitlich auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der Werfer versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts, und Ernten per Werfer macht die Bienen nicht wütend.",
   "help": [
    [
     "Keine Waben",
@@ -8953,7 +9161,7 @@
    ],
    "meta": [
     [
-     "Ernten per Spender macht die Bienen nicht wütend.",
+     "Ernten per Werfer macht die Bienen nicht wütend.",
      "https://minecraft.wiki/w/Tutorial:Honey_farming"
     ],
     [
@@ -9004,7 +9212,7 @@
     ]
    },
    {
-    "text": "Bienennest hinter den Trichter, die Öffnung zeigt zum Trichter (Norden). Links ein Block, hinten ein Block, oben ein Block – rechts (Osten) ein Spender, der aufs Nest zeigt, Schere hinein.",
+    "text": "Bienennest hinter den Trichter, die Öffnung zeigt zum Trichter (Norden). Links ein Block, hinten ein Block, oben ein Block – rechts (Osten) ein Werfer, der aufs Nest zeigt, Schere hinein.",
     "luft": [],
     "added": [
      {
@@ -9054,7 +9262,7 @@
     ]
    },
    {
-    "text": "Hinter den Spender zwei Beobachter, die sich anschauen (Takt): der Spender versucht dauernd zu scheren – bei vollem Nest fallen 3 Waben vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts.",
+    "text": "Hinter den Werfer zwei Beobachter, die sich anschauen (Takt): der Werfer versucht dauernd zu scheren – bei vollem Nest fallen 3 Waben vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts.",
     "luft": [],
     "added": [
      {
@@ -12949,15 +13157,15 @@
   "out": "XP, Knochen, Pfeile, Fleisch",
   "where": "Zombie- oder Skelett-Spawner im Verlies",
   "afk": "Innerhalb 16 Blöcken vom Spawner",
-  "why": "Spawner erzeugen Mobs, solange ein Spieler höchstens 16 Blöcke entfernt ist – aber nicht im Wasser. Darum liegt das Wasser eine Ebene unter dem Spawner: Die Mobs spawnen darüber, fallen hinein und werden unter dem Spawner durch zur Rinne und durch die Tür in eine Zelle geschoben (ein Schild hält das Wasser). Du stehst eine Ebene tiefer und triffst ihre Beine durch einen Spalt; die Beute fällt in die Truhe neben dir.",
+  "why": "Spawner erzeugen Mobs, solange ein Spieler höchstens 16 Blöcke entfernt ist – aber nicht im Wasser. Darum liegt das Wasser zwei Ebenen unter dem Spawner, dazwischen eine Ebene Luft: Die Mobs spawnen darüber, fallen hinein und passen im Wasser genau unter dem Spawner durch zur Rinne und durch die Tür in eine Zelle geschoben (ein Schild hält das Wasser). Du stehst eine Ebene tiefer und triffst ihre Beine durch einen Spalt; die Beute fällt in die Truhe neben dir.",
   "help": [
    [
     "Spawner spawnt nicht",
     "Höchstens 16 Blöcke entfernt bleiben; keine Fackeln im Raum."
    ],
    [
-    "Baby-Zombie kommt heraus",
-    "Babys passen durch den Spalt – einfach erschlagen."
+    "Baby-Zombies",
+    "Sie kommen nicht heraus, sind aber kleiner – durch den Spalt etwas tiefer zielen."
    ]
   ],
   "verified": true,
@@ -17112,7 +17320,7 @@
   "cat": "Mobs",
   "diff": 3,
   "out": "Knochen, Pfeile, Fäden, Schwarzpulver, Fleisch",
-  "where": "Unter der Erde (oder als dunkler Kasten in der Luft)",
+  "where": "Unter der Erde, weit weg von Höhlen",
   "afk": "Unten am Schacht (24–32 Blöcke unter dem Raum)",
   "why": "Monster spawnen bei Licht 0, wenn kein Spieler näher als 24 Blöcke ist – aber nicht im Wasser, und von selbst laufen sie auch nicht hinein. Darum: dunkler Raum 10 × 10, 2 hoch, Kanäle in Kreuzform 2 tief, oben offene Falltüren. Die Wegfindung hält sie für Boden, die Monster fallen ins Wasser, das schiebt sie zum trockenen Loch in der Mitte: 26 Blöcke Fall töten Zombies, Skelette, Creeper und Spinnen. Weiter als 32 Blöcke weg laufen Monster nicht mehr herum – darum wartest du direkt unten.",
   "help": [
@@ -17147,7 +17355,7 @@
   },
   "steps": [
    {
-    "text": "Unter der Erde (oder in einem dunklen Kasten) einen Raum 10 × 10 und 2 hoch ausgraben. Keine Fackeln – es muss ganz dunkel sein. Ideal: weit weg von Höhlen, sonst spawnen die Monster dort.",
+    "text": "Unter der Erde einen Raum 10 × 10 und 2 hoch ausgraben. Keine Fackeln – es muss ganz dunkel sein. Ideal: weit weg von Höhlen, sonst spawnen die Monster dort.",
     "luft": [
      {
       "x": 0,
@@ -18153,528 +18361,8 @@
     "added": []
    },
    {
-    "text": "In der Mitte ein Loch 2 × 2 ausheben: 2 tief für die Mitte, darunter der Schacht – zusammen 28 tief.",
+    "text": "In der Mitte ein Loch 2 × 2 ausheben – erst nur 2 tief.",
     "luft": [
-     {
-      "x": 4,
-      "y": -28,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -28,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -28,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -28,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -27,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -27,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -27,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -27,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -26,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -26,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -26,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -26,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -25,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -25,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -25,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -25,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -24,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -24,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -24,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -24,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -23,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -23,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -23,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -23,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -22,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -22,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -22,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -22,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -21,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -21,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -21,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -21,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -20,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -20,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -20,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -20,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -19,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -19,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -19,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -19,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -18,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -18,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -18,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -18,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -17,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -17,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -17,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -17,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -16,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -16,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -16,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -16,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -15,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -15,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -15,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -15,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -14,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -14,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -14,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -14,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -13,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -13,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -13,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -13,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -12,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -12,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -12,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -12,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -11,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -11,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -11,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -11,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -10,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -10,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -10,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -10,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -9,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -9,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -9,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -9,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -8,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -8,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -8,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -8,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -7,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -7,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -7,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -7,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -6,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -6,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -6,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -6,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -5,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -5,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -5,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -5,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -4,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -4,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -4,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -4,
-      "z": 5
-     },
-     {
-      "x": 4,
-      "y": -3,
-      "z": 4
-     },
-     {
-      "x": 5,
-      "y": -3,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -3,
-      "z": 5
-     },
-     {
-      "x": 5,
-      "y": -3,
-      "z": 5
-     },
      {
       "x": 4,
       "y": -2,
@@ -18719,7 +18407,7 @@
     "added": []
    },
    {
-    "text": "Gleich jetzt (solange die Kanäle noch nicht gegraben sind, kannst du sie an die Wände klicken): Ins Loch auf der zweiten Ebene 4 offene Falltüren, Klappe jeweils zur Mitte. Sie halten später das Wasser auf, aber alles, was das Wasser hineinschiebt, fällt trocken in den Schacht – auch Mobs, die oben schwimmen.",
+    "text": "Auf den Boden des Lochs 4 Falltüren setzen (oben auf den Boden klicken): bei den beiden nördlichen beim Klicken nach Süden schauen, bei den beiden südlichen nach Norden. Dann alle öffnen – die Klappen stehen in der Mitte des Lochs. Sie halten später das Wasser auf, aber alles, was das Wasser hineinschiebt, fällt trocken in den Schacht – auch Mobs, die oben schwimmen.",
     "luft": [],
     "added": [
      {
@@ -18771,6 +18459,532 @@
       "ent": false
      }
     ]
+   },
+   {
+    "text": "Jetzt durch die offenen Falltüren den Schacht darunter graben – zusammen 28 tief.",
+    "luft": [
+     {
+      "x": 4,
+      "y": -28,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -28,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -28,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -28,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -27,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -27,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -27,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -27,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -26,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -26,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -26,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -26,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -25,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -25,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -25,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -25,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -24,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -24,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -24,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -24,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -23,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -23,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -23,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -23,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -22,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -22,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -22,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -22,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -21,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -21,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -21,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -21,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -20,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -20,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -20,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -20,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -19,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -19,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -19,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -19,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -18,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -18,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -18,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -18,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -17,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -17,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -17,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -17,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -16,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -16,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -16,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -16,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -15,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -15,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -15,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -15,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -14,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -14,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -14,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -14,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -13,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -13,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -13,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -13,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -12,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -12,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -12,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -12,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -11,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -11,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -11,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -11,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -10,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -10,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -10,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -10,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -9,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -9,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -9,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -9,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -8,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -8,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -8,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -8,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -7,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -7,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -7,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -7,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -6,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -6,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -6,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -6,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -5,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -5,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -5,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -5,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -4,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -4,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -4,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -4,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -3,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -3,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -3,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -3,
+      "z": 5
+     }
+    ],
+    "added": []
    },
    {
     "text": "Kanäle in Kreuzform 2 tief ausheben (2 breit, von jeder Wand bis zum Loch).",
@@ -20544,7 +20758,7 @@
   "cat": "Mobs",
   "diff": 3,
   "out": "Schwarzpulver",
-  "where": "Unter der Erde (oder als dunkler Kasten in der Luft)",
+  "where": "Unter der Erde, weit weg von Höhlen",
   "afk": "Unten am Schacht (24–32 Blöcke unter dem Raum)",
   "why": "Wie die Monster-Farm, nur 8 × 8 und mit Falltüren in der oberen Hälfte der zweiten Ebene über dem Spawnboden: Es bleiben 1,8 Blöcke Platz. Creeper (1,7 hoch) passen hinein, Zombies, Skelette und Hexen (fast 2 hoch) nicht. Spinnen passen auch (Fäden als Beifang).",
   "help": [
@@ -21221,7 +21435,107 @@
     "added": []
    },
    {
-    "text": "In der Mitte ein Loch 2 × 2 ausheben: 2 tief für die Mitte, darunter der Schacht – zusammen 28 tief.",
+    "text": "In der Mitte ein Loch 2 × 2 ausheben – erst nur 2 tief.",
+    "luft": [
+     {
+      "x": 3,
+      "y": -2,
+      "z": 3
+     },
+     {
+      "x": 4,
+      "y": -2,
+      "z": 3
+     },
+     {
+      "x": 3,
+      "y": -2,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -2,
+      "z": 4
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 4
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 4
+     }
+    ],
+    "added": []
+   },
+   {
+    "text": "Auf den Boden des Lochs 4 Falltüren setzen (oben auf den Boden klicken): bei den beiden nördlichen beim Klicken nach Süden schauen, bei den beiden südlichen nach Norden. Dann alle öffnen – die Klappen stehen in der Mitte des Lochs. Sie halten später das Wasser auf, aber alles, was das Wasser hineinschiebt, fällt trocken in den Schacht – auch Mobs, die oben schwimmen.",
+    "luft": [],
+    "added": [
+     {
+      "x": 3,
+      "y": -2,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -2,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -2,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -2,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Jetzt durch die offenen Falltüren den Schacht darunter graben – zusammen 28 tief.",
     "luft": [
      {
       "x": 3,
@@ -21742,103 +22056,9 @@
       "x": 4,
       "y": -3,
       "z": 4
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 3
-     },
-     {
-      "x": 4,
-      "y": -2,
-      "z": 3
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -2,
-      "z": 4
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 3
-     },
-     {
-      "x": 4,
-      "y": -1,
-      "z": 3
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 4
-     },
-     {
-      "x": 4,
-      "y": -1,
-      "z": 4
      }
     ],
     "added": []
-   },
-   {
-    "text": "Gleich jetzt (solange die Kanäle noch nicht gegraben sind, kannst du sie an die Wände klicken): Ins Loch auf der zweiten Ebene 4 offene Falltüren, Klappe jeweils zur Mitte. Sie halten später das Wasser auf, aber alles, was das Wasser hineinschiebt, fällt trocken in den Schacht – auch Mobs, die oben schwimmen.",
-    "luft": [],
-    "added": [
-     {
-      "x": 3,
-      "y": -2,
-      "z": 3,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "n",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -2,
-      "z": 3,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "n",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 4,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -2,
-      "z": 4,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     }
-    ]
    },
    {
     "text": "Kanäle in Kreuzform 2 tief ausheben (2 breit, von jeder Wand bis zum Loch).",
@@ -22641,7 +22861,7 @@
     ]
    },
    {
-    "text": "Über den Spawnboden (überall außer über den Kanälen) Falltüren in die OBERE Hälfte der zweiten Ebene. Dann bleiben nur 1,8 Blöcke Platz: Creeper (1,7) passen hinein, Zombies und Skelette (fast 2) nicht.",
+    "text": "Über den ganzen Spawnboden – auch über die 8 Blöcke an den Kanal-Enden, nur nicht über die offenen Falltüren und das Loch – Falltüren in die OBERE Hälfte der zweiten Ebene (an die Unterseite der Decke klicken). Dann bleiben nur 1,8 Blöcke Platz: Creeper (1,7) passen hinein, Zombies und Skelette (fast 2) nicht.",
     "luft": [],
     "added": [
      {
@@ -22675,6 +22895,26 @@
       "ent": false
      },
      {
+      "x": 3,
+      "y": 1,
+      "z": 0,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": 0,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
       "x": 5,
       "y": 1,
       "z": 0,
@@ -22818,6 +23058,46 @@
       "x": 7,
       "y": 1,
       "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 4,
       "id": "oak_trapdoor",
       "p": {
        "half": "top"
@@ -22966,6 +23246,26 @@
      },
      {
       "x": 2,
+      "y": 1,
+      "z": 7,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 1,
+      "z": 7,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top"
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
       "y": 1,
       "z": 7,
       "id": "oak_trapdoor",
@@ -23601,6 +23901,26 @@
     "ent": false
    },
    {
+    "x": 3,
+    "y": 1,
+    "z": 0,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": 0,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
     "x": 5,
     "y": 1,
     "z": 0,
@@ -23744,6 +24064,46 @@
     "x": 7,
     "y": 1,
     "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 3,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 3,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 4,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 4,
     "id": "oak_trapdoor",
     "p": {
      "half": "top"
@@ -23892,6 +24252,26 @@
    },
    {
     "x": 2,
+    "y": 1,
+    "z": 7,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 1,
+    "z": 7,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top"
+    },
+    "ent": false
+   },
+   {
+    "x": 4,
     "y": 1,
     "z": 7,
     "id": "oak_trapdoor",
@@ -23940,7 +24320,7 @@
   "out": "Schleimbälle",
   "where": "Schleim-Chunk unter Höhe 40",
   "afk": "24–32 Blöcke weg warten, dann erschlagen",
-  "why": "Schleime spawnen in bestimmten Chunks (Schleim-Chunks, 10 % aller Chunks) unter Y 40 – egal wie hell. Grabe den ganzen Chunk 3 hoch aus (sie brauchen über 2 Blöcke Platz) und mach ihn mit Fackeln hell: Dann spawnen dort nur noch Schleime. Warte 24–32 Blöcke weg (näher spawnt nichts) und erschlage sie dann.",
+  "why": "Schleime spawnen in bestimmten Chunks (Schleim-Chunks, 10 % aller Chunks) unter Y 40 – egal wie hell. Grabe den ganzen Chunk 3 hoch aus (sie brauchen über 2 Blöcke Platz) und stell 2 Fackeln auf: Dann spawnen dort nur noch Schleime. Warte 24–32 Blöcke weg (näher spawnt nichts) und erschlage sie dann.",
   "help": [
    [
     "Keine Schleime",
@@ -23973,7 +24353,7 @@
   },
   "steps": [
    {
-    "text": "Einen Schleim-Chunk finden (Chunkbase oder Schleime unter Y 40). Chunk-Grenzen mit F3+G anzeigen und den Plan mit den Pfeilen im Plan-Menü genau auf den Chunk schieben. Den ganzen Chunk (16 × 16) unter Höhe 40 3 Blöcke hoch ausgraben und mit Fackeln hell machen: Schleime stört das Licht nicht, andere Monster schon.",
+    "text": "Einen Schleim-Chunk finden (Chunkbase oder Schleime unter Y 40). Chunk-Grenzen mit F3+G anzeigen und den Plan mit den Pfeilen im Plan-Menü genau auf den Chunk schieben. Den ganzen Chunk (16 × 16) unter Höhe 40 3 Blöcke hoch ausgraben.",
     "luft": [
      {
       "x": 0,
@@ -27819,6 +28199,28 @@
     "added": []
    },
    {
+    "text": "2 Fackeln auf den Boden (siehe Plan) – dann ist es überall hell genug: Schleime stört das Licht nicht, andere Monster schon.",
+    "luft": [],
+    "added": [
+     {
+      "x": 4,
+      "y": 0,
+      "z": 8,
+      "id": "torch",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 11,
+      "y": 0,
+      "z": 8,
+      "id": "torch",
+      "p": {},
+      "ent": false
+     }
+    ]
+   },
+   {
     "text": "24–32 Blöcke weg warten (z. B. 25 Blöcke darüber in einer kleinen Höhle), dann runter und die Schleime erschlagen.",
     "luft": [],
     "added": [
@@ -27834,6 +28236,22 @@
    }
   ],
   "fertig": [
+   {
+    "x": 4,
+    "y": 0,
+    "z": 8,
+    "id": "torch",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 11,
+    "y": 0,
+    "z": 8,
+    "id": "torch",
+    "p": {},
+    "ent": false
+   },
    {
     "x": 8,
     "y": 25,
@@ -27852,12 +28270,8 @@
   "out": "Redstone, Glowstone-Staub, Zucker, Flaschen",
   "where": "Hexenhütte im Sumpf",
   "afk": "Auf der Treppe, 26 Blöcke unter den Hexenfüßen (24–32 Blöcke weg)",
-  "why": "In der Box einer Hexenhütte (7 × 9 Grundfläche) spawnen nur Hexen – aber nicht im Wasser. Darum ist die Plattform trocken; mittendurch läuft ein 2 tiefer Kanal mit offenen Falltüren darüber. Hexen halten sie für Boden, fallen hinein, das Wasser schiebt sie zum Schacht, 32 Blöcke Fall töten sie (26 Leben). Ohne Dach läuft die Farm nachts; ein dunkles Dach macht sie auch tagsüber.",
+  "why": "In der Box einer Hexenhütte (7 × 9 Grundfläche) spawnen nur Hexen – aber nicht im Wasser. Darum ist die Plattform trocken; mittendurch läuft ein 2 tiefer Kanal mit offenen Falltüren darüber. Hexen halten sie für Boden, fallen hinein, das Wasser schiebt sie zum Schacht, 32 Blöcke Fall töten sie (26 Leben). Ohne Dach läuft die Farm nachts; ein dunkles Dach macht sie auch tagsüber. Im Test an einer echten Hexenhütte (26.3) gespawnt und gefallen.",
   "help": [
-   [
-    "Keine Hexen",
-    "Der Boden muss genau unter der Box liegen: deine Füße eine Ebene unter dem alten Hüttenboden, dann den Plan mit den Pfeilen im Plan-Menü verschieben."
-   ],
    [
     "Hexen bleiben im Kanal",
     "Falltüren über dem Kanal offen, im Loch am Ende eine offene Falltür auf Wasserhöhe."
@@ -27865,6 +28279,14 @@
    [
     "Hexen stehen nur herum",
     "Höchstens 32 Blöcke weg warten – weiter weg laufen Mobs nicht herum (im Test nachgeprüft)."
+   ],
+   [
+    "Keine Hexen",
+    "Der Boden muss genau unter der Box liegen: deine Füße eine Ebene unter dem alten Hüttenboden, dann den Plan im Plan-Menü verschieben und drehen, bis er genau unter der Hütte liegt."
+   ],
+   [
+    "Hexen schwimmen weg oder leben unten noch",
+    "Kanal oder Schacht ist nicht dicht – Wasser daneben durch Blöcke ersetzen, im Schacht darf kein Wasser stehen."
    ]
   ],
   "verified": true,
@@ -27885,7 +28307,7 @@
   },
   "steps": [
    {
-    "text": "Hexenhütte abbauen; ihre Grundfläche ist die Spawn-Box (7 × 9). Zum Start des Plans stehst du mit den Füßen eine Ebene UNTER dem alten Hüttenboden (y 0 hier). Verschiebe den Plan mit den Pfeilen im Plan-Menü, bis er genau unter der früheren Hütte liegt.",
+    "text": "Hexenhütte abbauen; ihre Grundfläche ist die Spawn-Box (7 × 9). Zum Start des Plans stehst du mit den Füßen eine Ebene UNTER dem alten Hüttenboden (y 0 hier). Verschiebe und drehe den Plan im Plan-Menü (Pfeile, Drehen), bis er genau unter der früheren Hütte liegt – die lange Seite (9) wie die lange Seite der Hütte.",
     "luft": [
      {
       "x": 0,
@@ -28521,7 +28943,7 @@
     "added": []
    },
    {
-    "text": "Schacht zuerst: In der Mitte der hinteren Kante 33 Blöcke tief graben, unten Trichter in eine Truhe und dein Platz (Treppe hinunter graben).",
+    "text": "Schacht zuerst: In der Mitte der hinteren Kante 33 Blöcke tief graben, unten Trichter in eine Truhe und dein Platz (Treppe hinunter graben). Wo Wasser hereinläuft, die Stelle mit einem Block zumauern – im Schacht darf kein Wasser stehen, sonst landen die Hexen weich.",
     "luft": [
      {
       "x": 3,
@@ -28732,7 +29154,7 @@
     ]
    },
    {
-    "text": "Boden 7 × 9 eine Ebene unter deinen Füßen (genau unter der Box) – trocken, hier spawnen die Hexen. In der Mitte läuft von vorne bis zum Schacht ein Kanal, 2 tief.",
+    "text": "Boden 7 × 9 eine Ebene unter deinen Füßen (genau unter der Box) – trocken, hier spawnen die Hexen. In der Mitte läuft von vorne bis zum Schacht ein Kanal, 2 tief. Steht die Hütte über Wasser: Der Kanal muss trotzdem dicht sein – wo neben oder unter ihm Wasser oder Luft ist, Blöcke setzen.",
     "luft": [
      {
       "x": 3,
@@ -29449,14 +29871,14 @@
     ]
    },
    {
-    "text": "Rand rundherum, 2 hoch – über einen Block springen Hexen drüber. Ein Dach (dunkel, sonst spawnen sie nur nachts) ist optional.",
+    "text": "Rand rundherum aus Zäunen – über einen Block springen Hexen drüber, über einen Zaun nicht. Ein Dach (dunkel, sonst spawnen sie nur nachts) ist optional.",
     "luft": [],
     "added": [
      {
       "x": -1,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29464,7 +29886,7 @@
       "x": 0,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29472,7 +29894,7 @@
       "x": 1,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29480,7 +29902,7 @@
       "x": 2,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29488,7 +29910,7 @@
       "x": 3,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29496,7 +29918,7 @@
       "x": 4,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29504,7 +29926,7 @@
       "x": 5,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29512,7 +29934,7 @@
       "x": 6,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29520,7 +29942,7 @@
       "x": 7,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29528,7 +29950,7 @@
       "x": -1,
       "y": 0,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29536,7 +29958,7 @@
       "x": 7,
       "y": 0,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29544,7 +29966,7 @@
       "x": -1,
       "y": 0,
       "z": 1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29552,7 +29974,7 @@
       "x": 7,
       "y": 0,
       "z": 1,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29560,7 +29982,7 @@
       "x": -1,
       "y": 0,
       "z": 2,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29568,7 +29990,7 @@
       "x": 7,
       "y": 0,
       "z": 2,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29576,7 +29998,7 @@
       "x": -1,
       "y": 0,
       "z": 3,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29584,7 +30006,7 @@
       "x": 7,
       "y": 0,
       "z": 3,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29592,7 +30014,7 @@
       "x": -1,
       "y": 0,
       "z": 4,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29600,7 +30022,7 @@
       "x": 7,
       "y": 0,
       "z": 4,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29608,7 +30030,7 @@
       "x": -1,
       "y": 0,
       "z": 5,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29616,7 +30038,7 @@
       "x": 7,
       "y": 0,
       "z": 5,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29624,7 +30046,7 @@
       "x": -1,
       "y": 0,
       "z": 6,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29632,7 +30054,7 @@
       "x": 7,
       "y": 0,
       "z": 6,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29640,7 +30062,7 @@
       "x": -1,
       "y": 0,
       "z": 7,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29648,7 +30070,7 @@
       "x": 7,
       "y": 0,
       "z": 7,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29656,7 +30078,7 @@
       "x": -1,
       "y": 0,
       "z": 8,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29664,7 +30086,7 @@
       "x": 7,
       "y": 0,
       "z": 8,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29672,7 +30094,7 @@
       "x": -1,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29680,7 +30102,7 @@
       "x": 0,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29688,7 +30110,7 @@
       "x": 1,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29696,7 +30118,7 @@
       "x": 2,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29704,7 +30126,7 @@
       "x": 3,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29712,7 +30134,7 @@
       "x": 4,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29720,7 +30142,7 @@
       "x": 5,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29728,7 +30150,7 @@
       "x": 6,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      },
@@ -29736,295 +30158,7 @@
       "x": 7,
       "y": 0,
       "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 0,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 0,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 2,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 2,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 3,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 3,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 4,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 4,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 5,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 5,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 6,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 6,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 7,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 7,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 8,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 8,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": 1,
-      "z": 9,
-      "id": "stone_bricks",
+      "id": "oak_fence",
       "p": {},
       "ent": false
      }
@@ -30686,7 +30820,7 @@
     "x": -1,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30694,7 +30828,7 @@
     "x": 0,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30702,7 +30836,7 @@
     "x": 1,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30710,7 +30844,7 @@
     "x": 2,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30718,7 +30852,7 @@
     "x": 3,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30726,7 +30860,7 @@
     "x": 4,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30734,7 +30868,7 @@
     "x": 5,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30742,7 +30876,7 @@
     "x": 6,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30750,7 +30884,7 @@
     "x": 7,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30758,7 +30892,7 @@
     "x": -1,
     "y": 0,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30766,7 +30900,7 @@
     "x": 7,
     "y": 0,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30774,7 +30908,7 @@
     "x": -1,
     "y": 0,
     "z": 1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30782,7 +30916,7 @@
     "x": 7,
     "y": 0,
     "z": 1,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30790,7 +30924,7 @@
     "x": -1,
     "y": 0,
     "z": 2,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30798,7 +30932,7 @@
     "x": 7,
     "y": 0,
     "z": 2,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30806,7 +30940,7 @@
     "x": -1,
     "y": 0,
     "z": 3,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30814,7 +30948,7 @@
     "x": 7,
     "y": 0,
     "z": 3,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30822,7 +30956,7 @@
     "x": -1,
     "y": 0,
     "z": 4,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30830,7 +30964,7 @@
     "x": 7,
     "y": 0,
     "z": 4,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30838,7 +30972,7 @@
     "x": -1,
     "y": 0,
     "z": 5,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30846,7 +30980,7 @@
     "x": 7,
     "y": 0,
     "z": 5,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30854,7 +30988,7 @@
     "x": -1,
     "y": 0,
     "z": 6,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30862,7 +30996,7 @@
     "x": 7,
     "y": 0,
     "z": 6,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30870,7 +31004,7 @@
     "x": -1,
     "y": 0,
     "z": 7,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30878,7 +31012,7 @@
     "x": 7,
     "y": 0,
     "z": 7,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30886,7 +31020,7 @@
     "x": -1,
     "y": 0,
     "z": 8,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30894,7 +31028,7 @@
     "x": 7,
     "y": 0,
     "z": 8,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30902,7 +31036,7 @@
     "x": -1,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30910,7 +31044,7 @@
     "x": 0,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30918,7 +31052,7 @@
     "x": 1,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30926,7 +31060,7 @@
     "x": 2,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30934,7 +31068,7 @@
     "x": 3,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30942,7 +31076,7 @@
     "x": 4,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30950,7 +31084,7 @@
     "x": 5,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30958,7 +31092,7 @@
     "x": 6,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -30966,295 +31100,7 @@
     "x": 7,
     "y": 0,
     "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 0,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 0,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 2,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 2,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 3,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 3,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 4,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 4,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 6,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 6,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 7,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 7,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 8,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 8,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": 1,
-    "z": 9,
-    "id": "stone_bricks",
+    "id": "oak_fence",
     "p": {},
     "ent": false
    },
@@ -31276,7 +31122,7 @@
   "out": "Prismarin, Fisch, XP",
   "where": "Ozeanmonument",
   "afk": "Nein – du kämpfst",
-  "why": "Wächter spawnen nur im Wasser in der Box eines Ozeanmonuments. Eine echte Farm ist ein Großprojekt (trockenlegen oder Blasensäulen-Aufzüge). Am einfachsten: eine kleine Plattform an der Wasseroberfläche über dem Monument – die Wächter kommen hoch, du triffst sie mit Dreizack oder Schwert.",
+  "why": "Wächter spawnen nur im Wasser in der Box eines Ozeanmonuments. Eine echte Farm ist ein Großprojekt (trockenlegen oder Blasensäulen-Aufzüge). Am einfachsten: eine kleine Plattform an der Wasseroberfläche über dem Monument – die Wächter kommen in Reichweite, du triffst sie mit dem Dreizack (Durchbohren); geworfen fliegt er auch unter Wasser weit.",
   "help": [
    [
     "Abbaulähmung",
@@ -31305,7 +31151,7 @@
   },
   "steps": [
    {
-    "text": "Über dem Ozeanmonument an der Wasseroberfläche eine kleine Plattform 3 × 3 bauen (auf Säulen vom Monument-Dach oder schwimmend). Wächter kommen zu dir hoch – mit Dreizack (Durchbohren) oder Bogen treffen; hinter einem Block vor ihren Lasern in Deckung gehen.",
+    "text": "Über dem Ozeanmonument an der Wasseroberfläche eine kleine Plattform 3 × 3 bauen (auf Säulen vom Monument-Dach oder schwimmend). Wächter kommen zu dir hoch – mit dem Dreizack (Durchbohren) treffen, geworfen fliegt er auch unter Wasser weit; ein Bogen hilft nur, wenn sie dicht unter der Oberfläche sind. Hinter einem Block vor ihren Lasern in Deckung gehen.",
     "luft": [],
     "added": [
      {
@@ -34412,7 +34258,7 @@
     ]
    },
    {
-    "text": "Spawner (ist schon da). Ein Block der Wand bleibt als Tür; Trank der Feuerresistenz trinken, hinein, mit dem Schwert (Plünderung) zuschlagen – Lohenruten gibt es nur, wenn du triffst.",
+    "text": "Spawner (ist schon da). Zum Hinein- und Hinausgehen zwei Wandblöcke übereinander abbauen und hinter dir sofort wieder setzen – durch eine 2 hohe Lücke fliegen Lohen hinaus. Trank der Feuerresistenz trinken, mit dem Schwert (Plünderung) zuschlagen – Lohenruten gibt es nur, wenn du triffst.",
     "luft": [],
     "added": [
      {
@@ -35747,7 +35593,7 @@
   "out": "Goldnuggets, verrottetes Fleisch",
   "where": "Nether-Ödland, am besten über dem Netherdach",
   "afk": "Unten am Trichter, 25 Blöcke unter der Plattform",
-  "why": "Zombifizierte Piglins spawnen auf Netherrack. Sie wollen das Schildkrötenei zertrampeln – erreichbar ist es nur über ein Loch mit einer offenen Falltür, die sie für Boden halten. Sie fallen 25 Blöcke und sterben. Seit 1.21.5 gibt es XP und Goldbarren nur, wenn du selbst tötest – dafür die Plattform nur 22 Blöcke hoch bauen und unten zuschlagen.",
+  "why": "Zombifizierte Piglins spawnen auf Netherrack. Sie wollen das Schildkrötenei zertrampeln – erreichbar ist es nur über ein Loch mit einer offenen Falltür, die sie für Boden halten. Sie fallen 25 Blöcke und sterben. Seit 1.21.5 gibt es XP und Goldbarren nur, wenn du selbst tötest: Dafür die Plattform 22 statt 25 Blöcke über dem Trichter bauen – dann kommen sie mit ½ Herz an. Warte dann aber nicht am Trichter, sondern 14 Blöcke weiter östlich (sonst bist du näher als 24 Blöcke an der Plattform und es spawnt nichts) und geh nur zum Zuschlagen kurz hin.",
   "help": [
    [
     "Piglins greifen alle an",
@@ -35759,7 +35605,7 @@
    ],
    [
     "Wenig Gold",
-    "Spawns verteilen sich auf alle dunklen Flächen bis 128 Blöcke um dich – auch auf Höhlen unter dem Dach. Mehr Plattform = mehr Piglins: Netherrack ist billig, die Plattform darf viel größer sein (alle Wege führen zum Loch am Ei)."
+    "Piglins spawnen bei jedem Licht auf allen Flächen bis 128 Blöcke um dich – auch in Höhlen unter dem Dach (Fackeln helfen nicht). Mehr Plattform = mehr Piglins: Netherrack ist billig, die Plattform darf viel größer sein."
    ]
   ],
   "verified": true,
@@ -37373,7 +37219,7 @@
   "out": "Wither-Schädel, Kohle, Knochen",
   "where": "Netherfestung",
   "afk": "24–32 Blöcke weg warten, dann kämpfen",
-  "why": "In der Box einer Netherfestung spawnen Wither-Skelette auf Netherziegeln, im Dunkeln (Licht ≤ 7). Eine freie Fläche 9 × 9 mit 3 Blöcken Platz (sie sind 2,4 hoch) reicht. Näher als 24 Blöcke spawnt nichts – warte etwas weg und kämpfe dann mit Plünderung III.",
+  "why": "In einer Netherfestung spawnen Wither-Skelette auf Netherziegeln im Dunkeln (Licht ≤ 7) – überall in den Gängen. Eine freie Fläche 9 × 9 mit 3 Blöcken Platz (sie sind 2,4 hoch) gibt ihnen zusätzlichen Platz, den du im Blick hast. Näher als 24 Blöcke spawnt nichts – warte etwas weg und kämpfe dann mit Plünderung III. Im Test spawnten sie in der Festung, auf der Fläche selbst in 30 Minuten aber keins: Je mehr andere Flächen der Festung du mit Stufen belegst, desto mehr kommen hierher.",
   "help": [
    [
     "Zu viele andere Mobs",
@@ -39953,7 +39799,7 @@
   "out": "Enderperlen, XP",
   "where": "Im End, ~128 Blöcke von anderen Inseln",
   "afk": "Unten in der Mitte der Landestelle",
-  "why": "Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einer Lore in der Mitte, rundherum ein Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und sterben. Du stehst unten in der Mitte (dort fällt keiner hin) und sammelst die Perlen ein. Für XP: nur 42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.",
+  "why": "Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot in der Mitte, rundherum ein 3 × 3-Feld und dann ein Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und sterben. Der Ring liegt 2 Blöcke von der Endermilbe weg: Näher dran würden die Endermen sie erschlagen (8 Leben, ein Schlag 7). Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur 42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.",
   "help": [
    [
     "Endermilbe verschwindet",
@@ -39962,6 +39808,10 @@
    [
     "Wenig Endermen",
     "Mindestens 128 Blöcke von anderen Inseln bauen."
+   ],
+   [
+    "Endermilbe ist tot",
+    "Der Lochring muss 2 Blöcke von ihr weg sein (3 × 3-Feld in der Mitte) – direkt daneben schlagen die Endermen sie."
    ]
   ],
   "verified": true,
@@ -39986,7 +39836,7 @@
   },
   "steps": [
    {
-    "text": "Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein. In der Mitte bleibt ein Block stehen, rundherum ein Ring aus 8 Löchern.",
+    "text": "Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein. In der Mitte bleibt ein Feld 3 × 3 stehen, rundherum ein Ring aus 16 Löchern – 2 Blöcke vom Mittelblock weg: Wer neben der Endermilbe steht, schlägt sie (8 Leben, ein Schlag 7), darum kommen die Endermen nie so nah heran.",
     "luft": [],
     "added": [
      {
@@ -40150,9 +40000,33 @@
       "ent": false
      },
      {
-      "x": 2,
+      "x": 7,
       "y": -1,
       "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 8,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": 3,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40160,7 +40034,7 @@
      {
       "x": 3,
       "y": -1,
-      "z": 2,
+      "z": 3,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40168,7 +40042,7 @@
      {
       "x": 4,
       "y": -1,
-      "z": 2,
+      "z": 3,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40176,62 +40050,6 @@
      {
       "x": 5,
       "y": -1,
-      "z": 2,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -1,
-      "z": 2,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": -1,
-      "z": 2,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 8,
-      "y": -1,
-      "z": 2,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": -1,
-      "z": 3,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 3,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 3,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -1,
       "z": 3,
       "id": "end_stone",
       "p": {},
@@ -40265,118 +40083,6 @@
       "x": 1,
       "y": -1,
       "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -1,
-      "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -1,
-      "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": -1,
-      "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 8,
-      "y": -1,
-      "z": 4,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 7,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 8,
-      "y": -1,
-      "z": 5,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": -1,
-      "z": 6,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 6,
-      "id": "end_stone",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 6,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40384,7 +40090,7 @@
      {
       "x": 3,
       "y": -1,
-      "z": 6,
+      "z": 4,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40392,7 +40098,7 @@
      {
       "x": 4,
       "y": -1,
-      "z": 6,
+      "z": 4,
       "id": "end_stone",
       "p": {},
       "ent": false
@@ -40400,13 +40106,93 @@
      {
       "x": 5,
       "y": -1,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -1,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 8,
+      "y": -1,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 8,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
       "z": 6,
       "id": "end_stone",
       "p": {},
       "ent": false
      },
      {
-      "x": 6,
+      "x": 1,
       "y": -1,
       "z": 6,
       "id": "end_stone",
@@ -40576,131 +40362,21 @@
     ]
    },
    {
-    "text": "In jedes Loch eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock) – Endermen halten sie für Boden. Auf den Mittelblock eine Schiene.",
-    "luft": [],
-    "added": [
-     {
-      "x": 3,
-      "y": -1,
-      "z": 3,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -1,
-      "z": 3,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": -1,
-      "z": 3,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 4,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "e",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": -1,
-      "z": 4,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "w",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 5,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "n",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -1,
-      "z": 5,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "n",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": -1,
-      "z": 5,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "n",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": 0,
-      "z": 4,
-      "id": "rail",
-      "p": {},
-      "ent": false
-     }
-    ]
-   },
-   {
-    "text": "Lore auf die Schiene, eine Endermilbe mit Namensschild hinein. Endermen wollen zu ihr und fallen.",
+    "text": "Auf den Mittelblock ein Boot. Eine Endermilbe hineinlocken (sie entsteht manchmal beim Perlenwurf und läuft dir nach) und ihr ein Namensschild geben – ohne verschwindet sie nach 2 Minuten.",
     "luft": [],
     "added": [
      {
       "x": 4,
       "y": 0,
       "z": 4,
-      "id": "minecart",
+      "id": "oak_boat",
       "p": {},
       "ent": true
      }
     ]
    },
    {
-    "text": "Endermilbe in die Lore.",
+    "text": "Endermilbe im Boot.",
     "luft": [],
     "added": [
      {
@@ -40714,10 +40390,256 @@
     ]
    },
    {
-    "text": "44 Blöcke unter der Plattform ein Boden 3 × 3 mit einem Rand: Der Fall tötet die Endermen. Du stehst in der Mitte (dort fällt keiner hin) und sammelst die Perlen automatisch ein. Bau dir eine Treppe oder Leiter hinunter.",
+    "text": "Erst jetzt in jedes Loch eine offene Falltür, die Klappe an der Außenkante – Endermen halten sie für Boden, wollen zur Endermilbe und fallen.",
     "luft": [],
     "added": [
      {
+      "x": 2,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 5,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 5,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 6,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 6,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 6,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 6,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 6,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "44 Blöcke unter der Plattform ein Boden 5 × 5 mit einem Rand: Der Fall tötet die Endermen. Du stehst in der Mitte (dort fällt keiner hin). Die Perlen landen rund um dich – alle paar Minuten einmal herumgehen und einsammeln (sie bleiben 5 Minuten liegen). Bau dir eine Treppe oder Leiter hinunter.",
+    "luft": [],
+    "added": [
+     {
+      "x": 2,
+      "y": -45,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -45,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -45,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -45,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -45,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -45,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 3,
       "y": -45,
       "z": 3,
@@ -40737,6 +40659,22 @@
       "x": 5,
       "y": -45,
       "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -45,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -45,
+      "z": 4,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -40766,6 +40704,22 @@
       "ent": false
      },
      {
+      "x": 6,
+      "y": -45,
+      "z": 4,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -45,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 3,
       "y": -45,
       "z": 5,
@@ -40785,6 +40739,54 @@
       "x": 5,
       "y": -45,
       "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -45,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -45,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -45,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -45,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -45,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -45,
+      "z": 6,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -40796,73 +40798,9 @@
     "luft": [],
     "added": [
      {
-      "x": 3,
-      "y": -44,
-      "z": 2,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 4,
-      "y": -44,
-      "z": 2,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 5,
-      "y": -44,
-      "z": 2,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
       "x": 2,
       "y": -44,
-      "z": 3,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -44,
-      "z": 3,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -44,
-      "z": 4,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -44,
-      "z": 4,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -44,
-      "z": 5,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 6,
-      "y": -44,
-      "z": 5,
+      "z": 1,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -40870,7 +40808,7 @@
      {
       "x": 3,
       "y": -44,
-      "z": 6,
+      "z": 1,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -40878,7 +40816,7 @@
      {
       "x": 4,
       "y": -44,
-      "z": 6,
+      "z": 1,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -40886,7 +40824,135 @@
      {
       "x": 5,
       "y": -44,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -44,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -44,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -44,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -44,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -44,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -44,
+      "z": 4,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -44,
+      "z": 4,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -44,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -44,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -44,
       "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": -44,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -44,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -44,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -44,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -44,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -44,
+      "z": 7,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -41070,9 +41136,33 @@
     "ent": false
    },
    {
-    "x": 2,
+    "x": 7,
     "y": -1,
     "z": 2,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 8,
+    "y": -1,
+    "z": 2,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
+    "z": 3,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -1,
+    "z": 3,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41080,7 +41170,7 @@
    {
     "x": 3,
     "y": -1,
-    "z": 2,
+    "z": 3,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41088,7 +41178,7 @@
    {
     "x": 4,
     "y": -1,
-    "z": 2,
+    "z": 3,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41096,62 +41186,6 @@
    {
     "x": 5,
     "y": -1,
-    "z": 2,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": -1,
-    "z": 2,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": -1,
-    "z": 2,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 8,
-    "y": -1,
-    "z": 2,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": -1,
     "z": 3,
     "id": "end_stone",
     "p": {},
@@ -41185,118 +41219,6 @@
     "x": 1,
     "y": -1,
     "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 8,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 7,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 8,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": -1,
-    "z": 6,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": 6,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 6,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41304,7 +41226,7 @@
    {
     "x": 3,
     "y": -1,
-    "z": 6,
+    "z": 4,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41312,7 +41234,7 @@
    {
     "x": 4,
     "y": -1,
-    "z": 6,
+    "z": 4,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41320,13 +41242,93 @@
    {
     "x": 5,
     "y": -1,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -1,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 8,
+    "y": -1,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 8,
+    "y": -1,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
     "z": 6,
     "id": "end_stone",
     "p": {},
     "ent": false
    },
    {
-    "x": 6,
+    "x": 1,
     "y": -1,
     "z": 6,
     "id": "end_stone",
@@ -41490,110 +41492,6 @@
     "y": -1,
     "z": 8,
     "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 3,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "s",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -1,
-    "z": 3,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "s",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -1,
-    "z": 3,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "s",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 4,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "e",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -1,
-    "z": 4,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "w",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 5,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "n",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -1,
-    "z": 5,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "n",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -1,
-    "z": 5,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "n",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": 0,
-    "z": 4,
-    "id": "rail",
     "p": {},
     "ent": false
    },
@@ -41606,49 +41504,201 @@
     "ent": true
    },
    {
+    "x": 2,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
     "x": 3,
-    "y": -45,
-    "z": 3,
-    "id": "stone_bricks",
-    "p": {},
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
     "ent": false
    },
    {
     "x": 4,
-    "y": -45,
-    "z": 3,
-    "id": "stone_bricks",
-    "p": {},
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
     "ent": false
    },
    {
     "x": 5,
-    "y": -45,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
     "z": 3,
-    "id": "stone_bricks",
-    "p": {},
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -1,
+    "z": 3,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 4,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -1,
+    "z": 4,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 5,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -1,
+    "z": 5,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 6,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
     "ent": false
    },
    {
     "x": 3,
-    "y": -45,
-    "z": 4,
-    "id": "stone_bricks",
-    "p": {},
+    "y": -1,
+    "z": 6,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
     "ent": false
    },
    {
     "x": 4,
-    "y": -45,
-    "z": 4,
-    "id": "stone_bricks",
-    "p": {},
+    "y": -1,
+    "z": 6,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
     "ent": false
    },
    {
     "x": 5,
+    "y": -1,
+    "z": 6,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -1,
+    "z": 6,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
     "y": -45,
-    "z": 4,
+    "z": 2,
     "id": "stone_bricks",
     "p": {},
     "ent": false
@@ -41656,30 +41706,6 @@
    {
     "x": 3,
     "y": -45,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -45,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -45,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -44,
     "z": 2,
     "id": "stone_bricks",
     "p": {},
@@ -41687,7 +41713,7 @@
    },
    {
     "x": 4,
-    "y": -44,
+    "y": -45,
     "z": 2,
     "id": "stone_bricks",
     "p": {},
@@ -41695,7 +41721,15 @@
    },
    {
     "x": 5,
-    "y": -44,
+    "y": -45,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -45,
     "z": 2,
     "id": "stone_bricks",
     "p": {},
@@ -41703,7 +41737,31 @@
    },
    {
     "x": 2,
-    "y": -44,
+    "y": -45,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -45,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -45,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -45,
     "z": 3,
     "id": "stone_bricks",
     "p": {},
@@ -41711,7 +41769,7 @@
    },
    {
     "x": 6,
-    "y": -44,
+    "y": -45,
     "z": 3,
     "id": "stone_bricks",
     "p": {},
@@ -41719,7 +41777,31 @@
    },
    {
     "x": 2,
-    "y": -44,
+    "y": -45,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -45,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -45,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -45,
     "z": 4,
     "id": "stone_bricks",
     "p": {},
@@ -41727,7 +41809,7 @@
    },
    {
     "x": 6,
-    "y": -44,
+    "y": -45,
     "z": 4,
     "id": "stone_bricks",
     "p": {},
@@ -41735,15 +41817,7 @@
    },
    {
     "x": 2,
-    "y": -44,
-    "z": 5,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 6,
-    "y": -44,
+    "y": -45,
     "z": 5,
     "id": "stone_bricks",
     "p": {},
@@ -41751,7 +41825,47 @@
    },
    {
     "x": 3,
-    "y": -44,
+    "y": -45,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -45,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -45,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -45,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -45,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -45,
     "z": 6,
     "id": "stone_bricks",
     "p": {},
@@ -41759,7 +41873,7 @@
    },
    {
     "x": 4,
-    "y": -44,
+    "y": -45,
     "z": 6,
     "id": "stone_bricks",
     "p": {},
@@ -41767,8 +41881,176 @@
    },
    {
     "x": 5,
+    "y": -45,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -45,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -44,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -44,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -44,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -44,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -44,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -44,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -44,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -44,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -44,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -44,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -44,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -44,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -44,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
     "y": -44,
     "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": -44,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -44,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -44,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -44,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -44,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": -44,
+    "z": 7,
     "id": "stone_bricks",
     "p": {},
     "ent": false
@@ -47854,6 +48136,10 @@
    [
     "Plagegeister (Vexe)",
     "Magier zuerst erledigen – ihre Plagegeister fliegen durch Wände."
+   ],
+   [
+    "Dorfbewohner kommt nicht ins Bett",
+    "Die Lücke vorne offen lassen, bis er das Bett beansprucht hat (grüne Partikel) – erst dann zumachen."
    ]
   ],
   "verified": true,
@@ -47878,7 +48164,7 @@
   },
   "steps": [
    {
-    "text": "Weit weg von Dörfern: ein Bett in eine kleine Glaszelle, Wände 3 hoch (auf dem Bett braucht ein Dorfbewohner 2,5 Blöcke). Mit einem Dorfbewohner darin ist hier ein „Dorf“.",
+    "text": "Weit weg von Dörfern: ein Bett in eine kleine Glaszelle, Wände 3 hoch (auf dem Bett braucht ein Dorfbewohner 2,5 Blöcke), vorne (Süden) eine 1 breite Lücke lassen. Mit einem Dorfbewohner darin ist hier ein „Dorf“.",
     "luft": [],
     "added": [
      {
@@ -47945,14 +48231,6 @@
      },
      {
       "x": 0,
-      "y": 0,
-      "z": 1,
-      "id": "glass",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
       "y": 1,
       "z": -2,
       "id": "glass",
@@ -47993,14 +48271,6 @@
      },
      {
       "x": 0,
-      "y": 1,
-      "z": 1,
-      "id": "glass",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
       "y": 2,
       "z": -2,
       "id": "glass",
@@ -48035,14 +48305,6 @@
       "x": 1,
       "y": 2,
       "z": 0,
-      "id": "glass",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": 2,
-      "z": 1,
       "id": "glass",
       "p": {},
       "ent": false
@@ -48050,7 +48312,7 @@
     ]
    },
    {
-    "text": "Dorfbewohner ins Bett bringen, dann das Dach drauf.",
+    "text": "Dorfbewohner in die Nähe bringen (Boot oder Lore). Er läuft selbst durch die Lücke zum Bett und beansprucht es (grüne Partikel).",
     "luft": [],
     "added": [
      {
@@ -48060,6 +48322,36 @@
       "id": "villager",
       "p": {},
       "ent": true
+     }
+    ]
+   },
+   {
+    "text": "Lücke schließen, wenn er auf dem Bett ist (am einfachsten nachts, wenn er schläft), dann das Dach.",
+    "luft": [],
+    "added": [
+     {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "id": "glass",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": 1,
+      "id": "glass",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 2,
+      "z": 1,
+      "id": "glass",
+      "p": {},
+      "ent": false
      }
     ]
    },
@@ -48134,7 +48426,7 @@
     ]
    },
    {
-    "text": "Turm daneben: 5 Blöcke hoch, oben eine Plattform 3 × 3 mit Rand – von hier schießt du mit Armbrust oder Bogen, die Plünderer kommen nicht hinauf. Unheilvolle Flasche trinken, herkommen – nach 30 s beginnt der Überfall.",
+    "text": "Turm daneben: 5 Blöcke hoch, oben eine Plattform 3 × 3 mit je einem Block auf den 4 Ecken. Dazwischen schießt du mit Armbrust oder Bogen hinunter (an der Kante schleichen), die Plünderer kommen nicht hinauf. Unheilvolle Flasche trinken, herkommen – nach 30 s beginnt der Überfall.",
     "luft": [],
     "added": [
      {
@@ -48363,14 +48655,6 @@
    },
    {
     "x": 0,
-    "y": 0,
-    "z": 1,
-    "id": "glass",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
     "y": 1,
     "z": -2,
     "id": "glass",
@@ -48411,14 +48695,6 @@
    },
    {
     "x": 0,
-    "y": 1,
-    "z": 1,
-    "id": "glass",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
     "y": 2,
     "z": -2,
     "id": "glass",
@@ -48453,14 +48729,6 @@
     "x": 1,
     "y": 2,
     "z": 0,
-    "id": "glass",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 2,
-    "z": 1,
     "id": "glass",
     "p": {},
     "ent": false
@@ -48472,6 +48740,30 @@
     "id": "villager",
     "p": {},
     "ent": true
+   },
+   {
+    "x": 0,
+    "y": 0,
+    "z": 1,
+    "id": "glass",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 1,
+    "id": "glass",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 2,
+    "z": 1,
+    "id": "glass",
+    "p": {},
+    "ent": false
    },
    {
     "x": 0,
@@ -49656,7 +49948,7 @@
    "rate": "Pro Kessel im Schnitt etwa ein Minecraft-Tag pro Füllung (Wiki)",
    "ort": [
     [
-     "Überall. Im Nether braucht der Tropfstein keine Lavaquelle darüber.",
+     "Überall – auch im Nether muss eine Lavaquelle über dem Block liegen (ohne Lava tropft es dort nur zum Schein, der Kessel bleibt leer).",
      "https://minecraft.wiki/w/Pointed_Dripstone"
     ]
    ],
@@ -49867,7 +50159,7 @@
     ]
    },
    {
-    "text": "Auf Höhe 4 links und rechts der Reihe Blöcke als Rand, dann eine Lavaquelle über jeden Tropfstein.",
+    "text": "Auf Höhe 4 links und rechts der Reihe Blöcke als Rand: erst einen Hilfsblock oben auf den westlichsten Block der Reihe, daran nördlich und südlich je einen Randblock, beide Ränder nach Osten bis zum Pfeiler verlängern, Hilfsblock wieder abbauen. Dann eine Lavaquelle über jeden Tropfstein.",
     "luft": [],
     "added": [
      {
@@ -50250,17 +50542,17 @@
   "cat": "Blöcke",
   "diff": 1,
   "out": "Schneebälle, Schneeblöcke",
-  "where": "Kaltes Biom (in warmen schmilzt der Golem)",
+  "where": "Überall außer Wüste, Savanne, Tafelberg (Badlands) und Nether – dort schmilzt der Golem",
   "afk": "Nein – halbautomatisch",
   "why": "Ein Schneegolem hinterlässt überall, wo er steht, eine Schneedecke – sofort wieder, wenn du sie abbaust. Er steht in einer Glaskammer mit Dach (Regen schadet ihm); vorne unten bleibt ein Spalt, durch den du mit der Schaufel die Schneedecke abbaust.",
   "help": [
    [
     "Golem schmilzt",
-    "Nur in kalten Biomen."
+    "In Wüste, Savanne, Tafelberg und im Nether schmilzt er – woanders bauen."
    ],
    [
     "Kein Schnee",
-    "Spielregel mobGriefing muss an sein."
+    "Spielregel mob_griefing („Zerstörung durch Kreaturen“) muss an sein."
    ]
   ],
   "verified": true,
@@ -50281,7 +50573,7 @@
   },
   "steps": [
    {
-    "text": "Kammer aus Glas um einen Platz: hinten und seitlich 2 hoch, vorne bleibt unten eine Lücke.",
+    "text": "Kammer aus Glas um einen Platz: hinten 3 hoch, seitlich 2 hoch, vorne bleibt offen.",
     "luft": [],
     "added": [
      {
@@ -50328,6 +50620,14 @@
       "x": 1,
       "y": 1,
       "z": 0,
+      "id": "glass",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 2,
+      "z": -1,
       "id": "glass",
       "p": {},
       "ent": false
@@ -50349,7 +50649,7 @@
     ]
    },
    {
-    "text": "Dach aus Glas (Regen schadet dem Golem), vorne oben ein Glas unters Dach – unten bleibt die Lücke, durch die du mit der Schaufel die Schneedecke abbaust; sie bildet sich sofort neu.",
+    "text": "Dach aus Glas (Regen schadet dem Golem): eins über den Golem an das hintere Glas, eins davor.",
     "luft": [],
     "added": [
      {
@@ -50367,25 +50667,17 @@
       "id": "glass",
       "p": {},
       "ent": false
-     },
-     {
-      "x": 0,
-      "y": 1,
-      "z": 1,
-      "id": "glass",
-      "p": {},
-      "ent": false
      }
     ]
    },
    {
-    "text": "Dach hinten.",
+    "text": "Vorne ein Glas unter das vordere Dach. Unten bleibt die Lücke, durch die du mit der Schaufel die Schneedecke abbaust; sie bildet sich sofort neu.",
     "luft": [],
     "added": [
      {
       "x": 0,
-      "y": 2,
-      "z": -1,
+      "y": 1,
+      "z": 1,
       "id": "glass",
       "p": {},
       "ent": false
@@ -50444,6 +50736,14 @@
    },
    {
     "x": 0,
+    "y": 2,
+    "z": -1,
+    "id": "glass",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
     "y": 0,
     "z": 0,
     "id": "snow_golem",
@@ -50470,14 +50770,6 @@
     "x": 0,
     "y": 1,
     "z": 1,
-    "id": "glass",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 2,
-    "z": -1,
     "id": "glass",
     "p": {},
     "ent": false
@@ -51612,11 +51904,11 @@
   "out": "Stöcke (für Pfeilmacher-Smaragde)",
   "where": "An einer Bambusfarm",
   "afk": "Ja",
-  "why": "Im Crafter sind 7 Felder gesperrt, nur links oben und links Mitte sind frei – genau das Stock-Rezept (2 Bambus übereinander). Zwei Beobachter, die sich anschauen, geben einen dauernden Takt: Sind beide Felder voll, entsteht ein Stock und fällt nach unten in die Truhe; sonst passiert nichts.",
+  "why": "Im Crafter sind 7 Felder gesperrt, nur links oben und links Mitte sind frei – genau das Stock-Rezept (2 Bambus übereinander). Zwei Beobachter, die sich anschauen, geben einen dauernden Takt: Sind beide Felder voll, entsteht ein Stock und landet in der Truhe davor; sonst passiert nichts.",
   "help": [
    [
     "Keine Stöcke",
-    "Crafter-Vorderseite muss nach unten zur Truhe zeigen; genau 7 Felder sperren."
+    "Das Crafter-Gesicht muss zur Truhe zeigen; genau 7 Felder sperren."
    ]
   ],
   "verified": true,
@@ -51637,50 +51929,12 @@
   },
   "steps": [
    {
-    "text": "Truhe auf den Boden, darauf ein Crafter mit der Vorderseite nach UNTEN (beim Setzen nach oben schauen).",
-    "luft": [],
-    "added": [
-     {
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "id": "chest",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": 1,
-      "z": 0,
-      "id": "crafter",
-      "p": {},
-      "ent": false
-     }
-    ]
-   },
-   {
-    "text": "Trichter auf den Crafter, der nach unten zeigt – hier kommt der Bambus hinein.",
-    "luft": [],
-    "added": [
-     {
-      "x": 0,
-      "y": 2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "d"
-      },
-      "ent": false
-     }
-    ]
-   },
-   {
-    "text": "Zwei Beobachter neben den Crafter, die sich gegenseitig anschauen (Takt): der erste schaut vom Crafter weg nach Osten, der zweite zurück nach Westen.",
+    "text": "Zwei Beobachter, die sich anschauen (Takt): den ersten auf den Boden setzen und dabei flach nach Osten schauen, den zweiten östlich daran setzen und dabei nach Westen schauen.",
     "luft": [],
     "added": [
      {
       "x": 1,
-      "y": 1,
+      "y": 0,
       "z": 0,
       "id": "observer",
       "p": {
@@ -51690,7 +51944,7 @@
      },
      {
       "x": 2,
-      "y": 1,
+      "y": 0,
       "z": 0,
       "id": "observer",
       "p": {
@@ -51699,38 +51953,52 @@
       "ent": false
      }
     ]
+   },
+   {
+    "text": "Westlich daneben der Crafter: von Westen her auf die Seite des Beobachters zielen (nach Osten schauen), dann zeigt sein Gesicht nach Westen. Davor (Westen) eine Truhe.",
+    "luft": [],
+    "added": [
+     {
+      "x": -1,
+      "y": 0,
+      "z": 0,
+      "id": "chest",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "id": "crafter",
+      "p": {
+       "f": "w"
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Trichter schleichend auf den Crafter setzen – er zeigt nach unten. Hier kommt der Bambus hinein.",
+    "luft": [],
+    "added": [
+     {
+      "x": 0,
+      "y": 1,
+      "z": 0,
+      "id": "hopper",
+      "p": {
+       "f": "d"
+      },
+      "ent": false
+     }
+    ]
    }
   ],
   "fertig": [
    {
-    "x": 0,
-    "y": 0,
-    "z": 0,
-    "id": "chest",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 1,
-    "z": 0,
-    "id": "crafter",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": 2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "d"
-    },
-    "ent": false
-   },
-   {
     "x": 1,
-    "y": 1,
+    "y": 0,
     "z": 0,
     "id": "observer",
     "p": {
@@ -51740,11 +52008,39 @@
    },
    {
     "x": 2,
-    "y": 1,
+    "y": 0,
     "z": 0,
     "id": "observer",
     "p": {
      "f": "w"
+    },
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 0,
+    "z": 0,
+    "id": "chest",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "id": "crafter",
+    "p": {
+     "f": "w"
+    },
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 0,
+    "id": "hopper",
+    "p": {
+     "f": "d"
     },
     "ent": false
    }
