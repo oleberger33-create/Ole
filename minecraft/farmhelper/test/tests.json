@@ -376,6 +376,58 @@
    }
   }
  },
+ "honig_profi": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "nachher": [
+   "kill @e[type=minecraft:bee,x={x},y={y},z={z},distance=..14]",
+   "setblock {x+0} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+0} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+0}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+0},{y},{z}]}",
+   "summon minecraft:bee {x+0}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+0},{y},{z}]}",
+   "summon minecraft:bee {x+0}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+0},{y},{z}]}",
+   "setblock {x+1} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+1} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+1}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+1},{y},{z}]}",
+   "summon minecraft:bee {x+1}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+1},{y},{z}]}",
+   "summon minecraft:bee {x+1}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+1},{y},{z}]}",
+   "setblock {x+2} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+2} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+2}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+2},{y},{z}]}",
+   "summon minecraft:bee {x+2}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+2},{y},{z}]}",
+   "summon minecraft:bee {x+2}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+2},{y},{z}]}",
+   "setblock {x+3} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+3} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+3}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+3},{y},{z}]}",
+   "summon minecraft:bee {x+3}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+3},{y},{z}]}",
+   "summon minecraft:bee {x+3}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+3},{y},{z}]}",
+   "setblock {x+4} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+4} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+4}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+4},{y},{z}]}",
+   "summon minecraft:bee {x+4}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+4},{y},{z}]}",
+   "summon minecraft:bee {x+4}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+4},{y},{z}]}",
+   "setblock {x+5} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+5} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+5}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+5},{y},{z}]}",
+   "summon minecraft:bee {x+5}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+5},{y},{z}]}",
+   "summon minecraft:bee {x+5}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+5},{y},{z}]}",
+   "setblock {x+6} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+6} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+6}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+6},{y},{z}]}",
+   "summon minecraft:bee {x+6}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+6},{y},{z}]}",
+   "summon minecraft:bee {x+6}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+6},{y},{z}]}",
+   "setblock {x+7} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x+7} {y} {z+1} container.0 with minecraft:shears",
+   "summon minecraft:bee {x+7}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+7},{y},{z}]}",
+   "summon minecraft:bee {x+7}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+7},{y},{z}]}",
+   "summon minecraft:bee {x+7}.5 {y+1} {z-1}.5 {PersistenceRequired:1b,hive_pos:[I;{x+7},{y},{z}]}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:honeycomb": 36
+   }
+  }
+ },
  "eisen": {
   "boden": "minecraft:grass_block",
   "zeit": 12500,
@@ -387,6 +439,20 @@
   "hoechstens": {
    "wesen": {
     "minecraft:iron_golem": 1
+   }
+  }
+ },
+ "eisen_profi": {
+  "boden": "minecraft:grass_block",
+  "zeit": 12500,
+  "erwartet": {
+   "items": {
+    "minecraft:iron_ingot": 28
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:iron_golem": 2
    }
   }
  },
@@ -408,6 +474,27 @@
   "erwartet": {
    "wesen": {
     "minecraft:zombie": 2
+   }
+  }
+ },
+ "xpspawner_profi": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 4,
+  "nachher": [
+   "setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:\"minecraft:zombie\"}}}"
+  ],
+  "bereich": [
+   0,
+   -15,
+   4,
+   0,
+   -13,
+   4
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:zombie": 10
    }
   }
  },
@@ -444,6 +531,18 @@
    }
   }
  },
+ "creeper_profi": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "hoehe": 100,
+  "zeit": "day",
+  "erwartet": {
+   "items": {
+    "minecraft:gunpowder": 5
+   }
+  }
+ },
  "schleim": {
   "boden": "minecraft:stone",
   "fuellung": "minecraft:stone",
@@ -460,6 +559,28 @@
   "erwartet": {
    "wesen": {
     "minecraft:slime": 1
+   }
+  }
+ },
+ "schleim_profi": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 4,
+  "hoehe": 37,
+  "zeit": "day",
+  "vorher": [
+   "fill {x} -60 {z} {x+15} {y-7} {z+15} minecraft:stone"
+  ],
+  "ursprung": [
+   689376,
+   687984
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:slime_ball": 4
+   },
+   "wesen": {
+    "minecraft:iron_golem": 1
    }
   }
  },
@@ -487,6 +608,55 @@
    }
   }
  },
+ "hexe_profi": {
+  "zeit": "day",
+  "welt": "struktur",
+  "boden": "minecraft:dirt",
+  "bauwerk": {
+   "id": "minecraft:swamp_hut",
+   "suchen": true,
+   "hoehe": 64,
+   "groesse": [
+    7,
+    9
+   ],
+   "ecke": [
+    0,
+    0,
+    0
+   ]
+  },
+  "erwartet": {
+   "items": {
+    "minecraft:redstone": 16
+   }
+  }
+ },
+ "waechter_profi": {
+  "boden": "minecraft:water",
+  "fuellung": "minecraft:water",
+  "zeit": "day",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:monument",
+   "suchen": true,
+   "hoehe": 50,
+   "groesse": [
+    58,
+    58
+   ],
+   "ecke": [
+    -3,
+    -24,
+    -3
+   ]
+  },
+  "erwartet": {
+   "items": {
+    "minecraft:prismarine_shard|minecraft:prismarine_crystals|minecraft:cod": 1
+   }
+  }
+ },
  "lohe": {
   "boden": "minecraft:nether_bricks",
   "fuellung": "minecraft:nether_bricks",
@@ -500,6 +670,30 @@
    }
   }
  },
+ "lohe_profi": {
+  "dimension": "the_nether",
+  "hoehe": 70,
+  "boden": "minecraft:nether_bricks",
+  "fuellung": "minecraft:nether_bricks",
+  "erde_bis": 4,
+  "zeit": "day",
+  "nachher": [
+   "setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:\"minecraft:blaze\"}}}"
+  ],
+  "bereich": [
+   0,
+   -14,
+   0,
+   0,
+   -8,
+   0
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:blaze": 10
+   }
+  }
+ },
  "gold": {
   "dimension": "the_nether",
   "hoehe": 135,
@@ -508,6 +702,29 @@
   "erwartet": {
    "items": {
     "minecraft:rotten_flesh": 1
+   }
+  }
+ },
+ "gold_profi": {
+  "dimension": "the_nether",
+  "hoehe": 205,
+  "biom": "minecraft:nether_wastes",
+  "zeit": "day",
+  "vorher": [
+   "setblock {x+10} {y-2} {z+9} minecraft:netherrack"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:rotten_flesh": 30,
+    "minecraft:gold_nugget": 20
+   },
+   "bloecke": {
+    "minecraft:turtle_egg": 1
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:ghast": 0
    }
   }
  },
@@ -525,6 +742,37 @@
    "suchen": true,
    "hoehe": 64
   },
+  "erwartet": {
+   "wesen": {
+    "minecraft:wither_skeleton": 1
+   }
+  }
+ },
+ "witherskelett_profi": {
+  "dimension": "the_nether",
+  "zeit": "day",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:fortress",
+   "anker": [
+    0,
+    1,
+    0
+   ],
+   "suchen": true,
+   "hoehe": 64
+  },
+  "boden": "minecraft:netherrack",
+  "fuellung": "minecraft:netherrack",
+  "erde_bis": -21,
+  "bereich": [
+   0,
+   -25,
+   0,
+   1,
+   -22,
+   1
+  ],
   "erwartet": {
    "wesen": {
     "minecraft:wither_skeleton": 1
@@ -579,6 +827,30 @@
    }
   }
  },
+ "ertrunkene_profi": {
+  "biom": "minecraft:river",
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "hoehe": 100,
+  "nachher": [
+   "fill {x+0} {y+10} {z+0} {x+9} {y+10} {z+9} minecraft:stone_brick_slab[type=top,waterlogged=true] replace minecraft:stone_brick_slab[type=top]",
+   "fill {x+0} {y+11} {z+0} {x+9} {y+11} {z+9} minecraft:stone_bricks replace minecraft:air",
+   "fill {x+0} {y+11} {z+0} {x+9} {y+11} {z+9} minecraft:air replace minecraft:stone_bricks"
+  ],
+  "bereich": [
+   4,
+   -25,
+   4,
+   5,
+   -23,
+   5
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:drowned": 5
+   }
+  }
+ },
  "aussenposten": {
   "boden": "minecraft:grass_block",
   "zeit": "day",
@@ -608,11 +880,63 @@
    }
   }
  },
+ "aussenposten_profi": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "welt": "struktur",
+  "ursprung": [
+   -8192,
+   8192
+  ],
+  "bauwerk": {
+   "id": "minecraft:pillager_outpost",
+   "anker": [
+    12,
+    10,
+    0
+   ],
+   "suchen": true,
+   "hoehe": 72,
+   "oberflaeche": true
+  },
+  "nachher": [
+   "summon minecraft:pillager {x-7}.5 {y+0} {z-7}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x-7}.5 {y+0} {z+7}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x+7}.5 {y+0} {z-7}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x+7}.5 {y+0} {z+7}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}"
+  ],
+  "bereich": [
+   -2,
+   -2,
+   -2,
+   2,
+   -1,
+   2
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:white_banner|minecraft:ominous_bottle": 3
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:pillager": 2
+   }
+  }
+ },
  "handel": {
   "boden": "minecraft:grass_block",
   "erwartet": {
    "wesen": {
     "minecraft:villager": 4
+   }
+  }
+ },
+ "handel_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "wesen": {
+    "minecraft:villager": 16
    }
   }
  },
@@ -624,11 +948,31 @@
    }
   }
  },
+ "bruchstein_profi": {
+  "boden": "minecraft:grass_block",
+  "spieler": {
+   "hand": "minecraft:diamond_pickaxe",
+   "aktion": "attack continuous"
+  },
+  "erwartet": {
+   "items": {
+    "minecraft:cobblestone": 400
+   }
+  }
+ },
  "lava": {
   "boden": "minecraft:grass_block",
   "erwartet": {
    "bloecke": {
     "minecraft:lava_cauldron": 1
+   }
+  }
+ },
+ "lava_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:lava_cauldron": 12
    }
   }
  },
@@ -641,6 +985,30 @@
    }
   }
  },
+ "schnee_profi": {
+  "boden": "minecraft:grass_block",
+  "biom": "minecraft:snowy_plains",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:snow": 3
+   }
+  }
+ },
+ "angeln_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "setblock {x} {y} {z+2} minecraft:oak_fence[waterlogged=true]"
+  ],
+  "spieler": {
+   "hand": "minecraft:fishing_rod",
+   "aktion": "use continuous"
+  },
+  "erwartet": {
+   "beute": {
+    "minecraft:cod|minecraft:salmon|minecraft:pufferfish|minecraft:tropical_fish": 15
+   }
+  }
+ },
  "stockcrafter": {
   "nachher": [
    "data merge block {x} {y} {z} {disabled_slots:[I;1,2,4,5,6,7,8]}",
@@ -650,6 +1018,17 @@
   "erwartet": {
    "items": {
     "minecraft:stick": 8
+   }
+  }
+ },
+ "stockcrafter_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "data merge block {x} {y-2} {z+3} {disabled_slots:[I;1,2,4,5,6,7,8]}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:stick": 150
    }
   }
  },
@@ -784,6 +1163,46 @@
   },
   "plan": "gold"
  },
+ "aussenposten_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "vorher": [
+   "forceload add {x-18} {z-18} {x+18} {z+18}",
+   "fill {x-16} {y-2} {z-16} {x+16} {y-2} {z+16} minecraft:dirt",
+   "fill {x-16} {y-1} {z-16} {x+16} {y-1} {z+16} minecraft:grass_block",
+   "fill {x-17} {y-1} {z-17} {x+17} {y+1} {z-17} minecraft:stone_bricks",
+   "fill {x-17} {y-1} {z+17} {x+17} {y+1} {z+17} minecraft:stone_bricks",
+   "fill {x-17} {y-1} {z-17} {x-17} {y+1} {z+17} minecraft:stone_bricks",
+   "fill {x+17} {y-1} {z-17} {x+17} {y+1} {z+17} minecraft:stone_bricks"
+  ],
+  "nachher": [
+   "summon minecraft:pillager {x+0}.5 {y+0} {z-12}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x+0}.5 {y+0} {z+12}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x-12}.5 {y+0} {z+0}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x+12}.5 {y+0} {z+0}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x+9}.5 {y+0} {z+9}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}",
+   "summon minecraft:pillager {x-9}.5 {y+0} {z-9}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1},head:{id:\"minecraft:white_banner\",count:1}},drop_chances:{head:2.0f}}"
+  ],
+  "bereich": [
+   -2,
+   -2,
+   -2,
+   2,
+   -1,
+   2
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:white_banner": 4
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:pillager": 2
+   }
+  },
+  "plan": "aussenposten_profi"
+ },
  "baum_profi_mech": {
   "boden": "minecraft:grass_block",
   "nachher": [
@@ -796,6 +1215,154 @@
    }
   },
   "plan": "baum_profi"
+ },
+ "bruchstein_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "setblock {x} {y+1} {z+1} minecraft:air",
+   "setblock {x} {y+1} {z+2} minecraft:air",
+   "setblock {x} {y+1} {z+3} minecraft:air",
+   "setblock {x} {y+1} {z+4} minecraft:air"
+  ],
+  "erwartet": {
+   "bloecke": {
+    "minecraft:cobblestone": 4
+   }
+  },
+  "plan": "bruchstein_profi"
+ },
+ "creeper_profi_mech": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "hoehe": 100,
+  "zeit": "day",
+  "nachher": [
+   "summon minecraft:creeper {x+0}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+16}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+0}.5 {y+0} {z+16}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+15}.5 {y+0} {z+16}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+5}.5 {y+0} {z+5}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+11}.5 {y+0} {z+5}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+5}.5 {y+0} {z+11}.5 {PersistenceRequired:1b}",
+   "summon minecraft:creeper {x+11}.5 {y+0} {z+11}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:gunpowder": 3
+   }
+  },
+  "plan": "creeper_profi"
+ },
+ "ertrunkene_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "hoehe": 100,
+  "bereich": [
+   4,
+   -25,
+   4,
+   5,
+   -23,
+   5
+  ],
+  "nachher": [
+   "fill {x+0} {y+10} {z+0} {x+9} {y+10} {z+9} minecraft:stone_brick_slab[type=top,waterlogged=true] replace minecraft:stone_brick_slab[type=top]",
+   "fill {x+0} {y+11} {z+0} {x+9} {y+11} {z+9} minecraft:stone_bricks replace minecraft:air",
+   "fill {x+0} {y+11} {z+0} {x+9} {y+11} {z+9} minecraft:air replace minecraft:stone_bricks",
+   "fill {x+0} {y+0} {z+0} {x+9} {y+8} {z+9} minecraft:water replace minecraft:air",
+   "summon minecraft:drowned {x+1}.5 {y+8} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:drowned {x+8}.5 {y+8} {z+8}.5 {PersistenceRequired:1b}",
+   "summon minecraft:drowned {x+0}.5 {y+5} {z+5}.5 {PersistenceRequired:1b}",
+   "summon minecraft:drowned {x+5}.5 {y+3} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:drowned {x+9}.5 {y+2} {z+4}.5 {PersistenceRequired:1b}",
+   "summon minecraft:drowned {x+2}.5 {y+0} {z+7}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:drowned": 5
+   }
+  },
+  "plan": "ertrunkene_profi"
+ },
+ "gold_profi_mech": {
+  "dimension": "the_nether",
+  "hoehe": 205,
+  "biom": "minecraft:nether_wastes",
+  "zeit": "day",
+  "vorher": [
+   "setblock {x+10} {y-2} {z+9} minecraft:netherrack"
+  ],
+  "nachher": [
+   "summon minecraft:zombified_piglin {x+0}.5 {y+26} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+20}.5 {y+26} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+0}.5 {y+26} {z+20}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+20}.5 {y+26} {z+20}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+6}.5 {y+26} {z+9}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+6}.5 {y+26} {z+11}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+7}.5 {y+26} {z+10}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+14}.5 {y+26} {z+9}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+14}.5 {y+26} {z+11}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+13}.5 {y+26} {z+10}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+10}.5 {y+26} {z+4}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+10}.5 {y+26} {z+16}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:rotten_flesh|minecraft:gold_nugget": 6
+   },
+   "bloecke": {
+    "minecraft:turtle_egg": 1
+   }
+  },
+  "plan": "gold_profi"
+ },
+ "handel_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "zeit": "night",
+  "nachher": [
+   "summon minecraft:zombie {x+1}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombie {x+7}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombie {x+13}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombie {x+4}.5 {y+0} {z+0}.5 {PersistenceRequired:1b,IsBaby:1b}",
+   "summon minecraft:zombie {x+10}.5 {y+0} {z+0}.5 {PersistenceRequired:1b,IsBaby:1b}"
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:villager": 16
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:zombie_villager": 0,
+    "minecraft:witch": 0
+   }
+  },
+  "plan": "handel_profi"
+ },
+ "hexe_profi_mech": {
+  "biom": "minecraft:mushroom_fields",
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "nachher": [
+   "summon minecraft:witch {x+1}.5 {y+0} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+5}.5 {y+0} {z+7}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+0}.5 {y+3} {z+8}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+6}.5 {y+3} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+0}.5 {y+6} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+6}.5 {y+6} {z+8}.5 {PersistenceRequired:1b}"
+  ],
+  "hoechstens": {
+   "wesen": {
+    "minecraft:witch": 0
+   }
+  },
+  "erwartet": {
+   "items": {
+    "minecraft:redstone": 24
+   }
+  },
+  "plan": "hexe_profi"
  },
  "kuh_profi_mech": {
   "boden": "minecraft:grass_block",
@@ -816,6 +1383,34 @@
    }
   },
   "plan": "kuh_profi"
+ },
+ "lohe_profi_mech": {
+  "dimension": "the_nether",
+  "hoehe": 70,
+  "boden": "minecraft:nether_bricks",
+  "fuellung": "minecraft:nether_bricks",
+  "erde_bis": 4,
+  "zeit": "day",
+  "nachher": [
+   "summon minecraft:blaze {x-3}.5 {y-7} {z-3}.5 {PersistenceRequired:1b}",
+   "summon minecraft:blaze {x+3}.5 {y-7} {z-3}.5 {PersistenceRequired:1b}",
+   "summon minecraft:blaze {x-3}.5 {y-7} {z+3}.5 {PersistenceRequired:1b}",
+   "summon minecraft:blaze {x+3}.5 {y-7} {z+3}.5 {PersistenceRequired:1b}"
+  ],
+  "bereich": [
+   0,
+   -14,
+   0,
+   0,
+   -8,
+   0
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:blaze": 3
+   }
+  },
+  "plan": "lohe_profi"
  },
  "mobfarm_profi_mech": {
   "boden": "minecraft:stone",
@@ -849,5 +1444,117 @@
    }
   },
   "plan": "mobfarm_profi"
+ },
+ "schleim_profi_mech": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 4,
+  "hoehe": 37,
+  "zeit": "day",
+  "vorher": [
+   "fill {x} -60 {z} {x+15} {y-7} {z+15} minecraft:stone"
+  ],
+  "ursprung": [
+   688688,
+   688496
+  ],
+  "nachher": [
+   "summon minecraft:slime {x+12}.5 {y+0} {z+12}.5 {PersistenceRequired:1b,Size:3}",
+   "summon minecraft:slime {x+12}.5 {y+0} {z+3}.5 {PersistenceRequired:1b,Size:3}",
+   "summon minecraft:slime {x+3}.5 {y+0} {z+12}.5 {PersistenceRequired:1b,Size:1}",
+   "summon minecraft:slime {x+14}.5 {y+0} {z+8}.5 {PersistenceRequired:1b,Size:1}",
+   "summon minecraft:slime {x+8}.5 {y+0} {z+14}.5 {PersistenceRequired:1b,Size:1}",
+   "summon minecraft:slime {x+9}.5 {y+0} {z+9}.5 {PersistenceRequired:1b,Size:0}",
+   "summon minecraft:slime {x+10}.5 {y+0} {z+2}.5 {PersistenceRequired:1b,Size:0}",
+   "summon minecraft:slime {x+2}.5 {y+0} {z+10}.5 {PersistenceRequired:1b,Size:0}",
+   "summon minecraft:slime {x+15}.5 {y+0} {z+15}.5 {PersistenceRequired:1b,Size:0}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:slime_ball": 10
+   },
+   "wesen": {
+    "minecraft:iron_golem": 1
+   }
+  },
+  "plan": "schleim_profi"
+ },
+ "schnee_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "biom": "minecraft:snowy_plains",
+  "nachher": [
+   "data merge block {x+4} {y-1} {z+1} {disabled_slots:[I;2,5,6,7,8]}",
+   "summon minecraft:item {x-2}.5 {y+2} {z+1}.5 {Item:{id:\"minecraft:snowball\",count:16}}",
+   "summon minecraft:item {x+0}.5 {y+2} {z+1}.5 {Item:{id:\"minecraft:snowball\",count:16}}",
+   "summon minecraft:item {x+2}.5 {y+2} {z+1}.5 {Item:{id:\"minecraft:snowball\",count:16}}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:snow_block": 6
+   }
+  },
+  "plan": "schnee_profi"
+ },
+ "waechter_profi_mech": {
+  "zeit": "day",
+  "hoehe": 100,
+  "vorher": [
+   "fill {x-2} {y-8} {z-2} {x+8} {y-1} {z+8} minecraft:stone",
+   "fill {x-1} {y-7} {z-1} {x+7} {y-1} {z+7} minecraft:water"
+  ],
+  "nachher": [
+   "summon minecraft:guardian {x+0}.5 {y-4} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:guardian {x+3}.5 {y-4} {z+3}.5 {PersistenceRequired:1b}",
+   "summon minecraft:guardian {x+6}.5 {y-4} {z+5}.5 {PersistenceRequired:1b}",
+   "summon minecraft:guardian {x+1}.5 {y-3} {z+6}.5 {PersistenceRequired:1b}",
+   "summon minecraft:guardian {x+5}.5 {y-3} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:guardian {x+3}.5 {y-2} {z+6}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:prismarine_shard|minecraft:prismarine_crystals|minecraft:cod": 4
+   }
+  },
+  "plan": "waechter_profi"
+ },
+ "witherskelett_profi_mech": {
+  "dimension": "the_nether",
+  "zeit": "day",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:fortress",
+   "anker": [
+    0,
+    1,
+    0
+   ],
+   "suchen": true,
+   "hoehe": 64
+  },
+  "boden": "minecraft:netherrack",
+  "fuellung": "minecraft:netherrack",
+  "erde_bis": -21,
+  "nachher": [
+   "summon minecraft:wither_skeleton {x+0}.5 {y+0} {z-10}.5 {PersistenceRequired:1b}",
+   "summon minecraft:wither_skeleton {x-8}.5 {y+0} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:wither_skeleton {x+10}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:wither_skeleton {x+1}.5 {y+0} {z+9}.5 {PersistenceRequired:1b}",
+   "summon minecraft:wither_skeleton {x+1}.5 {y+4} {z-6}.5 {PersistenceRequired:1b}",
+   "summon minecraft:wither_skeleton {x+6}.5 {y+4} {z+1}.5 {PersistenceRequired:1b}"
+  ],
+  "bereich": [
+   0,
+   -25,
+   0,
+   1,
+   -22,
+   1
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:wither_skeleton": 4
+   }
+  },
+  "plan": "witherskelett_profi"
  }
 }

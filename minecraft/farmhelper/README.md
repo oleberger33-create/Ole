@@ -68,6 +68,25 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
   Schleim-Chunks Schleime und füllen das Monster-Limit. Tests darum hoch über der Oberfläche oder mit gefülltem
   Untergrund in einem allein liegenden Schleim-Chunk.
 
+### Profi-Varianten (generator/profi/)
+
+Zu jeder Farm gibt es eine zweite Bauweise „… (Profi)“: die beste, die im Survival mit normalem Aufwand machbar ist
+(höchstens etwa 600 Blöcke). Sie steht im Menü direkt nach der einfachen und übernimmt Symbol, Ort-Prüfung und
+Behälter-Inhalte der Grundfarm. Eine Profi-Datei je Farm (Vorlage: `profi_basis.py`, Selbstprüfung:
+`python3 profi_pruefen.py <farm> --ebenen`); Dateien mit `_` vorne sind Entwürfe und werden nicht geladen.
+
+Auf dem 26.3-Testserver bestanden (30 Spielminuten, in Klammern die einfache Variante): Zuckerrohr 85 (25),
+Bambus 924 (245), Kaktus 155 (5), Melone 444 (90), Seetang 274 (72), Karotten-Bauer 202 (22), Knochenmehl 47 (14),
+Wolle 376 (22), Hühner 10 gebratene (1), Kühe automatisch gebraten, Baum 39 Holz (21), Blumen 256 automatisch,
+Honig 69 (9), Handel 16 Dorfbewohner sicher, Eisen 47 (14), Spawner 100 Zombies (3), Monster 91 (17),
+Creeper 275 Schwarzpulver (2), Schleim 122 Bälle automatisch, Hexe 187 Redstone bei Tag (8 nachts), Wächter am echten
+Monument 32 Prismarinscherben, Lohe 100 (6), Gold 354 Nuggets (9), Wither-Skelett 12 (0), Ertrunkene 10 (~0,5),
+Außenposten tötet und sammelt selbst (3 Flaschen am echten Außenposten), Bruchstein 1561, Lava 15 Kessel (4),
+Schnee automatisch in die Truhe, AFK-Angeln 40 Fänge, Stöcke 455.
+
+Noch Entwurf (Test nicht bestanden, nicht im Pack): Enderman (Endermilbe stirbt trotz Umbau), Überfall (die
+Ersatztests kamen unten nicht an).
+
 ### Teststand (26.3)
 
 Letzter Gesamtlauf: 31 von 32 Flachwelt-Tests bestanden (30 Spielminuten, alle Farmen gleichzeitig), dazu die
