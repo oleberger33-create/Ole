@@ -47262,14 +47262,14 @@
     ]
    },
    {
-    "text": "Auf den mittleren Block einen Sockel 2 hoch (auf 1 Block springen Plünderer hinauf), darauf einen Turm aus Gerüst bis 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas nicht): Sie sehen dich, rennen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu auf den Sockel hinunter (Gerüst: Schleichen), sie von oben erledigen und wieder hochklettern: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Zum Wiederkommen von außen einen Block neben die Gruben stellen, auf den Sockel springen, Block wieder abbauen.",
+    "text": "Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: über die Grube ins Gerüst springen.",
     "luft": [],
     "added": [
      {
       "x": 0,
       "y": 0,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -47277,7 +47277,7 @@
       "x": 0,
       "y": 1,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -47607,7 +47607,7 @@
     "x": 0,
     "y": 0,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47615,7 +47615,7 @@
     "x": 0,
     "y": 1,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },

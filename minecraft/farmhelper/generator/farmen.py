@@ -747,8 +747,9 @@ f.schritt("Rand rundherum, 2 hoch – über einen Block springen Hexen drüber. 
           "nachts) ist optional.", {0: rand, 1: rand}, x0=-1, z0=-1)
 f.schritt("Auf deiner Treppe hinunter zur Truhe warten, 26 Blöcke unter den Hexenfüßen: näher als 24 spawnt nichts, "
           "weiter als 32 weg laufen die Hexen nicht herum.", {-26: "P", -25: "-"}, x0=5, z0=8)
-f.pruefe(zeit="night", welt="struktur",
-         bauwerk={"id": "minecraft:swamp_hut", "anker": [3, 3, 4], "suchen": True, "hoehe": 64},
+f.pruefe(zeit="night", welt="struktur", boden="minecraft:dirt",
+         bauwerk={"id": "minecraft:swamp_hut", "suchen": True, "hoehe": 64, "groesse": [7, 9],
+                  "ecke": [0, 0, 0]},
          erwartet={"items": {"*": 1}})
 
 f = farm("ertrunkene")
@@ -786,13 +787,12 @@ f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen
 f.schritt("In jede Grube oben eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock – sonst laufen "
           "sie auf den Klappen-Kanten bis zur Mitte). Plünderer halten sie für Boden.", {
     -1: "aaa\nc.d\nbbb"}, x0=-1, z0=-1)
-f.schritt("Auf den mittleren Block einen Sockel 2 hoch (auf 1 Block springen Plünderer hinauf), darauf einen Turm "
-          "aus Gerüst bis 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas "
-          "nicht): Sie sehen dich, rennen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu "
-          "auf den Sockel hinunter (Gerüst: Schleichen), sie von oben erledigen und wieder hochklettern: Jeder "
-          "Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Zum Wiederkommen von außen einen Block neben die "
-          "Gruben stellen, auf den Sockel springen, Block wieder abbauen.", {
-    0: "#", 1: "#", **{y: "X" for y in range(2, 28)}})
+f.schritt("Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die "
+          "Plünderer hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, "
+          "treten auf die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie "
+          "erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: über die "
+          "Grube ins Gerüst springen.", {
+    **{y: "X" for y in range(0, 28)}})
 f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
          bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72},

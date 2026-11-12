@@ -233,15 +233,20 @@
  "hexe": {
   "zeit": "night",
   "welt": "struktur",
+  "boden": "minecraft:dirt",
   "bauwerk": {
    "id": "minecraft:swamp_hut",
-   "anker": [
-    3,
-    3,
-    4
-   ],
    "suchen": true,
-   "hoehe": 64
+   "hoehe": 64,
+   "groesse": [
+    7,
+    9
+   ],
+   "ecke": [
+    0,
+    0,
+    0
+   ]
   },
   "erwartet": {
    "items": {

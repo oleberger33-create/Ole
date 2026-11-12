@@ -169,6 +169,56 @@ class Test:
         basis = {'x': self.x, 'y': self.y, 'z': self.z}
         return re.sub(r'\{([xyz])([+-]\d+)?\}', lambda m: str(basis[m.group(1)] + int(m.group(2) or 0)), befehl)
 
+    def finde(self, bw, x=None, z=None):
+        x = self.x if x is None else x
+        z = self.z if z is None else z
+        a = self.r(f'execute in {self.dim} positioned {x} {self.y} {z} run locate structure {bw["id"]}')
+        m = re.search(r'\[(-?\d+), (~|-?\d+), (-?\d+)\]', a)
+        if not m:
+            self.meld.append(f'locate {bw["id"]}: {a[:120]}')
+            return False
+        self.x, self.z = int(m.group(1)), int(m.group(3))
+        self.y = bw.get('hoehe', self.y if m.group(2) == '~' else int(m.group(2)))
+        self.cmd(f'forceload add {self.x - 48} {self.z - 48} {self.x + 48} {self.z + 48}')
+        warte_geladen(self, self.x, self.z)
+        time.sleep(3)
+        return True
+
+    def bauwerk_genau(self, bw):
+        """Spawn-Box (Bauwerksteil) blockgenau ausmessen; nur ein Bauwerk nehmen, dessen Box in x/z so liegt wie im
+        Plan ("groesse": [x, z]), dann den Plan-Ursprung so legen, dass "ecke" (Plan-Koordinate der Box-Ecke mit
+        den kleinsten Werten) genau auf der Box-Ecke liegt."""
+        pred = f'{{type:"minecraft:location_check",predicate:{{structures:"{bw["id"]}"}}}}'
+
+        def drin(x, y, z):
+            return 'passed' in self.r(f'execute in {self.dim} positioned {x} {y} {z} if predicate {pred}').lower()
+
+        sx, sz = self.x, self.z
+        for versuch in range(8):
+            if not self.finde(bw, sx + versuch * 2500, sz):
+                return
+            start = next(((self.x + dx, self.y + dy, self.z + dz) for dy in range(-12, 13, 2)
+                          for dx in range(0, 16, 2) for dz in range(0, 16, 2)
+                          if drin(self.x + dx, self.y + dy, self.z + dz)), None)
+            if not start:
+                continue
+            lo, hi = list(start), list(start)
+            for ach in range(3):
+                for richt, grenze in ((-1, lo), (1, hi)):
+                    p = list(start)
+                    while True:
+                        p[ach] += richt
+                        if not drin(*p):
+                            break
+                        grenze[ach] = p[ach]
+            gx, gz = hi[0] - lo[0] + 1, hi[2] - lo[2] + 1
+            self.meld.append(f'Box {bw["id"]}: {lo} .. {hi} ({gx} x {hi[1] - lo[1] + 1} x {gz})')
+            if [gx, gz] == list(bw['groesse']):
+                ex, ey, ez = bw.get('ecke', [0, 0, 0])
+                self.x, self.y, self.z = lo[0] - ex, lo[1] - ey, lo[2] - ez
+                return
+        self.meld.append(f'kein passend gedrehtes {bw["id"]} gefunden')
+
     # ---------------------------------------------------------------- Aufbau
     def vorbereiten(self):
         if self.t.get('bauwerk', {}).get('suchen'):     # echtes Bauwerk: erst finden, dann dort aufbauen
@@ -196,17 +246,11 @@ class Test:
     def bauwerk(self, bw):
         """Bauwerk suchen (echte Welt: /locate, sonst setzen), seine Box finden, leeren und den Plan-Ursprung so
         legen, dass der Anker in der Box liegt. Per Befehl gesetzte Bauwerke haben keine Spawn-Regeln."""
+        if bw.get('suchen') and bw.get('groesse'):      # genaue Box ausmessen, passend gedrehtes Bauwerk suchen
+            return self.bauwerk_genau(bw)
         if bw.get('suchen'):
-            a = self.r(f'execute in {self.dim} positioned {self.x} {self.y} {self.z} run locate structure {bw["id"]}')
-            m = re.search(r'\[(-?\d+), (~|-?\d+), (-?\d+)\]', a)
-            if not m:
-                self.meld.append(f'locate {bw["id"]}: {a[:120]}')
+            if not self.finde(bw):
                 return
-            self.x, self.z = int(m.group(1)), int(m.group(3))
-            self.y = bw.get('hoehe', self.y if m.group(2) == '~' else int(m.group(2)))
-            self.cmd(f'forceload add {self.x - 48} {self.z - 48} {self.x + 48} {self.z + 48}')
-            warte_geladen(self, self.x, self.z)
-            time.sleep(3)
         else:
             self.cmd(f'place structure {bw["id"]} {self.x} {self.y} {self.z}')
         treffer = []
