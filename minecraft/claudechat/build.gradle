@@ -1,0 +1,46 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = 'de.ole'
+base { archivesName = 'claudechat' }
+
+repositories { mavenCentral() }
+
+// Bibliotheken, die in die Mod-Jar eingebettet werden (Jar-in-Jar). Kotlin kommt vom Mod
+// „Fabric Language Kotlin“, der auf dem Server ohnehin installiert ist – darum hier ausgeschlossen.
+configurations {
+	bundle { transitive = true }
+	implementation.extendsFrom bundle
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	bundle("com.anthropic:anthropic-java:${project.anthropic_version}") {
+		exclude group: 'org.jetbrains.kotlin'
+		exclude group: 'org.jetbrains', module: 'annotations'
+		exclude group: 'org.slf4j'          // bringt Minecraft selbst mit
+	}
+	compileOnly "org.jetbrains.kotlin:kotlin-stdlib:2.2.0"
+}
+
+afterEvaluate {
+	configurations.bundle.resolvedConfiguration.resolvedArtifacts.each { a ->
+		dependencies.add('include', a.moduleVersion.id.toString())
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	filesMatching("fabric.mod.json") { expand "version": version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 25; it.options.encoding = 'UTF-8' }
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
