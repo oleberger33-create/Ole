@@ -148,10 +148,12 @@ f.schritt("Im Gerüst hinunter (schleichen) und hier warten: 45 Blöcke unter de
           "spawnt nichts, und bis 128 Blöcke bleiben die Endermen da. Die Perlen landen in der Truhe neben dir.", {
     0: "P"})
 
-f.pruefe(dimension="the_end", zeit="day", hoehe=15, ursprung=[400, 400],   # Plattform auf Höhe 59 wie bei der einfachen
+# Wie die einfache Farm im leeren Ring um die Hauptinsel, aber auf der anderen Seite (die einfache testet bei 400/400 –
+# laufen beide Tests zugleich, dürfen sie sich nicht überbauen). hoehe 15: Plattform auf Höhe 59 wie bei der einfachen.
+f.pruefe(dimension="the_end", zeit="day", hoehe=15, ursprung=[-400, 400],
          nachher=["kill @e[type=minecraft:endermite,x={x-5},y={y+45},z={z},distance=..8]",
                   "kill @e[type=minecraft:oak_boat,x={x-5},y={y+45},z={z},distance=..8]",
-                  'summon minecraft:oak_boat {x-5}.5 {y+45} {z}.5 {Passengers:[{id:"minecraft:endermite",'
-                  'PersistenceRequired:1b}]}'],
+                  'execute positioned {x-5} {y+45} {z} run summon minecraft:oak_boat ~0.5 ~ ~0.5 '   # auch bei x < 0
+                  '{Passengers:[{id:"minecraft:endermite",PersistenceRequired:1b}]}'],
          bereich=[-6, 45, -1, -4, 47, 1],
-         erwartet={"beute": {"minecraft:ender_pearl": 50}, "wesen": {"minecraft:endermite": 1}})
+         erwartet={"beute": {"minecraft:ender_pearl": 100}, "wesen": {"minecraft:endermite": 1}})

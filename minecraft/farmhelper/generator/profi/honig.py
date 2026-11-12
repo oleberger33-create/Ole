@@ -23,7 +23,8 @@ OST = N                                       # x der Truhe
 
 f = profi("honig", dict(
     name="Honigwaben-Farm (Profi)", diff=3, out="Honigwaben (Kerzen, Bienenstöcke, Wachs für Kupfer)",
-    where="Auf Gras oder Erde mit Platz 11 × 5; Bienen aus Bienennestern (mit Behutsamkeit) oder mit Blumen vermehrt",
+    where="Auf Gras oder Erde, Grundfläche 10 × 3 (mit Platz davor und dahinter etwa 12 × 6); Bienen aus "
+          "Bienennestern (mit Behutsamkeit abgebaut) oder mit Blumen vermehrt",
     afk="Ja (in der Nähe bleiben, Simulationsdistanz)",
     why="Acht Bienenstöcke statt einem Nest, mit je 3 Bienen – achtmal so viel Honig. Jeder Stock steht direkt auf "
         "einem Trichter: In Java entstehen die Waben beim Scheren mitten im Stock, und ein Trichter darunter saugt "
@@ -62,7 +63,7 @@ f = profi("honig", dict(
              "neuen Honigstufe aus – bei nicht vollem Stock nutzt sich die Schere nicht ab. Ernten per Werfer macht "
              "die Bienen nicht wütend.", W + "Tutorial:Honey_farming#Automatic_harvesting"),
             ("Java: Die Waben entstehen im Stock und werden von einem Trichter darunter eingesammelt.",
-             W + "Tutorial:Honey_farming#Honeycombs"),
+             W + "Tutorial:Honey_farming#Automatic_harvesting"),
             ("Trichter sammeln auch Items in Bienennestern und -stöcken über ihnen (Tag does_not_block_hoppers).",
              W + "Hopper#Bee_nests_and_beehives"),
             ("Ein Stock fasst 3 Bienen; sie verlassen ihn nur durch die Öffnung vorne. Jede Biene mit Pollen hebt "
@@ -89,15 +90,16 @@ f.schritt(f"Südlich neben der Trichterreihe {N} Werfer auf den Boden, die nach 
     0: "D" * N}, z0=1)
 f.schritt(f"Auf jeden Trichter einen Bienenstock (oder ein Bienennest), die Öffnung nach Norden: Ein Stock zeigt mit "
           "der Öffnung zu dir – von Norden her nach Süden schauen und schleichend oben auf den Trichter klicken. "
-          "Im Westen neben den ersten Stock einen Steinziegel, im Osten Glas auf die Truhe (dann geht sie noch auf): "
+          "Im Westen neben den ersten Stock einen Steinziegel, im Osten schleichend Glas auf die Truhe (dann geht sie "
+          "noch auf): "
           "Die Waben dürfen nur nach vorne heraus.", {
     0: "#" + "N" * N + "G"}, x0=-1)
 f.schritt("Auf jeden Stock einen Beobachter, der nach unten auf den Stock schaut: Stell dich auf die Werfer, schau "
           "steil nach unten auf die Oberseite des Stocks und setz ihn – der rote Punkt zeigt dann nach oben.", {
     1: "O" * N})
 f.schritt("Auf jeden Beobachter einen Steinziegel (dafür auf den Werfern stehen, dann siehst du die Oberseite) – "
-          "der Beobachter schaltet ihn bei jeder neuen Honigstufe. Dann von hinten (Süden) auf jeden Werfer einen "
-          "Steinziegel.", {
+          "der Beobachter schaltet ihn bei jeder neuen Honigstufe. Dann von hinten (Süden) schleichend auf jeden Werfer "
+          "einen Steinziegel.", {
     2: "#" * N,
     1: "." * N + "\n" + "#" * N})
 f.schritt("Redstone-Staub auf die Steinziegel über den Werfern: Stell dich dafür hinter den Werfern auf einen "

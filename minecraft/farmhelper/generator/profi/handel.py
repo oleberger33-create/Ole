@@ -64,9 +64,9 @@ f = profi("handel", dict(
           ["Viel billiger handeln", "Einen Dorfbewohner von einem Zombie anstecken lassen (nur auf Normal oder "
                                     "Schwer) und heilen: Wurftrank der Schwäche, dann Goldener Apfel. Danach sind "
                                     "seine Preise dauerhaft stark gesenkt."]],
-    meta=m("Rate: 16 Dorfbewohner mit eigenem Arbeitsblock statt 4 – viermal so viele Angebote, jedes bis zu 2-mal "
-           "am Tag aufgefüllt; z. B. kaufen 4 Pfeilmacher zusammen bis zu 128-mal 32 Stöcke für je 1 Smaragd pro "
-           "Tag (Schätzung, ohne Preisanstieg durch Nachfrage).",
+    meta=m("Rate: 16 Dorfbewohner statt 4 – viermal so viele Angebote, jedes bis zu 2-mal am Tag aufgefüllt. "
+           "Beispiel: Ein Pfeilmacher kauft je Auffüllen 16-mal 32 Stöcke für 1 Smaragd, also rund 32 Smaragde am "
+           "Tag; 8 Pfeilmacher in der Halle schaffen rund 250 (Schätzung, ohne Preisanstieg durch Nachfrage).",
            [("Überall; die Dorfbewohner kommen aus einem Dorf oder einer Zucht und werden mit der Lore gebracht.",
              W + "Tutorial:Villager_trading_hall")],
            [("Zellen mit Arbeitsblock; neu würfeln durch Abbauen und Setzen, solange nicht gehandelt wurde.",
