@@ -55,8 +55,8 @@ TEXTE = {
             "fließt in zwei Rinnen Wasser zu zwei Trichtern und einer Truhe. Kein Redstone nötig.",
         help=[("Kakteen gehen beim Pflanzen kaputt", "Neben einem Kaktus darf auf seiner Höhe nichts Festes "
                                                      "stehen – nur die Glasstange eine Ebene höher."),
-              ("Weniger als erwartet", "Ein Teil der Stücke fällt auf den Kaktus und wird zerstört – das ist "
-                                       "normal.")],
+              ("Weniger als erwartet", "Ein Teil der Stücke fällt auf den Kaktus und wird zerstört, einige bleiben "
+                                       "auf dem Sand zwischen den Kakteen liegen – ab und zu einsammeln.")],
         meta=m("Große Farmen: „tausende Kakteen pro Stunde“ (Wiki, ohne genaue Zahl)",
                [("Überall auf Sand.", W + "Tutorial:Cactus_farming")],
                [("Kaktus bricht ab, sobald er neben einem Block wächst. Standard laut Wiki: Wasserströme unten "
@@ -66,9 +66,10 @@ TEXTE = {
         name="Kürbis- & Melonen-Farm", cat="Pflanzen", diff=2, out="Kürbisse, Melonen", where="Überall",
         afk="In der Nähe",
         why="Jeder Stängel lässt seine Frucht nur auf das Schlammfeld daneben wachsen (die anderen Seiten sind "
-            "Wasser, Nachbarstängel oder Blöcke). Ein Beobachter schaut von oben auf einen Stängel: Wächst dort eine "
-            "Frucht, ändert sich der Stängel, und alle Kolben drücken von oben auf die Fruchtfelder – Früchte "
-            "zerbrechen, leere Felder macht das nichts. Die Trichter unter dem Schlamm sammeln ein.",
+            "Wasser, Nachbarstängel oder Blöcke). Ein Beobachter schaut von oben auf einen Stängel: Ändert er sich "
+            "(er wächst oder bekommt eine Frucht), drücken alle Kolben von oben auf die Fruchtfelder – Früchte "
+            "zerbrechen, leere Felder macht das nichts. Die anderen Früchte warten bis dahin. Die Trichter unter dem "
+            "Schlamm sammeln ein.",
         help=[("Frucht wächst nicht", "Fruchtfeld muss frei sein; der Stängel braucht Licht ≥ 9 (von der Seite "
                                       "reicht)."),
               ("Frucht wächst an der falschen Stelle", "An die Enden der Ackerreihe gehört je ein Block.")],
@@ -82,7 +83,7 @@ TEXTE = {
         name="Seetang-Farm", cat="Pflanzen", diff=2, out="Seetang → Getrockneter Seetang (Brennstoff)",
         where="Überall", afk="In der Nähe",
         why="Seetang wächst in Wasser nach oben. Das Becken ist 3 hoch: oben Wasserquellen, darunter fallendes "
-            "Wasser – das reicht dem Seetang. Wird er oben angekommen, merkt es der Beobachter, und die Kolben "
+            "Wasser – das reicht dem Seetang. Ist er oben angekommen, merkt es sein Beobachter, und die Kolben "
             "schlagen den 2. Block ab. Die Stücke schwimmen nach oben und treiben über den Trichter neben dem "
             "obersten Block (Bauweise nach dem Wiki-Bauplan).",
         help=[("Items treiben nicht in den Trichter", "Über den Trichtern muss das Wasser aus dem Becken fließen – "
@@ -96,11 +97,16 @@ TEXTE = {
     "weizen": dict(
         name="Weizen/Karotten mit Bauern", cat="Pflanzen", diff=2, out="Weizen, Karotten, Kartoffeln, Rote Bete",
         where="Überall, weit weg von Dörfern", afk="In der Nähe",
-        why="Ein Bauer (Dorfbewohner mit Komposter) erntet reife Feldfrüchte und pflanzt mit seinem eigenen Saatgut "
-            "nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie die Ernte an, "
-            "bevor der Bauer sie aufhebt. Darum braucht er am Anfang einen Vorrat Saatgut, den du ihm zuwirfst.",
-        help=[("Bauer erntet nicht", "Er braucht den Komposter als Arbeitsplatz (kein Baby). Er arbeitet tagsüber."),
-              ("Felder bleiben leer", "Ihm ist das Saatgut ausgegangen – wirf ihm wieder einen Stapel zu.")],
+        why="Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte und pflanzt mit seinem "
+            "eigenen Vorrat nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie "
+            "die Ernte an, bevor der Bauer sie aufhebt. Darum gibst du ihm vorher einen Vorrat: am besten Karotten "
+            "oder Kartoffeln (Samen über 10 Stück kompostiert er).",
+        help=[("Bauer erntet nicht", "Er braucht den Komposter als Arbeitsplatz (kein Baby), arbeitet tagsüber; "
+                                     "die Spielregel mobGriefing muss an sein."),
+              ("Felder bleiben leer", "Sein Vorrat ist aufgebraucht – Tor auf, ihn kurz herausholen, ihm auf "
+                                      "normalem Boden wieder einen Stapel zuwerfen (auf dem Feld schlucken die "
+                                      "Trichter alles)."),
+              ("Er kommt nicht hinein", "Mit Leine, Boot oder Lore durchs Zauntor bringen.")],
         meta=m("Keine belegte Zahl",
                [("Die Farm muss weit genug weg von Dörfern liegen, sonst läuft der Bauer zum Dorf.",
                  W + "Tutorial:Crop_farming"),
@@ -113,9 +119,10 @@ TEXTE = {
         why="Echtes Holz lässt sich in Vanilla nicht einfach vollautomatisch ernten. Am meisten Holz pro Baum gibt "
             "die Dunkle Eiche (2 × 2 Setzlinge). Knochenmehl drauf, mit Effizienz-Axt fällen, Setzlinge wieder "
             "pflanzen.",
-        help=[("Baum wächst nicht", "Nach oben mindestens 7 Blöcke frei, Licht ≥ 9, 4 Setzlinge genau im Quadrat.")],
+        help=[("Baum wächst nicht", "Nach oben mindestens 10 Blöcke frei (oben auch zur Seite), Licht ≥ 9, "
+                                    "4 Setzlinge der Dunklen Eiche genau im Quadrat.")],
         meta=m("Dunkle Eiche: im Schnitt ca. 42 Holz und 6 Setzlinge pro Baum (Wiki)",
-               [("Dunkle Eiche braucht über dem nordwestlichen Setzling eine freie Säule von mindestens 7 Blöcken.",
+               [("Dunkle Eiche wächst nur aus 4 Setzlingen im Quadrat und braucht nach oben Platz.",
                  W + "Tutorial:Tree_farming")],
                [("Glück (Fortune) auf dem Werkzeug erhöht die Setzlings-Chance.", W + "Tutorial:Tree_farming")])),
     "knochenmehl": dict(
@@ -123,8 +130,8 @@ TEXTE = {
         afk="In der Nähe",
         why="Ein Komposter macht aus Pflanzen Knochenmehl. Der obere Trichter füllt ihn, der untere holt das "
             "fertige Knochenmehl heraus und gibt es in die Truhe. Gut an jede Pflanzenfarm anzuschließen.",
-        help=[("Kein Knochenmehl", "Manche Pflanzen haben nur eine kleine Chance pro Item (Samen 30 %, Kaktus 50 %, "
-                                   "Melone 65 %) – es braucht viele.")],
+        help=[("Kein Knochenmehl", "Manche Pflanzen haben nur eine kleine Chance pro Item (Samen 30 %, Kaktus und "
+                                   "Melonenscheiben 50 %, Kürbis 65 %) – es braucht viele.")],
         meta=m("Je nach Pflanzen-Nachschub",
                [("Überall.", W + "Tutorial:Crop_farming")],
                [("Einfachster Kompost-Automat: Trichter, Komposter, Trichter, Truhe.", W + "Composter"),
@@ -132,15 +139,18 @@ TEXTE = {
     "blumen": dict(
         name="Blumen-Farm", cat="Pflanzen", diff=1, out="Blumen → Farbstoffe",
         where="In einem Biom mit passenden Blumen (z. B. Blumenwald)", afk="Nein – Knopf drücken",
-        why="Knochenmehl auf Gras lässt die Blumen des Bioms wachsen. Der Spender liegt neben dem Gras (nicht "
-            "darauf – sonst wird das Gras zu Erde) und verteilt das Knochenmehl auf Knopfdruck.",
-        help=[("Nichts wächst", "Der Spender muss zur Seite auf einen Grasblock zeigen, über dem nichts steht."),
-              ("Falsche Blumen", "Welche Blumen wachsen, hängt vom Biom ab. Blumenwald hat fast alle.")],
+        why="Knochenmehl auf eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose) lässt eine Kopie "
+            "fallen, die Blume bleibt stehen. Ein Spender daneben macht das auf Knopfdruck – beliebig oft. Gelb, "
+            "Magenta, Rot und Rosa als Farbstoff; andere Blumen wachsen mit Knochenmehl auf Gras je nach Biom.",
+        help=[("Nichts passiert", "Der Spender muss auf die untere Hälfte der Blume zeigen; Knochenmehl hinein."),
+              ("Andere Farben", "Kleine Blumen wachsen mit Knochenmehl auf Gras – welche, bestimmt das Biom "
+                                "(Blumenwald hat fast alle).")],
         meta=m("Keine belegte Zahl",
                [("Welche Blumen wachsen, bestimmt das Biom. Im Blumenwald gibt es fast alle.",
                  W + "Tutorial:Flower_farming")],
-               [(TEST + "der erste Versuch (Spender auf dem Gras) machte das Gras zu Erde – darum liegt der Spender "
-                        "daneben.", None)])),
+               [("Hohe Blumen lassen mit Knochenmehl eine Kopie fallen.", W + "Bone_Meal"),
+                (TEST + "Knochenmehl auf Gras wirkt nur einmal (danach wächst etwas darauf) – darum die hohe "
+                        "Blume.", None)])),
     "huehner": dict(
         name="Hühner-Farm (automatisch)", cat="Tiere", diff=2, out="Gebratenes Hühnchen, Federn", where="Überall",
         afk="In der Nähe",
@@ -150,7 +160,11 @@ TEXTE = {
             "sie werden gegart, das Hühnchen fällt durch den Steinschneider in den Trichter.",
         help=[("Kein gebratenes Hühnchen", "Kessel genau über dem Steinschneider, mit Lava gefüllt; rundherum Glas, "
                                            "sonst entkommen Küken."),
-              ("Eier bleiben im Spender", "Die zwei Beobachter müssen sich gegenseitig anschauen (Takt).")],
+              ("Eier bleiben im Spender", "Die zwei Beobachter müssen sich gegenseitig anschauen (Takt)."),
+              ("Beobachter zeigt falsch", "Ein Beobachter schaut in die Richtung, in die du beim Setzen schaust – "
+                                          "notfalls einen Hilfsblock setzen und danach wieder abbauen."),
+              ("Wie kommen die Hühner hinein?", "Eier in den Schacht über dem Trichter werfen oder ein Huhn mit "
+                                                "Samen hineinlocken.")],
         meta=m("Keine belegte Zahl",
                [("Überall.", W + "Tutorial:Egg_farming")],
                [("Lava zerstört gebratenes Hühnchen sofort – darum der Kessel mit Lava über einem Steinschneider: nur "
@@ -162,7 +176,7 @@ TEXTE = {
         why="Kühe vermehren sich, wenn du zwei mit Weizen fütterst; das Kalb ist nach 20 Minuten groß. Ein "
             "Zaun-Gehege reicht: zwei Kühe behalten, die übrigen schlachten (am besten mit Plünderung, Flammen-"
             "Schwert = gebratenes Steak).",
-        help=[("Zu viele Tiere = Lag", "Höchstens ~20 Tiere pro Gehege halten."),
+        help=[("Zu eng", "In ein 3 × 3-Gehege passen gut 8 Kühe – vorher schlachten oder das Gehege vergrößern."),
               ("Kühe vermehren sich nicht", "Nach dem Füttern 5 Minuten warten, bis es wieder geht.")],
         meta=m("Keine belegte Zahl",
                [("Überall.", W + "Tutorial:Animal_farming")],
@@ -456,3 +470,73 @@ TEXTE = {
                [("Direkt an einer Bambusfarm.", None)],
                [(TEST + "128 Bambus → 64 Stöcke.", None)])),
 }
+
+# ---------------------------------------------------------------------------------------------------------------
+# Nachgeschärft nach der Gegenprüfung und den Mechanik-Tests (Mobs in die Farm gesetzt)
+TEXTE["hexe"].update(
+    afk="Unten am Schacht",
+    why="In der Box einer Hexenhütte (7 × 9 Grundfläche) spawnen nur Hexen – aber nicht im Wasser. Darum ist die "
+        "Plattform trocken; mittendurch läuft ein 2 tiefer Kanal mit offenen Falltüren darüber. Hexen halten sie für "
+        "Boden, fallen hinein, das Wasser schiebt sie zum Schacht, 32 Blöcke Fall töten sie (26 Leben). Ohne Dach "
+        "läuft die Farm nachts; ein dunkles Dach macht sie auch tagsüber.",
+    help=[["Keine Hexen", "Der Boden muss genau unter der Box liegen: deine Füße eine Ebene unter dem alten "
+                          "Hüttenboden, dann den Plan mit den Pfeilen im Plan-Menü verschieben."],
+          ["Hexen bleiben im Kanal", "Falltüren über dem Kanal offen, im Loch am Ende eine offene Falltür auf "
+                                     "Wasserhöhe."]])
+TEXTE["ertrunkene"].update(
+    why="In Flussbiomen spawnen Ertrunkene in dunklem Wasser (die Stelle und der Block darunter Wasser, darüber Platz) "
+        "in jeder Höhe. Das geschlossene Becken ist stockdunkel; durch die Schilder im Boden sinken sie in den Schacht "
+        "und kommen mit wenig Leben unten an. Du triffst ihre Beine durch einen Spalt – Dreizacke gibt es nur, wenn du "
+        "tötest.")
+TEXTE["gold"].update(
+    where="Nether-Ödland, am besten über dem Netherdach", afk="Unten am Trichter, 25 Blöcke unter der Plattform",
+    why="Zombifizierte Piglins spawnen auf Netherrack. Sie wollen das Schildkrötenei zertrampeln – erreichbar ist es "
+        "nur über ein Loch mit einer offenen Falltür, die sie für Boden halten. Sie fallen 25 Blöcke und sterben. Seit "
+        "1.21.5 gibt es XP und Goldbarren nur, wenn du selbst tötest – dafür die Plattform nur 22 Blöcke hoch bauen "
+        "und unten zuschlagen.")
+TEXTE["enderman"].update(
+    afk="Unten in der Mitte der Landestelle",
+    why="Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einer Lore in der Mitte, rundherum ein "
+        "Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und sterben. Du "
+        "stehst unten in der Mitte (dort fällt keiner hin) und sammelst die Perlen ein. Für XP: nur 42 Blöcke tief – "
+        "dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.")
+TEXTE["schleim"].update(
+    why="Schleime spawnen in bestimmten Chunks (Schleim-Chunks, 10 % aller Chunks) unter Y 40 – egal wie hell. Grabe "
+        "den ganzen Chunk 3 hoch aus (sie brauchen über 2 Blöcke Platz) und mach ihn mit Fackeln hell: Dann spawnen "
+        "dort nur noch Schleime. Warte 24–32 Blöcke weg (näher spawnt nichts) und erschlage sie dann.")
+TEXTE["xpspawner"].update(
+    why="Spawner erzeugen Mobs, solange ein Spieler höchstens 16 Blöcke entfernt ist – aber nicht im Wasser. Darum "
+        "liegt das Wasser eine Ebene unter dem Spawner: Die Mobs spawnen darüber, fallen hinein und werden unter dem "
+        "Spawner durch zur Rinne und durch die Tür in eine Zelle geschoben (ein Schild hält das Wasser). Du stehst "
+        "eine Ebene tiefer und triffst ihre Beine durch einen Spalt; die Beute fällt in die Truhe neben dir.",
+    help=[["Spawner spawnt nicht", "Höchstens 16 Blöcke entfernt bleiben; keine Fackeln im Raum."],
+          ["Baby-Zombie kommt heraus", "Babys passen durch den Spalt – einfach erschlagen."]])
+TEXTE["handel"].update(
+    why="Jeder Dorfbewohner steht in einer 1 × 1-Zelle direkt vor seinem Arbeitsblock (dort füllt er bis zu 2-mal am "
+        "Tag seine Angebote auf). Vorne ist unten ein Block und auf Höhe 2 ein Block, dazwischen ein Fenster: Du "
+        "handelst ganz normal, er kommt nicht heraus. Ein Pfeilmacher kauft z. B. 32 Stöcke für 1 Smaragd.")
+TEXTE["honig"].update(
+    why="Ein Spender mit Schere zeigt seitlich auf das Bienennest. Zwei Beobachter geben einen dauernden Takt: der "
+        "Spender versucht immer wieder zu scheren. Erst bei vollem Nest (Stufe 5) klappt es – 3 Waben fallen vorne "
+        "heraus in den Trichter. Fehlversuche kosten die Schere nichts, und Ernten per Spender macht die Bienen nicht "
+        "wütend.")
+TEXTE["mobfarm"].update(
+    afk="Unten am Schacht (24–32 Blöcke unter dem Raum)",
+    why="Monster spawnen bei Licht 0, wenn kein Spieler näher als 24 Blöcke ist – aber nicht im Wasser, und von selbst "
+        "laufen sie auch nicht hinein. Darum: dunkler Raum 10 × 10, 2 hoch, Kanäle in Kreuzform 2 tief, oben offene "
+        "Falltüren. Die Wegfindung hält sie für Boden, die Monster fallen ins Wasser, das schiebt sie zum trockenen "
+        "Loch in der Mitte: 26 Blöcke Fall töten Zombies, Skelette, Creeper und Spinnen. Weiter als 32 Blöcke weg "
+        "laufen Monster nicht mehr herum – darum wartest du direkt unten.",
+    help=[["Wenig Mobs", "Höhlen in 128 Blöcken ausleuchten – sie konkurrieren. Weit weg von Höhlen bauen."],
+          ["Hexen unten", "Hexen haben 26 Leben und überleben den Fall – unten erschlagen."]])
+TEXTE["creeper"].update(
+    afk="Unten am Schacht (24–32 Blöcke unter dem Raum)",
+    why="Wie die Monster-Farm, nur 8 × 8 und mit Falltüren in der oberen Hälfte der zweiten Ebene über dem "
+        "Spawnboden: Es bleiben 1,8 Blöcke Platz. Creeper (1,7 hoch) passen hinein, Zombies, Skelette und Hexen (fast "
+        "2 hoch) nicht. Spinnen passen auch (Fäden als Beifang).")
+TEXTE["eisen"]["help"] = TEXTE["eisen"]["help"] + [
+    ["Bei Regen nichts", "Der Tageslichtsensor im Nacht-Modus hält bei Regen die Falltüren offen – nach dem Regen "
+                         "geht es weiter."],
+    ["Golem steht woanders", "In 16 Blöcken darf kein lebender Golem sein – auch keiner, der auf einem Dach "
+                             "oder Hügel in der Nähe gespawnt ist. Flächen bis 8 Blöcke um die Dorfbewohner aus "
+                             "Glas oder weit genug weg."]]

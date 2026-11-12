@@ -53,6 +53,7 @@ def raster(text):
 
 class Farm:
     alle = []
+    weitere_tests = {}                                   # Name → Test (mit "plan": Farm-id), z. B. Mechanik-Tests
 
     def __init__(self, fid, **info):
         self.id = fid
@@ -87,6 +88,11 @@ class Farm:
 
     def pruefe(self, **test):
         self.test = test
+        return self
+
+    def pruefe_auch(self, name, **test):
+        """Zusätzlicher Test derselben Farm (z. B. Mobs hineinsetzen statt auf seltene Spawns zu warten)."""
+        Farm.weitere_tests[name] = dict(test, plan=self.id)
         return self
 
     # ------------------------------------------------------------------ Ausgabe
@@ -128,6 +134,7 @@ def schreiben(plaene_pfad=None, tests_pfad=None, reihenfolge=None):
         farmen = [nach[i] for i in reihenfolge if i in nach] + [f for f in farmen if f.id not in reihenfolge]
     plaene = [f.plan() for f in farmen]
     tests = {f.id: f.test for f in farmen if f.test}
+    tests.update(Farm.weitere_tests)
     plaene_pfad = plaene_pfad or os.path.join(HIER, "plaene.json")
     tests_pfad = tests_pfad or os.path.join(HIER, "..", "test", "tests.json")
     with open(plaene_pfad, "w", encoding="utf-8") as d:

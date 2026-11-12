@@ -23,8 +23,9 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
 
 ## Technik
 
-- `generator/export.js` holt die Baupläne und die belegten Orts-/Meta-Angaben aus dem Farm-Handbuch
-  (`plaene.json`).
+- `generator/farmen.py` enthält alle 33 Baupläne in der einfachsten Bauweise, die auf dem Testserver funktioniert
+  hat (Text-Raster je Ebene, Format in `entwurf.py`), die Texte stehen in `farmtexte.py`. `python3 farmen.py`
+  schreibt `plaene.json` und `../test/tests.json`; `python3 farmen.py --material` zeigt die Materialliste je Farm.
 - `generator/farmhelper.py plaene.json <ordner>` baut das Datapack `OlesFarmhelper.zip` und das Ressourcenpaket
   `OlesFarmhelper-Ressourcen.zip`; `bloecke.py` übersetzt die Plan-Blöcke in echte Blöcke, Prüfungen und Items,
   `textur.py` zeichnet das Item-Bild.
@@ -32,11 +33,20 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
   machen kleine gemeinsame Funktionen (`c/`, `z/`, `h/`, `w/`), die an `~ ~ ~` arbeiten.
 - Knöpfe schicken `/trigger ofh.t set <Code>` (geht ohne Operator-Rechte). Ein unsichtbarer Marker merkt sich
   Farm, Drehung und Teilschritt; jede Sekunde prüft das Pack alle offenen Pläne.
-- Getestet auf einem lokalen 26.3-Server (Fabric + Carpet-Testspieler): alle 33 Farmen Teil für Teil nachgebaut,
-  jeder Teil schaltet automatisch weiter; alle Fenster, Ort-Checks und Knöpfe laufen ohne Fehler.
+- `test/mctest.py plaene.json tests.json [farm …] --ticks=N --zufall=N` baut die Farmen auf einem lokalen
+  26.3-Server (Fabric + Carpet, RCON) so auf, wie ein Spieler sie baut, stellt einen Testspieler an den
+  Warteplatz, lässt die Zeit im Zeitraffer laufen und misst den Ertrag in Truhen, am Boden, Blöcke und Wesen.
+  Bauwerk-Farmen (Hexenhütte, Außenposten, Festung) brauchen eine normale Welt mit Bauwerken – per Befehl gesetzte
+  Bauwerke haben keine Spawn-Regeln.
 
-Die Pläne sind die Lern-Modelle aus dem Farm-Handbuch (Eisen- und Bambusfarm genau wie auf dem Server). Wo die
-besten Designs größer oder anders sind, steht das mit Quelle in den Farm-Infos.
+### Was beim Vereinfachen gelernt wurde (Testserver 26.3)
+
+- Im Wasser spawnt nichts – auch nicht am Spawner. Wasserkanäle liegen darum eine Ebene unter dem Spawnboden.
+- Fließendes Wasser über Wasser breitet sich nicht aus: Sammelrinnen über einem Becken gehen nicht.
+- Durch Glas sehen Mobs nichts (Dorfbewohner/Zombie, Endermen/Endermilbe).
+- Spender mit Glasflaschen werfen sie bei nicht vollem Bienennest heraus, Scheren nicht.
+- Trichter saugen durch Schlamm und Ackerboden (nicht ganz hohe Blöcke), nicht durch Erde oder Magma.
+- Ein Dispenser direkt auf Gras macht das Gras zu Erde.
 
 ## Server-Version (OLE SMP, Welt „welt“)
 

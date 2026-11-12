@@ -371,9 +371,10 @@ PRUEF = {
                  "In Pilzfeldern/Tiefer Dunkelheit spawnen keine Monster!")],
     "creeper": [("nicht_biom", ["minecraft:mushroom_fields", "minecraft:deep_dark"], "Biom erlaubt Monster-Spawns",
                  "In Pilzfeldern/Tiefer Dunkelheit spawnen keine Monster!")],
-    "schleim": [("y_max", 40, "Unter Y 40 – passt für einen Schleim-Chunk", "Über Y 40: im Schleim-Chunk erst unter Y 40")],
+    "schleim": [("y_max", 39, "Unter Y 40 – passt für einen Schleim-Chunk", "Über Y 39: im Schleim-Chunk erst unter Y 40")],
     "hexe": [("struktur", "minecraft:swamp_hut", "Du stehst in einer Hexenhütten-Box", "Keine Hexenhütte hier – such eine im Sumpf")],
-    "waechter": [("struktur", "minecraft:monument", "Du stehst in einer Ozeanmonument-Box", "Kein Ozeanmonument hier")],
+    "waechter": [("struktur_unten", "minecraft:monument", "Unter dir liegt ein Ozeanmonument",
+                  "Kein Ozeanmonument unter dir")],
     "lohe": [("dimension", "minecraft:the_nether", "Im Nether", "Nicht im Nether"),
              ("struktur", "minecraft:fortress", "In einer Netherfestung", "Keine Netherfestung hier – such den Lohen-Spawner")],
     "witherskelett": [("dimension", "minecraft:the_nether", "Im Nether", "Nicht im Nether"),
@@ -431,6 +432,8 @@ def ort_zeilen(fid):
             z.append(f'execute if dimension {wert} run tellraw @s {{text:"✘ {schlecht}",color:"red"}}')
         elif art == "struktur":
             aus(gut, schlecht, [f"if {struktur(wert)}"])
+        elif art == "struktur_unten":                   # Monument-Box endet unter der Wasseroberfläche
+            aus(gut, schlecht, [f"positioned ~ ~-{d} ~ if {struktur(wert)}" for d in (3, 6, 9)])
         elif art == "y_max":
             aus(gut, schlecht, [f"if predicate {{type:\"minecraft:location_check\",predicate:{{position:{{y:{{max:{wert}}}}}}}}}"])
         elif art == "weg_von_mitte":

@@ -389,7 +389,7 @@ def main():
     zufall = int(next((a.split('=')[1] for a in sys.argv if a.startswith('--zufall=')), 3))
     plaene = {f['id']: f for f in json.load(open(args[0], encoding='utf-8'))}
     tests = json.load(open(args[1], encoding='utf-8'))
-    auswahl = args[2:] or [f for f in plaene if f in tests]
+    auswahl = args[2:] or list(tests)
     r = Rcon()
     r('scoreboard objectives add mctest dummy')
     for c in ('gamerule spawn_mobs true', 'gamerule advance_weather false', 'weather clear',
@@ -400,9 +400,11 @@ def main():
     nur_messen = '--nur-messen' in sys.argv
     for k, fid in enumerate(auswahl):
         tt = tests[fid]
+        plan = plaene[tt.get('plan', fid)]
         hoehe = tt.get('hoehe', 0 if tt.get('dimension', 'overworld') != 'the_end' else 60)
-        ux, uz = tt.get('ursprung', (k * 1024 + 4096, 4096))
-        t = Test(r, plaene[fid], tt, (ux, hoehe, uz))
+        basis = int(os.environ.get('MCTEST_BASIS', 4096))  # neuer Ort: keine Reste alter Testläufe in der Nähe
+        ux, uz = tt.get('ursprung', (k * 1024 + basis, basis))
+        t = Test(r, plan, tt, (ux, hoehe, uz))
         if not nur_messen:
             t.vorbereiten()
             t.bauen()

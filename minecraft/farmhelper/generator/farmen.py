@@ -134,13 +134,13 @@ f.schritt("Wasserquellen ans Ostende beider Rinnen – das Wasser fließt bis ü
         ........
         ..FFFFFFW
     """}, x0=-2, z0=-1)
-f.schritt("Glasstange auf Höhe 1 über der südlichen Rinne (an den Enden je ein Glas als Stütze). Wächst ein Kaktus "
-          "auf 2 Blöcke, berührt er das Glas und bricht ab.", {
+f.schritt("Glasstange auf Höhe 1 über der südlichen Rinne: links neben der Rinne ein Glas auf den Boden, darauf die "
+          "Stange nach Osten. Wächst ein Kaktus auf 2 Blöcke, berührt er das Glas und bricht ab.", {
     0: """
-        .G.....G
+        G
     """,
     1: """
-        .GGGGGGG
+        GGGGGGG
     """}, x0=-2, z0=1)
 f.schritt("Kakteen auf jeden zweiten Sand pflanzen (Westende, Mitte, Ostende) – fertig.", {
     0: """
@@ -161,6 +161,10 @@ f.schritt("Ausheben: eine Wasserrinne (4 lang) und zwei Reihen weiter eine Reihe
         .....
         -----
     """})
+f.schritt("Zuerst die Kolben, die nach UNTEN zeigen: An das Westende einen Stützblock 2 hoch, dann stellst du dich in "
+          "den Graben, schaust nach oben und setzt die 4 Kolben in einer Reihe (Kolben zeigen zu dir).", {
+    0: "#",
+    1: "#KKKK"}, x0=-1, z0=2)
 f.schritt("4 Trichter nach Osten in die Truhe.", {
     -2: """
         .....
@@ -177,21 +181,15 @@ f.schritt("Wasser ins Westende der Rinne, Gras dazwischen zu Ackerboden hacken, 
     0: """
         ......
         #....#
-        #.....
     """}, x0=-1)
 f.schritt("Melonen- oder Kürbiskerne auf den Ackerboden.", {
     0: """
         ....
         TTTT
     """})
-f.schritt("Über dem Schlamm 4 Kolben, die nach UNTEN zeigen (Stütze am Westende).", {
-    1: """
-        .....
-        .....
-        #KKKK
-    """}, x0=-1)
 f.schritt("Über den zweiten Stängel ein Beobachter, der nach UNTEN schaut, darauf ein Block. Redstone-Staub auf die "
-          "Kolben – wächst eine Frucht, fahren alle Kolben aus.", {
+          "Kolben – ändert sich der beobachtete Stängel (er wächst oder bekommt eine Frucht), fahren alle Kolben aus "
+          "und zerbrechen die Früchte, die gerade da sind.", {
     1: """
         ....
         .B..
@@ -218,17 +216,18 @@ f.schritt("Becken 6 lang, 1 breit, 3 hoch: Nordwand unten aus Blöcken, darüber
         #......#
         #>>>>>>C
     """}, x0=-1)
-f.schritt("Hinter die Kolben Blöcke mit Redstone-Staub darauf. Obere Reihe der Nordwand aus Blöcken, in der Mitte ein "
-          "Beobachter, der nach Süden auf den obersten Seetang schaut. Über den Trichtern ein Rand.", {
+f.schritt("Hinter die Kolben Blöcke mit Redstone-Staub darauf. Obere Reihe der Nordwand aus Beobachtern, die nach "
+          "Süden auf den obersten Seetang schauen (einer pro Pflanze – sonst kann ein Seetang, der zu früh "
+          "ausgewachsen ist, die Farm anhalten). Über den Trichtern ein Rand, vom Glas am Ostende aus gebaut.", {
     1: """
         .######.
     """,
     2: """
         .RRRRRR.
-        ###B####
+        #BBBBBB#
         #......#
         #......G
-        .######.
+        .#######
     """}, x0=-1, z0=-1)
 f.schritt("Wasserquellen in die oberste Reihe des Beckens (Höhe 2): Das Wasser fällt nach unten und läuft über die "
           "Trichter. Unten im Becken entsteht fallendes Wasser – das reicht für den Seetang.", {
@@ -247,7 +246,7 @@ f.schritt("Seetang auf den Boden setzen – fertig. Wächst der Seetang bis oben
 f.pruefe(boden=GRAS, erwartet={"items": {"minecraft:kelp": 4}})
 
 f = farm("weizen")
-f.zeichen(A="farmland", O="composter", Z="oak_fence", V="villager", Q="wheat")
+f.zeichen(A="farmland", O="composter", Z="oak_fence", T="fence_gate", V="villager", Q="wheat")
 f.schritt("Feld 4 × 2 ausheben, 2 tief, links davon Platz für Trichter und Truhe, rechts ein Loch fürs Wasser.", {
     -2: """
         ------
@@ -273,15 +272,16 @@ f.schritt("Zaun rundherum, links ein Komposter mit Block darüber (Arbeitsplatz 
         ZZZZZZ
         Z....Z
         O....Z
-        ZZZZZZ
+        ZZTZZZ
     """,
     1: """
         ......
         ......
         #.....
     """}, x0=-1, z0=-1)
-f.schritt("Weizen säen und einen Dorfbewohner hineinbringen. Wirf ihm einen Stapel Samen (oder Karotten/Kartoffeln) "
-          "zu – er wird Bauer, erntet und pflanzt mit seinen Samen nach. Die Ernte fällt in die Trichter.", {
+f.schritt("Weizen säen. Dann einen Dorfbewohner durchs Zauntor bringen – vorher (auf normalem Boden, nicht auf dem "
+          "Feld!) wirfst du ihm einen Stapel Karotten oder Kartoffeln zu: Auf dem Feld würden die Trichter sie "
+          "schneller schlucken. Mit dem Komposter wird er Bauer, erntet und pflanzt mit seinem Vorrat nach.", {
     0: """
         QQQQ
         QQQQ
@@ -297,7 +297,7 @@ f.pruefe(boden=GRAS, zeit="day",
 
 f = farm("baum")
 f.zeichen(S="oak_sapling")
-f.schritt("Freier Platz mit Gras oder Erde, nach oben mindestens 15 Blöcke frei. 4 Setzlinge der Dunklen Eiche im "
+f.schritt("Freier Platz mit Gras oder Erde, nach oben mindestens 10 Blöcke frei. 4 Setzlinge der Dunklen Eiche im "
           "2 × 2-Quadrat pflanzen, dann Knochenmehl drauf. Fällen, Setzlinge aufsammeln, von vorn.", {
     0: """
         SS
@@ -318,18 +318,18 @@ f.pruefe(nachher=[f"item replace block {{x}} {{y+2}} {{z}} container.{i} with mi
          erwartet={"items": {"minecraft:bone_meal": 2}})
 
 f = farm("blumen")
-f.zeichen(D=("dispenser", "w"), U="stone_button")
-f.schritt("Im Blumenwald (oder einem anderen Blumen-Biom) neben einem Grasblock ein Loch graben und einen Spender "
-          "hineinsetzen, der zur Seite auf das Gras zeigt (oben auf dem Gras darf nichts stehen, sonst wird es zu "
-          "Erde). Knochenmehl hinein, Knopf oben auf den Spender. Jeder Druck lässt rundherum Blumen wachsen – mit "
-          "der Hand abernten.", {
-    -1: ".D",
-    0: ".U"})
-f.pruefe(boden=GRAS, biom="minecraft:flower_forest",
-         nachher=["item replace block {x+1} {y-1} {z} container.0 with minecraft:bone_meal 64",
-                  "setblock {x+1} {y-1} {z-1} minecraft:observer[facing=north]",
-                  "setblock {x+1} {y-1} {z-2} minecraft:observer[facing=south]"],
-         erwartet={"bloecke": {"#minecraft:small_flowers": 3}})
+f.zeichen(D=("dispenser", "w"), U="stone_button", Y="tall_flower")
+f.schritt("Eine hohe Blume (Sonnenblume, Flieder, Rosenstrauch oder Pfingstrose) auf Gras pflanzen.", {0: "Y"})
+f.schritt("Daneben einen Spender, der zur Blume zeigt, Knochenmehl hinein, Knopf oben drauf. Jeder Druck lässt die "
+          "Blume eine Kopie fallen – sie selbst bleibt stehen. Aufsammeln von Hand (Farbstoffe!).", {
+    0: ".D", 1: ".U"})
+f.pruefe(boden=GRAS,
+         nachher=["setblock {x} {y} {z} minecraft:sunflower[half=lower]",
+                  "setblock {x} {y+1} {z} minecraft:sunflower[half=upper]",
+                  "item replace block {x+1} {y} {z} container.0 with minecraft:bone_meal 64",
+                  "setblock {x+1} {y} {z-1} minecraft:observer[facing=north]",
+                  "setblock {x+1} {y} {z-2} minecraft:observer[facing=south]"],
+         erwartet={"boden": {"minecraft:sunflower": 5}})
 
 # ===================================================================== Tiere
 f = farm("wolle")
@@ -370,20 +370,24 @@ f.pruefe(boden=GRAS,
          erwartet={"items": {"minecraft:white_wool": 2}})
 
 f = farm("honig")
-f.zeichen(N="bee_nest", D=("dispenser", "d"), O=("observer", "e"), Q=("observer", "w"), Y="poppy", X="bee")
+f.zeichen(N=("bee_nest", "n"), D=("dispenser", "w"), O=("observer", "e"), Q=("observer", "w"), Y="poppy",
+          X="bee")
 f.schritt("Ausheben: vor dem Nest ein Loch für einen Trichter, daneben eins für die Truhe.", {-1: "--"}, z0=-1)
 f.schritt("Trichter nach Osten in die Truhe.", {-1: ">C"}, z0=-1)
-f.schritt("Bienennest (Öffnung nach Norden, über den Trichter) hinter den Trichter. Links, rechts und hinten Blöcke – "
-          "nur vorne bleibt es frei: dort fallen die Waben heraus in den Trichter.", {
+f.schritt("Bienennest hinter den Trichter, die Öffnung zeigt zum Trichter (Norden). Links ein Block, hinten ein Block, "
+          "oben ein Block – rechts (Osten) ein Spender, der aufs Nest zeigt, Schere hinein.", {
     0: """
         ...
-        #N#
+        #ND
+        .#.
+    """,
+    1: """
+        ...
         .#.
     """}, x0=-1, z0=-1)
-f.schritt("Spender auf das Nest, der nach UNTEN zeigt, Schere hinein. Daneben zwei Beobachter, die sich anschauen "
-          "(Takt): der Spender versucht dauernd zu scheren – bei vollem Nest fallen 3 Waben heraus. Fehlversuche "
-          "kosten die Schere nichts.", {
-    1: "DOQ"})
+f.schritt("Hinter den Spender zwei Beobachter, die sich anschauen (Takt): der Spender versucht dauernd zu scheren – "
+          "bei vollem Nest fallen 3 Waben vorne heraus in den Trichter. Fehlversuche kosten die Schere nichts.", {
+    0: "OQ"}, x0=2)
 f.schritt("Blumen vor das Nest, Bienen ins Nest (Nest mit Behutsamkeit abbauen, dann sind sie drin).", {
     0: """
         Y.Y
@@ -392,7 +396,7 @@ f.schritt("Blumen vor das Nest, Bienen ins Nest (Nest mit Behutsamkeit abbauen, 
 f.pruefe(boden=GRAS, zeit="day",
          nachher=["kill @e[type=minecraft:bee,x={x},y={y},z={z},distance=..5]",
                   "setblock {x} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
-                  "item replace block {x} {y+1} {z} container.0 with minecraft:shears",
+                  "item replace block {x+1} {y} {z} container.0 with minecraft:shears",
                   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}",
                   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}",
                   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}"],
@@ -425,7 +429,7 @@ f.schritt("Kessel auf den Steinschneider und mit Lava füllen. Glaswände 2 hoch
     """}, x0=-1, z0=-1)
 f.schritt("Hühner auf den oberen Trichter: Ihre Eier fallen hinein, der Spender wirft sie auf den Steinschneider. "
           "Küken wachsen dort auf; erwachsene Hühner berühren mit dem Kopf die Lava im Kessel und werden gegart – "
-          "das Hühnchen fällt durch den Steinschneider in den Trichter.", {2: "XX"})
+          "das Hühnchen fällt durch den Steinschneider in den Trichter. Tipp: Eier in den Schacht werfen.", {2: "X"})
 f.pruefe(nachher=["kill @e[type=minecraft:chicken,x={x},y={y},z={z},distance=..6]"] +
          ["summon minecraft:chicken {x}.5 {y+2} {z}.5 {PersistenceRequired:1b,EggLayTime:200}"] * 4 +
          ["summon minecraft:chicken {x+2}.5 {y+1}.6 {z}.5 {PersistenceRequired:1b}"],
@@ -515,27 +519,31 @@ f.schritt("Wände 2 hoch um die Plattform (oben Glas). Wasser auf das Glas: es f
         G..G
         GGGG
     """}, x0=-1, z0=-4)
-f.schritt("Daneben (Osten) der Raum der Dorfbewohner: Boden auf Höhe 7, drei Betten, Wände 2 hoch (oben Glas).", {
-    7: """
-        #####
-        #####
-        #####
-        #####
-    """,
+f.schritt("Daneben (Osten) der Raum der Dorfbewohner: Boden auf Höhe 7, drei Betten, Wände 3 hoch (unten Stein, "
+          "darüber Glas) und ein Glasdach – sonst stellt das Spiel einen Dorfbewohner beim Aufwachen auch mal "
+          "neben das Bett auf die Wand.", {
+    7: "\n".join(["#####"] * 4),
     8: """
-        .###.#
+        ######
         #kkk#.#
-        #qqq##
-        .###..
+        #qqq##G
+        #####
     """,
     9: """
-        .GGG.G
+        GGGGGG
         G...t.G
         G...tG
-        .GGG..
-    """}, x0=3, z0=-4)
+        GGGGG
+    """,
+    10: """
+        GGGGG
+        G...D
+        G...D
+        GGGGG
+    """,
+    11: "\n".join(["GGGGG"] * 4)}, x0=3, z0=-4)
 f.schritt("Zombie-Zelle an der Ostseite: unten und oben eine Stufe (Schatten, sonst verbrennt er). Das Fenster zu "
-          "den Dorfbewohnern sind zwei Falltüren nebeneinander (durch Glas sehen sie nichts!); auf jede ein "
+          "den Dorfbewohnern sind zwei Falltüren nebeneinander (durch Glas sehen sie nichts!), darüber je ein "
           "Tageslichtsensor im Nacht-Modus (einmal anklicken): nachts klappen die Falltüren hoch, die Dorfbewohner "
           "sehen den Zombie nicht und können schlafen.", {
     7: """
@@ -545,8 +553,7 @@ f.schritt("Zombie-Zelle an der Ostseite: unten und oben eine Stufe (Schatten, so
     """,
     10: """
         ..
-        Ds
-        D.
+        .s
     """}, x0=7, z0=-4)
 f.schritt("Drei Dorfbewohner auf die Betten, einen Zombie (mit Namensschild!) in die Zelle.", {
     8: """
@@ -559,42 +566,36 @@ f.pruefe(boden=GRAS, zeit=12500,
          hoechstens={"wesen": {"minecraft:iron_golem": 1}})
 
 f = farm("xpspawner")
-f.zeichen(n="sign", Q="spawner")
+f.zeichen(n="sign", Q="spawner", H=("hopper", "s"))
 frei = ["-" * 9] * 9
-f.schritt("Den Raum um den Spawner freilegen: 9 × 9, von einer Ebene UNTER dem Spawner bis 1 darüber. Boden, Wände "
+f.schritt("Den Raum um den Spawner freilegen: 9 × 9, von zwei Ebenen UNTER dem Spawner bis 1 darüber. Boden, Wände "
           "und Decke bleiben aus Stein (unter der Erde sind sie schon da). Fackeln nur zum Bauen – später weg.", {
-    -1: "\n".join(frei),
+    -2: "\n".join(frei), -1: "\n".join(frei),
     0: "\n".join(frei[:4] + ["----.----"] + frei[5:]),
     1: "\n".join(frei)}, x0=-4, z0=-4)
-f.schritt("Vorne (Süden) eine Rinne eine Ebene tiefer über die ganze Breite, in der Mitte dahinter eine Tür "
-          "(2 hoch), eine Zelle und ein Spalt.", {
-    -2: "---------", }, x0=-4, z0=4)
-f.schritt("Tür, Zelle und Spalt ausgraben.", {-2: "-\n-\n-", -1: "-\n-"}, z0=5)
+f.schritt("Vorne (Süden) eine Rinne eine Ebene tiefer über die ganze Breite.", {-3: "---------"}, x0=-4, z0=4)
+f.schritt("Mitten dahinter Tür (2 hoch), Zelle, Spalt und dein Platz ausgraben, dazu eine Treppe für dich.", {
+    -4: ".\n.\n-\n-", -3: "-\n-\n-\n-", -2: "-\n-\n.\n-"}, z0=5)
 f.schritt("Rand der Wasserebenen: rundherum Stein, damit das Wasser bleibt (unter der Erde meist schon da).", {
-    -1: "\n".join(["#" * 11] + ["#.........#"] * 9 + ["#####.#####"]),
-    }, x0=-5, z0=-5)
-f.schritt("Rand der Rinne.", {-2: "#.........#\n#####.#####"}, x0=-5, z0=4)
-f.schritt("Zelle: Wände, Decke, unten ein Schild (hält das Wasser auf), vorne oben ein Block – unten bleibt ein "
-          "Spalt.", {
-    -3: "###\n###",
-    -2: "#n#\n...",
-    -1: "#.#\n.#.",
-    0: "###"}, x0=-1, z0=6)
-f.schritt("Davor ein Loch, 1 tiefer als die Rinne: Hier stehst du und triffst durch den Spalt die Beine der Mobs. "
-          "Sie sehen dich nicht und kommen nicht heraus.", {
-    -4: ".#.",
-    -3: "#-#",
-    -2: "#-#"}, x0=-1, z0=8)
+    -2: "\n".join(["#" * 11] + ["#.........#"] * 9 + ["#####.#####"])}, x0=-5, z0=-5)
+f.schritt("Rand der Rinne.", {-3: "#.........#\n#####.#####"}, x0=-5, z0=4)
+f.schritt("Zelle: unter dem Boden ein Trichter, der nach Süden in eine Truhe unter dem Spalt zeigt. Auf den Trichter "
+          "ein Schild (hält das Wasser auf), Wände und Decke, vorne über dem Spalt ein Block.", {
+    -4: ".H.\n.C.",
+    -3: "#n#\n#.#",
+    -2: "#.#\n.#.",
+    -1: "###"}, x0=-1, z0=6)
 f.schritt("Wasser: an der Nordwand eine Reihe Quellen – es fließt genau 7 Blöcke bis zur Kante der Rinne und schiebt "
-          "alles hinein. In die beiden Enden der Rinne je eine Quelle, sie schieben zur Tür. Die Mobs spawnen über "
-          "dem Wasser (im Wasser selbst spawnt in 26.3 nichts) und fallen hinein.", {
-    -1: "\n".join(["WWWWWWWWW"] + ["FFFFFFFFF"] * 7)}, x0=-4, z0=-4)
-f.schritt("Quellen an beide Enden der Rinne.", {-2: "WFFFFFFFW"}, x0=-4, z0=4)
-f.schritt("Hier stehen (höchstens 16 Blöcke vom Spawner, sonst spawnt nichts).", {-3: "P"}, z0=8)
+          "alles hinein. Die Mobs spawnen über dem Wasser (im Wasser selbst spawnt in 26.3 nichts), fallen hinein und "
+          "schwimmen unter dem Spawner durch.", {
+    -2: "\n".join(["WWWWWWWWW"] + ["FFFFFFFFF"] * 7)}, x0=-4, z0=-4)
+f.schritt("Quellen an beide Enden der Rinne – sie schieben zur Tür.", {-3: "WFFFFFFFW"}, x0=-4, z0=4)
+f.schritt("Hier stehst du (eine Ebene tiefer als die Mobs) und triffst durch den Spalt ihre Beine; die Beute fällt in "
+          "die Truhe neben dir. Höchstens 16 Blöcke vom Spawner, sonst spawnt nichts.", {-4: "P"}, z0=8)
 f.schritt("Spawner (ist schon da).", {0: "Q"})
 f.pruefe(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=4,
          nachher=['setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:"minecraft:zombie"}}}'],
-         bereich=[-1, -2, 6, 1, 0, 6],
+         bereich=[-1, -3, 6, 1, -1, 6],
          erwartet={"wesen": {"minecraft:zombie": 2}})
 
 # ===================================================================== Mobs
@@ -608,30 +609,50 @@ f.zeichen(a=("wall_sign", "e"), b=("wall_sign", "w"))
 
 
 def kanal_raum(f, n, text_raum):
-    """Dunkler Raum n × n (2 hoch) mit 2 breiten Wasserkanälen eine Ebene tiefer in Kreuzform zum Loch in der Mitte.
-    Im Wasser spawnt nichts – darum liegen die Kanäle tiefer als der Spawnboden."""
+    """Dunkler Raum n × n (2 hoch) mit 2 breiten Kanälen in Kreuzform zum Loch in der Mitte. Im Wasser spawnt nichts,
+    und von selbst laufen Monster nicht ins Wasser: Die Kanäle sind 2 tief, unten fließt Wasser, oben liegen offene
+    Falltüren – die hält die Wegfindung für Boden, die Monster laufen drauf und fallen hinein. Das Loch ist trocken
+    (Falltüren auf Wasserhöhe halten das Wasser), so fallen auch Mobs hinein, die oben schwimmen."""
     m = n // 2 - 1                                   # Loch bei m, m+1
+    f.zeichen(N=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
+              S=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
+              E=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
+              V=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}))
     f.schritt(text_raum, {0: "\n".join(["-" * n] * n), 1: "\n".join(["-" * n] * n)})
-    kreuz = {(x, z): "-" for x in range(n) for z in range(n) if x in (m, m + 1) or z in (m, m + 1)}
-    f.schritt("Kanäle in Kreuzform eine Ebene tiefer ausheben (2 breit, von jeder Wand bis zur Mitte).", {
-        -1: raster_aus(kreuz, 0, 0, n - 1, n - 1)})
-    f.schritt("In der Mitte ein Loch 2 × 2, 24 Blöcke unter den Kanälen.", {
-        y: "--\n--" for y in range(-25, -1)}, x0=m, z0=m)
-    f.schritt("Unten 4 Trichter unter den Schacht, sie führen in eine Truhe. Daneben Platz für dich.", {
-        -26: ".>v..\n.>>>C",
-        -25: "....-\n....-",
-        -24: "....-"}, x0=m - 1, z0=m)
-    f.schritt("Unter das Loch 4 Schilder an die Schachtwände: Sie halten das Wasser, Monster fallen durch.", {
-        -2: "ab\nab"}, x0=m, z0=m)
-    wasser = {}
-    for x in range(n):
-        for z in range(n):
-            if (x, z) in kreuz:
-                rand = x in (0, n - 1) or z in (0, n - 1)
-                wasser[(x, z)] = "W" if rand else "F"
-    f.schritt("Wasserquellen an die vier Kanal-Enden an den Wänden: Das Wasser fließt bis über das Loch.", {
-        -1: raster_aus(wasser, 0, 0, n - 1, n - 1)})
-    f.schritt("Hier unten warten (mindestens 24 Blöcke vom Raumboden, höchstens 32).", {-25: "P"}, x0=m + 3, z0=m)
+    f.schritt("In der Mitte ein Loch 2 × 2 ausheben: 2 tief für die Mitte, darunter der Schacht – zusammen 28 tief.", {
+        y: "--\n--" for y in range(-28, 0)}, x0=m, z0=m)
+    f.schritt("Gleich jetzt (solange die Kanäle noch nicht gegraben sind, kannst du sie an die Wände klicken): Ins Loch "
+              "auf der zweiten Ebene 4 offene Falltüren, Klappe jeweils zur Mitte. Sie halten später das Wasser auf, "
+              "aber alles, was das Wasser hineinschiebt, fällt trocken in den Schacht – auch Mobs, die oben "
+              "schwimmen.", {-2: "NN\nSS"}, x0=m, z0=m)
+    kreuz = {(x, z): "-" for x in range(n) for z in range(n) if (x in (m, m + 1) or z in (m, m + 1))
+             and not (m <= x <= m + 1 and m <= z <= m + 1)}
+    f.schritt("Kanäle in Kreuzform 2 tief ausheben (2 breit, von jeder Wand bis zum Loch).", {
+        -1: raster_aus(kreuz, 0, 0, n - 1, n - 1), -2: raster_aus(kreuz, 0, 0, n - 1, n - 1)})
+    f.schritt("Unten 4 Trichter unter den Schacht, sie führen in eine Truhe. Daneben dein Platz – grab dir eine Treppe "
+              "hinunter.", {
+        -29: ".>v..\n.>>>C",
+        -28: "....-\n....-",
+        -27: "....-"}, x0=m - 1, z0=m)
+    wasser = {(x, z): ("W" if x in (0, n - 1) or z in (0, n - 1) else "F") for (x, z) in kreuz}
+    f.schritt("Wasserquellen unten in die vier Kanal-Enden an den Wänden: Das Wasser fließt bis zu den Falltüren im "
+              "Loch.", {-2: raster_aus(wasser, 0, 0, n - 1, n - 1)})
+    deckel = {}
+    for (x, z) in kreuz:
+        if wasser[(x, z)] == "W":
+            deckel[(x, z)] = "#"                     # über den Quellen: dort hinge ein Mob im stehenden Wasser
+        elif x == m:
+            deckel[(x, z)] = "E"
+        elif x == m + 1:
+            deckel[(x, z)] = "V"
+        elif z == m:
+            deckel[(x, z)] = "S"
+        else:
+            deckel[(x, z)] = "N"
+    f.schritt("Über die Quellen an den Wänden einen Block, in jedes andere Kanalfeld auf Bodenhöhe eine offene Falltür "
+              "mit der Klappe an der Kanalwand. Monster halten sie für Boden, laufen drauf und fallen ins Wasser.", {
+        -1: raster_aus(deckel, 0, 0, n - 1, n - 1)})
+    f.schritt("Hier unten warten (mindestens 24 Blöcke vom Raumboden, höchstens 32).", {-28: "P"}, x0=m + 3, z0=m)
     return m
 
 
@@ -653,36 +674,44 @@ f.pruefe(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=3, zeit="
 
 
 f = farm("gold")
-f.zeichen(N="netherrack", E="turtle_egg", O=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}))
-f.schritt("Plattform 9 × 9 aus Netherrack (am besten auf dem Netherdach in einem Nether-Ödland). Beim Feld links "
-          "von der Mitte bleibt ein Loch.", {
-    -1: "\n".join(["N" * 9] * 4 + ["NNN.NNNNN"] + ["N" * 9] * 4)})
+f.zeichen(N="netherrack", E="turtle_egg", O=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}))
+f.schritt("Unten (z. B. auf dem Netherdach im Nether-Ödland) ein Trichter in eine Truhe mit Glas darüber, ein Ring "
+          "aus Blöcken um den Trichter, daneben dein Platz.", {
+    0: ".>C#", 1: "...", }, x0=2, z0=4)
+f.schritt("Ring um die Landestelle.", {1: ".#.\n#.G\n.#."}, x0=2, z0=3)
+f.schritt("25 Blöcke höher eine Plattform 9 × 9 aus Netherrack (mit einer Gerüst-Säule hochbauen). Genau über dem "
+          "Trichter bleibt ein Loch.", {
+    25: "\n".join(["N" * 9] * 4 + ["NNN.NNNNN"] + ["N" * 9] * 4)})
 f.schritt("In die Mitte ein Schildkrötenei, an drei Seiten Glas 2 hoch – nur von Westen über das Loch kommt man hin. "
-          "Ins Loch eine offene Falltür: Zombifizierte Piglins halten sie für Boden, laufen zum Ei und fallen.", {
-    -1: "...\nO..", 0: ".G\n.EG\n.G", 1: ".G\n..G\n.G"}, x0=3, z0=3)
-f.schritt("24 Blöcke unter dem Loch ein Trichter (der Fall tötet sie), daneben eine Truhe mit Glas darüber, "
-          "Blöcke um den Trichter. Dein Warteplatz daneben.", {
-    -25: ".>C#"}, x0=2, z0=4)
-f.schritt("Ring um die Landestelle.", {-24: ".#.\n#.G\n.#."}, x0=2, z0=3)
-f.schritt("Hier warten (24 Blöcke unter der Plattform – näher spawnt nichts, weiter weg laufen sie nicht herum).",
-          {-24: "P"}, x0=5, z0=4)
-f.pruefe(dimension="the_nether", hoehe=160, biom="minecraft:nether_wastes", zeit="day",
+          "Ins Loch eine offene Falltür (Klappe nach Westen): Zombifizierte Piglins halten sie für Boden, laufen zum Ei "
+          "und fallen 25 Blöcke – tot.", {
+    25: "...\nO..", 26: ".G\n.EG\n.G", 27: ".G\n..G\n.G"}, x0=3, z0=3)
+f.schritt("Hier warten (25 Blöcke unter der Plattform: näher spawnt nichts, weiter weg laufen sie nicht herum).",
+          {1: "P"}, x0=5, z0=4)
+f.pruefe(dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit="day",
          erwartet={"items": {"minecraft:gold_nugget": 1}})
 
 f = farm("enderman")
 f.zeichen(N="end_stone", Y="rail", M="minecart", X="endermite",
-          O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}))
+          a=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
+          b=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
+          c=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
+          d=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}))
 f.schritt("Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein. In der Mitte bleibt "
           "ein Block stehen, rundherum ein Ring aus 8 Löchern.", {
     -1: "\n".join(["N" * 9] * 3 + ["NNN...NNN", "NNN.N.NNN", "NNN...NNN"] + ["N" * 9] * 3)})
-f.schritt("In jedes Loch eine offene Falltür – Endermen halten sie für Boden. Auf den Mittelblock eine Schiene.", {
-    -1: "OOO\nO.O\nOOO", 0: "...\n.Y."}, x0=3, z0=3)
+f.schritt("In jedes Loch eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock) – Endermen halten "
+          "sie für Boden. Auf den Mittelblock eine Schiene.", {
+    -1: "aaa\nc.d\nbbb", 0: "...\n.Y."}, x0=3, z0=3)
 f.schritt("Lore auf die Schiene, eine Endermilbe mit Namensschild hinein. Endermen wollen zu ihr und fallen.", {
     0: "M"}, x0=4, z0=4)
 f.schritt("Endermilbe in die Lore.", {0: "X"}, x0=4, z0=4)
-f.schritt("44 Blöcke unter der Plattform ein Boden 3 × 3: Der Fall tötet die Endermen. Du stehst in der Mitte (dort "
-          "fällt keiner hin) und sammelst die Perlen automatisch ein. Für XP: 42 Blöcke tief und selbst zuschlagen.", {
+f.schritt("44 Blöcke unter der Plattform ein Boden 3 × 3 mit einem Rand: Der Fall tötet die Endermen. Du stehst "
+          "in der Mitte (dort fällt keiner hin) und sammelst die Perlen automatisch ein. Bau dir eine Treppe oder "
+          "Leiter hinunter.", {
     -45: "###\n###\n###"}, x0=3, z0=3)
+f.schritt("Rand um den Boden (die Perlen rollen sonst herunter).", {
+    -44: ".###.\n#...#\n#...#\n#...#\n.###."}, x0=2, z0=2)
 f.schritt("Hier stehen.", {-44: "P"}, x0=4, z0=4)
 f.pruefe(dimension="the_end", zeit="day",
          nachher=["kill @e[type=minecraft:endermite,x={x},y={y},z={z},distance=..8]",
@@ -692,82 +721,85 @@ f.pruefe(dimension="the_end", zeit="day",
          erwartet={"inventar": {"minecraft:ender_pearl": 1}})
 
 f = farm("hexe")
-f.zeichen(a=("wall_sign", "e"))
-f.schritt("Hexenhütte abbauen. Ihre Grundfläche ist die Spawn-Box (7 × 9). Stell dich zum Bauen in die Mitte der "
-          "früheren Hütte – der Plan legt sich an die Box.", {
+f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
+          U=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}))
+f.schritt("Hexenhütte abbauen; ihre Grundfläche ist die Spawn-Box (7 × 9). Zum Start des Plans stehst du mit den "
+          "Füßen eine Ebene UNTER dem alten Hüttenboden (y 0 hier). Verschiebe den Plan mit den Pfeilen im Plan-Menü, "
+          "bis er genau unter der früheren Hütte liegt.", {
     0: "\n".join(["-" * 7] * 9), 1: "\n".join(["-" * 7] * 9)})
-f.schritt("Boden 7 × 9 (eine Ebene unter dem früheren Hüttenboden, genau unter der Box) und ein Rand außen herum. "
-          "Hinten in der Mitte ein Loch mit einem Schild darin.", {
-    -1: "\n".join(["#" * 7] * 8 + ["###.###"])})
-f.schritt("Rand.", {0: "\n".join(["#########"] + ["#.......#"] * 9 + ["#########"])}, x0=-1, z0=-1)
-f.schritt("Schild ins Loch (hält das Wasser).", {-1: "a"}, x0=3, z0=8)
-f.schritt("Wasser: an der Vorderseite eine Reihe Quellen, hinten in den Ecken je eine – alles fließt zum Loch.", {
-    0: "\n".join(["WWWWWWW"] + ["FFFFFFF"] * 7 + ["WFFFFFW"])})
-f.schritt("Schacht 29 Blöcke tief (Hexen haben 26 Leben), unten Trichter in eine Truhe. Dein Warteplatz daneben.", {
-    **{y: "-" for y in range(-29, -1)}}, x0=3, z0=8)
-f.schritt("Unten Trichter und Truhe.", {-30: ">C", -29: ".--", -28: "..-"}, x0=3, z0=8)
-f.schritt("Hier warten.", {-29: "P"}, x0=5, z0=8)
+f.schritt("Schacht zuerst: In der Mitte der hinteren Kante 33 Blöcke tief graben, unten Trichter in eine Truhe und "
+          "dein Platz (Treppe hinunter graben).", {
+    **{y: "-" for y in range(-33, 0)}}, x0=3, z0=8)
+f.schritt("Unten Trichter und Truhe.", {-34: ">C", -33: ".--", -32: "..-"}, x0=3, z0=8)
+f.schritt("Boden 7 × 9 eine Ebene unter deinen Füßen (genau unter der Box) – trocken, hier spawnen die Hexen. In "
+          "der Mitte läuft von vorne bis zum Schacht ein Kanal, 2 tief.", {
+    -1: "\n".join(["###-###"] * 8 + ["###.###"]),
+    -2: "\n".join(["...-..."] * 8)})
+f.schritt("Ins Schachtloch auf Kanalhöhe eine offene Falltür (Klappe nach hinten): Sie hält das Wasser, die Hexen "
+          "fallen trocken in den Schacht.", {-2: "U"}, x0=3, z0=8)
+f.schritt("Wasserquelle vorne in den Kanal – sie fließt genau 7 Blöcke bis zur Falltür.", {
+    -2: "\n".join(["W"] + ["F"] * 7)}, x0=3)
+f.schritt("Über die Quelle einen Block, über den Kanal offene Falltüren (Klappe an der Kanalwand): Hexen halten sie "
+          "für Boden, laufen drauf und fallen hinein.", {-1: "\n".join(["#"] + ["O"] * 7 + ["O"])}, x0=3)
+f.schritt("Rand rundherum (Hexen sollen nicht herunterfallen), ein Dach (dunkel, sonst spawnen sie nur nachts) "
+          "ist optional.", {0: "\n".join(["#########"] + ["#.......#"] * 9 + ["#########"])}, x0=-1, z0=-1)
+f.schritt("Hier warten.", {-33: "P"}, x0=5, z0=8)
 f.pruefe(zeit="night", welt="struktur",
          bauwerk={"id": "minecraft:swamp_hut", "anker": [3, 3, 4], "suchen": True, "hoehe": 64},
          erwartet={})
 
 f = farm("ertrunkene")
 f.zeichen(a=("wall_sign", "e"), b=("wall_sign", "w"), H=("hopper", "d"))
-f.schritt("Im Flussbiom ein Becken 6 × 6 bauen: Boden und Wände 2 hoch. In der Mitte des Bodens ein Loch 2 × 2.", {
-    -1: "\n".join(["########"] * 3 + ["###..###"] * 2 + ["########"] * 3),
-    0: "\n".join(["########"] + ["#......#"] * 6 + ["########"]),
-    1: "\n".join(["########"] + ["#......#"] * 6 + ["########"])}, x0=-1, z0=-1)
-f.schritt("Vier Schilder ins Loch (halten das Wasser, Ertrunkene fallen durch).", {-1: "ab\nab"}, x0=2, z0=2)
-f.schritt("Becken mit Wasser füllen (2 hoch).", {
-    0: "\n".join(["WWWWWW"] * 6), 1: "\n".join(["WWWWWW"] * 6)})
-f.schritt("Deckel drauf – innen muss es stockdunkel sein, sonst spawnt nichts.", {
-    2: "\n".join(["########"] * 8)}, x0=-1, z0=-1)
-f.schritt("Schacht 22 Blöcke tief: Ertrunkene kommen mit 1 Leben unten an.", {
-    y: "--\n--" for y in range(-22, -1)}, x0=2, z0=2)
-f.schritt("Unten 4 Trichter, die über einen Trichter unter dem Spalt in eine Truhe führen. Auf der Truhe stehst du "
-          "(eine Ebene tiefer als die Landestelle); der Block über dem Spalt schützt dich – du triffst ihre Beine, "
-          "sie dich nicht.", {
+f.schritt("Im Flussbiom zuerst den Schacht: 2 × 2, 22 Blöcke tief, unten 4 Trichter, die über einen Trichter unter "
+          "einem Spalt in eine Truhe führen. Auf der Truhe stehst du (eine Ebene tiefer als die Landestelle); der Block "
+          "über dem Spalt schützt dich – du triffst ihre Beine, sie dich nicht. Treppe hinunter graben.", {
+    **{y: "--\n--" for y in range(-22, 0)}}, x0=2, z0=2)
+f.schritt("Unten Trichter, Truhe und dein Platz.", {
     -24: "...>C",
     -23: ".>>H-\n.^^..",
     -22: "...--"}, x0=1, z0=2)
+f.schritt("Becken 6 × 6: Boden mit dem Loch in der Mitte, Wände 3 hoch.", {
+    -1: "\n".join(["########"] * 3 + ["###..###"] * 2 + ["########"] * 3),
+    0: "\n".join(["########"] + ["#......#"] * 6 + ["########"]),
+    1: "\n".join(["########"] + ["#......#"] * 6 + ["########"]),
+    2: "\n".join(["########"] + ["#......#"] * 6 + ["########"])}, x0=-1, z0=-1)
+f.schritt("Vier Schilder ins Loch (halten das Wasser, Ertrunkene sinken durch).", {-1: "ab\nab"}, x0=2, z0=2)
+f.schritt("Becken 2 hoch mit Wasser füllen – darüber bleibt eine Ebene Luft (sie brauchen Platz zum Spawnen).", {
+    0: "\n".join(["WWWWWW"] * 6), 1: "\n".join(["WWWWWW"] * 6)})
+f.schritt("Deckel drauf – innen muss es stockdunkel sein, sonst spawnt nichts.", {
+    3: "\n".join(["########"] * 8)}, x0=-1, z0=-1)
 f.schritt("Hier stehen und zuschlagen (Dreizacke gibt es nur, wenn du triffst).", {-23: "P"}, x0=5, z0=2)
 f.pruefe(biom="minecraft:river", boden=GRAS, zeit="day", bereich=[2, -22, 2, 3, -20, 3],
          erwartet={"wesen": {"minecraft:drowned": 1}})
 
 f = farm("aussenposten")
-f.zeichen(K="campfire", O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
-          S=("oak_trapdoor", {"half": "bottom", "f": "n"}))
-gruben = {}
-for gx, gz in ((0, -9), (0, 9), (-9, 0), (9, 0)):
-    gruben[(gx, gz)] = True
-f.schritt("Um den Turm herum 4 Gruben (je 9 Blöcke von der Mitte): 3 tief ausheben, daneben Platz für eine Truhe.", {
-    -3: raster_aus({(x + d, z): "-" for x, z in gruben for d in (0, 1)}, -9, -9, 10, 9),
-    -2: raster_aus({(x + d, z): "-" for x, z in gruben for d in (0, 1)}, -9, -9, 10, 9),
-    -1: raster_aus({(x + d, z): "-" for x, z in gruben for d in (0, 1)}, -9, -9, 10, 9)}, x0=-9, z0=-9)
-f.schritt("Unten in jede Grube einen Trichter nach Osten in eine Truhe, auf den Trichter ein Lagerfeuer, oben "
-          "eine offene Falltür. Plünderer halten sie für Boden, fallen hinein und verbrennen.", {
-    -3: raster_aus({**{(x, z): ">" for x, z in gruben}, **{(x + 1, z): "C" for x, z in gruben}}, -9, -9, 10, 9),
-    -2: raster_aus({(x, z): "K" for x, z in gruben}, -9, -9, 10, 9),
-    -1: raster_aus({**{(x, z): "O" for x, z in gruben}, **{(x + 1, z): "S" for x, z in gruben}}, -9, -9, 10, 9)},
-    x0=-9, z0=-9)
-f.schritt("Vom Turm aus eine Säule hoch bauen und oben warten: 28 Blöcke über dem Boden (näher spawnt nichts, "
-          "weiter weg laufen sie nicht herum).", {27: "G", 28: "P"})
+f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}))
+ring = "---\n-.-\n---"
+f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum 8 Gruben ausheben, "
+          "2 tief – der Block in der Mitte bleibt.", {-1: ring, -2: ring}, x0=-1, z0=-1)
+f.schritt("In jede Grube oben eine offene Falltür: Plünderer halten sie für Boden.", {
+    -1: "OOO\nO.O\nOOO"}, x0=-1, z0=-1)
+f.schritt("Auf den mittleren Block eine Säule 27 hoch (z. B. Erde, oben Glas) – oben wartest du. Plünderer sehen "
+          "dich, wollen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu runter und sie "
+          "erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen.", {
+    **{y: "#" for y in range(0, 27)}, 27: "G"})
+f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
-         bauwerk={"id": "minecraft:pillager_outpost", "anker": [0, 10, 0], "suchen": True, "hoehe": 72},
-         erwartet={"items": {"minecraft:arrow": 1}})
+         bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72},
+         bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 1}})
 
 f = farm("lohe")
-f.zeichen(Q="spawner")
-f.schritt("Den Raum um den Lohen-Spawner freilegen: 9 × 9, vom Boden unter dem Spawner bis 2 darüber. Wände, Boden "
-          "und Decke bleiben (oder aus Netherziegeln ergänzen) – so fliegen die Lohen nicht weg.", {
+f.zeichen(Q="spawner", N="nether_bricks")
+f.schritt("Den Raum um den Lohen-Spawner freilegen: 9 × 9, vom Boden unter dem Spawner bis 2 darüber.", {
     **{y: "\n".join(["---------"] * 4 + ["----.----"] + ["---------"] * 4) if y == 0 else
        "\n".join(["---------"] * 9) for y in range(-1, 3)}}, x0=-4, z0=-4)
-f.schritt("Rand rundherum.", {y: "\n".join(["###########"] + ["#.........#"] * 9 + ["###########"])
-                            for y in range(-1, 3)}, x0=-5, z0=-5)
-f.schritt("Spawner (ist schon da). Stell dich in eine Ecke, Trank der Feuerresistenz trinken, mit Schwert "
-          "(Plünderung) zuschlagen – Lohenruten gibt es nur, wenn du triffst.", {0: "Q"})
+f.schritt("Rundherum Wände aus Netherziegeln, 4 hoch (vieles steht in der Festung schon). Wo kein Boden oder keine "
+          "Decke ist, dort auch zumachen – sonst fliegen die Lohen weg.", {
+    **{y: "\n".join(["NNNNNNNNNNN"] + ["N.........N"] * 9 + ["NNNNNNNNNNN"]) for y in range(-1, 3)}}, x0=-5, z0=-5)
+f.schritt("Spawner (ist schon da). Ein Block der Wand bleibt als Tür; Trank der Feuerresistenz trinken, hinein, mit "
+          "dem Schwert (Plünderung) zuschlagen – Lohenruten gibt es nur, wenn du triffst.", {0: "Q"})
 f.schritt("Hier stehen.", {-1: "P"}, x0=-4, z0=-4)
-f.pruefe(boden="minecraft:nether_bricks", fuellung="minecraft:nether_bricks", erde_bis=4,
+f.pruefe(boden="minecraft:nether_bricks", fuellung="minecraft:nether_bricks", erde_bis=5,
          nachher=['setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:"minecraft:blaze"}}}'],
          erwartet={"wesen": {"minecraft:blaze": 2}})
 
@@ -778,41 +810,46 @@ f.schritt("In der Netherfestung eine Fläche 9 × 9 aus Netherziegeln (Boden), d
     -1: "\n".join(["N" * 9] * 9), 0: "\n".join(["-" * 9] * 9), 1: "\n".join(["-" * 9] * 9),
     2: "\n".join(["-" * 9] * 9)})
 f.schritt("24–32 Blöcke weg warten (näher spawnt nichts), ab und zu hingehen und mit Plünderung III kämpfen.", {
-    0: "P"}, x0=4, z0=-22)
+    0: "P"}, x0=4, z0=-24)
 f.pruefe(dimension="the_nether", zeit="day", welt="struktur",
          bauwerk={"id": "minecraft:fortress", "anker": [4, 1, 4], "suchen": True, "hoehe": 64},
          erwartet={"wesen": {"minecraft:wither_skeleton": 1}})
 
 f = farm("schleim")
-f.schritt("Einen Schleim-Chunk finden (Chunkbase oder Schleime unter Y 40). Den ganzen Chunk (16 × 16) unter Höhe 40 "
-          "3 Blöcke hoch ausgraben – Licht ist egal.", {y: "\n".join(["-" * 16] * 16) for y in range(0, 3)})
-f.schritt("24–32 Blöcke weg warten (z. B. darüber), dann runter und die Schleime erschlagen.", {25: "P"}, x0=8, z0=8)
+f.schritt("Einen Schleim-Chunk finden (Chunkbase oder Schleime unter Y 40). Chunk-Grenzen mit F3+G anzeigen und den "
+          "Plan mit den Pfeilen im Plan-Menü genau auf den Chunk schieben. Den ganzen Chunk (16 × 16) unter Höhe 40 "
+          "3 Blöcke hoch ausgraben und mit Fackeln hell machen: Schleime stört das Licht nicht, andere Monster schon.",
+          {y: "\n".join(["-" * 16] * 16) for y in range(0, 3)})
+f.schritt("24–32 Blöcke weg warten (z. B. 25 Blöcke darüber in einer kleinen Höhle), dann runter und die Schleime "
+          "erschlagen.", {25: "P"}, x0=8, z0=8)
 f.pruefe(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=4, ursprung=[6400, 4016],
          erwartet={"wesen": {"minecraft:slime": 1}})
 
 f = farm("ueberfall")
 f.zeichen(k=("white_bed", {"part": "head", "f": "n"}), q=("white_bed", {"part": "foot", "f": "n"}), V="villager")
-f.schritt("Weit weg von Dörfern: ein Bett in eine kleine Glaszelle – mit einem Dorfbewohner darin ist hier ein "
-          "„Dorf“. Wände 2 hoch, Deckel drauf.", {
-    0: ".G.\nGkG\nGqG\n.G.", 1: ".G.\nG.G\nG.G\n.G.", 2: "...\n.G.\n.G."}, x0=-1, z0=-2)
+f.schritt("Weit weg von Dörfern: ein Bett in eine kleine Glaszelle, Wände 3 hoch (auf dem Bett braucht ein "
+          "Dorfbewohner 2,5 Blöcke). Mit einem Dorfbewohner darin ist hier ein „Dorf“.", {
+    0: ".G.\nGkG\nGqG\n.G.", 1: ".G.\nG.G\nG.G\n.G.", 2: ".G.\nG.G\nG.G\n.G."}, x0=-1, z0=-2)
+f.schritt("Dorfbewohner ins Bett bringen, dann das Dach drauf.", {0: "V"}, z0=0)
+f.schritt("Dach.", {3: ".G.\nGGG\nGGG\n.G."}, x0=-1, z0=-2)
 f.schritt("Turm daneben: 5 Blöcke hoch, oben eine Plattform 3 × 3 mit Rand – von hier schießt du mit Armbrust "
-          "oder Bogen, die Plünderer kommen nicht hinauf.", {
+          "oder Bogen, die Plünderer kommen nicht hinauf. Unheilvolle Flasche trinken, herkommen – nach 30 s beginnt "
+          "der Überfall.", {
     **{y: "#" for y in range(0, 5)},
     5: "###\n###\n###", 6: "#.#\n...\n#.#"}, x0=3, z0=0)
-f.schritt("Dorfbewohner ins Bett bringen. Unheilvolle Flasche trinken, herkommen – nach 30 s beginnt der Überfall.", {
-    0: "V"}, z0=0)
 f.schritt("Hier stehen.", {6: "P"}, x0=4, z0=1)
 
 f = farm("waechter")
 f.schritt("Über dem Ozeanmonument an der Wasseroberfläche eine kleine Plattform 3 × 3 bauen (auf Säulen vom "
-          "Monument-Dach oder schwimmend). Wächter kommen zu dir hoch – mit Dreizack oder Schwert zuschlagen.", {
+          "Monument-Dach oder schwimmend). Wächter kommen zu dir hoch – mit Dreizack (Durchbohren) oder Bogen "
+          "treffen; hinter einem Block vor ihren Lasern in Deckung gehen.", {
     -1: "###\n#.#\n###"}, x0=-1, z0=-1)
-f.schritt("Hier stehen – in der Mitte ist ein Loch ins Wasser, durch das du nach unten schlägst.", {0: "P"}, x0=1)
+f.schritt("Hier stehen.", {0: "P"}, x0=1)
 
 # ===================================================================== Handel
 f = farm("handel")
 f.zeichen(T="fletching_table", V="villager")
-f.schritt("Hinten 4 Arbeitsblöcke (z. B. Bognertische) mit Lücken dazwischen, Trennblöcke 2 hoch.", {
+f.schritt("Hinten 4 Arbeitsblöcke (z. B. Bognertische) mit Lücken dazwischen, Trennblöcke 3 hoch.", {
     0: """
         .T.T.T.T.
         #.#.#.#.#
@@ -820,11 +857,23 @@ f.schritt("Hinten 4 Arbeitsblöcke (z. B. Bognertische) mit Lücken dazwischen, 
     1: """
         .........
         #.#.#.#.#
+    """,
+    2: """
+        .........
+        #.#.#.#.#
     """}, x0=-1, z0=-1)
-f.schritt("Auf die Arbeitsblöcke je einen Block, vorne eine Reihe Blöcke auf Kopfhöhe – unten bleibt eine Lücke zum "
-          "Handeln (der Dorfbewohner passt nicht durch).", {
+f.schritt("Auf die Arbeitsblöcke je einen Block. Vorne unten und auf Höhe 2 eine Reihe Blöcke – dazwischen bleibt "
+          "das Fenster zum Handeln (der Dorfbewohner passt nicht durch).", {
+    0: """
+        .........
+        .........
+        #########
+    """,
     1: """
         .#.#.#.#.
+    """,
+    2: """
+        .........
         .........
         #########
     """}, x0=-1, z0=-1)
@@ -869,33 +918,29 @@ f.pruefe(boden=GRAS, erwartet={"bloecke": {"minecraft:lava_cauldron": 1}})
 
 f = farm("schnee")
 f.zeichen(X="snow_golem")
-f.schritt("Kammer aus Glas um einen Platz: hinten und seitlich 2 hoch, vorne nur oben (unten bleibt die Lücke zum "
-          "Abbauen), Glasdach (Regen schadet dem Golem).", {
+f.schritt("Kammer aus Glas um einen Platz: hinten und seitlich 2 hoch, vorne bleibt unten eine Lücke.", {
     0: """
         .G.
         G.G
-        ...
     """,
     1: """
         .G.
         G.G
-    """,
-    2: """
-        ...
-        .G.
-        .G.
     """}, x0=-1, z0=-1)
-f.schritt("Vorne ein Glas oben unter das Dach hängen – unten bleibt die Lücke.", {1: "G"}, z0=1)
-f.schritt("Schneegolem hinein bauen (2 Schneeblöcke + geschnitzter Kürbis). Unter ihm bildet sich Schnee – durch die "
-          "Lücke mit der Schaufel abbauen, er kommt sofort neu.", {0: "X"})
+f.schritt("Schneegolem hinein bauen (2 Schneeblöcke + geschnitzter Kürbis).", {0: "X"})
+f.schritt("Dach aus Glas (Regen schadet dem Golem), vorne oben ein Glas unters Dach – unten bleibt die Lücke, durch "
+          "die du mit der Schaufel die Schneedecke abbaust; sie bildet sich sofort neu.", {
+    2: ".\n.\nG\nG", 1: ".\n.\n.\nG"}, z0=-2)
+f.schritt("Dach hinten.", {2: "G"}, z0=-1)
 f.pruefe(boden=GRAS, biom="minecraft:snowy_plains", erwartet={"bloecke": {"minecraft:snow": 1}})
 
 f = farm("angeln")
 f.schritt("Becken 5 × 5 und 2 tief ausheben.", {
     -2: "\n".join(["-----"] * 5),
     -1: "\n".join(["-----"] * 5)})
-f.schritt("Mit Wasser füllen (Tipp: Ecken und Mitte füllen, der Rest wird von selbst zu Quellen). Darüber 2 Blöcke "
-          "frei lassen – so zählt es als „offenes Wasser“ und du angelst auch Schätze.", {
+f.schritt("Mit Wasserquellen füllen (Tipp: im Schachbrettmuster füllen, die Lücken werden von selbst zu Quellen – "
+          "fließendes Wasser zählt nicht). Darüber 2 Blöcke frei lassen – so ist es „offenes Wasser“ und du angelst "
+          "auch Schätze.", {
     -2: "\n".join(["WWWWW"] * 5),
     -1: "\n".join(["WWWWW"] * 5)})
 f.schritt("Davor stehen und in die Mitte angeln.", {0: "P"}, x0=2, z0=5)
@@ -912,6 +957,35 @@ f.pruefe(nachher=["data merge block {x} {y+1} {z} {disabled_slots:[I;1,2,4,5,6,7
                   "item replace block {x} {y+2} {z} container.0 with minecraft:bamboo 64",
                   "item replace block {x} {y+2} {z} container.1 with minecraft:bamboo 64"],
          erwartet={"items": {"minecraft:stick": 8}})
+
+# ===================================================================== Mechanik-Tests
+# Seltene Spawns lassen sich im Zeitraffer schlecht abwarten: Mobs hineinsetzen und prüfen, ob Transport und Tötung
+# funktionieren. Die Spawnregeln selbst stehen mit Quelle in den Texten.
+def mobs(typ, punkte, extra="PersistenceRequired:1b"):
+    return [f"summon minecraft:{typ} {{x{x:+d}}}.5 {{y{y:+d}}} {{z{z:+d}}}.5 {{{extra}}}" for x, y, z in punkte]
+
+
+[f for f in Farm.alle if f.id == "mobfarm"][0].pruefe_auch(
+    "mobfarm_mech", boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=3, zeit="day",
+    nachher=mobs("zombie", [(1, 0, 1), (8, 0, 1), (1, 0, 8), (8, 0, 8)]),
+    erwartet={"items": {"minecraft:rotten_flesh": 1}})
+[f for f in Farm.alle if f.id == "creeper"][0].pruefe_auch(
+    "creeper_mech", boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=3, zeit="day",
+    nachher=mobs("creeper", [(1, 0, 1), (6, 0, 1), (1, 0, 6), (6, 0, 6)]),
+    erwartet={"items": {"minecraft:gunpowder": 1}})
+[f for f in Farm.alle if f.id == "hexe"][0].pruefe_auch(
+    "hexe_mech", boden=GRAS, zeit="day",
+    nachher=mobs("witch", [(1, 0, 1), (5, 0, 2), (3, 0, 5), (1, 0, 6)]),
+    hoechstens={"wesen": {"minecraft:witch": 0}})
+[f for f in Farm.alle if f.id == "ertrunkene"][0].pruefe_auch(
+    "ertrunkene_mech", boden=GRAS, zeit="day", bereich=[2, -22, 2, 3, -20, 3],
+    nachher=mobs("drowned", [(0, 0, 0), (5, 0, 0), (0, 0, 5), (5, 0, 5)]),
+    erwartet={"wesen": {"minecraft:drowned": 1}})
+[f for f in Farm.alle if f.id == "aussenposten"][0].pruefe_auch(
+    "aussenposten_mech", boden=GRAS, zeit="day",
+    nachher=mobs("pillager", [(0, 0, -10), (0, 0, 10), (-10, 0, 0), (10, 0, 0), (7, 0, 7), (-7, 0, -7)]),
+    bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 2}})
+
 
 if __name__ == "__main__":
     if "--material" in sys.argv:

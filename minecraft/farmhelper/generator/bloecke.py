@@ -78,6 +78,9 @@ EINFACH = {
     "melon_stem": ("melon_stem", "#ofh:staengel", "minecraft:melon_seeds", "Melonen-/Kürbiskerne"),
     "oak_sapling": ("dark_oak_sapling", "#minecraft:saplings", "#minecraft:saplings", "Setzling"),
     "poppy": ("poppy", "#minecraft:small_flowers", "#minecraft:small_flowers", "Blume"),
+    "tall_flower": ("sunflower", "minecraft:sunflower[half=lower]|minecraft:lilac[half=lower]|"
+                                 "minecraft:rose_bush[half=lower]|minecraft:peony[half=lower]",
+                    "minecraft:sunflower", "Hohe Blume (Sonnenblume, Flieder, Rosenstrauch, Pfingstrose)"),
     "pointed_dripstone": ("pointed_dripstone", "minecraft:pointed_dripstone[vertical_direction=down]", "minecraft:pointed_dripstone",
                           "Spitzer Tropfstein"),
     "dripstone_block": ("dripstone_block", "minecraft:dripstone_block", "minecraft:dripstone_block", "Tropfsteinblock"),
@@ -133,14 +136,18 @@ def block(b, r):
     if i in EINFACH:
         anz, pr, item, name = EINFACH[i]
         props = {}
-        if i == "chest" and f in ("n", "e", "s", "w"):
+        if i in ("chest", "bee_nest") and f in ("n", "e", "s", "w"):
             props = {"facing": RICHTUNG[f]}
+            if i == "bee_nest":                          # Öffnung muss frei sein: Richtung mitprüfen
+                pr = f"{pr}[facing={RICHTUNG[f]}]"
         if i in ("white_bed", "red_bed"):                 # Bett = 2 Blöcke; Richtung zeigt vom Fußende zum Kopf
             props = {"part": p.get("part", "foot")} | ({"facing": RICHTUNG[f]} if f else {})
         if i == "crafter":                                # Vorderseite nach unten (Spieler schaut beim Setzen nach oben)
             props = {"orientation": "down_north"}
         if i == "pointed_dripstone":
             props = {"vertical_direction": "down", "thickness": "tip"}
+        if i == "tall_flower":
+            props = {"half": "lower"}
         if i == "daylight_detector_inv":
             props = {"inverted": "true"}
         return {"art": "block", "anzeige": anz, "props": props, "pruefen": pr, "item": item, "name": name,
@@ -166,9 +173,9 @@ def block(b, r):
     if i == "oak_trapdoor":
         half = p.get("half", "bottom")
         props, pr = {"half": half}, f"half={half}"
-        if p.get("open"):                                # offen: steht senkrecht, Mobs halten sie für Boden
-            props["open"] = "true"
-            pr += ",open=true"
+        if p.get("open"):                                # offen: steht senkrecht, Mobs halten sie für Boden;
+            props["open"] = "true"                       # oben/unten ist dann egal (gleiche Form)
+            pr = "open=true"
         if f in ("n", "e", "s", "w"):                    # Richtung zählt (offen steht die Klappe auf der Gegenseite)
             props["facing"] = RICHTUNG[f]
             pr += f",facing={RICHTUNG[f]}"
