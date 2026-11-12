@@ -1,13 +1,14 @@
 """Handelshalle (Profi): 16 Dorfbewohner in 1 × 1-Zellen, zwei Reihen an einem überdachten, beleuchteten Gang.
 
-Gang z 0 (x 0 … 14, 2 hoch, Dach y 2), Eingang im Osten (15, 0, 0) mit Zauntor. Zellen bei geraden x (0, 2, … 14) in
-z -2 (Nordreihe) und z 2 (Südreihe); dazwischen Trennwände (ungerade x) 2 hoch. Vor jeder Zelle (z ±1): unten der
-Arbeitsblock (Theke), darüber eine Stufe in der OBEREN Blockhälfte – es bleibt ein Schlitz von einem halben Block zum
-Handeln, und auch ohne Arbeitsblock ist die Öffnung nur 1,5 hoch (Dorfbewohner: 1,95). Hinter jeder Zelle (z ±3) Glas:
-Daran bleibt eine Lore stehen (an undurchsichtigen Blöcken prallt sie zurück). Auf dem Zellenboden eine Schiene: Auf
-Schienen spawnt nichts, und sie ist das Ende der Ladespur. Dach y 2 über allem (x -1 … 15, z -3 … 3), zwei Leuchtblöcke im
-Gangdach (3, 2, 0) und (11, 2, 0). Blitzableiter auf einer Säule mitten auf dem Dach (7, 3 … 5, 0): Ein Blitz dort trifft
-Wesen nur bis 3 Blöcke unter der Einschlagstelle (6) – die Dorfbewohner (bis 1,95 hoch) bleiben verschont.
+Gang z 0 (x 0 … 14, 2 hoch, Dach y 2), Eingang im Osten (15, 0, 0) mit Zauntor. Zellen bei geraden x (0, 2, … 14)
+in z -2 (Nordreihe) und z 2 (Südreihe); dazwischen Trennwände (ungerade x) 2 hoch. Vor jeder Zelle (z ±1): unten der
+Arbeitsblock (Theke), darüber eine Stufe in der OBEREN Blockhälfte – es bleibt ein Schlitz von einem halben Block
+zum Handeln, und auch ohne Arbeitsblock ist die Öffnung nur 1,5 hoch (Dorfbewohner: 1,95). Hinter jeder Zelle
+(z ±3) Glas: Daran bleibt eine Lore stehen (an undurchsichtigen Blöcken prallt sie zurück). Auf dem Zellenboden eine
+Schiene: Auf Schienen spawnt nichts, und sie ist das Ende der Ladespur. Dach y 2 über allem (x -1 … 15, z -3 … 3),
+zwei Leuchtblöcke im Gangdach (3, 2, 0) und (11, 2, 0). Blitzableiter auf einer Säule mitten auf dem Dach (Säule 7, 3 … 5, 0, Ableiter
+(7, 6, 0)): Ein Blitz dort schlägt bei y 7 ein und trifft Wesen nur bis 3 Blöcke darunter (y 4) – die Dorfbewohner (bis
+1,95 hoch) bleiben verschont.
 """
 from profi_basis import *
 
@@ -28,7 +29,6 @@ BLOECKE = {
     "lightning_rod": ("lightning_rod", "minecraft:lightning_rod", "minecraft:lightning_rod", "Blitzableiter"),
 }
 
-GERADE = list(range(0, 15, 2))               # Zellen x 0 … 14
 X0, X1 = -1, 15                              # Endwände
 
 
@@ -75,7 +75,8 @@ f = profi("handel", dict(
              "am Tag auf, auch ohne Bett. Ein erwachsener Dorfbewohner ist 1,95 hoch.", W + "Villager"),
             ("Eine Lore hält am Ende der Schiene vor durchsichtigen Blöcken an, vor undurchsichtigen prallt sie "
              "zurück. Mitfahrer ersticken nicht in durchsichtigen Blöcken (Stufe). Mobs steigen nur aus, wenn die "
-             "Lore zerstört wird.", W + "Minecart"),
+             "Lore zerstört wird (oder über eine Aktivierungsschiene fährt); findet sie daneben keinen Platz mit "
+             "genug Kopfhöhe, bleibt der Mitfahrer an ihrer Stelle.", W + "Minecart"),
             ("Auf Schienen spawnen keine Monster (Tag prevent_mob_spawning_inside).", W + "Rail"),
             ("Blitz in 3–4 Blöcken Nähe macht Dorfbewohner zu Hexen; ein Blitzableiter als höchster Block fängt "
              "Blitze im Umkreis von 128 Blöcken ab.", W + "Lightning_Rod"),
@@ -107,17 +108,18 @@ f.schritt("Eine Schiene auf den Boden jeder Zelle (vom Gang aus durch die Öffnu
 f.schritt("Dach auf Höhe 2 über die ganze Halle, 17 × 7. Über dem Gang an 2 Stellen einen Leuchtblock "
           "(Leuchtstein, Seelaterne, Kürbislaterne …) statt Steinziegel – dann ist der Gang hell genug.", {
     2: "\n".join(["#" * 17] * 3 + ["####E#######E####"] + ["#" * 17] * 3)}, x0=X0, z0=-3)
-f.schritt("Blitzableiter: mitten auf dem Dach über dem Gang 2 Steinziegel übereinander, oben drauf der Blitzableiter "
+f.schritt("Blitzableiter: mitten auf dem Dach über dem Gang 3 Steinziegel übereinander, oben drauf der Blitzableiter "
           "(3 Kupferbarren). Er muss der höchste Block weit und breit sein. Ein Blitz trifft Wesen nur bis 3 Blöcke "
           "unter der Einschlagstelle – so hoch erreicht er keinen Dorfbewohner.", {
-    3: "#", 4: "#", 5: "B"}, x0=7)
+    3: "#", 4: "#", 5: "#", 6: "B"}, x0=7)
 f.schritt("Einladen, Zelle für Zelle, im Westen anfangen: (1) Auf den Platz vor der Zelle (unter der Stufe) eine "
           "Schiene legen. (2) Im Gang Schienen vom Eingang bis vor diese Zelle, weiter westlich keine – die letzte "
           "biegt dann in die Zelle ab. (3) Den Dorfbewohner in einer Lore vom Eingang her schieben: Sie rollt in die "
           "Zelle und bleibt am Glas stehen. (4) Lore durch die Öffnung kaputt schlagen – er steht in der Zelle und "
-          "kommt unter der Stufe nicht heraus. (5) Die Schiene vor ihm abbauen und seinen Arbeitsblock dort setzen "
-          "(Bognertisch, Lesepult, Komposter …). Dann die Gang-Schienen bis vor die nächste Zelle abbauen. Passt "
-          "das Angebot nicht: Arbeitsblock abbauen und neu setzen, bis es passt.", {
+          "kommt unter der Stufe nicht heraus. Die Lore liegt jetzt als Item in der Zelle: Schleichend passt du "
+          "unter die Stufe (1,5 hoch) und hebst sie auf. (5) Die Schiene vor ihm abbauen und seinen Arbeitsblock "
+          "dort setzen (Bognertisch, Lesepult, Komposter …). Dann die Gang-Schienen bis vor die nächste Zelle "
+          "abbauen. Passt das Angebot nicht: Arbeitsblock abbauen und neu setzen, bis es passt.", {
     0: "\n".join([reihe("V", ".", ".", "."), reihe("A", ".", ".", "."), "", reihe("A", ".", ".", "."),
                   reihe("V", ".", ".", ".")])}, x0=X0, z0=-2)
 f.schritt("Gang-Schienen abbauen und in den Eingang im Osten ein Zauntor setzen: im Gang stehen und nach Osten "

@@ -3,12 +3,12 @@
 Je Stock (Spalte x): Trichter (x, -1, 0) direkt UNTER dem Stock, alle nach Osten in die Truhe (8, -1, 0); Stock
 (x, 0, 0); Werfer mit Schere dahinter (x, 0, 1), zeigt nach Norden auf den Stock; Beobachter auf dem Stock (x, 1, 0),
 schaut nach unten auf den Stock (Ausgang oben); darauf ein Block S (x, 2, 0), den der Beobachter stark mit Strom
-versorgt. Auf jedem Werfer ein Block T (x, 1, 1), darauf Redstone-Staub (x, 2, 1): eine Leitung über alle Werfer, direkt
-neben den Blöcken S. Blume vor jedem Stock (x, 0, -1). Seitlich zu: Steinziegel (-1, 0, 0) im Westen, Glas (8, 0, 0)
+versorgt. Auf jedem Werfer ein Block T (x, 1, 1), darauf Redstone-Staub (x, 2, 1): eine Leitung über alle Werfer,
+direkt neben den Blöcken S. Blume vor jedem Stock (x, 0, -1). Seitlich zu: Steinziegel (-1, 0, 0) im Westen, Glas (8, 0, 0)
 auf der Truhe im Osten.
 
-Warum nicht Staub direkt auf Beobachter und Werfer: Beobachter leiten keinen Strom, Staub auf einem Beobachter gibt sein
-Signal nicht eine Stufe nach unten weiter (Wiki: Observer). Darum liegt die Leitung auf gleicher Höhe wie die Blöcke S.
+Warum nicht Staub direkt auf Beobachter und Werfer: Beobachter leiten keinen Strom, Staub auf einem Beobachter gibt
+sein Signal nicht eine Stufe nach unten weiter (Wiki: Observer). Darum liegt die Leitung auf gleicher Höhe wie die Blöcke S.
 
 Ablauf: Jede Änderung der Honigstufe eines Stocks → sein Beobachter gibt einen Puls in S → die Staubleitung daneben
 schaltet alle Blöcke T → alle 8 Werfer darunter versuchen zu scheren.

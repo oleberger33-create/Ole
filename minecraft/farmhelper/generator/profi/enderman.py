@@ -95,8 +95,8 @@ f.schritt("Westlich davon der Trichterboden 5 × 5 – hier landen später die E
         >>>>^
     """}, x0=-7, z0=-2)
 f.schritt("Rand um den Trichterboden: ein Ring aus Endstein auf Höhe der Trichter (der Trichter zur Truhe ist ein Teil "
-          "davon) und darauf ein Ring aus Glas. Er hält Perlen fest, die beim Tod eines Enderman etwas wegspringen; auf "
-          "Glas spawnt nichts.", {
+          "davon) und darauf ein Ring aus Glas (auf den Trichter schleichend klicken). Er hält Perlen fest, die beim "
+          "Tod eines Enderman etwas wegspringen; auf Glas spawnt nichts.", {
     0: """
         NNNNNNN
         N.....N
@@ -131,7 +131,9 @@ f.schritt("Dach: Auf dem Mittelblock zwei Hilfsblöcke hochbauen (springen und u
     47: "UUU\nUUU\nUUU"}, x0=-6, z0=-1)
 f.schritt("Auf den Mittelblock (unter das Dach) ein Boot. Eine Endermilbe hineinlocken – sie entsteht manchmal beim "
           "Werfen einer Enderperle und läuft dir nach – und ihr ein Namensschild geben, sonst verschwindet sie nach 2 "
-          "Minuten. Solange du auf der Plattform bist, spawnen dort keine Endermen (näher als 24 Blöcke an dir nie).", {
+          "Minuten. Vorher alle Endermen auf der Plattform erledigen – sonst schlagen sie die Endermilbe, solange das "
+          "Loch noch fehlt. Neue kommen nicht, solange du in der Mitte bist: Die ganze Plattform ist näher als 24 "
+          "Blöcke an dir.", {
     45: "B"}, x0=-5)
 f.schritt("Endermilbe im Boot.", {45: "M"}, x0=-5)
 f.schritt("Um den Mittelblock ein Loch 5 × 5 ausheben (24 Blöcke, der Mittelblock bleibt) – genau über dem "
