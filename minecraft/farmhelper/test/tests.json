@@ -7,6 +7,14 @@
    }
   }
  },
+ "zuckerrohr_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:sugar_cane": 60
+   }
+  }
+ },
  "bambus": {
   "boden": "minecraft:grass_block",
   "erwartet": {
@@ -15,11 +23,27 @@
    }
   }
  },
+ "bambus_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:bamboo": 500
+   }
+  }
+ },
  "kaktus": {
   "boden": "minecraft:grass_block",
   "erwartet": {
    "items": {
     "minecraft:cactus": 3
+   }
+  }
+ },
+ "kaktus_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:cactus": 40
    }
   }
  },
@@ -34,11 +58,31 @@
    }
   }
  },
+ "kuerbis_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "fill {x} {y} {z-1} {x+7} {y} {z-1} minecraft:melon_stem[age=7]",
+   "fill {x} {y} {z+1} {x+7} {y} {z+1} minecraft:melon_stem[age=7]"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:melon_slice": 200
+   }
+  }
+ },
  "seetang": {
   "boden": "minecraft:grass_block",
   "erwartet": {
    "items": {
     "minecraft:kelp": 4
+   }
+  }
+ },
+ "seetang_profi": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:kelp": 150
    }
   }
  },
@@ -57,11 +101,42 @@
    }
   }
  },
+ "weizen_profi": {
+  "boden": "minecraft:grass_block",
+  "zeit": "cycle",
+  "nachher": [
+   "kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..12]",
+   "summon minecraft:villager {x+2}.5 {y} {z+4}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:carrot\",count:8}]}",
+   "summon minecraft:villager {x-2}.5 {y} {z+4}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:nitwit\",level:1,type:\"minecraft:plains\"}}",
+   "fill {x} {y} {z} {x+8} {y} {z+8} minecraft:carrots[age=7] replace minecraft:carrots"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:carrot": 60
+   }
+  }
+ },
  "baum": {
   "boden": "minecraft:grass_block",
   "erwartet": {
    "bloecke": {
     "minecraft:dark_oak_log": 4
+   }
+  }
+ },
+ "baum_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "item replace block {x} {y} {z+2} container.0 with minecraft:bone_meal 64",
+   "item replace block {x+8} {y} {z+2} container.0 with minecraft:bone_meal 64",
+   "setblock {x+1} {y} {z+2} minecraft:observer[facing=east]",
+   "setblock {x+2} {y} {z+2} minecraft:observer[facing=west]",
+   "setblock {x+9} {y} {z+2} minecraft:observer[facing=east]",
+   "setblock {x+10} {y} {z+2} minecraft:observer[facing=west]"
+  ],
+  "erwartet": {
+   "bloecke": {
+    "minecraft:dark_oak_log": 30
    }
   }
  },
@@ -76,6 +151,18 @@
   "erwartet": {
    "items": {
     "minecraft:bone_meal": 2
+   }
+  }
+ },
+ "knochenmehl_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "fill {x} {y+1} {z-1} {x+11} {y+1} {z-1} minecraft:melon_stem[age=7]",
+   "fill {x} {y+1} {z+1} {x+11} {y+1} {z+1} minecraft:melon_stem[age=7]"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:bone_meal": 20
    }
   }
  },
@@ -107,6 +194,36 @@
    }
   }
  },
+ "blumen_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "setblock {x} {y} {z} minecraft:sunflower[half=lower]",
+   "setblock {x} {y+1} {z} minecraft:sunflower[half=upper]",
+   "setblock {x+1} {y} {z} minecraft:lilac[half=lower]",
+   "setblock {x+1} {y+1} {z} minecraft:lilac[half=upper]",
+   "setblock {x+2} {y} {z} minecraft:rose_bush[half=lower]",
+   "setblock {x+2} {y+1} {z} minecraft:rose_bush[half=upper]",
+   "setblock {x+3} {y} {z} minecraft:peony[half=lower]",
+   "setblock {x+3} {y+1} {z} minecraft:peony[half=upper]",
+   "item replace block {x} {y+2} {z+2} container.0 with minecraft:bone_meal 64",
+   "item replace block {x} {y+2} {z+2} container.1 with minecraft:bone_meal 64",
+   "item replace block {x} {y+2} {z+2} container.2 with minecraft:bone_meal 64",
+   "item replace block {x} {y+2} {z+2} container.3 with minecraft:bone_meal 64"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:sunflower|minecraft:lilac|minecraft:rose_bush|minecraft:peony": 200
+   },
+   "bloecke": {
+    "minecraft:sunflower": 2
+   }
+  },
+  "hoechstens": {
+   "items": {
+    "minecraft:bone_meal": 0
+   }
+  }
+ },
  "huehner": {
   "nachher": [
    "kill @e[type=minecraft:chicken,x={x},y={y},z={z},distance=..6]",
@@ -125,6 +242,43 @@
    }
   }
  },
+ "huehner_profi": {
+  "nachher": [
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-2}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x-1}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+0}.5 {y+2} {z+0}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+2}.5 {y+1}.6 {z}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:cooked_chicken": 3
+   },
+   "wesen": {
+    "minecraft:chicken": 24
+   }
+  }
+ },
  "kuh": {
   "boden": "minecraft:grass_block",
   "nachher": [
@@ -138,6 +292,33 @@
    }
   }
  },
+ "kuh_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "execute as @e[type=minecraft:cow,x={x},y={y},z={z},distance=..4] run data merge entity @s {InLove:600}",
+   "summon minecraft:cow {x+1}.5 {y-3} {z+0}.5 {PersistenceRequired:1b,Age:-200}",
+   "summon minecraft:cow {x+0}.5 {y-3} {z+1}.5 {PersistenceRequired:1b,Age:-200}",
+   "summon minecraft:cow {x+1}.5 {y-3} {z+1}.5 {PersistenceRequired:1b,Age:-200}",
+   "summon minecraft:cow {x+0}.5 {y-3} {z+0}.5 {PersistenceRequired:1b,Age:-40000}",
+   "setblock {x+2} {y-2} {z} minecraft:lava"
+  ],
+  "bereich": [
+   0,
+   -3,
+   0,
+   1,
+   -3,
+   1
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:cooked_beef": 3
+   },
+   "wesen": {
+    "minecraft:cow": 1
+   }
+  }
+ },
  "wolle": {
   "boden": "minecraft:grass_block",
   "nachher": [
@@ -148,6 +329,33 @@
   "erwartet": {
    "items": {
     "minecraft:white_wool": 2
+   }
+  }
+ },
+ "wolle_profi": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "item replace block {x+0} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+2} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+4} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+6} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+8} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+10} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+12} {y+1} {z-1} container.0 with minecraft:shears",
+   "item replace block {x+14} {y+1} {z-1} container.0 with minecraft:shears",
+   "kill @e[type=minecraft:sheep,x={x},y={y},z={z},distance=..20]",
+   "summon minecraft:sheep {x+0}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+2}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+4}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+6}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+8}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+10}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+12}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}",
+   "summon minecraft:sheep {x+14}.5 {y+1} {z+0}.5 {PersistenceRequired:1b,Sheared:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:white_wool": 100
    }
   }
  },
@@ -211,6 +419,17 @@
   "erwartet": {
    "items": {
     "minecraft:rotten_flesh": 1
+   }
+  }
+ },
+ "mobfarm_profi": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "zeit": "day",
+  "erwartet": {
+   "items": {
+    "minecraft:rotten_flesh|minecraft:bone|minecraft:arrow|minecraft:gunpowder|minecraft:string": 30
    }
   }
  },
@@ -564,5 +783,71 @@
    }
   },
   "plan": "gold"
+ },
+ "baum_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "fill {x} {y} {z} {x+9} {y} {z+1} minecraft:air replace minecraft:dark_oak_sapling",
+   "fill {x-3} {y+6} {z-3} {x+12} {y+8} {z+4} minecraft:dark_oak_leaves[persistent=false,distance=7]"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:dark_oak_sapling": 8
+   }
+  },
+  "plan": "baum_profi"
+ },
+ "kuh_profi_mech": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "execute as @e[type=minecraft:cow,x={x},y={y},z={z},distance=..4] run data merge entity @s {InLove:600}"
+  ],
+  "bereich": [
+   0,
+   -3,
+   0,
+   1,
+   -3,
+   1
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:cow": 1
+   }
+  },
+  "plan": "kuh_profi"
+ },
+ "mobfarm_profi_mech": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "zeit": "day",
+  "nachher": [
+   "summon minecraft:zombie {x+1}.5 {y-5} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombie {x+16}.5 {y-5} {z+16}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+16}.5 {y-5} {z+1}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+1}.5 {y-5} {z+16}.5 {PersistenceRequired:1b}",
+   "summon minecraft:witch {x+4}.5 {y-5} {z+12}.5 {PersistenceRequired:1b}"
+  ],
+  "bereich": [
+   8,
+   -38,
+   8,
+   9,
+   -38,
+   9
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:rotten_flesh": 1,
+    "minecraft:redstone|minecraft:glowstone_dust|minecraft:sugar|minecraft:glass_bottle|minecraft:stick|minecraft:spider_eye": 1
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:witch": 0
+   }
+  },
+  "plan": "mobfarm_profi"
  }
 }
