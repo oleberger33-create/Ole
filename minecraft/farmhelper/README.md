@@ -37,21 +37,47 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
   26.3-Server (Fabric + Carpet, RCON) so auf, wie ein Spieler sie baut, stellt einen Testspieler an den
   Warteplatz, lässt die Zeit im Zeitraffer laufen und misst den Ertrag in Truhen, am Boden, Blöcke und Wesen.
   Bauwerk-Farmen (Hexenhütte, Außenposten, Festung) brauchen eine normale Welt mit Bauwerken – per Befehl gesetzte
-  Bauwerke haben keine Spawn-Regeln.
+  Bauwerke haben keine Spawn-Regeln. Das Programm misst die Spawn-Box der Hexenhütte blockgenau und nimmt nur eine
+  Hütte in Plan-Ausrichtung. Vor jedem Lauf entlädt es alte Testorte und entfernt alle Wesen (`--behalten` lässt
+  das): Mobs alter Testorte füllen sonst das Monster-Limit, und nichts spawnt mehr.
+  Erwartungen: `items` (Behälter), `boden` (Items am Boden), `inventar` (Testspieler), `beute` (alles zusammen),
+  `bloecke`, `wesen` (mit `bereich` nur in einem Teil); Schlüssel `*` = alle Sorten, `a|b` = a und b zusammen.
 
 ### Was beim Vereinfachen gelernt wurde (Testserver 26.3)
 
 - Im Wasser spawnt nichts – auch nicht am Spawner. Wasserkanäle liegen darum eine Ebene unter dem Spawnboden.
 - Fließendes Wasser über Wasser breitet sich nicht aus: Sammelrinnen über einem Becken gehen nicht.
 - Durch Glas sehen Mobs nichts (Dorfbewohner/Zombie, Endermen/Endermilbe).
-- Spender mit Glasflaschen werfen sie bei nicht vollem Bienennest heraus, Scheren nicht.
+- Werfer mit Glasflaschen werfen sie bei nicht vollem Bienennest heraus, Scheren nicht.
 - Trichter saugen durch Schlamm und Ackerboden (nicht ganz hohe Blöcke), nicht durch Erde oder Magma.
 - Ein Dispenser direkt auf Gras macht das Gras zu Erde.
 - Mobs, die weiter als 32 Blöcke von jedem Spieler sind, laufen nicht herum (Hexen standen bei 33 Blöcken still).
   Der AFK-Platz liegt darum 24–32 Blöcke von der Spawnfläche entfernt.
 - Durch Gerüst sehen Mobs hindurch (Plünderer zielen auf den Spieler oben auf dem Gerüstturm), durch Erde/Glas nicht.
-- Mobs können auf der Oberkante einer offenen Falltür stehen und darauf laufen; von dort springen sie einen Block
-  hoch. Klappen darum an die Außenkante, Ziel-Blöcke in der Mitte mindestens 2 hoch.
+- Mobs können auf der Oberkante einer offenen Falltür stehen und darauf laufen. Über einen 1 breiten Lochring
+  kommen sie trotzdem: Der Spalt neben der Kante ist schmaler als ein Schritt, und sie steigen auf den nächsten
+  Block (Endermen sogar einen ganzen Block hoch). Darum sind Lochfelder um ein Ziel 2 breit, Klappen außen.
+- Endermen teleportieren sich ab und zu von selbst und landen dabei auch auf Falltüren. Ein Boot nimmt einen
+  zweiten Fahrgast auf – so kam ein Enderman neben die Endermilbe. Ein Dach 3 × 3 über der Mitte (2 Blöcke Platz)
+  verhindert das.
+- Endermen spawnen auch auf einem 3 × 3-Feld neben der Endermilbe; auf unteren Stufen nicht.
+- Echte Dorfbewohner heben auf (per `/summon` gesetzte nicht, außer mit `CanPickUpLoot:1b`): Der Bauer schnappt
+  sich die Ernte vor den Trichtern unter dem Acker. Er wirft aber ab mehr als 24 Stück einer Sorte den Rest einem
+  anderen Dorfbewohner zu – dort fangen Trichter ihn auf. Weizen backt er vorher zu Brot.
+- Die flache Testwelt ist für Schleime und Ertrunkene ungeeignet: Auf der Oberfläche (y -61, unter 40) spawnen in
+  Schleim-Chunks Schleime und füllen das Monster-Limit. Tests darum hoch über der Oberfläche oder mit gefülltem
+  Untergrund in einem allein liegenden Schleim-Chunk.
+
+### Teststand (26.3)
+
+- Mit echten Spawns bzw. echtem Wachstum getestet und bestanden: Zuckerrohr, Bambus, Kaktus, Melone/Kürbis,
+  Seetang, Karotten-Bauer, Baum, Knochenmehl, Blumen, Hühner, Kühe, Wolle, Honig, Eisen, Spawner, Monster,
+  Creeper, Schleim (allein liegender Schleim-Chunk), Lohen, Gold, Endermen (weit weg von Inseln), Ertrunkene (wenig:
+  ~1 pro Stunde), Handel, Bruchstein, Lava, Schnee, Stock-Crafter; Hexen und Plünderer an echten Bauwerken.
+- Zusätzlich mit hineingesetzten Mobs: Monster, Creeper, Hexen, Ertrunkene, Plünderer, Gold.
+- Nicht nachgewiesen: Wither-Skelette spawnten in der Festung, auf der Fläche in 30 Minuten aber keins; Wächter,
+  Überfall und Angeln haben keinen automatischen Test (Kampf- bzw. Handarbeit).
+
 - Per `/summon` mit Daten gesetzte Mobs bekommen keine Ausrüstung (Plünderer ohne Armbrust laufen nicht zum Ziel) –
   in Tests die Ausrüstung mitgeben.
 

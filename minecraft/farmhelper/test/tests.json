@@ -44,15 +44,16 @@
  },
  "weizen": {
   "boden": "minecraft:grass_block",
-  "zeit": "day",
+  "zeit": "cycle",
   "nachher": [
    "kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..8]",
-   "summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},CanPickUpLoot:1b,Inventory:[{id:\"minecraft:wheat_seeds\",count:64}]}",
-   "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:wheat[age=7]"
+   "summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:carrot\",count:8}]}",
+   "summon minecraft:villager {x-2}.5 {y} {z}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:nitwit\",level:1,type:\"minecraft:plains\"}}",
+   "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:carrots[age=7]"
   ],
   "erwartet": {
    "items": {
-    "minecraft:wheat": 4
+    "minecraft:carrot": 1
    }
   }
  },
@@ -229,15 +230,13 @@
   "fuellung": "minecraft:stone",
   "erde_bis": 4,
   "ursprung": [
-   6400,
-   4016
+   688880,
+   688240
   ],
-  "welt": "struktur",
+  "hoehe": 37,
+  "zeit": "day",
   "vorher": [
-   "fill {x-6} {y+5} {z-6} {x+21} {y+31} {z+21} minecraft:stone"
-  ],
-  "nachher": [
-   "fill {x+8} {y+25} {z+8} {x+8} {y+26} {z+8} minecraft:air"
+   "fill {x} -60 {z} {x+15} {y-7} {z+15} minecraft:stone"
   ],
   "erwartet": {
    "wesen": {
@@ -329,9 +328,13 @@
    2,
    5
   ],
+  "ursprung": [
+   400,
+   400
+  ],
   "erwartet": {
-   "boden": {
-    "minecraft:ender_pearl": 1
+   "beute": {
+    "minecraft:ender_pearl": 2
    },
    "wesen": {
     "minecraft:endermite": 1
@@ -373,12 +376,12 @@
    "oberflaeche": true
   },
   "bereich": [
-   -1,
    -2,
+   -2,
+   -2,
+   2,
    -1,
-   1,
-   -1,
-   1
+   2
   ],
   "erwartet": {
    "wesen": {
@@ -528,12 +531,12 @@
    "summon minecraft:pillager {x-9}.5 {y+0} {z-9}.5 {PersistenceRequired:1b,equipment:{mainhand:{id:\"minecraft:crossbow\",count:1}}}"
   ],
   "bereich": [
-   -1,
    -2,
+   -2,
+   -2,
+   2,
    -1,
-   1,
-   -1,
-   1
+   2
   ],
   "erwartet": {
    "wesen": {

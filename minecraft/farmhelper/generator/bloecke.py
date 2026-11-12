@@ -76,6 +76,8 @@ EINFACH = {
     "sugar_cane": ("sugar_cane", "minecraft:sugar_cane", "minecraft:sugar_cane", "Zuckerrohr"),
     "kelp": ("kelp", "#ofh:seetang", "minecraft:kelp", "Seetang"),
     "wheat": ("wheat", "minecraft:wheat", "minecraft:wheat_seeds", "Weizen (Samen)"),
+    "feldfrucht": ("carrots", "minecraft:carrots|minecraft:potatoes|minecraft:wheat|minecraft:beetroots",
+                   "minecraft:carrot", "Karotten oder Kartoffeln"),
     "melon_stem": ("melon_stem", "#ofh:staengel", "minecraft:melon_seeds", "Melonen-/Kürbiskerne"),
     "dark_oak_sapling": ("dark_oak_sapling", "minecraft:dark_oak_sapling", "minecraft:dark_oak_sapling",
                          "Schwarzeichensetzling"),

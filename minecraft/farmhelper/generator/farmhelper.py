@@ -328,7 +328,7 @@ def gui(pfad):
 
 
 ICON = {"zuckerrohr": "sugar_cane", "bambus": "bamboo", "kaktus": "cactus", "kuerbis": "melon_slice", "seetang": "kelp",
-        "weizen": "wheat", "baum": "oak_log", "knochenmehl": "bone_meal", "blumen": "poppy", "huehner": "cooked_chicken",
+        "weizen": "carrot", "baum": "oak_log", "knochenmehl": "bone_meal", "blumen": "poppy", "huehner": "cooked_chicken",
         "kuh": "leather", "wolle": "white_wool", "honig": "honeycomb", "eisen": "iron_ingot",
         "xpspawner": "experience_bottle", "mobfarm": "bone", "creeper": "gunpowder", "schleim": "slime_ball",
         "hexe": "redstone", "waechter": "prismarine_shard", "lohe": "blaze_rod", "gold": "gold_nugget",

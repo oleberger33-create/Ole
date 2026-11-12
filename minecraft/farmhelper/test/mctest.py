@@ -10,7 +10,7 @@ Für jede Farm:
   dann Lebewesen und Behälter-Inhalte,
 - Testspieler (Carpet) auf den AFK-Platz stellen,
 - Zeit laufen lassen (/tick sprint), dann messen: Items in Behältern, Items am Boden, Blöcke, Wesen, Spieler-Inventar.
-  Erwartung "*" zählt alle Sorten zusammen (z. B. {"items": {"*": 1}}: irgendeine Beute).
+  Erwartung "*" zählt alle Sorten zusammen (z. B. {"items": {"*": 1}}: irgendeine Beute), "a|b" zählt a und b.
 
 tests.json: {"<farm>": {"dimension": "overworld|the_nether|the_end", "biom": "minecraft:…", "zeit": "day|night|cycle",
              "bauwerk": {"id": "minecraft:swamp_hut", "anker": [x, y, z]},
@@ -332,6 +332,7 @@ class Test:
         x, y, z = self.afk
         self.r(f'player {name} spawn at {x + 0.5} {y} {z + 0.5} facing 0 0 in {self.dim} in survival')
         time.sleep(1.0)
+        self.r(f'clear {name}')                          # Testspieler behalten sonst ihr Inventar aus alten Läufen
         self.r(f'effect give {name} minecraft:resistance infinite 255 true')
         self.r(f'effect give {name} minecraft:saturation infinite 255 true')
         sp = self.t.get('spieler', {})
@@ -343,7 +344,7 @@ class Test:
 
     # ---------------------------------------------------------------- Messen
     def messen(self):
-        erg = {'items': {}, 'boden': {}, 'bloecke': {}, 'wesen': {}, 'inventar': {}}
+        erg = {'items': {}, 'boden': {}, 'bloecke': {}, 'wesen': {}, 'inventar': {}, 'beute': {}}
         x1, y1, z1, x2, y2, z2 = self.box(3)
         for b in self.f['fertig']:
             if b['id'] in BEHAELTER and not b.get('ent'):
@@ -357,8 +358,8 @@ class Test:
         # Items am Boden: je erwartetem Item-Typ die Anzahl aufsummieren
         alle = set()
         for teil in ('erwartet', 'hoechstens'):
-            for art in ('items', 'boden'):
-                alle |= set(self.t.get(teil, {}).get(art, {}))
+            for art in ('items', 'boden', 'beute'):
+                alle |= {it for k in self.t.get(teil, {}).get(art, {}) for it in k.split('|') if it != '*'}
         for it in alle:
             filt = f'type=minecraft:item,{sel},nbt={{Item:{{id:"{it}"}}}}'
             self.r('scoreboard players set #s mctest 0')
@@ -375,8 +376,12 @@ class Test:
             wsel = (f'x={self.x + a1},y={self.y + b1},z={self.z + c1},dx={a2 - a1},dy={b2 - b1},dz={c2 - c1}')
         for w in set(self.t.get('erwartet', {}).get('wesen', {})) | set(self.t.get('hoechstens', {}).get('wesen', {})):
             erg['wesen'][w] = anzahl(self.r(f'execute in {self.dim} if entity @e[type={w},{wsel}]'))
-        if hasattr(self, 'name') and self.t.get('erwartet', {}).get('inventar'):
+        if hasattr(self, 'name') and (self.t.get('erwartet', {}).get('inventar') or self.t.get('erwartet', {}).get('beute')):
             zaehle(self.r(f'data get entity {self.name} Inventory'), erg['inventar'])
+        erg['beute'] = {}                                 # alles zusammen: Behälter, Boden, Inventar des Testspielers
+        for art in ('items', 'boden', 'inventar'):
+            for k, v in erg[art].items():
+                erg['beute'][k] = erg['beute'].get(k, 0) + v
         return erg
 
 
@@ -491,12 +496,12 @@ def main():
         ok = True
         for art, ziel in t.t.get('erwartet', {}).items():
             for key, mindest in ziel.items():
-                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] == key)
+                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] in key.split('|'))
                 if ist < mindest:
                     ok = False
         for art, ziel in t.t.get('hoechstens', {}).items():
             for key, hoechst in ziel.items():
-                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] == key)
+                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] in key.split('|'))
                 if ist > hoechst:
                     ok = False
                     t.meld.append(f'zu viel {key}: {ist} > {hoechst}')

@@ -6344,30 +6344,30 @@
  },
  {
   "id": "weizen",
-  "name": "Weizen/Karotten mit Bauern",
+  "name": "Karotten/Kartoffeln mit Bauern",
   "cat": "Pflanzen",
   "diff": 2,
-  "out": "Weizen, Karotten, Kartoffeln, Rote Bete",
+  "out": "Karotten, Kartoffeln (auch Brot, Rote Bete)",
   "where": "Überall, weit weg von Dörfern",
   "afk": "In der Nähe",
-  "why": "Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte und pflanzt mit seinem eigenen Vorrat nach. Der Ackerboden liegt auf Trichtern – weil Ackerboden etwas niedriger ist, saugen sie die Ernte an, bevor der Bauer sie aufhebt. Darum gibst du ihm vorher einen Vorrat: am besten Karotten oder Kartoffeln (Samen über 10 Stück kompostiert er). Die Wand ist 2 hoch: Durch einen Zaun schlagen Zombies zu.",
+  "why": "Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte, hebt sie auf und pflanzt nach. Hat er mehr als 24 Stück einer Sorte, wirft er den Rest einem anderen Dorfbewohner zu: Der steht in einer Zelle auf einem Trichter, davor liegt noch ein Trichter – sie fangen alles auf und füllen die Truhe. Weizen macht er zu Brot und gibt erst ab 25 Broten etwas ab, darum lieber Karotten oder Kartoffeln. Die Wand ist 2 hoch: Durch einen Zaun schlagen Zombies zu.",
   "help": [
    [
     "Bauer erntet nicht",
     "Er braucht den Komposter als Arbeitsplatz (kein Baby), arbeitet tagsüber; die Spielregel mob_griefing („Zerstörung durch Kreaturen“) muss an sein."
    ],
    [
-    "Felder bleiben leer",
-    "Sein Vorrat ist aufgebraucht. Unten in der Südwand einen Block abbauen (der obere bleibt, so kommt er nicht hinaus) und neue Stapel Karotten oder Kartoffeln in die Lücke werfen – dort ist normaler Boden ohne Trichter, er holt sie sich. Danach wieder zumachen."
-   ],
-   [
     "Er kommt nicht hinein",
     "Dorfbewohner lassen sich nicht anleinen, und ein Boot braucht 2 Blöcke Breite. Darum die Lücke im Süden erst schließen, wenn er drin ist."
+   ],
+   [
+    "Nichts in der Truhe",
+    "Er gibt erst ab mehr als 24 Stück einer Sorte ab. Der zweite Dorfbewohner darf kein Bauer sein und muss in Wurfweite stehen (direkt neben dem Feld)."
    ]
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Im Test 16 Karotten in 40 Minuten mit 8 Feldern – mehr Felder = mehr",
    "ort": [
     [
      "Die Farm muss weit genug weg von Dörfern liegen, sonst läuft der Bauer zum Dorf.",
@@ -6384,64 +6384,24 @@
    ],
    "meta": [
     [
-     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: Bauer mit Samen erntet und pflanzt nach, Weizen landet in der Truhe.",
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: der Bauer erntete, warf den Überschuss dem zweiten Dorfbewohner zu, die Trichter fingen ihn auf.",
      null
     ]
    ]
   },
   "steps": [
    {
-    "text": "Feld 4 × 2 ausheben, 2 tief, links davon Platz für Trichter und Truhe, rechts ein Loch fürs Wasser.",
+    "text": "Feld 4 × 2: Erde zu Ackerboden hacken, rechts daneben ein Loch mit einer Wasserquelle. Links daneben 2 Löcher für Trichter, links davon eins für die Truhe und noch eins zum Hineinsteigen (davor stehst du zum Öffnen der Truhe).",
     "luft": [
      {
-      "x": -2,
-      "y": -2,
+      "x": -4,
+      "y": -1,
       "z": 0
      },
      {
-      "x": -1,
-      "y": -2,
+      "x": -3,
+      "y": -1,
       "z": 0
-     },
-     {
-      "x": 0,
-      "y": -2,
-      "z": 0
-     },
-     {
-      "x": 1,
-      "y": -2,
-      "z": 0
-     },
-     {
-      "x": 2,
-      "y": -2,
-      "z": 0
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 0
-     },
-     {
-      "x": 0,
-      "y": -2,
-      "z": 1
-     },
-     {
-      "x": 1,
-      "y": -2,
-      "z": 1
-     },
-     {
-      "x": 2,
-      "y": -2,
-      "z": 1
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 1
      },
      {
       "x": -2,
@@ -6450,26 +6410,6 @@
      },
      {
       "x": -1,
-      "y": -1,
-      "z": 0
-     },
-     {
-      "x": 0,
-      "y": -1,
-      "z": 0
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 0
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 0
-     },
-     {
-      "x": 3,
       "y": -1,
       "z": 0
      },
@@ -6477,168 +6417,105 @@
       "x": 4,
       "y": -1,
       "z": 0
-     },
+     }
+    ],
+    "added": [
      {
       "x": 0,
       "y": -1,
-      "z": 1
+      "z": 0,
+      "id": "farmland",
+      "p": {},
+      "ent": false
      },
      {
       "x": 1,
       "y": -1,
-      "z": 1
+      "z": 0,
+      "id": "farmland",
+      "p": {},
+      "ent": false
      },
      {
       "x": 2,
       "y": -1,
-      "z": 1
+      "z": 0,
+      "id": "farmland",
+      "p": {},
+      "ent": false
      },
      {
       "x": 3,
       "y": -1,
-      "z": 1
+      "z": 0,
+      "id": "farmland",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": 1,
+      "id": "farmland",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": 1,
+      "id": "farmland",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 1,
+      "id": "farmland",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 1,
+      "id": "farmland",
+      "p": {},
+      "ent": false
      }
-    ],
-    "added": []
+    ]
    },
    {
-    "text": "8 Trichter unter das Feld: hintere Reihe nach Norden, vordere Reihe nach Westen, dann über einen Trichter in die Truhe.",
+    "text": "Wasser, Truhe und 2 Trichter, die nach Westen in die Truhe zeigen (schleichend an die Truhe klicken).",
     "luft": [],
     "added": [
      {
-      "x": -2,
-      "y": -2,
+      "x": -3,
+      "y": -1,
       "z": 0,
       "id": "chest",
       "p": {},
       "ent": false
      },
      {
+      "x": -2,
+      "y": -1,
+      "z": 0,
+      "id": "hopper",
+      "p": {
+       "f": "w"
+      },
+      "ent": false
+     },
+     {
       "x": -1,
-      "y": -2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": -2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 0,
-      "id": "hopper",
-      "p": {
-       "f": "w"
-      },
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": -2,
-      "z": 1,
-      "id": "hopper",
-      "p": {
-       "f": "n"
-      },
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -2,
-      "z": 1,
-      "id": "hopper",
-      "p": {
-       "f": "n"
-      },
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -2,
-      "z": 1,
-      "id": "hopper",
-      "p": {
-       "f": "n"
-      },
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -2,
-      "z": 1,
-      "id": "hopper",
-      "p": {
-       "f": "n"
-      },
-      "ent": false
-     }
-    ]
-   },
-   {
-    "text": "Erde auf die Trichter, dann zu Ackerboden hacken. Rechts daneben eine Wasserquelle.",
-    "luft": [],
-    "added": [
-     {
-      "x": 0,
       "y": -1,
       "z": 0,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 0,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 0,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 0,
-      "id": "farmland",
-      "p": {},
+      "id": "hopper",
+      "p": {
+       "f": "w"
+      },
       "ent": false
      },
      {
@@ -6648,43 +6525,11 @@
       "id": "water",
       "p": {},
       "ent": false
-     },
-     {
-      "x": 0,
-      "y": -1,
-      "z": 1,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": 1,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": -1,
-      "z": 1,
-      "id": "farmland",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": -1,
-      "z": 1,
-      "id": "farmland",
-      "p": {},
-      "ent": false
      }
     ]
    },
    {
-    "text": "Wand 2 hoch rund ums Feld (durch einen Zaun schlagen Zombies zu; hinter einer Wand sieht der Bauer sie nicht), links ein Komposter mit Block darüber (Arbeitsplatz des Bauern). Vorne (Süden) 2 Blöcke breit offen lassen.",
+    "text": "Wand 2 hoch rund ums Feld (durch einen Zaun schlagen Zombies zu; hinter einer Wand sieht der Bauer sie nicht). Links ein Komposter mit Block darüber (Arbeitsplatz des Bauern), daneben bleibt der Trichter frei. Vorne (Süden) 2 Blöcke breit offen lassen.",
     "luft": [],
     "added": [
      {
@@ -6731,14 +6576,6 @@
       "x": 4,
       "y": 0,
       "z": -1,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": -1,
-      "y": 0,
-      "z": 0,
       "id": "stone_bricks",
       "p": {},
       "ent": false
@@ -6848,14 +6685,6 @@
       "ent": false
      },
      {
-      "x": -1,
-      "y": 1,
-      "z": 0,
-      "id": "stone_bricks",
-      "p": {},
-      "ent": false
-     },
-     {
       "x": 4,
       "y": 1,
       "z": 0,
@@ -6914,79 +6743,150 @@
     ]
    },
    {
-    "text": "Weizen säen. Dann einen Dorfbewohner ohne Beruf holen (keinen Nichtsnutz im grünen Kittel). Auf normalem Boden, nicht auf dem Feld (dort schlucken die Trichter alles), wirfst du ihm ein paar Stapel Karotten oder Kartoffeln zu. Anleinen lassen sich Dorfbewohner nicht: Schieb ihn in ein Boot, steig dazu und rudere durch die Lücke aufs Feld (an Land langsam, geht aber), dann aussteigen, hinausgehen, das Boot von außen abbauen. Mit dem Komposter wird er Bauer, erntet und pflanzt mit seinem Vorrat nach.",
+    "text": "Über den vorderen Trichter eine Falltür in die OBERE Hälfte (an die Wand im Norden klicken, oben): Darunter passt kein Dorfbewohner, aber Geworfenes fliegt durch.",
     "luft": [],
     "added": [
      {
-      "x": 0,
+      "x": -1,
+      "y": 1,
+      "z": 0,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "top",
+       "f": "s"
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Zelle für den zweiten Dorfbewohner über dem hinteren Trichter: Wände im Norden, Glas über der Truhe, oben ein Block. Im Süden noch offen lassen.",
+    "luft": [],
+    "added": [
+     {
+      "x": -2,
+      "y": 0,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -3,
       "y": 0,
       "z": 0,
-      "id": "wheat",
+      "id": "glass",
       "p": {},
       "ent": false
      },
      {
-      "x": 1,
-      "y": 0,
+      "x": -2,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -3,
+      "y": 1,
       "z": 0,
-      "id": "wheat",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      },
      {
-      "x": 2,
-      "y": 0,
+      "x": -2,
+      "y": 2,
       "z": 0,
-      "id": "wheat",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": 0,
-      "z": 0,
-      "id": "wheat",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
-      "id": "wheat",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": 0,
-      "z": 1,
-      "id": "wheat",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 2,
-      "y": 0,
-      "z": 1,
-      "id": "wheat",
-      "p": {},
-      "ent": false
-     },
-     {
-      "x": 3,
-      "y": 0,
-      "z": 1,
-      "id": "wheat",
+      "id": "stone_bricks",
       "p": {},
       "ent": false
      }
     ]
    },
    {
-    "text": "Dorfbewohner aufs Feld.",
+    "text": "Karotten oder Kartoffeln pflanzen – Weizen geht auch, aber den backt der Bauer zu Brot und gibt erst ab 25 Broten etwas ab.",
     "luft": [],
     "added": [
+     {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 0,
+      "z": 0,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 0,
+      "z": 0,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 0,
+      "z": 0,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 0,
+      "z": 1,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 0,
+      "z": 1,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 0,
+      "z": 1,
+      "id": "feldfrucht",
+      "p": {},
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Zwei Dorfbewohner: Der Bauer kommt aufs Feld – ein Dorfbewohner ohne Beruf läuft von selbst durch die Lücke zum Komposter, sonst im Boot hineinrudern. Vorher (auf normalem Boden) wirfst du ihm ein paar Karotten oder Kartoffeln zu. Der zweite darf kein Bauer werden (Nichtsnutz im grünen Kittel, oder einer, mit dem du schon gehandelt hast): mit einer Lore auf einer Schiene von Süden in seine Zelle schieben, Lore abbauen.",
+    "luft": [],
+    "added": [
+     {
+      "x": -2,
+      "y": 0,
+      "z": 0,
+      "id": "villager",
+      "p": {},
+      "ent": true
+     },
      {
       "x": 1,
       "y": 0,
@@ -6998,7 +6898,29 @@
     ]
    },
    {
-    "text": "Lücke schließen.",
+    "text": "Zelle im Süden schließen.",
+    "luft": [],
+    "added": [
+     {
+      "x": -2,
+      "y": 0,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -2,
+      "y": 1,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Feld im Süden schließen.",
     "luft": [],
     "added": [
      {
@@ -7038,133 +6960,95 @@
   ],
   "fertig": [
    {
-    "x": -2,
-    "y": -2,
+    "x": 0,
+    "y": -1,
+    "z": 0,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -1,
+    "z": 0,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 0,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -1,
+    "z": 0,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
+    "z": 1,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -1,
+    "z": 1,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 1,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -1,
+    "z": 1,
+    "id": "farmland",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -3,
+    "y": -1,
     "z": 0,
     "id": "chest",
     "p": {},
     "ent": false
    },
    {
+    "x": -2,
+    "y": -1,
+    "z": 0,
+    "id": "hopper",
+    "p": {
+     "f": "w"
+    },
+    "ent": false
+   },
+   {
     "x": -1,
-    "y": -2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": -2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -2,
-    "z": 0,
-    "id": "hopper",
-    "p": {
-     "f": "w"
-    },
-    "ent": false
-   },
-   {
-    "x": 0,
-    "y": -2,
-    "z": 1,
-    "id": "hopper",
-    "p": {
-     "f": "n"
-    },
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -2,
-    "z": 1,
-    "id": "hopper",
-    "p": {
-     "f": "n"
-    },
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -2,
-    "z": 1,
-    "id": "hopper",
-    "p": {
-     "f": "n"
-    },
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -2,
-    "z": 1,
-    "id": "hopper",
-    "p": {
-     "f": "n"
-    },
-    "ent": false
-   },
-   {
-    "x": 0,
     "y": -1,
     "z": 0,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": 0,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 0,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 0,
-    "id": "farmland",
-    "p": {},
+    "id": "hopper",
+    "p": {
+     "f": "w"
+    },
     "ent": false
    },
    {
@@ -7176,38 +7060,6 @@
     "ent": false
    },
    {
-    "x": 0,
-    "y": -1,
-    "z": 1,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": 1,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 2,
-    "y": -1,
-    "z": 1,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 1,
-    "id": "farmland",
-    "p": {},
-    "ent": false
-   },
-   {
     "x": -1,
     "y": 0,
     "z": -1,
@@ -7251,14 +7103,6 @@
     "x": 4,
     "y": 0,
     "z": -1,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": -1,
-    "y": 0,
-    "z": 0,
     "id": "stone_bricks",
     "p": {},
     "ent": false
@@ -7368,14 +7212,6 @@
     "ent": false
    },
    {
-    "x": -1,
-    "y": 1,
-    "z": 0,
-    "id": "stone_bricks",
-    "p": {},
-    "ent": false
-   },
-   {
     "x": 4,
     "y": 1,
     "z": 0,
@@ -7432,10 +7268,61 @@
     "ent": false
    },
    {
+    "x": -1,
+    "y": 1,
+    "z": 0,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "top",
+     "f": "s"
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": 0,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -3,
+    "y": 0,
+    "z": 0,
+    "id": "glass",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -3,
+    "y": 1,
+    "z": 0,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": 2,
+    "z": 0,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
     "x": 0,
     "y": 0,
     "z": 0,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7443,7 +7330,7 @@
     "x": 1,
     "y": 0,
     "z": 0,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7451,7 +7338,7 @@
     "x": 2,
     "y": 0,
     "z": 0,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7459,7 +7346,7 @@
     "x": 3,
     "y": 0,
     "z": 0,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7467,7 +7354,7 @@
     "x": 0,
     "y": 0,
     "z": 1,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7475,7 +7362,7 @@
     "x": 1,
     "y": 0,
     "z": 1,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7483,7 +7370,7 @@
     "x": 2,
     "y": 0,
     "z": 1,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
    },
@@ -7491,9 +7378,17 @@
     "x": 3,
     "y": 0,
     "z": 1,
-    "id": "wheat",
+    "id": "feldfrucht",
     "p": {},
     "ent": false
+   },
+   {
+    "x": -2,
+    "y": 0,
+    "z": 0,
+    "id": "villager",
+    "p": {},
+    "ent": true
    },
    {
     "x": 1,
@@ -7502,6 +7397,22 @@
     "id": "villager",
     "p": {},
     "ent": true
+   },
+   {
+    "x": -2,
+    "y": 0,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": 1,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
    },
    {
     "x": 1,
@@ -24333,7 +24244,7 @@
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Im Test 58 Schleime in 60 Minuten (allein liegender Schleim-Chunk, Tag)",
    "ort": [
     [
      "Schleim-Chunk, unter Y = 40 – finden z. B. mit dem Chunkbase Slime Chunk Finder.",
@@ -24348,6 +24259,10 @@
     [
      "Automatisch: Eisengolem als Köder, Magmablöcke töten, Trichter daneben sammeln.",
      "https://minecraft.wiki/w/Tutorial:Slime_farming"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: 58 Schleime in 60 Minuten in einem Schleim-Chunk ohne weitere in der Nähe.",
+     null
     ]
    ]
   },
@@ -28291,7 +28206,7 @@
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Keine belegte Zahl – im Test an echten Hexenhütten fielen nachts mehrere Hexen in den Schacht",
    "ort": [
     [
      "Hexenhütte im Sumpf; die Box ist 7 × 7 × 9 und reicht von 1 unter dem Hüttenboden bis 2 über das Dach – bis zu 3 Plattformen passen hinein.",
@@ -28302,6 +28217,10 @@
     [
      "Hexen haben 26 Leben – sie brauchen mindestens 29 Blöcke Fall.",
      "https://minecraft.wiki/w/Witch"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: an echten Hexenhütten spawnten Hexen, fielen und starben; die Beute lag in der Truhe.",
+     null
     ]
    ]
   },
@@ -35610,7 +35529,7 @@
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Im Test 3 Goldnuggets in 20 Minuten mit der 9 × 9-Plattform – größer = mehr",
    "ort": [
     [
      "Nether-Ödland; über dem Netherdach muss man nichts absichern.",
@@ -35625,6 +35544,10 @@
     [
      "Seit 1.21.5: XP und Spieler-Beute nur, wenn ein Spieler tötet.",
      "https://minecraft.wiki/w/Zombified_Piglin"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: Piglins spawnten, liefen zum Ei, fielen und starben; Nuggets in der Truhe.",
+     null
     ]
    ]
   },
@@ -39799,7 +39722,7 @@
   "out": "Enderperlen, XP",
   "where": "Im End, ~128 Blöcke von anderen Inseln",
   "afk": "Unten in der Mitte der Landestelle",
-  "why": "Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot in der Mitte, rundherum ein 3 × 3-Feld und dann ein Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und sterben. Der Ring liegt 2 Blöcke von der Endermilbe weg: Näher dran würden die Endermen sie erschlagen (8 Leben, ein Schlag 7). Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur 42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.",
+  "why": "Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot auf einer Stufe in der Mitte, rundherum ein Loch 5 × 5 mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und sterben. Das Loch ist 2 Blöcke breit: Endermen steigen ohne Sprung einen ganzen Block hoch und kämen über einen schmalen Ring hinüber – und direkt neben der Endermilbe würden sie sie erschlagen (8 Leben, ein Schlag 7). Ein Dach 3 × 3 zwei Blöcke über der Mitte: Endermen teleportieren sich ab und zu, und darunter passt keiner hin. Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur 42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.",
   "help": [
    [
     "Endermilbe verschwindet",
@@ -39811,12 +39734,12 @@
    ],
    [
     "Endermilbe ist tot",
-    "Der Lochring muss 2 Blöcke von ihr weg sein (3 × 3-Feld in der Mitte) – direkt daneben schlagen die Endermen sie."
+    "Das Loch um sie herum muss 2 Blöcke breit sein, und das Dach über der Mitte muss da sein – sonst teleportieren sich Endermen neben sie und schlagen sie."
    ]
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Im Test 47 Enderperlen in 20 Minuten (Plattform weit weg von anderen Inseln)",
    "ort": [
     [
      "Im End, mindestens 128 Blöcke von anderen Spawnflächen.",
@@ -39831,12 +39754,16 @@
     [
      "Seit 1.20.2 musst du mindestens 3 Blöcke über ihnen stehen.",
      "https://minecraft.wiki/w/Tutorial:Enderman_farming"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: 47 Perlen in 20 Minuten, die Endermilbe lebte am Ende noch. Nahe anderer Inseln kamen kaum Endermen.",
+     null
     ]
    ]
   },
   "steps": [
    {
-    "text": "Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein. In der Mitte bleibt ein Feld 3 × 3 stehen, rundherum ein Ring aus 16 Löchern – 2 Blöcke vom Mittelblock weg: Wer neben der Endermilbe steht, schlägt sie (8 Leben, ein Schlag 7), darum kommen die Endermen nie so nah heran.",
+    "text": "Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein, genau in der Mitte eine untere Stufe.",
     "luft": [],
     "added": [
      {
@@ -40000,6 +39927,46 @@
       "ent": false
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 2,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 7,
       "y": -1,
       "z": 2,
@@ -40032,6 +39999,14 @@
       "ent": false
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 3,
       "y": -1,
       "z": 3,
@@ -40049,6 +40024,14 @@
      },
      {
       "x": 5,
+      "y": -1,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
       "y": -1,
       "z": 3,
       "id": "end_stone",
@@ -40088,6 +40071,14 @@
       "ent": false
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 3,
       "y": -1,
       "z": 4,
@@ -40099,12 +40090,22 @@
       "x": 4,
       "y": -1,
       "z": 4,
+      "id": "slab",
+      "p": {
+       "half": "bottom"
+      },
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 4,
       "id": "end_stone",
       "p": {},
       "ent": false
      },
      {
-      "x": 5,
+      "x": 6,
       "y": -1,
       "z": 4,
       "id": "end_stone",
@@ -40144,6 +40145,14 @@
       "ent": false
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
       "x": 3,
       "y": -1,
       "z": 5,
@@ -40161,6 +40170,14 @@
      },
      {
       "x": 5,
+      "y": -1,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
       "y": -1,
       "z": 5,
       "id": "end_stone",
@@ -40193,6 +40210,46 @@
      },
      {
       "x": 1,
+      "y": -1,
+      "z": 6,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 6,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 6,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 6,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 6,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
       "y": -1,
       "z": 6,
       "id": "end_stone",
@@ -40362,7 +40419,85 @@
     ]
    },
    {
-    "text": "Auf den Mittelblock ein Boot. Eine Endermilbe hineinlocken (sie entsteht manchmal beim Perlenwurf und läuft dir nach) und ihr ein Namensschild geben – ohne verschwindet sie nach 2 Minuten.",
+    "text": "Über die Mitte ein Dach 3 × 3, zwei Blöcke über der Plattform (mit zwei Hilfsblöcken hochbauen, danach wieder abbauen). Endermen teleportieren sich ab und zu – unter diesem Dach ist für sie kein Platz, also landet keiner neben der Endermilbe. Sehen können sie sie trotzdem.",
+    "luft": [],
+    "added": [
+     {
+      "x": 3,
+      "y": 2,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": 2,
+      "z": 3,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 2,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": 2,
+      "z": 4,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 2,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": 2,
+      "z": 5,
+      "id": "end_stone",
+      "p": {},
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "Auf die Stufe ein Boot. Eine Endermilbe hineinlocken (sie entsteht manchmal beim Perlenwurf und läuft dir nach) und ihr ein Namensschild geben – ohne verschwindet sie nach 2 Minuten.",
     "luft": [],
     "added": [
      {
@@ -40390,7 +40525,187 @@
     ]
    },
    {
-    "text": "Erst jetzt in jedes Loch eine offene Falltür, die Klappe an der Außenkante – Endermen halten sie für Boden, wollen zur Endermilbe und fallen.",
+    "text": "Um die Stufe herum ein Loch 5 × 5 ausheben (die Stufe bleibt stehen) – 2 Blöcke breit: Wer neben der Endermilbe steht, schlägt sie (8 Leben, ein Schlag 7), und über einen 1 breiten Ring steigen Endermen hinüber.",
+    "luft": [
+     {
+      "x": 2,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 3
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 4
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 4
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 4
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 4
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 5
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 5
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 5
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 5
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 5
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 6
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 6
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 6
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 6
+     },
+     {
+      "x": 6,
+      "y": -1,
+      "z": 6
+     }
+    ],
+    "added": []
+   },
+   {
+    "text": "4 Falltüren an die Seiten der Stufe klicken (Klappe an der Stufe), alle öffnen.",
+    "luft": [],
+    "added": [
+     {
+      "x": 4,
+      "y": -1,
+      "z": 3,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": -1,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": -1,
+      "z": 4,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": -1,
+      "z": 5,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "16 Falltüren an den Rand des Lochs klicken (Klappe am Rand), alle öffnen. Die Ecken innen bleiben offen. Endermen halten die Falltüren für Boden, wollen zur Endermilbe und fallen.",
     "luft": [],
     "added": [
      {
@@ -41168,30 +41483,6 @@
     "ent": false
    },
    {
-    "x": 3,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -1,
-    "z": 3,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
     "x": 7,
     "y": -1,
     "z": 3,
@@ -41224,27 +41515,13 @@
     "ent": false
    },
    {
-    "x": 3,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
     "x": 4,
     "y": -1,
     "z": 4,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
-    "y": -1,
-    "z": 4,
-    "id": "end_stone",
-    "p": {},
+    "id": "slab",
+    "p": {
+     "half": "bottom"
+    },
     "ent": false
    },
    {
@@ -41273,30 +41550,6 @@
    },
    {
     "x": 1,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 3,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 4,
-    "y": -1,
-    "z": 5,
-    "id": "end_stone",
-    "p": {},
-    "ent": false
-   },
-   {
-    "x": 5,
     "y": -1,
     "z": 5,
     "id": "end_stone",
@@ -41491,6 +41744,78 @@
     "x": 8,
     "y": -1,
     "z": 8,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 2,
+    "z": 3,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 2,
+    "z": 3,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": 2,
+    "z": 3,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 2,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 2,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": 2,
+    "z": 4,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 2,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 2,
+    "z": 5,
+    "id": "end_stone",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": 2,
+    "z": 5,
     "id": "end_stone",
     "p": {},
     "ent": false
@@ -41502,6 +41827,54 @@
     "id": "endermite",
     "p": {},
     "ent": true
+   },
+   {
+    "x": 4,
+    "y": -1,
+    "z": 3,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": -1,
+    "z": 4,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -1,
+    "z": 4,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": -1,
+    "z": 5,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
    },
    {
     "x": 2,
@@ -42082,11 +42455,15 @@
    [
     "Keine Dreizacke",
     "Nur Ertrunkene, die mit Dreizack spawnen, lassen einen fallen (selten)."
+   ],
+   [
+    "Zu wenige",
+    "Das 6 × 6-Becken ist klein: Mach es breiter (gleiche Höhe, Schilder über dem Schacht), dann spawnen mehr."
    ]
   ],
   "verified": true,
   "meta": {
-   "rate": "Keine belegte Zahl",
+   "rate": "Wenig: im Test etwa 1 Ertrunkener pro Stunde – mehr Wasserfläche (Becken breiter) bringt mehr.",
    "ort": [
     [
      "Flussbiom: dort spawnen Ertrunkene in jeder Höhe (im Ozean nur unter Y 58).",
@@ -42101,6 +42478,10 @@
     [
      "Dreizack: 6,25 % spawnen mit einem; 8,5 % Drop-Chance, nur bei Tod durch Spieler.",
      "https://minecraft.wiki/w/Drowned"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: im Flussbiom spawnte in 60 Minuten 1 Ertrunkener im Becken und sank bis unten.",
+     null
     ]
    ]
   },
@@ -47327,7 +47708,7 @@
   "out": "Unheilvolle Flaschen, Armbrüste, Pfeile",
   "where": "Am Plünderer-Außenposten",
   "afk": "Oben auf dem Gerüstturm, 28 Blöcke hoch",
-  "why": "Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus Gerüst – durch Gerüst sehen sie hindurch. Sie rennen zu dir, treten auf die offenen Falltüren rund um den Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Ab und zu runter und sie erledigen: Jeder Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.",
+  "why": "Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus Gerüst – durch Gerüst sehen sie hindurch. Sie rennen zu dir, treten auf die offenen Falltüren im Grubenfeld rund um den Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Das Feld ist 2 breit: Über eine schmale Grube steigen sie hinüber. Ab und zu runter und sie erledigen: Jeder Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.",
   "help": [
    [
     "Keine Flaschen",
@@ -47340,7 +47721,7 @@
   ],
   "verified": true,
   "meta": {
-   "rate": "6 % der Plünderer werden Hauptmann; jeder lässt 1 Unheilvolle Flasche fallen (Wiki)",
+   "rate": "6 % der Plünderer werden Hauptmann; jeder lässt 1 Unheilvolle Flasche fallen (Wiki). Im Test saßen an einem echten Außenposten nach 30 Minuten 6–14 Plünderer in den Gruben.",
    "ort": [
     [
      "Spawn-Box laut Wiki: 72 × 54 × 72, mittig auf dem obersten Stockwerk.",
@@ -47351,14 +47732,48 @@
     [
      "Ein Hauptmann außerhalb eines Überfalls lässt immer eine Unheilvolle Flasche fallen.",
      "https://minecraft.wiki/w/Pillager"
+    ],
+    [
+     "Auf dem Testserver (26.3) nachgebaut und laufen lassen: an einem echten Außenposten saßen nach 30 Minuten 6–14 Plünderer in den Gruben.",
+     null
     ]
    ]
   },
   "steps": [
    {
-    "text": "Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum 8 Gruben ausheben, 2 tief – der Block in der Mitte bleibt.",
+    "text": "Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum ein Grubenfeld 5 × 5 ausheben, 2 tief – der Block in der Mitte bleibt. 2 breit, weil Plünderer über eine schmale Grube hinübersteigen.",
     "luft": [
      {
+      "x": -2,
+      "y": -1,
+      "z": -2
+     },
+     {
+      "x": -1,
+      "y": -1,
+      "z": -2
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": -2
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": -2
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": -2
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": -1
+     },
+     {
       "x": -1,
       "y": -1,
       "z": -1
@@ -47374,6 +47789,16 @@
       "z": -1
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": -1
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 0
+     },
+     {
       "x": -1,
       "y": -1,
       "z": 0
@@ -47382,6 +47807,16 @@
       "x": 1,
       "y": -1,
       "z": 0
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 0
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 1
      },
      {
       "x": -1,
@@ -47399,6 +47834,66 @@
       "z": 1
      },
      {
+      "x": 2,
+      "y": -1,
+      "z": 1
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": -1,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 2
+     },
+     {
+      "x": -2,
+      "y": -2,
+      "z": -2
+     },
+     {
+      "x": -1,
+      "y": -2,
+      "z": -2
+     },
+     {
+      "x": 0,
+      "y": -2,
+      "z": -2
+     },
+     {
+      "x": 1,
+      "y": -2,
+      "z": -2
+     },
+     {
+      "x": 2,
+      "y": -2,
+      "z": -2
+     },
+     {
+      "x": -2,
+      "y": -2,
+      "z": -1
+     },
+     {
       "x": -1,
       "y": -2,
       "z": -1
@@ -47414,6 +47909,16 @@
       "z": -1
      },
      {
+      "x": 2,
+      "y": -2,
+      "z": -1
+     },
+     {
+      "x": -2,
+      "y": -2,
+      "z": 0
+     },
+     {
       "x": -1,
       "y": -2,
       "z": 0
@@ -47422,6 +47927,16 @@
       "x": 1,
       "y": -2,
       "z": 0
+     },
+     {
+      "x": 2,
+      "y": -2,
+      "z": 0
+     },
+     {
+      "x": -2,
+      "y": -2,
+      "z": 1
      },
      {
       "x": -1,
@@ -47437,26 +47952,44 @@
       "x": 1,
       "y": -2,
       "z": 1
+     },
+     {
+      "x": 2,
+      "y": -2,
+      "z": 1
+     },
+     {
+      "x": -2,
+      "y": -2,
+      "z": 2
+     },
+     {
+      "x": -1,
+      "y": -2,
+      "z": 2
+     },
+     {
+      "x": 0,
+      "y": -2,
+      "z": 2
+     },
+     {
+      "x": 1,
+      "y": -2,
+      "z": 2
+     },
+     {
+      "x": 2,
+      "y": -2,
+      "z": 2
      }
     ],
     "added": []
    },
    {
-    "text": "In jede Grube oben eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock – sonst laufen sie auf den Klappen-Kanten bis zur Mitte). Plünderer halten sie für Boden.",
+    "text": "4 Falltüren an die Seiten des Mittelblocks klicken (Klappe am Mittelblock), alle öffnen.",
     "luft": [],
     "added": [
-     {
-      "x": -1,
-      "y": -1,
-      "z": -1,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
      {
       "x": 0,
       "y": -1,
@@ -47464,37 +47997,13 @@
       "id": "oak_trapdoor",
       "p": {
        "half": "bottom",
-       "f": "s",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 1,
-      "y": -1,
-      "z": -1,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "s",
+       "f": "n",
        "open": true
       },
       "ent": false
      },
      {
       "x": -1,
-      "y": -1,
-      "z": 0,
-      "id": "oak_trapdoor",
-      "p": {
-       "half": "bottom",
-       "f": "e",
-       "open": true
-      },
-      "ent": false
-     },
-     {
-      "x": 1,
       "y": -1,
       "z": 0,
       "id": "oak_trapdoor",
@@ -47506,13 +48015,13 @@
       "ent": false
      },
      {
-      "x": -1,
+      "x": 1,
       "y": -1,
-      "z": 1,
+      "z": 0,
       "id": "oak_trapdoor",
       "p": {
        "half": "bottom",
-       "f": "n",
+       "f": "e",
        "open": true
       },
       "ent": false
@@ -47524,6 +48033,180 @@
       "id": "oak_trapdoor",
       "p": {
        "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     }
+    ]
+   },
+   {
+    "text": "16 Falltüren an den Rand des Feldes klicken (Klappe am Rand), alle öffnen. Die Ecken innen bleiben offen. Plünderer halten die Falltüren für Boden.",
+    "luft": [],
+    "added": [
+     {
+      "x": -2,
+      "y": -1,
+      "z": -2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": -1,
+      "z": -2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": -2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": -1,
+      "z": -2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": -2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "s",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": -1,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": -1,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 0,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 0,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 1,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "e",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 1,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "w",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -2,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": -1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
        "f": "n",
        "open": true
       },
@@ -47532,7 +48215,19 @@
      {
       "x": 1,
       "y": -1,
-      "z": 1,
+      "z": 2,
+      "id": "oak_trapdoor",
+      "p": {
+       "half": "bottom",
+       "f": "n",
+       "open": true
+      },
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": -1,
+      "z": 2,
       "id": "oak_trapdoor",
       "p": {
        "half": "bottom",
@@ -47544,7 +48239,7 @@
     ]
    },
    {
-    "text": "Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: über die Grube ins Gerüst springen.",
+    "text": "Auf den Mittelblock einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: einen Block in eine Grube setzen und danach wieder abbauen.",
     "luft": [],
     "added": [
      {
@@ -47790,55 +48485,19 @@
   ],
   "fertig": [
    {
-    "x": -1,
-    "y": -1,
-    "z": -1,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "s",
-     "open": true
-    },
-    "ent": false
-   },
-   {
     "x": 0,
     "y": -1,
     "z": -1,
     "id": "oak_trapdoor",
     "p": {
      "half": "bottom",
-     "f": "s",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 1,
-    "y": -1,
-    "z": -1,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "s",
+     "f": "n",
      "open": true
     },
     "ent": false
    },
    {
     "x": -1,
-    "y": -1,
-    "z": 0,
-    "id": "oak_trapdoor",
-    "p": {
-     "half": "bottom",
-     "f": "e",
-     "open": true
-    },
-    "ent": false
-   },
-   {
-    "x": 1,
     "y": -1,
     "z": 0,
     "id": "oak_trapdoor",
@@ -47850,13 +48509,13 @@
     "ent": false
    },
    {
-    "x": -1,
+    "x": 1,
     "y": -1,
-    "z": 1,
+    "z": 0,
     "id": "oak_trapdoor",
     "p": {
      "half": "bottom",
-     "f": "n",
+     "f": "e",
      "open": true
     },
     "ent": false
@@ -47868,6 +48527,174 @@
     "id": "oak_trapdoor",
     "p": {
      "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": -1,
+    "z": -2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": -1,
+    "z": -2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
+    "z": -2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": -1,
+    "z": -2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": -2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "s",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": -1,
+    "z": -1,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": -1,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": -1,
+    "z": 0,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 0,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": -1,
+    "z": 1,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "e",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 1,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "w",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -2,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": -1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
      "f": "n",
      "open": true
     },
@@ -47876,7 +48703,19 @@
    {
     "x": 1,
     "y": -1,
-    "z": 1,
+    "z": 2,
+    "id": "oak_trapdoor",
+    "p": {
+     "half": "bottom",
+     "f": "n",
+     "open": true
+    },
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": -1,
+    "z": 2,
     "id": "oak_trapdoor",
     "p": {
      "half": "bottom",

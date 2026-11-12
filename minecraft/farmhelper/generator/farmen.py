@@ -246,60 +246,55 @@ f.schritt("Seetang auf den Boden setzen – fertig. Wächst der Seetang bis oben
 f.pruefe(boden=GRAS, erwartet={"items": {"minecraft:kelp": 4}})
 
 f = farm("weizen")
-f.zeichen(A="farmland", O="composter", V="villager", Q="wheat")
-f.schritt("Feld 4 × 2 ausheben, 2 tief, links davon Platz für Trichter und Truhe, rechts ein Loch fürs Wasser.", {
-    -2: """
-        ------
-        ..----
-    """,
+f.zeichen(A="farmland", O="composter", V="villager", K="villager", Q="feldfrucht", Y="rail",
+          T=("oak_trapdoor", {"half": "top", "f": "s"}), w=("hopper", "w"))
+f.schritt("Feld 4 × 2: Erde zu Ackerboden hacken, rechts daneben ein Loch mit einer Wasserquelle. Links daneben 2 "
+          "Löcher für Trichter, links davon eins für die Truhe und noch eins zum Hineinsteigen (davor stehst du zum "
+          "Öffnen der Truhe).", {
     -1: """
-        -------
-        ..----
-    """}, x0=-2)
-f.schritt("8 Trichter unter das Feld: hintere Reihe nach Norden, vordere Reihe nach Westen, dann über einen "
-          "Trichter in die Truhe.", {
-    -2: """
-        C<<<<<
-        ..^^^^
-    """}, x0=-2)
-f.schritt("Erde auf die Trichter, dann zu Ackerboden hacken. Rechts daneben eine Wasserquelle.", {
-    -1: """
-        AAAAW
-        AAAA.
-    """})
+        ----AAAA-
+        ....AAAA.
+    """}, x0=-4)
+f.schritt("Wasser, Truhe und 2 Trichter, die nach Westen in die Truhe zeigen (schleichend an die Truhe klicken).", {
+    -1: ".Cww....W"}, x0=-4)
 f.schritt("Wand 2 hoch rund ums Feld (durch einen Zaun schlagen Zombies zu; hinter einer Wand sieht der Bauer sie "
-          "nicht), links ein Komposter mit Block darüber (Arbeitsplatz des Bauern). Vorne (Süden) 2 Blöcke breit "
-          "offen lassen.", {
+          "nicht). Links ein Komposter mit Block darüber (Arbeitsplatz des Bauern), daneben bleibt der Trichter frei. "
+          "Vorne (Süden) 2 Blöcke breit offen lassen.", {
     0: """
         ######
-        #....#
+        .....#
         O....#
         ##..##
     """,
     1: """
         ######
-        #....#
+        .....#
         #....#
         ##..##
     """}, x0=-1, z0=-1)
-f.schritt("Weizen säen. Dann einen Dorfbewohner ohne Beruf holen (keinen Nichtsnutz im grünen Kittel). Auf normalem "
-          "Boden, nicht auf dem Feld (dort schlucken die Trichter alles), wirfst du ihm ein paar Stapel Karotten oder "
-          "Kartoffeln zu. Anleinen lassen sich Dorfbewohner nicht: Schieb ihn in ein Boot, steig dazu und rudere durch "
-          "die Lücke aufs Feld (an Land langsam, geht aber), dann aussteigen, hinausgehen, das Boot von außen "
-          "abbauen. Mit dem Komposter wird er Bauer, erntet und pflanzt mit seinem Vorrat nach.", {
-    0: """
-        QQQQ
-        QQQQ
-    """})
-f.schritt("Dorfbewohner aufs Feld.", {0: "V"}, x0=1)
-f.schritt("Lücke schließen.", {0: "##", 1: "##"}, x0=1, z0=2)
-f.pruefe(boden=GRAS, zeit="day",
+f.schritt("Über den vorderen Trichter eine Falltür in die OBERE Hälfte (an die Wand im Norden klicken, oben): Darunter "
+          "passt kein Dorfbewohner, aber Geworfenes fliegt durch.", {1: "T"}, x0=-1)
+f.schritt("Zelle für den zweiten Dorfbewohner über dem hinteren Trichter: Wände im Norden, Glas über der Truhe, oben "
+          "ein Block. Im Süden noch offen lassen.", {
+    0: ".#\nG.", 1: ".#\n#.", 2: "..\n.#"}, x0=-3, z0=-1)
+f.schritt("Karotten oder Kartoffeln pflanzen – Weizen geht auch, aber den backt der Bauer zu Brot und gibt erst ab "
+          "25 Broten etwas ab.", {0: "QQQQ\nQQQQ"})
+f.schritt("Zwei Dorfbewohner: Der Bauer kommt aufs Feld – ein Dorfbewohner ohne Beruf läuft von selbst durch die "
+          "Lücke zum Komposter, sonst im Boot hineinrudern. Vorher (auf normalem Boden) wirfst du ihm ein paar "
+          "Karotten oder Kartoffeln zu. Der zweite darf kein Bauer werden (Nichtsnutz im grünen Kittel, oder einer, mit dem du schon "
+          "gehandelt hast): mit einer Lore auf einer Schiene von Süden in seine Zelle schieben, Lore abbauen.", {
+    0: "K..V"}, x0=-2)
+f.schritt("Zelle im Süden schließen.", {0: "#", 1: "#"}, x0=-2, z0=1)
+f.schritt("Feld im Süden schließen.", {0: "##", 1: "##"}, x0=1, z0=2)
+f.pruefe(boden=GRAS, zeit="cycle",
          nachher=["kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..8]",
-                  'summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,VillagerData:{profession:'
-                  '"minecraft:farmer",level:1,type:"minecraft:plains"},CanPickUpLoot:1b,Inventory:[{id:'
-                  '"minecraft:wheat_seeds",count:64}]}',
-                  "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:wheat[age=7]"],
-         erwartet={"items": {"minecraft:wheat": 4}})
+                  'summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{'
+                  'profession:"minecraft:farmer",level:1,type:"minecraft:plains"},Inventory:[{id:'
+                  '"minecraft:carrot",count:8}]}',
+                  'summon minecraft:villager {x-2}.5 {y} {z}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{'
+                  'profession:"minecraft:nitwit",level:1,type:"minecraft:plains"}}',
+                  "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:carrots[age=7]"],
+         erwartet={"items": {"minecraft:carrot": 1}})
 
 f = farm("baum")
 f.zeichen(S="dark_oak_sapling")
@@ -705,21 +700,27 @@ f.pruefe(dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit
          erwartet={"items": {"minecraft:rotten_flesh": 1}})
 
 f = farm("enderman")
-f.zeichen(N="end_stone", B="oak_boat", X="endermite",
+f.zeichen(N="end_stone", B="oak_boat", X="endermite", U=("slab", {"half": "bottom"}),
           a=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
           b=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
           c=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
           d=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}))
-f.schritt("Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein. In der Mitte bleibt "
-          "ein Feld 3 × 3 stehen, rundherum ein Ring aus 16 Löchern – 2 Blöcke vom Mittelblock weg: Wer neben der "
-          "Endermilbe steht, schlägt sie (8 Leben, ein Schlag 7), darum kommen die Endermen nie so nah heran.", {
-    -1: "\n".join(["N" * 9] * 2 + ["NN.....NN", "NN.NNN.NN", "NN.NNN.NN", "NN.NNN.NN", "NN.....NN"]
-                  + ["N" * 9] * 2)})
-f.schritt("Auf den Mittelblock ein Boot. Eine Endermilbe hineinlocken (sie entsteht manchmal beim Perlenwurf und "
-          "läuft dir nach) und ihr ein Namensschild geben – ohne verschwindet sie nach 2 Minuten.", {0: "B"}, x0=4, z0=4)
+f.schritt("Im End, mindestens 128 Blöcke von jeder anderen Insel: Plattform 9 × 9 aus Endstein, genau in der Mitte "
+          "eine untere Stufe.", {
+    -1: "\n".join(["N" * 9] * 4 + ["NNNNUNNNN"] + ["N" * 9] * 4)})
+f.schritt("Über die Mitte ein Dach 3 × 3, zwei Blöcke über der Plattform (mit zwei Hilfsblöcken hochbauen, danach "
+          "wieder abbauen). Endermen teleportieren sich ab und zu – unter diesem Dach ist für sie kein Platz, also "
+          "landet keiner neben der Endermilbe. Sehen können sie sie trotzdem.", {2: "NNN\nNNN\nNNN"}, x0=3, z0=3)
+f.schritt("Auf die Stufe ein Boot. Eine Endermilbe hineinlocken (sie entsteht manchmal beim Perlenwurf und läuft dir "
+          "nach) und ihr ein Namensschild geben – ohne verschwindet sie nach 2 Minuten.", {0: "B"}, x0=4, z0=4)
 f.schritt("Endermilbe im Boot.", {0: "X"}, x0=4, z0=4)
-f.schritt("Erst jetzt in jedes Loch eine offene Falltür, die Klappe an der Außenkante – Endermen halten sie für "
-          "Boden, wollen zur Endermilbe und fallen.", {
+f.schritt("Um die Stufe herum ein Loch 5 × 5 ausheben (die Stufe bleibt stehen) – 2 Blöcke breit: Wer neben der "
+          "Endermilbe steht, schlägt sie (8 Leben, ein Schlag 7), und über einen 1 breiten Ring steigen Endermen "
+          "hinüber.", {-1: "-----\n-----\n--.--\n-----\n-----"}, x0=2, z0=2)
+f.schritt("4 Falltüren an die Seiten der Stufe klicken (Klappe an der Stufe), alle öffnen.", {
+    -1: ".b.\nd.c\n.a."}, x0=3, z0=3)
+f.schritt("16 Falltüren an den Rand des Lochs klicken (Klappe am Rand), alle öffnen. Die Ecken innen bleiben offen. "
+          "Endermen halten die Falltüren für Boden, wollen zur Endermilbe und fallen.", {
     -1: "aaaaa\nc...d\nc...d\nc...d\nbbbbb"}, x0=2, z0=2)
 f.schritt("44 Blöcke unter der Plattform ein Boden 5 × 5 mit einem Rand: Der Fall tötet die Endermen. Du stehst "
           "in der Mitte (dort fällt keiner hin). Die Perlen landen rund um dich – alle paar Minuten einmal "
@@ -733,8 +734,8 @@ f.pruefe(dimension="the_end", zeit="day",
                   "kill @e[type=minecraft:oak_boat,x={x},y={y},z={z},distance=..8]",
                   'summon minecraft:oak_boat {x+4}.5 {y} {z+4}.5 {Passengers:[{id:"minecraft:endermite",'
                   'PersistenceRequired:1b}]}'],
-         bereich=[3, 0, 3, 5, 2, 5],
-         erwartet={"boden": {"minecraft:ender_pearl": 1}, "wesen": {"minecraft:endermite": 1}})
+         bereich=[3, 0, 3, 5, 2, 5], ursprung=[400, 400],     # im leeren Ring um die Hauptinsel: keine Inseln nah
+         erwartet={"beute": {"minecraft:ender_pearl": 2}, "wesen": {"minecraft:endermite": 1}})
 
 f = farm("hexe")
 f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
@@ -800,23 +801,26 @@ f.zeichen(a=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
           b=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
           c=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
           d=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}), X="scaffolding")
-ring = "---\n-.-\n---"
-f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum 8 Gruben ausheben, "
-          "2 tief – der Block in der Mitte bleibt.", {-1: ring, -2: ring}, x0=-1, z0=-1)
-f.schritt("In jede Grube oben eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock – sonst laufen "
-          "sie auf den Klappen-Kanten bis zur Mitte). Plünderer halten sie für Boden.", {
-    -1: "aaa\nc.d\nbbb"}, x0=-1, z0=-1)
-f.schritt("Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die "
-          "Plünderer hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, "
-          "treten auf die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie "
-          "erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: über die "
-          "Grube ins Gerüst springen.", {
+feld = "-----\n-----\n--.--\n-----\n-----"
+f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum ein Grubenfeld 5 × 5 "
+          "ausheben, 2 tief – der Block in der Mitte bleibt. 2 breit, weil Plünderer über eine schmale Grube "
+          "hinübersteigen.", {-1: feld, -2: feld}, x0=-2, z0=-2)
+f.schritt("4 Falltüren an die Seiten des Mittelblocks klicken (Klappe am Mittelblock), alle öffnen.", {
+    -1: ".b.\nd.c\n.a."}, x0=-1, z0=-1)
+f.schritt("16 Falltüren an den Rand des Feldes klicken (Klappe am Rand), alle öffnen. Die Ecken innen bleiben offen. "
+          "Plünderer halten die Falltüren für Boden.", {
+    -1: "aaaaa\nc...d\nc...d\nc...d\nbbbbb"}, x0=-2, z0=-2)
+f.schritt("Auf den Mittelblock einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer "
+          "hindurch (durch Erde oder Glas nicht), und unten im Gerüst ist für sie Platz: Sie rennen dorthin, treten auf "
+          "die Falltüren und sitzen in der Grube fest. Ab und zu im Gerüst hinunter (Schleichen) und sie erledigen: "
+          "Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Hinein und hinaus: einen Block in eine "
+          "Grube setzen und danach wieder abbauen.", {
     **{y: "X" for y in range(0, 28)}})
 f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
          bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72,
                   "oberflaeche": True},
-         bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 1}})
+         bereich=[-2, -2, -2, 2, -1, 2], erwartet={"wesen": {"minecraft:pillager": 1}})
 
 f = farm("lohe")
 f.zeichen(Q="spawner", N="nether_bricks")
@@ -855,12 +859,11 @@ f.schritt("2 Fackeln auf den Boden (siehe Plan) – dann ist es überall hell ge
           "andere Monster schon.", {0: "\n".join(["." * 16] * 8 + ["....T......T...."] + ["." * 16] * 7)})
 f.schritt("24–32 Blöcke weg warten (z. B. 25 Blöcke darüber in einer kleinen Höhle), dann runter und die Schleime "
           "erschlagen.", {25: "P"}, x0=8, z0=8)
-# Test in der normalen Welt (Seed 12345, Chunk 400/251 ist ein Schleim-Chunk): In der flachen Testwelt füllen
-# Schleime auf der Oberfläche (y -61, auch „unter 40“) das Monster-Limit. Den freigeräumten Platz über dem Chunk
-# wieder mit Stein füllen, nur der Platz des Testspielers bleibt frei.
-f.pruefe(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=4, ursprung=[6400, 4016], welt="struktur",
-         vorher=["fill {x-6} {y+5} {z-6} {x+21} {y+31} {z+21} minecraft:stone"],
-         nachher=["fill {x+8} {y+25} {z+8} {x+8} {y+26} {z+8} minecraft:air"],
+# Test in der flachen Welt (Seed 12345): Chunk 43055/43015 ist ein Schleim-Chunk ohne weitere in 3 Chunks Umkreis.
+# Raum auf Höhe 37 (unter 40), darunter alles mit Stein füllen – sonst spawnen Schleime auf der flachen Oberfläche
+# (y -61, auch „unter 40“) und füllen das Monster-Limit. Bei Tag spawnt oben im Hellen sonst nichts.
+f.pruefe(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=4, ursprung=[688880, 688240], hoehe=37,
+         zeit="day", vorher=["fill {x} -60 {z} {x+15} {y-7} {z+15} minecraft:stone"],
          erwartet={"wesen": {"minecraft:slime": 1}})
 
 f = farm("ueberfall")
@@ -1038,7 +1041,7 @@ WEIT = ["forceload add {x-18} {z-18} {x+18} {z+18}",
     "aussenposten_mech", boden=GRAS, zeit="day", vorher=WEIT,
     nachher=mobs("pillager", [(0, 0, -12), (0, 0, 12), (-12, 0, 0), (12, 0, 0), (9, 0, 9), (-9, 0, -9)],
                  'PersistenceRequired:1b,equipment:{mainhand:{id:"minecraft:crossbow",count:1}}'),
-    bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 4}})
+    bereich=[-2, -2, -2, 2, -1, 2], erwartet={"wesen": {"minecraft:pillager": 4}})
 [f for f in Farm.alle if f.id == "gold"][0].pruefe_auch(
     "gold_mech", dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit="day",
     nachher=mobs("zombified_piglin", [(0, 26, 0), (8, 26, 8), (0, 26, 8), (8, 26, 0), (1, 26, 6), (7, 26, 2)]),

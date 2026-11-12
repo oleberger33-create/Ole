@@ -488,8 +488,9 @@ TEXTE["hexe"].update(
 TEXTE["aussenposten"].update(
     afk="Oben auf dem Gerüstturm, 28 Blöcke hoch",
     why="Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus "
-        "Gerüst – durch Gerüst sehen sie hindurch. Sie rennen zu dir, treten auf die offenen Falltüren rund um den "
-        "Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Ab und zu runter und sie erledigen: Jeder "
+        "Gerüst – durch Gerüst sehen sie hindurch. Sie rennen zu dir, treten auf die offenen Falltüren im Grubenfeld "
+        "rund um den Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Das Feld ist 2 breit: Über eine "
+        "schmale Grube steigen sie hinüber. Ab und zu runter und sie erledigen: Jeder "
         "Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.")
 TEXTE["gold"]["help"] = TEXTE["gold"]["help"] + [
     ["Wenig Gold", "Spawns verteilen sich auf alle dunklen Flächen bis 128 Blöcke um dich – auch auf Höhlen unter dem "
@@ -607,13 +608,16 @@ _hilfe("ueberfall", "Dorfbewohner kommt nicht ins Bett", "Die Lücke vorne offen
                                                         "hat (grüne Partikel) – erst dann zumachen.")
 TEXTE["enderman"].update(
     afk="Unten in der Mitte der Landestelle",
-    why="Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot in der Mitte, rundherum "
-        "ein 3 × 3-Feld und dann ein Ring aus Löchern mit offenen Falltüren (sie halten sie für Boden). Sie fallen "
-        "44 Blöcke und sterben. Der Ring liegt 2 Blöcke von der Endermilbe weg: Näher dran würden die Endermen sie "
-        "erschlagen (8 Leben, ein Schlag 7). Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur "
+    why="Endermen hassen Endermilben. Eine Endermilbe mit Namensschild sitzt in einem Boot auf einer Stufe in der "
+        "Mitte, rundherum ein Loch 5 × 5 mit offenen Falltüren (sie halten sie für Boden). Sie fallen 44 Blöcke und "
+        "sterben. Das Loch ist 2 Blöcke breit: Endermen steigen ohne Sprung einen ganzen Block hoch und kämen über "
+        "einen schmalen Ring hinüber – und direkt neben der Endermilbe würden sie sie erschlagen (8 Leben, ein "
+        "Schlag 7). Ein Dach 3 × 3 zwei Blöcke über der Mitte: Endermen teleportieren sich ab und zu, und darunter "
+        "passt keiner hin. Du stehst unten in der Mitte und sammelst die Perlen ein. Für XP: nur "
         "42 Blöcke tief – dann kommen sie mit ½ Herz an; stell dich dann 3 Blöcke über sie.")
-_hilfe("enderman", "Endermilbe ist tot", "Der Lochring muss 2 Blöcke von ihr weg sein (3 × 3-Feld in der Mitte) – "
-                                         "direkt daneben schlagen die Endermen sie.")
+_hilfe("enderman", "Endermilbe ist tot", "Das Loch um sie herum muss 2 Blöcke breit sein, und das Dach über der "
+                                         "Mitte muss da sein – sonst teleportieren sich Endermen neben sie und "
+                                         "schlagen sie.")
 TEXTE["gold"]["why"] = (
     "Zombifizierte Piglins spawnen auf Netherrack. Sie wollen das Schildkrötenei zertrampeln – erreichbar ist es nur "
     "über ein Loch mit einer offenen Falltür, die sie für Boden halten. Sie fallen 25 Blöcke und sterben. Seit 1.21.5 "
@@ -668,3 +672,40 @@ TEXTE["witherskelett"]["why"] = (
     "im Blick hast. Näher als 24 Blöcke spawnt nichts – warte etwas weg und kämpfe dann mit Plünderung III. Im Test "
     "spawnten sie in der Festung, auf der Fläche selbst in 30 Minuten aber keins: Je mehr andere Flächen der Festung "
     "du mit Stufen belegst, desto mehr kommen hierher.")
+
+# Messwerte aus den Tests (Testserver 26.3, normale Zufallsticks; 20 Spielminuten = 24 000 Ticks)
+def _messung(fid, rate, test):
+    TEXTE[fid]["meta"]["rate"] = rate
+    TEXTE[fid]["meta"]["meta"] = [e for e in TEXTE[fid]["meta"]["meta"] if not str(e[0]).startswith(TEST)] + [
+        [TEST + test, None]]
+
+
+_messung("ertrunkene", "Wenig: im Test etwa 1 Ertrunkener pro Stunde – mehr Wasserfläche (Becken breiter) bringt "
+                       "mehr.",
+         "im Flussbiom spawnte in 60 Minuten 1 Ertrunkener im Becken und sank bis unten.")
+TEXTE["ertrunkene"]["help"] = [list(e) for e in TEXTE["ertrunkene"]["help"]] + [
+    ["Zu wenige", "Das 6 × 6-Becken ist klein: Mach es breiter (gleiche Höhe, Schilder über dem Schacht), dann "
+                  "spawnen mehr."]]
+_messung("enderman", "Im Test 47 Enderperlen in 20 Minuten (Plattform weit weg von anderen Inseln)",
+         "47 Perlen in 20 Minuten, die Endermilbe lebte am Ende noch. Nahe anderer Inseln kamen kaum Endermen.")
+_messung("schleim", "Im Test 58 Schleime in 60 Minuten (allein liegender Schleim-Chunk, Tag)",
+         "58 Schleime in 60 Minuten in einem Schleim-Chunk ohne weitere in der Nähe.")
+_messung("aussenposten", "6 % der Plünderer werden Hauptmann; jeder lässt 1 Unheilvolle Flasche fallen (Wiki). Im "
+                         "Test saßen an einem echten Außenposten nach 30 Minuten 6–14 Plünderer in den Gruben.",
+         "an einem echten Außenposten saßen nach 30 Minuten 6–14 Plünderer in den Gruben.")
+_messung("hexe", "Keine belegte Zahl – im Test an echten Hexenhütten fielen nachts mehrere Hexen in den Schacht",
+         "an echten Hexenhütten spawnten Hexen, fielen und starben; die Beute lag in der Truhe.")
+_messung("gold", "Im Test 3 Goldnuggets in 20 Minuten mit der 9 × 9-Plattform – größer = mehr",
+         "Piglins spawnten, liefen zum Ei, fielen und starben; Nuggets in der Truhe.")
+_messung("weizen", "Im Test 16 Karotten in 40 Minuten mit 8 Feldern – mehr Felder = mehr",
+         "der Bauer erntete, warf den Überschuss dem zweiten Dorfbewohner zu, die Trichter fingen ihn auf.")
+TEXTE["weizen"].update(
+    name="Karotten/Kartoffeln mit Bauern", out="Karotten, Kartoffeln (auch Brot, Rote Bete)",
+    why="Ein Bauer (Dorfbewohner mit Komposter als Arbeitsplatz) erntet reife Feldfrüchte, hebt sie auf und pflanzt "
+        "nach. Hat er mehr als 24 Stück einer Sorte, wirft er den Rest einem anderen Dorfbewohner zu: Der steht in "
+        "einer Zelle auf einem Trichter, davor liegt noch ein Trichter – sie fangen alles auf und füllen die Truhe. "
+        "Weizen macht er zu Brot und gibt erst ab 25 Broten etwas ab, darum lieber Karotten oder Kartoffeln. Die "
+        "Wand ist 2 hoch: Durch einen Zaun schlagen Zombies zu.")
+_hilfe("weizen", "Felder bleiben leer")
+_hilfe("weizen", "Nichts in der Truhe", "Er gibt erst ab mehr als 24 Stück einer Sorte ab. Der zweite Dorfbewohner "
+                                        "darf kein Bauer sein und muss in Wurfweite stehen (direkt neben dem Feld).")
