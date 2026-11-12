@@ -210,3 +210,21 @@ def block(b, r):
                 "pruefen": f"minecraft:powered_rail[shape={form}]", "item": "minecraft:powered_rail",
                 "name": "Antriebsschiene", "schluessel": f"rail:{form}"}
     raise KeyError(f"Block ohne Übersetzung: {i}")
+
+
+# ---- Zusätzliche Blöcke aus den Profi-Varianten (generator/profi/*.py): BLOECKE = {...} im EINFACH-Format,
+# GERICHTET_NEU = {...} im GERICHTET-Format, jeweils als reines Literal (wird hier gelesen, nicht ausgeführt)
+def _profi_bloecke():
+    import ast
+    import glob
+    import os
+    for pfad in sorted(glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "profi", "*.py"))):
+        for knoten in ast.parse(open(pfad, encoding="utf-8").read()).body:
+            if isinstance(knoten, ast.Assign) and len(knoten.targets) == 1 and \
+                    getattr(knoten.targets[0], "id", None) in ("BLOECKE", "GERICHTET_NEU"):
+                ziel = EINFACH if knoten.targets[0].id == "BLOECKE" else GERICHTET
+                for k, v in ast.literal_eval(knoten.value).items():
+                    ziel.setdefault(k, tuple(v))
+
+
+_profi_bloecke()

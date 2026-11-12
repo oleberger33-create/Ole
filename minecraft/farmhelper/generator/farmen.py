@@ -1048,10 +1048,17 @@ WEIT = ["forceload add {x-18} {z-18} {x+18} {z+18}",
     erwartet={"items": {"minecraft:gold_nugget": 1}})
 
 
+# ===================================================================== Profi-Varianten (generator/profi/*.py)
+import profi_basis  # noqa: E402
+
+PROFI = profi_basis.lade_alle()
+REIHENFOLGE_ALLE = [i for fid in REIHENFOLGE for i in ([fid, fid + "_profi"] if fid in PROFI else [fid])]
+
+
 if __name__ == "__main__":
     if "--material" in sys.argv:
         for f in Farm.alle:
             print(f.id, f.material())
     else:
-        p, t = schreiben(reihenfolge=REIHENFOLGE)
+        p, t = schreiben(reihenfolge=REIHENFOLGE_ALLE)
         print(len(p), "Farmen,", len(t), "Tests")

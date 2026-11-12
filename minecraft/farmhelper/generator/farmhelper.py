@@ -32,6 +32,11 @@ PLAENE = json.load(open(sys.argv[1], encoding="utf-8"))
 # Blöcke, die in einer Farm von selbst entstehen (Ertrag oder fließende Flüssigkeit): kein Geist, keine Prüfung
 # Blöcke, die in einer Farm von selbst entstehen (Ertrag): kein Geist, keine Prüfung
 VON_SELBST_IN = {"bruchstein": {"cobblestone"}, "blumen": {"poppy"}}
+
+
+def basis(fid):
+    """Profi-Varianten (<farm>_profi) übernehmen Symbol, Ort-Prüfung und Behälter-Inhalte ihrer Grundfarm."""
+    return fid[:-len("_profi")] if fid.endswith("_profi") else fid
 WACHSEN = {"sugar_cane", "kelp", "bamboo", "cactus"}        # wachsen von selbst nach oben: nur der unterste zählt
 SEITEN4 = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}
 # Was in Behälter gehört oder eingestellt werden muss (Farm: [(Block, Prüfung, Item, Name, Text im Spiel)])
@@ -49,7 +54,7 @@ INHALT = {
 
 def vorbereiten(f):
     """Pläne fürs Bauen im Spiel aufbereiten (Ertrag weg, Betten, Katzen, Befüllen)."""
-    weg = VON_SELBST_IN.get(f["id"], set())
+    weg = VON_SELBST_IN.get(basis(f["id"]), set())
     f["fertig"] = [b for b in f["fertig"] if b["id"] not in weg]
     for st in f["steps"]:
         st["added"] = [b for b in st["added"] if b["id"] not in weg]
@@ -71,7 +76,7 @@ def vorbereiten(f):
                 frei -= {pos, n}
                 break
     # Befüllen: ein eigener Schritt direkt nach dem Schritt, in dem der Behälter gesetzt wird
-    for block_id, pruefen, item, name, text in INHALT.get(f["id"], []):
+    for block_id, pruefen, item, name, text in INHALT.get(basis(f["id"]), []):
         for k, st in enumerate(f["steps"]):
             ziel = [b for b in st["added"] if b["id"] == block_id]
             if ziel:
@@ -407,8 +412,8 @@ NUR_OBERWELT = {"zuckerrohr", "bambus", "kaktus", "kuerbis", "seetang", "weizen"
 def ort_zeilen(fid):
     """Prüfzeilen: laufen als Spieler an der zu prüfenden Stelle; Ergebnis per tellraw nur an ihn."""
     z = [f'tellraw @s {{text:"— Ort-Check —",color:"gold"}}']
-    pr = list(PRUEF.get(fid, []))
-    if fid in NUR_OBERWELT:
+    pr = list(PRUEF.get(basis(fid), []))
+    if basis(fid) in NUR_OBERWELT:
         pr.insert(0, ("dimension", "minecraft:overworld", "In der Oberwelt", "Nicht in der Oberwelt"))
 
     def aus(gut, schlecht, bedingung_gut):
@@ -467,7 +472,7 @@ def balken(teil, gesamt, breite=20):
 
 
 def titel(f):
-    return [bild(ICON.get(f["id"], "wheat")), {"text": "  " + f["name"], "bold": True, "color": "gold"}]
+    return [bild(ICON.get(basis(f["id"]), "wheat")), {"text": "  " + f["name"], "bold": True, "color": "gold"}]
 
 
 def text_mit_quelle(text, url):
@@ -553,7 +558,7 @@ def kategorie_dialog(i):
     knoepfe = []
     for nr in nrn:
         f = PLAENE[nr - 1]
-        knoepfe.append({"label": [bild(ICON.get(f["id"], "wheat")), {"text": "  " + f["name"]}],
+        knoepfe.append({"label": [bild(ICON.get(basis(f["id"]), "wheat")), {"text": "  " + f["name"]}],
                         "tooltip": [*sterne(f["diff"]), {"text": "\n" + f["out"], "color": "white"},
                                     {"text": "\n" + f["where"], "color": "gray"}],
                         "width": 170, "action": trig(INFO + nr)})
@@ -648,7 +653,7 @@ for nr, f in enumerate(PLAENE, 1):
         funktion(f"f/{fid}/s{i}/menu", [f"dialog show @s {j(plan_dialog(nr, f, i, t, len(ts)))}"])
         hud = []
         voll = round(10 * i / max(len(ts), 1))
-        teile = [bild(ICON.get(fid, "wheat")), {"text": f" Schritt {t[0] + 1}/{len(f['steps'])} ", "color": "gold"},
+        teile = [bild(ICON.get(basis(fid), "wheat")), {"text": f" Schritt {t[0] + 1}/{len(f['steps'])} ", "color": "gold"},
                  {"text": "▌" * voll, "color": "green"}, {"text": "▌" * (10 - voll), "color": "dark_gray"},
                  {"text": "  fehlt ", "color": "gray"}, {"score": {"name": "#fehlt", "objective": NS}, "color": "yellow"}]
         for k, key in enumerate(keys):
