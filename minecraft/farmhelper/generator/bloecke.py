@@ -33,6 +33,7 @@ EINFACH = {
     "dirt": ("dirt", "#ofh:boden", "#minecraft:dirt", "Erde"),
     "grass_block": ("grass_block", "#ofh:boden", "#minecraft:dirt", "Grasblock (oder Erde)"),
     "farmland": ("farmland", "minecraft:farmland", "#minecraft:dirt", "Ackerboden (Erde + Hacke)"),
+    "mud": ("mud", "minecraft:mud", "minecraft:mud", "Schlamm (Wasserflasche auf Erde)"),
     "sand": ("sand", "#minecraft:sand", "#minecraft:sand", "Sand"),
     "soul_sand": ("soul_sand", "minecraft:soul_sand", "minecraft:soul_sand", "Seelensand"),
     "netherrack": ("netherrack", "minecraft:netherrack", "minecraft:netherrack", "Netherrack"),
@@ -52,12 +53,15 @@ EINFACH = {
     "stonecutter": ("stonecutter", "minecraft:stonecutter", "minecraft:stonecutter", "Steinschneider"),
     "daylight_detector": ("daylight_detector", "minecraft:daylight_detector", "minecraft:daylight_detector",
                           "Tageslichtsensor"),
+    "daylight_detector_inv": ("daylight_detector", "minecraft:daylight_detector[inverted=true]",
+                              "minecraft:daylight_detector", "Tageslichtsensor (einmal anklicken: Nacht-Modus)"),
     "fletching_table": ("fletching_table", "minecraft:fletching_table", "minecraft:fletching_table", "Bognertisch"),
     "chest": ("chest", "#ofh:truhe", "minecraft:chest", "Truhe"),
     "cactus": ("cactus", "minecraft:cactus", "minecraft:cactus", "Kaktus"),
     "bamboo": ("bamboo", "#ofh:bambus", "minecraft:bamboo", "Bambus"),
     "scaffolding": ("scaffolding", "minecraft:scaffolding", "minecraft:scaffolding", "Gerüst"),
     "oak_fence": ("oak_fence", "#minecraft:wooden_fences", "#minecraft:wooden_fences", "Holzzaun"),
+    "fence_gate": ("oak_fence_gate", "#minecraft:fence_gates", "#minecraft:fence_gates", "Zauntor"),
     "cobblestone_wall": ("cobblestone_wall", "#minecraft:walls", "#minecraft:walls", "Mauer"),
     "sign": ("oak_sign", "#minecraft:standing_signs", "#minecraft:signs", "Schild"),
     "redstone": ("redstone_wire", "minecraft:redstone_wire", "minecraft:redstone", "Redstone-Staub"),
@@ -77,9 +81,9 @@ EINFACH = {
     "pointed_dripstone": ("pointed_dripstone", "minecraft:pointed_dripstone[vertical_direction=down]", "minecraft:pointed_dripstone",
                           "Spitzer Tropfstein"),
     "dripstone_block": ("dripstone_block", "minecraft:dripstone_block", "minecraft:dripstone_block", "Tropfsteinblock"),
-    "crafter": ("crafter", "minecraft:crafter[orientation=up_north]|minecraft:crafter[orientation=up_east]|"
-                           "minecraft:crafter[orientation=up_south]|minecraft:crafter[orientation=up_west]",
-                "minecraft:crafter", "Crafter (Vorderseite oben)"),
+    "crafter": ("crafter", "minecraft:crafter[orientation=down_north]|minecraft:crafter[orientation=down_east]|"
+                           "minecraft:crafter[orientation=down_south]|minecraft:crafter[orientation=down_west]",
+                "minecraft:crafter", "Crafter (Vorderseite unten)"),
     "bee_nest": ("bee_nest", "#ofh:bienen", "minecraft:bee_nest", "Bienennest"),
     "bookshelf": ("bookshelf", "minecraft:bookshelf", "minecraft:bookshelf", "Bücherregal"),
 }
@@ -133,10 +137,12 @@ def block(b, r):
             props = {"facing": RICHTUNG[f]}
         if i in ("white_bed", "red_bed"):                 # Bett = 2 Blöcke; Richtung zeigt vom Fußende zum Kopf
             props = {"part": p.get("part", "foot")} | ({"facing": RICHTUNG[f]} if f else {})
-        if i == "crafter":                                # Vorderseite nach oben (Spieler schaut beim Setzen nach unten)
-            props = {"orientation": "up_north"}
+        if i == "crafter":                                # Vorderseite nach unten (Spieler schaut beim Setzen nach oben)
+            props = {"orientation": "down_north"}
         if i == "pointed_dripstone":
             props = {"vertical_direction": "down", "thickness": "tip"}
+        if i == "daylight_detector_inv":
+            props = {"inverted": "true"}
         return {"art": "block", "anzeige": anz, "props": props, "pruefen": pr, "item": item, "name": name,
                 "schluessel": i}
     if i in GERICHTET:
@@ -159,9 +165,24 @@ def block(b, r):
                 "item": "#minecraft:slabs", "name": name, "schluessel": f"{i}:{typ}"}
     if i == "oak_trapdoor":
         half = p.get("half", "bottom")
-        return {"art": "block", "anzeige": "oak_trapdoor", "props": {"half": half},
-                "pruefen": f"#minecraft:wooden_trapdoors[half={half}]", "item": "#minecraft:wooden_trapdoors",
-                "name": "Falltür" + (" (oben)" if half == "top" else " (unten)"), "schluessel": f"trapdoor:{half}"}
+        props, pr = {"half": half}, f"half={half}"
+        if p.get("open"):                                # offen: steht senkrecht, Mobs halten sie für Boden
+            props["open"] = "true"
+            pr += ",open=true"
+        if f in ("n", "e", "s", "w"):                    # Richtung zählt (offen steht die Klappe auf der Gegenseite)
+            props["facing"] = RICHTUNG[f]
+            pr += f",facing={RICHTUNG[f]}"
+        return {"art": "block", "anzeige": "oak_trapdoor", "props": props,
+                "pruefen": f"#minecraft:wooden_trapdoors[{pr}]", "item": "#minecraft:wooden_trapdoors",
+                "name": "Falltür" + (" (offen)" if p.get("open") else " (oben)" if half == "top" else " (unten)"),
+                "schluessel": f"trapdoor:{half}:{props.get('facing', '')}:{props.get('open', '')}"}
+    if i == "rail":
+        achse = p.get("axis", "z")
+        if r % 2:
+            achse = "x" if achse == "z" else "z"
+        form = "north_south" if achse == "z" else "east_west"
+        return {"art": "block", "anzeige": "rail", "props": {"shape": form},
+                "pruefen": "minecraft:rail", "item": "minecraft:rail", "name": "Schiene", "schluessel": "rail"}
     if i == "powered_rail":
         achse = p.get("axis", "z")
         if r % 2:

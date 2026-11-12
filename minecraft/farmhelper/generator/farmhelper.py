@@ -38,8 +38,8 @@ SEITEN4 = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}
 INHALT = {
     "wolle": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears", "Schere im Spender",
                "Schere in den Spender legen")],
-    "honig": [("dispenser", "items block ~ ~ ~ container.* minecraft:glass_bottle", "minecraft:glass_bottle",
-               "Glasflaschen im Spender", "Glasflaschen in den Spender legen")],
+    "honig": [("dispenser", "items block ~ ~ ~ container.* minecraft:shears", "minecraft:shears",
+               "Schere im Spender", "Schere in den Spender legen")],
     "blumen": [("dispenser", "items block ~ ~ ~ container.* minecraft:bone_meal", "minecraft:bone_meal",
                 "Knochenmehl im Spender", "Knochenmehl in den Spender legen")],
     "stockcrafter": [("crafter", "block ~ ~ ~ minecraft:crafter{disabled_slots:[I;1,2,4,5,6,7,8]}", None,
@@ -54,7 +54,8 @@ def vorbereiten(f):
     for st in f["steps"]:
         st["added"] = [b for b in st["added"] if b["id"] not in weg]
     # Betten belegen 2 Blöcke: Paare suchen, Fußende + Kopfende mit Richtung
-    betten = {(b["x"], b["y"], b["z"]): b for b in f["fertig"] if b["id"] in ("white_bed", "red_bed")}
+    betten = {(b["x"], b["y"], b["z"]): b for b in f["fertig"] if b["id"] in ("white_bed", "red_bed")
+              and "part" not in b.get("p", {})}           # schon im Plan festgelegte Betten nicht neu paaren
     frei = set(betten)
     for pos in sorted(betten):
         if pos not in frei:
@@ -69,12 +70,6 @@ def vorbereiten(f):
                                 b["p"] = {"part": teil, "f": r}
                 frei -= {pos, n}
                 break
-    # Creeper-Farm: die Katzen unter den Glasblöcken in der Mitte
-    if f["id"] == "creeper":
-        katzen = [{"x": b["x"], "y": b["y"] - 1, "z": b["z"], "id": "cat", "p": {}, "ent": True}
-                  for b in f["fertig"] if b["id"] == "glass"]
-        f["fertig"] += katzen
-        f["steps"][2]["added"] += [dict(k) for k in katzen]
     # Befüllen: ein eigener Schritt direkt nach dem Schritt, in dem der Behälter gesetzt wird
     for block_id, pruefen, item, name, text in INHALT.get(f["id"], []):
         for k, st in enumerate(f["steps"]):
@@ -334,7 +329,7 @@ def gui(pfad):
 
 ICON = {"zuckerrohr": "sugar_cane", "bambus": "bamboo", "kaktus": "cactus", "kuerbis": "melon_slice", "seetang": "kelp",
         "weizen": "wheat", "baum": "oak_log", "knochenmehl": "bone_meal", "blumen": "poppy", "huehner": "cooked_chicken",
-        "kuh": "leather", "wolle": "white_wool", "honig": "honey_bottle", "eisen": "iron_ingot",
+        "kuh": "leather", "wolle": "white_wool", "honig": "honeycomb", "eisen": "iron_ingot",
         "xpspawner": "experience_bottle", "mobfarm": "bone", "creeper": "gunpowder", "schleim": "slime_ball",
         "hexe": "redstone", "waechter": "prismarine_shard", "lohe": "blaze_rod", "gold": "gold_nugget",
         "witherskelett": "wither_skeleton_skull", "enderman": "ender_pearl", "ertrunkene": "trident",
@@ -372,15 +367,11 @@ def struktur(s):
 PRUEF = {
     "ertrunkene": [("biom", FLUSS, "Biom: Fluss/Tropfsteinhöhle – dort spawnen Ertrunkene am meisten (Gewicht 100/95)",
                     "Kein Fluss-Biom: im Ozean spawnen Ertrunkene nur mit Gewicht 5 – besser in einen Fluss")],
-    "mobfarm": [("biom", OZEAN, "Über dem Ozean: kaum andere Spawnflächen in 128 Blöcken",
-                 "Nicht über dem Ozean: alle Höhlen in 128 Blöcken ausleuchten, sonst spawnen Mobs dort"),
-                ("nicht_biom", ["minecraft:mushroom_fields", "minecraft:deep_dark"], "Biom erlaubt Monster-Spawns",
+    "mobfarm": [("nicht_biom", ["minecraft:mushroom_fields", "minecraft:deep_dark"], "Biom erlaubt Monster-Spawns",
                  "In Pilzfeldern/Tiefer Dunkelheit spawnen keine Monster!")],
-    "creeper": [("biom", OZEAN, "Über dem Ozean (empfohlen; am besten kalter Ozean)",
-                 "Nicht über dem Ozean – das Wiki empfiehlt den Ozean")],
-    "schleim": [("biom", SUMPF, "Sumpf: Schleime spawnen hier zwischen Y 51 und 69 bei Licht ≤ 7",
-                 "Kein Sumpf: Du brauchst einen Schleim-Chunk (Chunkbase) und baust unter Y 40"),
-                ("y_max", 40, "Unter Y 40 – passt für einen Schleim-Chunk", "Über Y 40: im Schleim-Chunk erst unter Y 40")],
+    "creeper": [("nicht_biom", ["minecraft:mushroom_fields", "minecraft:deep_dark"], "Biom erlaubt Monster-Spawns",
+                 "In Pilzfeldern/Tiefer Dunkelheit spawnen keine Monster!")],
+    "schleim": [("y_max", 40, "Unter Y 40 – passt für einen Schleim-Chunk", "Über Y 40: im Schleim-Chunk erst unter Y 40")],
     "hexe": [("struktur", "minecraft:swamp_hut", "Du stehst in einer Hexenhütten-Box", "Keine Hexenhütte hier – such eine im Sumpf")],
     "waechter": [("struktur", "minecraft:monument", "Du stehst in einer Ozeanmonument-Box", "Kein Ozeanmonument hier")],
     "lohe": [("dimension", "minecraft:the_nether", "Im Nether", "Nicht im Nether"),
@@ -396,8 +387,7 @@ PRUEF = {
                   "Zu nah an der Hauptinsel – mindestens 128 Blöcke Abstand zu anderen Spawnflächen")],
     "aussenposten": [("struktur", "minecraft:pillager_outpost", "Du stehst in einer Plünderer-Außenposten-Box",
                       "Kein Außenposten hier – die Farm geht nur dort")],
-    "ueberfall": [("biom", OZEAN, "Über dem Ozean – ideal", "Nicht über dem Ozean (das Wiki empfiehlt ihn)"),
-                  ("keine_wesen", ("minecraft:villager", 96), "Keine fremden Dorfbewohner in 96 Blöcken",
+    "ueberfall": [("keine_wesen", ("minecraft:villager", 96), "Keine fremden Dorfbewohner in 96 Blöcken",
                    "Dorfbewohner in der Nähe – der Überfall kann am falschen Dorf landen")],
     "eisen": [("keine_wesen", ("minecraft:iron_golem", 16), "Kein Eisengolem in 16 Blöcken",
                "Ein Eisengolem ist in 16 Blöcken – dann rufen die Dorfbewohner keinen neuen")],

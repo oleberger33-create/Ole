@@ -1,0 +1,383 @@
+{
+ "zuckerrohr": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:sugar_cane": 6
+   }
+  }
+ },
+ "bambus": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:bamboo": 6
+   }
+  }
+ },
+ "kaktus": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:cactus": 3
+   }
+  }
+ },
+ "kuerbis": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "fill {x} {y} {z+1} {x+3} {y} {z+1} minecraft:melon_stem[age=7]"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:melon_slice": 3
+   }
+  }
+ },
+ "seetang": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "items": {
+    "minecraft:kelp": 4
+   }
+  }
+ },
+ "weizen": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "nachher": [
+   "kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..8]",
+   "summon minecraft:villager {x+1} {y} {z} {PersistenceRequired:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:wheat_seeds\",count:64}]}",
+   "fill {x} {y} {z} {x+3} {y} {z+1} minecraft:wheat[age=7]"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:wheat": 4
+   }
+  }
+ },
+ "baum": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:dark_oak_log": 4
+   }
+  }
+ },
+ "knochenmehl": {
+  "nachher": [
+   "item replace block {x} {y+2} {z} container.0 with minecraft:wheat_seeds 64",
+   "item replace block {x} {y+2} {z} container.1 with minecraft:wheat_seeds 64",
+   "item replace block {x} {y+2} {z} container.2 with minecraft:wheat_seeds 64",
+   "item replace block {x} {y+2} {z} container.3 with minecraft:wheat_seeds 64",
+   "item replace block {x} {y+2} {z} container.4 with minecraft:wheat_seeds 64"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:bone_meal": 2
+   }
+  }
+ },
+ "blumen": {
+  "boden": "minecraft:grass_block",
+  "biom": "minecraft:flower_forest",
+  "nachher": [
+   "item replace block {x+1} {y-1} {z} container.0 with minecraft:bone_meal 64",
+   "setblock {x+1} {y-1} {z-1} minecraft:observer[facing=north]",
+   "setblock {x+1} {y-1} {z-2} minecraft:observer[facing=south]"
+  ],
+  "erwartet": {
+   "bloecke": {
+    "#minecraft:small_flowers": 3
+   }
+  }
+ },
+ "huehner": {
+  "nachher": [
+   "kill @e[type=minecraft:chicken,x={x},y={y},z={z},distance=..6]",
+   "summon minecraft:chicken {x}.5 {y+2} {z}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x}.5 {y+2} {z}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x}.5 {y+2} {z}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x}.5 {y+2} {z}.5 {PersistenceRequired:1b,EggLayTime:200}",
+   "summon minecraft:chicken {x+2}.5 {y+1}.6 {z}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:cooked_chicken": 1
+   },
+   "wesen": {
+    "minecraft:chicken": 4
+   }
+  }
+ },
+ "kuh": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "kill @e[type=minecraft:cow,x={x},y={y},z={z},distance=..5]",
+   "summon minecraft:cow {x}.5 {y} {z}.5 {PersistenceRequired:1b,InLove:600}",
+   "summon minecraft:cow {x+2}.5 {y} {z}.5 {PersistenceRequired:1b,InLove:600}"
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:cow": 3
+   }
+  }
+ },
+ "wolle": {
+  "boden": "minecraft:grass_block",
+  "nachher": [
+   "item replace block {x-1} {y+1} {z} container.0 with minecraft:shears",
+   "kill @e[type=minecraft:sheep,x={x},y={y},z={z},distance=..4]",
+   "summon minecraft:sheep {x}.5 {y+1} {z}.5 {PersistenceRequired:1b,Sheared:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:white_wool": 2
+   }
+  }
+ },
+ "honig": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "nachher": [
+   "kill @e[type=minecraft:bee,x={x},y={y},z={z},distance=..5]",
+   "setblock {x} {y} {z} minecraft:bee_nest[facing=north,honey_level=3]",
+   "item replace block {x} {y+1} {z} container.0 with minecraft:shears",
+   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}",
+   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}",
+   "summon minecraft:bee {x}.5 {y+1} {z-2}.5 {PersistenceRequired:1b,hive_pos:[I;{x},{y},{z}]}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:honeycomb": 3
+   }
+  }
+ },
+ "eisen": {
+  "boden": "minecraft:grass_block",
+  "zeit": 12500,
+  "erwartet": {
+   "items": {
+    "minecraft:iron_ingot": 1
+   }
+  },
+  "hoechstens": {
+   "wesen": {
+    "minecraft:iron_golem": 1
+   }
+  }
+ },
+ "xpspawner": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 4,
+  "nachher": [
+   "setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:\"minecraft:zombie\"}}}"
+  ],
+  "bereich": [
+   -1,
+   -2,
+   6,
+   1,
+   0,
+   6
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:zombie": 2
+   }
+  }
+ },
+ "mobfarm": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "zeit": "day",
+  "erwartet": {
+   "items": {
+    "minecraft:rotten_flesh": 1
+   }
+  }
+ },
+ "creeper": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 3,
+  "zeit": "day",
+  "erwartet": {
+   "items": {
+    "minecraft:gunpowder": 1
+   }
+  }
+ },
+ "schleim": {
+  "boden": "minecraft:stone",
+  "fuellung": "minecraft:stone",
+  "erde_bis": 4,
+  "ursprung": [
+   6400,
+   4016
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:slime": 1
+   }
+  }
+ },
+ "hexe": {
+  "zeit": "night",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:swamp_hut",
+   "anker": [
+    3,
+    3,
+    4
+   ],
+   "suchen": true,
+   "hoehe": 64
+  },
+  "erwartet": {}
+ },
+ "lohe": {
+  "boden": "minecraft:nether_bricks",
+  "fuellung": "minecraft:nether_bricks",
+  "erde_bis": 4,
+  "nachher": [
+   "setblock {x} {y} {z} minecraft:spawner{SpawnData:{entity:{id:\"minecraft:blaze\"}}}"
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:blaze": 2
+   }
+  }
+ },
+ "gold": {
+  "dimension": "the_nether",
+  "hoehe": 160,
+  "biom": "minecraft:nether_wastes",
+  "zeit": "day",
+  "erwartet": {
+   "items": {
+    "minecraft:gold_nugget": 1
+   }
+  }
+ },
+ "witherskelett": {
+  "dimension": "the_nether",
+  "zeit": "day",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:fortress",
+   "anker": [
+    4,
+    1,
+    4
+   ],
+   "suchen": true,
+   "hoehe": 64
+  },
+  "erwartet": {
+   "wesen": {
+    "minecraft:wither_skeleton": 1
+   }
+  }
+ },
+ "enderman": {
+  "dimension": "the_end",
+  "zeit": "day",
+  "nachher": [
+   "kill @e[type=minecraft:endermite,x={x},y={y},z={z},distance=..8]",
+   "kill @e[type=minecraft:minecart,x={x},y={y},z={z},distance=..8]",
+   "summon minecraft:minecart {x+4}.5 {y} {z+4}.5 {Passengers:[{id:\"minecraft:endermite\",PersistenceRequired:1b}]}"
+  ],
+  "erwartet": {
+   "inventar": {
+    "minecraft:ender_pearl": 1
+   }
+  }
+ },
+ "ertrunkene": {
+  "biom": "minecraft:river",
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "bereich": [
+   2,
+   -22,
+   2,
+   3,
+   -20,
+   3
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:drowned": 1
+   }
+  }
+ },
+ "aussenposten": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "welt": "struktur",
+  "bauwerk": {
+   "id": "minecraft:pillager_outpost",
+   "anker": [
+    0,
+    10,
+    0
+   ],
+   "suchen": true,
+   "hoehe": 72
+  },
+  "erwartet": {
+   "items": {
+    "minecraft:arrow": 1
+   }
+  }
+ },
+ "handel": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "wesen": {
+    "minecraft:villager": 4
+   }
+  }
+ },
+ "bruchstein": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:cobblestone": 1
+   }
+  }
+ },
+ "lava": {
+  "boden": "minecraft:grass_block",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:lava_cauldron": 1
+   }
+  }
+ },
+ "schnee": {
+  "boden": "minecraft:grass_block",
+  "biom": "minecraft:snowy_plains",
+  "erwartet": {
+   "bloecke": {
+    "minecraft:snow": 1
+   }
+  }
+ },
+ "stockcrafter": {
+  "nachher": [
+   "data merge block {x} {y+1} {z} {disabled_slots:[I;1,2,4,5,6,7,8]}",
+   "item replace block {x} {y+2} {z} container.0 with minecraft:bamboo 64",
+   "item replace block {x} {y+2} {z} container.1 with minecraft:bamboo 64"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:stick": 8
+   }
+  }
+ }
+}

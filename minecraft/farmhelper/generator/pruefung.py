@@ -3,6 +3,10 @@
 - Flüssigkeit läuft im fertigen Bau aus (Nachbar seitlich/unten ist Luft und keine geplante Flüssigkeit)
 - Flüssigkeit wird gesetzt, bevor ein Nachbarblock steht (läuft beim Bauen aus)
 - Spawner und AFK-Platz weiter als 16 Blöcke auseinander
+
+Unter y 0 ist gewachsener Boden: Was dort nicht ausgehoben wird (luft), zählt als fester Block. Bei unterirdischen
+Farmen (Spawner, Monsterraum) sind Wände, Boden und Decke Stein, der schon da ist – dort meldet das Werkzeug nur,
+was ein Plan-Rand ausdrücklich verlangt.
 """
 import json, sys
 import bloecke
@@ -17,7 +21,11 @@ for f in plaene:
         for b in s["added"]:
             schritt.setdefault((b["x"], b["y"], b["z"]), k)
     meldungen = []
+    gegraben = {(q["x"], q["y"], q["z"]) for s in f["steps"] for q in s.get("luft", [])}
     belegt = set(fertig)
+
+    def fest(n):                                      # Plan-Block oder gewachsener Boden (unter y 0, nicht gegraben)
+        return n in belegt or (n[1] < 0 and n not in gegraben)
     xs = [p[0] for p in belegt]; ys = [p[1] for p in belegt]; zs = [p[2] for p in belegt]
     box = (min(xs), max(xs), min(ys), max(ys), min(zs), max(zs))
     drinnen = lambda p: box[0] <= p[0] <= box[1] and box[2] <= p[1] <= box[3] and box[4] <= p[2] <= box[5]
@@ -30,10 +38,10 @@ for f in plaene:
         while offen and not raus:
             p, d = offen.pop()
             unten = (p[0], p[1] - 1, p[2])
-            schritte = [unten] if unten not in belegt else [(p[0] + 1, p[1], p[2]), (p[0] - 1, p[1], p[2]),
+            schritte = [unten] if not fest(unten) else [(p[0] + 1, p[1], p[2]), (p[0] - 1, p[1], p[2]),
                                                              (p[0], p[1], p[2] + 1), (p[0], p[1], p[2] - 1)]
             for n in schritte:
-                if n in belegt or n in gesehen:
+                if fest(n) or n in gesehen:
                     continue
                 nd = d if n == unten else d + 1
                 if nd > weit:
