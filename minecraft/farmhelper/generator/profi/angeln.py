@@ -68,11 +68,11 @@ f = profi("angeln", dict(
            "reparieren sie wieder. Mit Köder III beißt es etwa doppelt so oft."],
           ["Nach ein paar Minuten hört es auf",
            "Das Spiel darf nicht pausieren: Mit F3+P schaltest du die Pause beim Fensterwechsel aus. Die Taste "
-           "muss gedrückt bleiben, z. B. mit einem Gewicht auf der Maus. Ist die Truhe voll, staut sich der Trichter, "
-           "und der Fang bleibt im Zaun liegen. Dann drückt er die Platte, und die Farm steht. Truhe leeren."]],
+           "muss gedrückt bleiben, z. B. mit einem Gewicht auf der Maus. Ist die Doppeltruhe voll (gut 3000 Fische), "
+           "fliegt der Fang zu dir ins Inventar und danach auf den Boden. Also rechtzeitig leeren."]],
     meta=m("Rate: etwa 170 Fänge pro Stunde mit einer normalen Angel und etwa 320 mit Köder III, jeder mit "
            "1–6 Erfahrungspunkten (Schätzung aus den Wiki-Wartezeiten: 5–30 s, mit Köder III 0–15 s, dazu 1–4 s, bis "
-           "der Fisch anbeißt, und etwa 1 s, bis die Farm einholt). Etwa 89 % Fisch, 11 % Trödel, keine Schätze. "
+           "der Fisch anbeißt, und höchstens 1 s, bis die Farm einholt). Etwa 89 % Fisch, 11 % Trödel, keine Schätze. "
            "Beim einfachen Teich angelst du gleich schnell, aber nur, solange du selbst klickst.",
            [("Überall. Die Farm braucht nur den einen Wasserblock im Zaun und freien Himmel über der Wägeplatte "
              "(Glas geht). Unter Dach dauert jeder Biss doppelt so lang.", W + "Fishing")],
@@ -99,7 +99,7 @@ f.zeichen(u="slab", T=("chest", "w"), Z="angel_zaun_nass", p="angel_grobwaegepla
 
 # Raster: Spalten x -1 … 2, Zeilen z -1 … 4
 f.schritt("Ausheben (je 1 tief): den Block unter deinem späteren Platz, 2 Blöcke davor (Süden) einen für den "
-          "Trichter und östlich daneben 2 für die Truhe.", {
+          "Trichter, östlich neben dem Trichter-Loch einen und nördlich davon noch einen für die Truhe.", {
     -1: """
         ....
         .-..
@@ -188,7 +188,8 @@ f.schritt("Hinter deinen Platz (Norden) 2 Blöcke als Rückwand. Zum Hinein- und
           "setzt sie wieder. Dann stellst du dich auf die Stufe, nimmst die Angel in die Hand (am besten mit "
           "Reparatur, Haltbarkeit III und Köder III) und schaust GENAU geradeaus nach Süden auf die dünne Kante der "
           "geschlossenen Eisenfalltür (F3: Neigung 0). Halt die rechte Maustaste gedrückt, mit F3+P pausiert das "
-          "Spiel nicht, wenn du das Fenster wechselst.", {
+          "Spiel nicht, wenn du das Fenster wechselst. An die Truhe kommst du von hier: schräg nach links unten (Osten) "
+          "schauen und auf ihren weiter entfernten Teil zielen.", {
     0: """
         .#..
         .P..

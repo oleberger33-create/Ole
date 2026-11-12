@@ -49,40 +49,44 @@ f = profi("waechter", dict(
              W + "Tutorial:Guardian_farming#Spawning"),
             ("Unter einem Dach spawnen Wächter öfter; im offenen Ozean scheitern 95 % der Versuche.",
              W + "Guardian#Spawning")],
-           [("Ohne Trockenlegen: Seelensand-Blasensäulen tragen die Wächter in eine Kammer an der Oberfläche; Lagerfeuer "
-             "mit Trichtern darunter töten und sammeln.", W + "Tutorial:Guardian_farming#Automatic_farms"),
+           [("Ohne Trockenlegen: Seelensand-Blasensäulen tragen die Wächter in eine Kammer an der Oberfläche, von dort zur "
+             "Tötungskammer.", W + "Tutorial:Guardian_farming#Automatic_farms"),
+            ("Brennende Lagerfeuer töten Wächter, Trichter darunter sammeln die Beute.",
+             W + "Tutorial:Guardian_farming#Transport_and_killing"),
             ("Aufwärts-Blasensäulen tragen Wesen schnell nach oben; sie entstehen nur in Wasserquellen über Seelensand.",
              W + "Bubble_Column"),
             ("Stillstehende Wächter treibt fließendes Wasser viel schneller als andere Mobs; an Land ersticken sie nicht, "
              "sie springen herum.", W + "Guardian#Behavior"),
-            ("Gerüst lässt sich mit Wasser füllen (wie andere wasserdurchlässige Blöcke nur per Eimer); es hängt höchstens 6 Blöcke von einer Stütze.",
+            ("Gerüst kann geflutet werden – nur mit dem Eimer, fließendes Wasser dringt nicht ein; Mobs kommen von unten "
+             "hindurch, oben stehen sie darauf; es hält höchstens 6 Blöcke von einer Stütze.",
              W + "Scaffolding"),
             ("Auf einem Lagerfeuer nimmt man alle halbe Sekunde 1 Schaden; Wächter haben 30 Leben.", W + "Damage#Campfire"),
             ("Auf dem Testserver (26.3) geprüft (andere Farmen): Trichter saugen durch nicht ganz hohe Blöcke; "
              "Wasserstrom endet nach 7 Blöcken.", None)])))
 
-f.zeichen(U="soul_sand", X="scaffolding", Q="campfire", K="cobblestone")
+f.zeichen(**{"#": "cobblestone"}, U="soul_sand", X="scaffolding", Q="campfire", K="cobblestone")
 
-f.schritt("Stelle suchen: innerhalb der Grundfläche des Monuments, wo das Dach höchstens bis Höhe 56 reicht. Den Plan so "
-          "starten, dass deine Füße auf Höhe 63 sind (eine Ebene über dem Meer, z. B. auf einem Hilfsblock) – dann liegt "
-          "alles auf der richtigen Höhe. Unter Wasser zuerst den Boden 7 × 7 auf Höhe 56 (direkt aufs Dach, wenn es dort "
-          "liegt, sonst mit einer Hilfssäule vom Dach) und an seiner Westseite eine Säule bis eine Ebene unter die "
-          "Wasseroberfläche.", {
+f.schritt("Stelle suchen: innerhalb der Grundfläche des Monuments, wo das Dach höchstens bis Höhe 56 reicht. Plan "
+          "starten und mit den Pfeilen im Plan-Menü so verschieben, dass die Gerüst-Ebene auf Höhe 63 liegt (eine Ebene "
+          "über dem Meer) – dann liegt alles auf der richtigen Höhe. Unter Wasser zuerst den Boden 7 × 7 auf Höhe 56 "
+          "(mit einer Hilfssäule vom Dach aus; liegt das Dach genau auf Höhe 56, ist es schon der Boden) und an seiner "
+          "Westseite eine Säule bis eine Ebene unter die Wasseroberfläche.", {
     -7: raster_aus({**{p: "#" for p in FELD}, (-1, 0): "#"}, -1, 0, 6, 6),
     **{y: "#" for y in range(-6, -1)}}, x0=-1, z0=0)
 f.schritt("Seelensand auf den ganzen Boden (49 Stück). Nach einer Sekunde steigen darüber Blasen bis zur Oberfläche: "
           "Das Meerwasser ist jetzt eine Fläche aus Blasensäulen.", {
     -6: raster_aus({p: "U" for p in FELD}, 0, 0, 6, 6)})
 f.schritt("Rand in der obersten Wasserschicht (Höhe 62): auf die Säule einen Block, von dort die Westreihe (9 Blöcke, "
-          "von einer Ebene nördlich des Feldes bis eine Ebene südlich davon). Auf ihr nördliches Ende einen Block und "
+          "von einem Block nördlich des Feldes bis einen Block südlich davon). Auf ihr nördliches Ende einen Block und "
           "von dort eine Reihe eine Ebene über dem Wasser nach Osten (9 Blöcke, die Rückreihe), unter ihr östliches Ende "
           "einen Block (an die Unterseite klicken) und von dort die Ostreihe nach Süden.", {
     -1: raster_aus({p: "#" for p in RAND_UNTEN}, -1, -1, 7, 7),
     0: raster_aus({(x, -1): "#" for x in range(-1, 8)}, -1, -1, 7, 7)}, x0=-1, z0=-1)
 f.schritt("Gerüst-Lage über dem Seelensand, eine Ebene über dem Wasser: zuerst auf jeden Block der West- und der "
-          "Ostreihe ein Gerüst (die südlichsten beiden Randblöcke bleiben frei), dann von beiden Seiten nach innen (an "
-          "die Seite eines Gerüsts klicken). Kein Gerüst darf weiter als 6 von einem Gerüst auf dem Rand entfernt sein – "
-          "hier sind es höchstens 4. Südlich daran eine Reihe aus 9 festen Blöcken: Dort endet der Strom, und Beute, "
+          "Ostreihe, auf dem noch nichts steht, ein Gerüst – nur nicht auf den südlichsten. Dann von beiden Seiten nach "
+          "innen (an die Seite eines Gerüsts klicken). Kein Gerüst darf weiter als 6 von einem Gerüst auf dem Rand "
+          "entfernt sein – hier sind es höchstens 4. Südlich daran eine Reihe aus 9 festen Blöcken: Dort endet der "
+          "Strom, und Beute, "
           "die aus der Kammer zurückfliegt, bleibt nicht im Gerüst hängen.", {
     0: raster_aus({**{p: "X" for p in GERUEST}, **{(x, 7): "#" for x in range(-1, 8)}}, -1, 0, 7, 7)}, x0=-1, z0=0)
 KAMMER = {(8, 7): "#", (8, 8): "C", (7, 8): ">"}
@@ -97,7 +101,8 @@ f.schritt("Auf die 7 westlichen Trichter je ein Lagerfeuer (oben auf den Trichte
           "Reihe von 9 Blöcken südlich davon.", {
     0: raster_aus({**{(x, 8): "Q" for x in range(7)}, (-1, 8): "#", (7, 8): "#",
                    **{(x, 9): "#" for x in range(-1, 8)}}, -1, 8, 7, 9)}, x0=-1, z0=8)
-f.schritt("Wände eine Ebene höher rund um Feld und Kammer (auf Rand, Rückreihe und Kammerwände). Dann 7 Wasserquellen "
+f.schritt("Wände eine Ebene höher rund um Feld und Kammer (auf die äußeren Gerüste, die Rückreihe, die Enden der festen "
+          "Reihe und die Kammerwände). Dann 7 Wasserquellen "
           "an die Innenseite der Rückwand klicken (nicht auf das Gerüst – Gerüst lässt sich per Eimer füllen und ließe "
           "dann Wasser durch): Der Strom fließt genau 7 Blöcke nach Süden und endet vor den Lagerfeuern.", {
     1: raster_aus({**{p: "#" for p in WAND}, **{(x, 0): "W" for x in range(7)},
@@ -115,10 +120,13 @@ f.schritt("Warteplatz: eine Säule auf die Decke, oben 26 Blöcke über dem Ger�
 MEER = dict(boden="minecraft:water", fuellung="minecraft:water", zeit="day")
 BEUTE = "minecraft:prismarine_shard|minecraft:prismarine_crystals|minecraft:cod"
 f.pruefe(**MEER, welt="struktur",
-         bauwerk={"id": "minecraft:ocean_monument", "suchen": True, "hoehe": 50, "groesse": [58, 58],
+         bauwerk={"id": "minecraft:monument", "suchen": True, "hoehe": 50, "groesse": [58, 58],
                   "ecke": [-3, -24, -3]},
          erwartet={"items": {BEUTE: 1}})
-# Mechanik in der flachen Welt (hoch über dem Boden): 6 Wächter in die Blasensäulen – hoch, Strom, Lagerfeuer, Truhe.
-f.pruefe_auch("waechter_profi_mech", **MEER, hoehe=100,
+# Mechanik in der flachen Welt, hoch über dem Boden: ein Steinkasten mit Wasser darin ersetzt das Meer (läuft nicht aus),
+# 6 Wächter in die Blasensäulen – hoch, Strom, Lagerfeuer, Truhe.
+f.pruefe_auch("waechter_profi_mech", zeit="day", hoehe=100,
+              vorher=["fill {x-2} {y-8} {z-2} {x+8} {y-1} {z+8} minecraft:stone",
+                      "fill {x-1} {y-7} {z-1} {x+7} {y-1} {z+7} minecraft:water"],
               nachher=mobs("guardian", [(0, -4, 1), (3, -4, 3), (6, -4, 5), (1, -3, 6), (5, -3, 1), (3, -2, 6)]),
               erwartet={"items": {BEUTE: 4}})

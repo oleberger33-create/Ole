@@ -1,12 +1,12 @@
 """XP-Farm am Spawner (Profi): Raum eine Ebene höher als bei der einfachen Farm (alle 3 Spawn-Ebenen nutzbar), ein Block
-auf dem Spawner, Wasser schiebt alles in eine Rinne mit Loch in der Mitte; die Mobs fallen 11 Blöcke in eine Zelle
-außerhalb des Prüfbereichs (9 × 9 × 9) des Spawners und kommen mit 12 von 20 Leben an. Du triffst sie durch einen Spalt,
-die Beute läuft über einen Trichter in die Truhe.
+auf dem Spawner, Wasser schiebt alles in eine Rinne mit Loch in der Mitte; die Mobs fallen 10,5 Blöcke in eine Zelle
+außerhalb des Prüfbereichs (9 × 9 × 9) des Spawners und kommen mit 13 von 20 Leben an. Du triffst sie durch einen Spalt,
+die Beute läuft durch eine Stufe in einen Trichter und in die Truhe, die XP-Kugeln rollen zu dir.
 
 Spawner (0, 0, 0). Raum x -4 … 4, z -4 … 4, Höhe -2 … 2 (Wasser auf -2). Rinne Höhe -3, z 4, x -8 … 8 (Quellen an den
-Enden, Loch bei x 0). Schacht (0, -4 … -12, 4), Zelle (0, -14 … -13, 4), Trichter (0, -15, 4) nach unten in die Truhe
-(0, -16, 4). Spalt (0, -14, 3) mit geschlossener Falltür unten, darunter eine Mulde (0, -15 … -16, 3) als Blick auf die
-Truhe. Dein Platz (0, -15, 2): 15,6 Blöcke vom Spawner.
+Enden, Loch bei x 0). Schacht (0, -4 … -12, 4), Zelle (0, -14 … -13, 4) mit unterer Stufe (0, -14, 4) als Boden,
+darunter Trichter (0, -15, 4) nach unten in die Truhe (0, -16, 4). Spalt (0, -14, 3) mit geschlossener Falltür unten,
+darunter eine Mulde (0, -15 … -16, 3) als Blick auf die Truhe. Dein Platz (0, -15, 2): 15,6 Blöcke vom Spawner.
 """
 from profi_basis import *
 
@@ -19,13 +19,13 @@ f = profi("xpspawner", dict(
         "ist der Raum eine Ebene höher (5 statt 4), und ein Block auf dem Spawner sorgt dafür, dass niemand oben auf "
         "ihm liegen bleibt. Das gibt rechnerisch etwa 45 % mehr Mobs. Gespawnt wird wie gehabt nur in der Luft; das "
         "Wasser liegt zwei Ebenen unter dem Spawner. 2. Kein Stau: Das Wasser schiebt alle Mobs in die Rinne, und "
-        "deren Wasser endet von beiden Seiten genau an einem Loch in der Mitte. Die Mobs fallen 11 Blöcke tief in "
+        "deren Wasser endet von beiden Seiten genau an einem Loch in der Mitte. Die Mobs fallen gut 10 Blöcke tief in "
         "eine Zelle – heraus aus dem Bereich um den Spawner (9 × 9 × 9), in dem er ab 6 Mobs aussetzt. Er spawnt "
-        "also weiter, auch wenn sich unten viele sammeln. 3. Halb tot: Der Fall nimmt jedem Mob 8 Leben, es bleiben "
-        "12 von 20 – ein Schlag weniger pro Mob, und mit Schwungkraft triffst du alle in der Zelle zugleich. Du "
-        "stehst eine Ebene tiefer und triffst sie durch einen Spalt; sie sehen dich nicht. Eine geschlossene Falltür "
-        "unten im Spalt hält Babyzombies drinnen, XP-Kugeln fliegen darüber zu dir. Die Beute fällt durch den "
-        "Trichter in die Truhe.",
+        "also weiter, auch wenn sich unten viele sammeln. 3. Halb tot: Der Fall nimmt jedem Mob 7 Leben, es bleiben "
+        "13 von 20 – ein Schlag weniger pro Mob, und mit Schwungkraft triffst du alle in der Zelle zugleich. Die "
+        "Mobs stehen auf einer Stufe genau in Höhe des Spalts; du stehst tiefer und triffst sie hindurch, sie sehen "
+        "dich nicht. Eine geschlossene Falltür unten im Spalt hält Babyzombies drinnen, die XP-Kugeln rollen von der "
+        "Stufe über die Falltür direkt zu dir. Die Beute saugt der Trichter unter der Stufe in die Truhe.",
     help=[["Spawner spawnt nicht", "Genau auf deinem Platz stehen: 15 Ebenen unter dem Spawner, 2 Blöcke nördlich "
                                    "der Zelle – das sind 15,6 Blöcke, höchstens 16 gehen. Schon eine Ebene tiefer "
                                    "ist er aus. Keine Fackeln im Raum."],
@@ -36,7 +36,7 @@ f = profi("xpspawner", dict(
                                                "Mobs, ab denen der Spawner aussetzt."],
           ["Mobs sterben ohne XP", "Ab 24 Mobs auf einem Fleck erdrücken sie sich gegenseitig – dann gibt es nur die "
                                    "Beute (sie landet trotzdem in der Truhe). Alle paar Minuten zuschlagen."]],
-    meta=m("Rate (Schätzung): rund 500 Mobs pro Stunde, also etwa 2500 XP (Stufe 30 in gut einer halben Stunde), "
+    meta=m("Rate (Schätzung): rund 500 Mobs pro Stunde, also etwa 2500 XP (Level 30 in gut einer halben Stunde), "
            "gegen etwa 350 bei der einfachen Farm. Gerechnet: alle 10–40 s (im Mittel 25 s) 4 Versuche; hier "
            "gelingen fast 9 von 10, bei der einfachen gut die Hälfte (die oberste Ebene ist dort zu niedrig). Ein "
            "Zombie gibt 5 XP.",
@@ -47,15 +47,17 @@ f = profi("xpspawner", dict(
              W + "Monster_Spawner"),
             ("XP nur, wenn ein Spieler tötet; XP-Farmen machen die Mobs vorher per Fallhöhe schwach.",
              W + "Tutorial:Mob_farm"),
-            ("Fallschaden = Fallhöhe − 3 (abgerundet): 11,3 Blöcke Fall auf den Trichter geben 8 Schaden.",
+            ("Fallschaden = Fallhöhe − 3 (abgerundet): 10,5 Blöcke Fall auf die Stufe geben 7 Schaden.",
              W + "Damage#Fall_damage"),
+            ("Ein Trichter sammelt Gegenstände im Block über sich, solange dort kein ganzer Block ist – durch eine "
+             "Stufe hindurch also schon.", W + "Hopper"),
             ("Ab mehr als 24 Mobs auf einem Fleck gibt es Gedränge-Schaden.", W + "Damage#Entity_cramming"),
             ("Babyzombies sind 0,98 Blöcke hoch – unter einer geschlossenen Falltür bleiben nur 0,81 frei. Ein "
              "Zombie gibt 5 XP.", W + "Zombie"),
             ("Auf dem Testserver (26.3) geprüft (einfache Farm): Im Wasser spawnt nichts; das Wasser zwei Ebenen "
              "unter dem Spawner schiebt die Mobs in die eine Ebene tiefere Rinne.", None)])))
 
-f.zeichen(Q="spawner", T=("oak_trapdoor", {"half": "bottom"}))
+f.zeichen(Q="spawner", T=("oak_trapdoor", {"half": "bottom"}), U=("slab", {"half": "bottom"}))
 
 frei = ["-" * 9] * 9
 f.schritt("Den Raum um den Spawner freilegen: 9 × 9, von zwei Ebenen UNTER dem Spawner bis zwei Ebenen ÜBER ihm "
@@ -83,21 +85,23 @@ f.schritt("Unten nach Norden: den Spalt erst 2 hoch durchbrechen (damit du durch
           "Rinne oder Schacht).", {
     -13: ".\n-", -14: "-\n-", -15: "-\n-\n-", -16: ".\n-\n-"}, x0=0, z0=2)
 f.schritt("Aus der Mulde: die Truhe unter die Zelle setzen (unten auf den Boden klicken), dann schleichend einen "
-          "Trichter oben auf die Truhe – er zeigt nach unten in die Truhe. Auf dem Trichter landen die Mobs, ihre "
-          "Beute fällt hinein.", {-16: "C", -15: "H"}, x0=0, z0=4)
-f.schritt("Zurück auf deinen Platz. Den oberen Spaltblock wieder zumachen (von unten an den Stein darüber klicken). "
-          "Dann eine Falltür in die UNTERE Hälfte des Spalts: unten an seine Seitenwand klicken und zu lassen. Mobs "
-          "kommen nicht heraus (auch Babyzombies nicht, sie sind 0,98 hoch), XP-Kugeln fliegen über die Falltür zu "
-          "dir.", {-13: "#", -14: "T"}, x0=0, z0=3)
+          "Trichter oben auf die Truhe – er zeigt nach unten in die Truhe.", {-16: "C", -15: "H"}, x0=0, z0=4)
+f.schritt("Zurück auf deinen Platz. Durch den Spalt schleichend eine Stufe oben auf den Trichter setzen (untere "
+          "Hälfte): Darauf landen die Mobs, genau in Höhe des Spalts. Der Trichter saugt ihre Beute durch die Stufe.",
+          {-14: "U"}, x0=0, z0=4)
+f.schritt("Den oberen Spaltblock wieder zumachen (von unten an den Stein darüber klicken). Dann eine Falltür in die "
+          "UNTERE Hälfte des Spalts: unten an seine Seitenwand klicken und zu lassen. Mobs kommen nicht heraus (auch "
+          "Babyzombies nicht, sie sind 0,98 hoch), die XP-Kugeln rollen über die Falltür zu dir.", {
+    -13: "#", -14: "T"}, x0=0, z0=3)
 f.schritt("Wasser: an der Nordwand eine Reihe Quellen (9) – es fließt genau 7 Blöcke bis zur Kante der Rinne und "
           "schiebt alles hinein. Im Wasser spawnt nichts, die Mobs spawnen darüber und fallen hinein.", {
     -2: "\n".join(["WWWWWWWWW"] + ["FFFFFFFFF"] * 7)}, x0=-4, z0=-4)
 f.schritt("Je eine Quelle in die beiden Enden der Rinne, 8 Blöcke vom Loch: Das Wasser fließt 7 Blöcke und endet "
           "von beiden Seiten genau am Loch – es läuft nicht in den Schacht, schiebt aber alles hinein.", {
     -3: "WFFFFFFF.FFFFFFFW"}, x0=-8, z0=4)
-f.schritt("Hier stehst du – eine Ebene tiefer als die Mobs in der Zelle, 15,6 Blöcke vom Spawner (höchstens 16, "
-          "sonst spawnt nichts). Du triffst sie durch den Spalt über der Falltür; nach 11 Blöcken Fall haben sie nur "
-          "noch 12 von 20 Leben. Die Truhe öffnest du durch die Lücke unter der Falltür (schräg nach unten schauen).",
+f.schritt("Hier stehst du – tiefer als die Mobs in der Zelle, 15,6 Blöcke vom Spawner (höchstens 16, sonst spawnt "
+          "nichts). Du triffst sie durch den Spalt über der Falltür; nach 10,5 Blöcken Fall haben sie nur noch 13 von "
+          "20 Leben. Die Truhe öffnest du durch die Lücke unter der Falltür (schräg nach unten schauen).",
           {-15: "P"}, x0=0, z0=2)
 f.schritt("Spawner (ist schon da).", {0: "Q"})
 

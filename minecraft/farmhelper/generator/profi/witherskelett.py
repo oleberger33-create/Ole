@@ -35,7 +35,8 @@ f = profi("witherskelett", dict(
         "½ Block hoch: Du triffst ihre Beine, sie sehen dich nicht und erreichen dich nicht, auch kleine "
         "Magmawürfel passen nicht hindurch. Abstände: Dein Platz ist 25 Blöcke unter der unteren Fläche – näher "
         "als 24 spawnt nichts – und jedes Armende höchstens 32 Blöcke von dir entfernt, sonst stehen die Monster "
-        "still. Schädel gibt es nur, wenn du triffst.",
+        "still. Schädel gibt es nur, wenn du triffst. XP-Kugeln kommen durch den niedrigen Spalt kaum zu dir – dafür "
+        "ist er dicht.",
     help=[["Es spawnt wenig",
            "Die Flächen müssen in der Festung liegen (außerhalb ihrer Gänge zählt nur Netherziegel-Boden), dunkel "
            "sein (Licht ≤ 7) und 3 Blöcke Luft haben. Freie Netherziegel-Flächen der Festung in der Nähe mit Stufen "
@@ -64,8 +65,8 @@ f = profi("witherskelett", dict(
              "Block.", W + "Cobweb"),
             ("Fallschaden = Fallhöhe − 3 (abgerundet); Wither-Skelette haben 20 Lebenspunkte, sind 2,4 hoch und "
              "passen nicht durch 2 hohe Öffnungen.", W + "Damage#Fall_damage"),
-            (TEST + "Mobs laufen auf offene Falltüren und fallen; Trichter saugen Items durch Schlamm hindurch auf.",
-             None)])))
+            (TEST + "Mobs laufen auf offene Falltüren und fallen; weiter als 32 Blöcke vom Spieler laufen sie nicht "
+             "herum; Trichter saugen Items durch Schlamm hindurch auf.", None)])))
 
 f.zeichen(N="nether_bricks", R="netherrack", M="mud", X="cobweb", O=("slab", {"half": "top"}),
           a=("oak_trapdoor", {"f": "e", "open": True}), b=("oak_trapdoor", {"f": "s", "open": True}),
@@ -119,15 +120,17 @@ f.schritt("4 Spinnennetze direkt unter die Falltüren, an die Schachtwand klicke
     -2: "XX\nXX"})
 
 # 4 – Tötungskammer
-f.schritt("Kammer unten (23 bis 26 Blöcke unter der Fläche): Die Schachtwände noch 3 Ebenen tiefer führen, auf der "
-          "Südseite stattdessen eine Reihe 1 tiefer: Netherrack ganz unten und oben, dazwischen kommt die Stufe. "
-          "Südlich davon dein Platz 2 × 2 hoch mit Decke, Seitenwänden und Rückwand (bis eine Ebene tiefer). Die "
-          "zwei Blöcke der Rückwand hinter dem westlichen Platz sind deine Tür: abbauen und hinter dir wieder setzen. "
-          "Den Weg hierher (Leiter oder Treppe) baust du, wie es passt.", {
+f.schritt("Kammer ganz unten (23 bis 26 Blöcke unter deinen Füßen auf der unteren Fläche): Die Schachtwände im "
+          "Westen, Norden und Osten noch 3 Ebenen tiefer führen. Im Süden kommt eine Zwischenreihe: Netherrack direkt "
+          "unter der Südwand und 2 Ebenen tiefer (mit je einem Block an den Seiten); dazwischen kommt später die "
+          "Stufe. Südlich davon dein Platz, 2 breit und 2 hoch, mit Decke (eine Reihe länger), Seitenwänden und "
+          "Rückwand (sie reicht eine Ebene tiefer). Die zwei Rückwandblöcke hinter dem westlichen Platz sind deine "
+          "Tür: abbauen und hinter dir wieder setzen. Den Weg hierher (Leiter oder Treppe) baust du, wie es passt.", {
     -23: """
         .RR.
         R..R
         R..R
+        .RR.
         .RR.
         .RR.
     """,
@@ -159,9 +162,9 @@ f.schritt("Ganz unten: 2 Truhen (an die Rückwand klicken), dann je 3 Trichter n
           "Truhe bzw. den Trichter klicken: Alle zeigen nach Süden zur Truhe.", {
     -26: "vv\nvv\nvv\nCC"})
 f.schritt("Schlamm (Wasserflasche auf Erde) auf die 4 Trichter unter dem Schacht – Trichter saugen durch Schlamm. "
-          "Zwei OBERE Stufen zwischen die Netherrack-Reihe (an die Unterseite des Blocks darüber klicken). Zwischen "
-          "Netherrack und Stufe bleibt ein Spalt ½ Block hoch: Du triffst die Beine der Monster, sie sehen dich "
-          "nicht.", {
+          "Zwei OBERE Stufen in die Lücke der Zwischenreihe (an die Unterseite des Netherracks darüber klicken). "
+          "Zwischen Netherrack und Stufe bleibt ein Spalt ½ Block hoch: Du triffst die Beine der Monster, sie sehen "
+          "dich nicht.", {
     -25: "MM\nMM",
     -24: "..\n..\nOO"})
 mitte = arme(L2)

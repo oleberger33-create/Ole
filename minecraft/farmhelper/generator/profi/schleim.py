@@ -3,8 +3,8 @@ das Eck x 0 … 4, z 0 … 4 bleibt stehen und wird zur Golemzelle: Eisengolem i
 unteren Stufen (Füße auf Höhe -1,5, Augen auf 0,8). Ost- und Südseite haben auf Raumhöhe Schlitze aus unteren Stufen
 (offen 0,5 … 1,0): Durch sie sehen die Schleime den Golem, hindurch passt keiner (der kleinste ist 0,52 hoch).
 
-Davor ein Ring Lagerfeuer (x 5, z 0 … 5 und z 5, x 0 … 4) auf Trichtern, außen ein zweiter Ring Trichter bündig im
-Boden (x 6, z 0 … 6 und z 6, x 0 … 5). Alle Trichter laufen nach Norden bzw. Osten zur Truhe (7, -1, 0).
+Davor eine Reihe Lagerfeuer (x 5, z 0 … 5 und z 5, x 0 … 4) auf Trichtern, außen eine zweite Reihe Trichter bündig
+im Boden (x 6, z 0 … 6 und z 6, x 0 … 5). Alle Trichter laufen nach Norden bzw. Osten zur Truhe (7, -1, 0).
 Fackel (11, 0, 11), Warteplatz 25 Blöcke über der Raummitte.
 """
 from profi_basis import *
@@ -26,10 +26,11 @@ f = profi("schleim", dict(
         "dem Raumboden. Ost- und Südseite seiner Zelle haben auf Bodenhöhe Schlitze: unten eine Stufe, darüber der "
         "stehen gebliebene Fels, offen bleibt ein halber Block. Durch den Schlitz sehen ihn die Schleime im ganzen Raum "
         "(Glas ginge nicht – durch Glas sehen Mobs nichts), aber kein Schleim passt hindurch, auch der kleinste "
-        "(0,52 hoch) nicht. So kann ihn keiner berühren und verletzen. Vor der Zelle liegt ein Ring Lagerfeuer: Wer "
-        "zum Golem will, steht darauf und brennt (1 Schaden pro halbe Sekunde) – große und mittlere zerfallen in "
+        "(0,52 hoch) nicht. So kann ihn keiner berühren und verletzen. Vor der Zelle liegt eine Reihe Lagerfeuer (an der "
+        "Ost- und an der Südseite): Wer zum Golem will, steht darauf und brennt (1 Schaden pro halbe Sekunde) – "
+        "große und mittlere zerfallen in "
         "kleinere, kleine sterben sofort und lassen Schleimbälle fallen. Die Trichter unter den Lagerfeuern saugen "
-        "sie durch das niedrige Lagerfeuer an; ein zweiter Trichterring außen fängt Bälle, die beim Tod nach außen "
+        "sie durch das niedrige Lagerfeuer an; eine zweite Trichterreihe außen fängt Bälle, die beim Tod nach außen "
         "springen. Alles läuft in die Truhe. Die Lagerfeuer und eine Fackel machen den Raum hell: Andere Monster "
         "spawnen nicht, Schleime im Schleim-Chunk schon.",
     help=[["Golem nimmt Schaden", "In allen 7 Schlitzen muss eine UNTERE Stufe liegen, der Block über dem Eingang "
@@ -40,7 +41,7 @@ f = profi("schleim", dict(
                                               "bis er in Reichweite ist."],
           ["Andere Monster im Raum", "Fackel setzen (Licht überall mindestens 1) und Höhlen im Umkreis von 128 Blöcken "
                                      "ausleuchten – sie füllen sonst das Monster-Limit."],
-          ["Bälle liegen neben den Feuern", "Der äußere Trichterring muss bündig im Boden liegen, die Lagerfeuer "
+          ["Bälle liegen neben den Feuern", "Die äußere Trichterreihe muss bündig im Boden liegen, die Lagerfeuer "
                                             "müssen brennen (gelöscht schadet ein Lagerfeuer nicht)."]],
     meta=m("Rate: etwa 150–250 Schleimbälle pro Stunde (Schätzung: Im Test der einfachen Farm kamen 58 Schleime in 60 "
            "Minuten, die einfach stehen blieben; hier sterben sie laufend, also stoppt das Monster-Limit das Spawnen "
@@ -67,20 +68,22 @@ f.schritt("Einen Schleim-Chunk finden (Chunkbase oder Schleime unter Höhe 40), 
           "den Plan mit den Pfeilen im Plan-Menü genau auf den Chunk schieben. Den Chunk 3 Blöcke hoch ausgraben – nur "
           "ein Eck 5 × 5 im Nordwesten bleibt stehen, daraus wird die Golemzelle.", {
     y: raster_aus(RAUM, 0, 0, 15, 15) for y in range(0, 3)})
-f.schritt("Am stehen gebliebenen Eck die unterste Lage der Ost- und der Südseite ausgraben (7 Schlitze, siehe Plan), "
-          "in der Mitte der Ostseite auch den Block darüber: Das ist der Eingang, 2 hoch.", {
+f.schritt("An der Ost- und der Südseite des stehen gebliebenen Ecks in der untersten Lage 7 Schlitze ausgraben: alle "
+          "Blöcke außer den beiden, die an die Chunkwände stoßen (siehe Plan). In der Mitte der Ostseite auch den Block "
+          "darüber: Das ist der Eingang, 2 hoch.", {
     0: raster_aus({p: "-" for p in FENSTER}, 0, 0, 4, 4),
     1: raster_aus({(4, 2): "-"}, 0, 0, 4, 4)})
-f.schritt("Durch den Eingang die Zelle 3 × 3 ausgraben: 4 Lagen, von der Höhe über dem Raumboden bis 2 Blöcke unter "
-          "den Raumboden. Die Decke darüber bleibt stehen (sie ist das Dach der Zelle).", {
+f.schritt("Durch den Eingang die Zelle 3 × 3 ausgraben, 4 Lagen tief: die beiden unteren Lagen des Ecks (so hoch wie "
+          "der Raum) und 2 Lagen unter dem Raumboden. Die oberste Lage des Ecks bleibt als Dach der Zelle.", {
     y: raster_aus({p: "-" for p in INNEN}, 0, 0, 4, 4) for y in (1, 0, -1, -2)})
 f.schritt("In die Grube springen und 9 untere Stufen auf ihren Boden setzen. Zum Herausklettern einen Hilfsblock auf "
           "die Stufe direkt vor dem Eingang setzen, hinauf und durch den Eingang hinaus, den Hilfsblock wieder abbauen.", {
     -2: raster_aus({p: "U" for p in INNEN}, 0, 0, 4, 4)})
-f.schritt("Vom Eingang aus den Eisengolem in die Mitte bauen: einen Eisenblock auf die mittlere Stufe; einen an die "
-          "Innenseite der Westwand auf Raumbodenhöhe (der westliche Arm); einen Eisenblock auf den ersten; einen an "
-          "dessen Ostseite (der östliche Arm); oben drauf einen geschnitzten Kürbis. Der Golem steht dann auf den "
-          "Stufen, seine Augen knapp über dem Raumboden. Herauskommen kann er nicht (2 Blöcke hoch).", {
+f.schritt("Im Eingang stehend den Eisengolem in die Mitte bauen: einen Eisenblock auf die mittlere Stufe; einen an die "
+          "Innenseite der Westwand, Mitte, in der Lage auf Höhe deiner Füße (der westliche Arm); einen Eisenblock auf "
+          "den ersten; einen an dessen Ostseite (der östliche Arm); oben drauf einen geschnitzten Kürbis. Der Golem "
+          "steht dann auf den Stufen, seine Augen knapp über dem Raumboden. Herauskommen kann er nicht, die Wände sind "
+          "für ihn zu hoch.", {
     -1: "Y"}, x0=2, z0=2)
 f.schritt("Den Eingang oben wieder zumachen (an die Unterseite des Blocks darüber klicken). Dann in alle 7 Schlitze eine "
           "UNTERE Stufe (oben auf den Block darunter klicken): Offen bleibt ein halber Block – genug zum Sehen, zu eng "
@@ -104,14 +107,14 @@ f.schritt("Truhe ins Loch an der Nordwand, dann die 24 Trichter, immer schleiche
 f.schritt("Auf die 11 Trichter direkt an der Zelle je ein Lagerfeuer (oben auf den Trichter klicken; es brennt von "
           "selbst). Die äußeren Trichter bleiben frei und bündig mit dem Boden.", {
     0: raster_aus({p: "Q" for p in FEUER}, 0, 0, 5, 5)})
-f.schritt("Eine Fackel in die Südostecke des Raums: Mit dem Licht der Lagerfeuer ist dann überall Licht 1 oder mehr – "
-          "andere Monster spawnen nicht, Schleime schon.", {0: "T"}, x0=11, z0=11)
+f.schritt("Eine Fackel in den südöstlichen Teil des Raums, 4 Blöcke vor der Ecke: Mit dem Licht der Lagerfeuer ist dann "
+          "überall Licht 1 oder mehr – andere Monster spawnen nicht, Schleime schon.", {0: "T"}, x0=11, z0=11)
 f.schritt("24–32 Blöcke weg warten, z. B. 25 Blöcke über der Raummitte in einer kleinen Höhle: Näher spawnt nichts, "
           "und der Golem soll das einzige Ziel sein. Die Schleimbälle holst du aus der Truhe.", {25: "P"}, x0=8, z0=8)
 
 # Test wie bei der einfachen Farm: allein liegender Schleim-Chunk der flachen Testwelt (Seed 12345), Raum auf Höhe 37,
 # Untergrund gefüllt – aber andere Chunks als der Test der einfachen Farm (43055/43015), damit sich die Läufe nicht
-# stören: 43086/42999 und 43043/43031 (beide ohne weiteren Schleim-Chunk in 5 Chunks Umkreis). Gemessen: Schleimbälle in
+# stören: 43086/42999 und 43043/43031 (beide ohne weiteren Schleim-Chunk in 3 Chunks Umkreis). Gemessen: Schleimbälle in
 # Trichtern und Truhe (die einfache Farm zählte lebende Schleime) – und der Golem muss den Lauf überleben.
 TESTORT = dict(boden="minecraft:stone", fuellung="minecraft:stone", erde_bis=4, hoehe=37, zeit="day",
                vorher=["fill {x} -60 {z} {x+15} {y-7} {z+15} minecraft:stone"])

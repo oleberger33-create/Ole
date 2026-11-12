@@ -31,8 +31,8 @@ f = profi("lohe", dict(
         "spawnen, dunkel genug (Licht höchstens 9, erlaubt sind 11).",
     help=[["Es kommen keine Lohen",
            "Du musst auf der Truhe stehen (knapp 15 Blöcke vom Spawner, mehr als 16 geht nicht). Im Schacht kein "
-           "Licht außer der Lava: alle Fackeln vom Bau abbauen. Die Lava muss 7 Blöcke unter dem Spawner liegen – "
-           "höher wird es zu hell."],
+           "Licht außer der Lava (keine Fackeln). Die Lava muss 7 Blöcke unter dem Spawner liegen – höher wird es "
+           "zu hell."],
           ["Lohen bleiben auf der Lava liegen",
            "Lava nur in die 4 inneren Ecken, sie fließt bis zur Mitte (dort ganz flach). Das Loch in der Mitte "
            "braucht ein Wandschild (kein Block, keine Falltür) und darunter freie Rutsche. Ein Block muss auf dem "
@@ -80,21 +80,23 @@ def ebene(zellen_dict):
 # 1 – Freimachen
 frei = {y: ebene(zellen([p for p in INNEN if not (y == 0 and p == (0, 0))], "-")) for y in range(-7, 3)}
 frei[0] = ebene(zellen([p for p in INNEN if p != (0, 0)], "-") | {(0, 0): "Q"})      # Spawner bleibt
+frei[1] = ebene(zellen([p for p in INNEN if p != (0, 0)], "-") | {(0, 0): "N"})      # Block auf dem Spawner
 frei[-8] = ebene({(0, 0): "-"})
 for y in range(-13, -8):
     frei[y] = ebene({(0, 0): "-"})
 frei[-14] = ebene({(0, 2): "-"})
 frei[-13] = ebene({(0, 0): "-", (0, 2): "-"})
-f.schritt("Vorbereiten: Trank der Feuerresistenz trinken – solange du baust, kommen Lohen. Den Schacht um den Spawner "
-          "freimachen: innen 7 × 7, von 7 Blöcken unter dem Spawner bis 2 darüber; der Spawner bleibt in der Luft "
-          "hängen. Darunter mittig eine Rutsche 1 × 1 bis 13 Blöcke unter dem Spawner ausgraben und ganz unten, "
-          "2 Blöcke südlich davon, deinen Platz (2 hoch). Fackeln halten den Spawner beim Bauen ruhig – am Ende alle "
-          "wieder abbauen.", frei, x0=-4, z0=-4)
+f.schritt("Als Erstes, noch vom Boden neben dem Spawner aus: einen Block oben auf den Spawner setzen – sonst bleiben "
+          "später Lohen darauf stehen. Trank der Feuerresistenz trinken: Solange du baust, kommen Lohen. Dann den "
+          "Schacht um den Spawner freimachen: innen 7 × 7, von 7 Blöcken unter dem Spawner bis 2 darüber; der Spawner "
+          "bleibt in der Luft hängen. Darunter mittig eine Rutsche 1 × 1 bis 13 Blöcke unter dem Spawner ausgraben "
+          "und ganz unten, 2 Blöcke südlich davon, deinen Platz (2 hoch).", frei, x0=-4, z0=-4)
 
 # 2 – Kammer unten
 f.schritt("Kammer ganz unten (15 Blöcke unter dem Spawner): zuerst die Truhe unter deinen späteren Platz, dann zwei "
           "Trichter nach Norden davor – schleichend an die Truhe bzw. an den Trichter klicken (ein Trichter zeigt in den "
-          "Block, an den du klickst): Beide zeigen nach Süden zur Truhe.", {
+          "Block, an den du klickst): Beide zeigen nach Süden zur Truhe. Ist rundherum nichts zum Anklicken, erst "
+          "einen Hilfsblock setzen und später abbauen.", {
     -15: "v\nv\nC"}, z0=0)
 f.schritt("Schlamm (Wasserflasche auf Erde) auf beide Trichter – Trichter saugen durch Schlamm. Rundherum Wände, "
           "2 hoch. Die beiden Wandblöcke südlich von deinem Platz sind deine Tür: zum Hinein- und Hinausgehen "
@@ -117,11 +119,12 @@ f.schritt("Schlamm (Wasserflasche auf Erde) auf beide Trichter – Trichter saug
 f.schritt("Eine OBERE Stufe über den südlichen Schlamm (an die obere Hälfte eines Wandblocks daneben klicken). "
           "Zwischen Schlamm und Stufe bleibt ein Spalt 5/8 Block hoch: Durch ihn triffst du die Beine der Lohen, "
           "sehen können sie dich nicht.", {-13: "O"}, z0=1)
-f.schritt("Über die Stufe einen Block, über deinen Platz die Decke, und die Wände der Rutsche 1 × 1 nach oben bis "
-          "9 Blöcke unter den Spawner – direkt darüber kommt der Boden.", {
+f.schritt("Über die Stufe einen Block, über deinen Platz und die Tür die Decke, und die Wände der Rutsche 1 × 1 "
+          "nach oben bis 9 Blöcke unter den Spawner – direkt darüber kommt der Boden.", {
     -12: """
         .N.
         N.N
+        .N.
         .N.
         .N.
     """,
@@ -140,19 +143,17 @@ f.schritt("Boden 9 × 9 aus Netherziegeln, 8 Blöcke unter dem Spawner – von d
     -8: ebene(boden)}, x0=-4, z0=-4)
 rand = zellen(RING, "N")
 rand.update({(-3, -3): "L", (3, -3): "L", (-3, 3): "L", (3, 3): "L"})
-f.schritt("Rand 1 hoch rund um den Boden – das ist die Lavaschicht. Dann von oben je einen Eimer Lava in die 4 inneren "
-          "Ecken: Im Nether fließt sie 7 Blöcke weit, bedeckt den ganzen Boden und wird zur Mitte hin flacher. Dorthin "
-          "schiebt sie die Lohen.", {
+f.schritt("Rand 1 hoch rund um den Boden – das ist die Lavaschicht. Dann, auf dem Rand stehend, je einen Eimer Lava "
+          "in die 4 inneren Ecken (auf den Boden klicken): Im Nether fließt sie 7 Blöcke weit, bedeckt den ganzen "
+          "Boden und wird zur Mitte hin flacher. Dorthin schiebt sie die Lohen.", {
     -7: ebene(rand)}, x0=-4, z0=-4)
 
 # 4 – Wände, Decke
 f.schritt("Wände aus Netherziegeln auf den Rand, 9 Ringe übereinander bis 2 Blöcke über den Spawner (was von der Festung "
           "schon steht, bleibt). Lohen spawnen bis eine Ebene über dem Spawner und sind 1,8 hoch.", {
     y: ebene(zellen(RING, "N")) for y in range(-6, 3)}, x0=-4, z0=-4)
-f.schritt("Einen Block oben auf den Spawner (sonst bleiben dort Lohen stehen) und die Decke 9 × 9 drei Blöcke über dem "
-          "Spawner. Vor dem letzten Deckenblock alle Fackeln im Schacht abbauen und hinausklettern – drinnen darf nur "
-          "die Lava leuchten.", {
-    1: ebene({(0, 0): "N"}),
+f.schritt("Decke 9 × 9 drei Blöcke über dem Spawner, auf die Wände gesetzt – von außen bauen. Im Schacht darf nichts "
+          "leuchten außer der Lava, und die Lohen fliegen so nicht hinaus.", {
     3: ebene(zellen(ALLE, "N"))}, x0=-4, z0=-4)
 
 # 5 – Platz

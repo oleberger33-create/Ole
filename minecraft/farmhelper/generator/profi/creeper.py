@@ -1,7 +1,8 @@
 """Creeper-Farm (Profi): gleiche Bauweise wie die einfache Farm (dunkler Raum 2 hoch, Falltüren oben → 1,8 Blöcke frei,
 2 breite Kanäle in Kreuzform zum Loch in der Mitte, gut 24 Blöcke Fall), aber 18 × 18 statt 8 × 8 – so groß, wie es
-geht: Die Kanäle sind genau 8 lang (Quelle + 7 Blöcke Fließwasser), das Wasser endet am Loch, das Loch bleibt ohne Falltüren
-trocken; jede Ecke ist höchstens 32 Blöcke vom AFK-Platz entfernt. Teppiche auf jedem dritten Feld verhindern Spinnen.
+geht: Die Kanäle sind genau 8 lang (Quelle + 7 Blöcke Fließwasser), das Wasser endet am Loch, das Loch bleibt ohne
+Falltüren trocken; jede Ecke ist höchstens 32 Blöcke vom AFK-Platz entfernt. Teppiche auf jedem dritten Feld verhindern
+Spinnen.
 
 Raum x 0 … 17, z 0 … 17, Füße auf Höhe 0, Boden -1. Kanäle x 8/9 bzw. z 8/9 (Wasser auf -2, offene Falltüren auf -1),
 Loch (8 … 9, 8 … 9). Schacht bis -26, Trichter auf -27 (nach unten), Truhen auf -28. Plätze unten: Ost x 10 (AFK
