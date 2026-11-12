@@ -70,16 +70,21 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
 
 ### Teststand (26.3)
 
-- Mit echten Spawns bzw. echtem Wachstum getestet und bestanden: Zuckerrohr, Bambus, Kaktus, Melone/Kürbis,
-  Seetang, Karotten-Bauer, Baum, Knochenmehl, Blumen, Hühner, Kühe, Wolle, Honig, Eisen, Spawner, Monster,
-  Creeper, Schleim (allein liegender Schleim-Chunk), Lohen, Gold, Endermen (weit weg von Inseln), Ertrunkene (wenig:
-  ~1 pro Stunde), Handel, Bruchstein, Lava, Schnee, Stock-Crafter; Hexen und Plünderer an echten Bauwerken.
-- Zusätzlich mit hineingesetzten Mobs: Monster, Creeper, Hexen, Ertrunkene, Plünderer, Gold.
+Letzter Gesamtlauf: 31 von 32 Flachwelt-Tests bestanden (30 Spielminuten, alle Farmen gleichzeitig), dazu die
+Bauwerk-Farmen in einer normalen Welt.
+
+- Mit echten Spawns bzw. echtem Wachstum bestanden: Zuckerrohr, Bambus, Kaktus, Melone/Kürbis, Seetang,
+  Karotten-Bauer, Baum, Knochenmehl, Blumen, Hühner, Kühe, Wolle, Honig, Eisen, Spawner, Monster, Creeper, Lohen,
+  Gold, Endermen (weit weg von Inseln: 38–47 Perlen in 20 Minuten), Handel, Bruchstein, Lava, Schnee,
+  Stock-Crafter; Hexen an echten Hexenhütten (3 von 3 Läufen).
+- Schleim: allein in einem allein liegenden Schleim-Chunk 58 Schleime in 60 Minuten; im Gesamtlauf mit 32 Farmen
+  keiner (alle teilen sich das Monster-Limit).
+- Plünderer an echten Außenposten: 6 bzw. 14 in den Gruben nach 30 Minuten, an einem dritten Außenposten erst nach
+  35 Minuten einer – die Spawnrate schwankt je Außenposten.
+- Ertrunkene: funktioniert, aber wenig (1 in 60 Minuten).
+- Zusätzlich mit hineingesetzten Mobs bestanden: Monster, Creeper, Hexen, Ertrunkene, Plünderer, Gold.
 - Nicht nachgewiesen: Wither-Skelette spawnten in der Festung, auf der Fläche in 30 Minuten aber keins; Wächter,
   Überfall und Angeln haben keinen automatischen Test (Kampf- bzw. Handarbeit).
-
-- Per `/summon` mit Daten gesetzte Mobs bekommen keine Ausrüstung (Plünderer ohne Armbrust laufen nicht zum Ziel) –
-  in Tests die Ausrüstung mitgeben.
 
 ## Server-Version (OLE SMP, Welt „welt“)
 
