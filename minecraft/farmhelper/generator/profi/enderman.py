@@ -1,0 +1,157 @@
+"""Enderman-Farm im End (Profi): derselbe Endermilben-Köder wie die einfache Farm (Boot in der Mitte, Loch 5 × 5 mit
+offenen Falltüren, 2 breit, Dach 3 × 3), aber auf einer Plattform 19 × 19 statt 9 × 9, die Endermilbe einen halben
+Block höher (ganzer Block statt Stufe – Sichtlinie über die große Plattform) und unten ein Trichterboden mit
+Doppeltruhe: voll AFK, keine Perle verschwindet.
+
+Gebaut wird von unten nach oben. Ursprung (0, 0, 0) = Warteplatz unten (Füße), Stufe darunter.
+Unten (y 0): Trichterboden 5 × 5 bei x -7 … -3, z -2 … 2, Ausgang (-2, 0, 0) → Doppeltruhe (-1, 0 … 1, 0),
+Ring aus Endstein auf y 0, Glasrand auf y 1. Gerüst-Säule (0, 0 … 44, 1).
+Oben: Plattform 19 × 19 auf y 44 (x -14 … 4, z -9 … 9), Mittelblock (-5, 44, 0), Loch 5 × 5 darum,
+Boot + Endermilbe auf (-5, 45, 0), Dach aus unteren Stufen auf y 47. Fall: Oberseite 45 → Trichter-Oberkante 1 =
+44 Blöcke = 41 Schaden (Enderman 40 Leben).
+"""
+from profi_basis import *
+
+f = profi("enderman", dict(
+    name="Enderman-Farm im End (Profi)", diff=4, out="Enderperlen",
+    where="Im End, mindestens 128 Blöcke von jeder anderen Insel; unten möglichst tief bauen (über Höhe 0), die "
+          "Plattform liegt 44 Blöcke höher",
+    afk="Ja – unten neben der Truhe, 45 Blöcke unter der Plattform",
+    why="Der Köder ist derselbe wie in der einfachen Farm: Eine Endermilbe mit Namensschild sitzt in einem Boot in der "
+        "Mitte, rundherum ein Loch 5 × 5 mit offenen Falltüren – 2 breit, sonst stiegen Endermen hinüber und schlügen "
+        "sie –, darüber ein Dach 3 × 3. Endermen wollen zu ihr, treten auf die Falltüren (sie halten sie für Boden) "
+        "und fallen 44 Blöcke tief: 41 Schaden, sie haben 40 Leben. Besser als die einfache Farm: Die Plattform ist "
+        "19 × 19 statt 9 × 9. Weit und breit ist sie der einzige Boden, also spawnen alle Endermen dort – auf etwa "
+        "5-mal so viel Fläche (335 statt 65 Felder). Die Endermilbe sitzt auf einem ganzen Block statt auf einer "
+        "Stufe, also einen halben Block höher: Auf der Stufe läge ihr Kopf unter der Plattform-Oberkante, und von "
+        "weiter als etwa 7 Blöcken verdeckten die Falltüren sie – so sehen sie alle Endermen auf der großen "
+        "Plattform. Unten landen die Endermen auf 25 Trichtern; die bringen jede Perle in eine Doppeltruhe neben "
+        "deinem Warteplatz – nichts einsammeln, nichts verschwindet nach 5 Minuten. Das Dach ist aus unteren Stufen, "
+        "unten liegen nur Trichter, Glas, Truhen und eine Stufe: Darauf spawnt nichts. Gebaut wird von unten nach "
+        "oben; die Gerüst-Säule ist danach dein Weg zwischen Warteplatz und Plattform.",
+    help=[["Endermilbe ist tot", "Das Loch um den Mittelblock muss 2 Blöcke breit sein und das Dach (untere Stufen, "
+                                 "2 Blöcke über der Plattform) da sein – sonst landen Endermen beim Teleportieren "
+                                 "neben ihr und schlagen sie. Ohne Namensschild verschwindet sie nach 2 Minuten."],
+          ["Wenig Endermen", "Mindestens 128 Blöcke von anderen Inseln bauen und kein Licht (Fackeln) in die Nähe. "
+                             "Unten möglichst tief anfangen: Beim Spawnen wählt das Spiel eine zufällige Höhe "
+                             "zwischen 0 und dem obersten Block – je tiefer die Plattform, desto öfter trifft es sie."],
+          ["Endermen greifen dich an", "Beim Bauen und Warten nicht in ihre Augen schauen (oder einen geschnitzten "
+                                       "Kürbis aufsetzen)."],
+          ["Truhe voll", "Die Doppeltruhe fasst 864 Perlen (grob 1½–2 Stunden). Danach bleiben die Perlen in den "
+                         "Trichtern – rechtzeitig leeren."]],
+    meta=m("Rate: Schätzung – die Plattform hat etwa 5-mal so viele Spawnfelder wie die einfache Farm (335 statt 65); "
+           "die einfache brachte im Test 38–47 Perlen in 20 Minuten. Grob 400–700 Enderperlen pro Stunde, alle in "
+           "der Truhe (Enderman: 0–1 Perle).",
+           [("Im End, mindestens 128 Blöcke von anderen Spawnflächen – dann spawnen Endermen nur auf der Plattform.",
+             W + "Tutorial:Enderman_farming")],
+           [("Endermilben-Köder: benannte Endermilbe in einem Fahrzeug, Endermen in Sichtweite laufen zu ihr und "
+             "fallen; 43 Blöcke Fall.", W + "Tutorial:Enderman_farming"),
+            ("Endermen sehen eine Endermilbe bis 64 Blöcke weit und greifen sie an.", W + "Enderman"),
+            ("Ohne Namensschild verschwindet eine Endermilbe nach 120 Sekunden – auch in Boot oder Lore.",
+             W + "Endermite"),
+            ("Fallschaden: 1 je Block ab dem vierten – 44 Blöcke sind 41 Schaden.", W + "Fall_damage"),
+            ("Trichter sammeln Gegenstände aus dem Raum über sich ein.", W + "Hopper"),
+            ("Auf Gerüst spawnen keine Mobs; darin klettert man hoch (Springen) und runter (Schleichen).",
+             W + "Scaffolding"),
+            ("Auf dem Testserver (26.3) mit der einfachen Farm geprüft: Endermen teleportieren sich und landen dabei "
+             "auch auf Falltüren, ein Boot nimmt einen zweiten Fahrgast auf – darum 2 breites Loch und Dach.",
+             None)])))
+
+f.zeichen(N="end_stone", s=("slab", {"half": "bottom"}), U=("slab", {"half": "bottom"}), K=("chest", "e"),
+          X="scaffolding", B="oak_boat", M="endermite",
+          a=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
+          b=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
+          c=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
+          d=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}))
+
+f.schritt("Im End, mindestens 128 Blöcke von jeder anderen Insel (z. B. am Ende einer Brücke aus Blöcken, auf denen "
+          "nichts spawnt). Du stehst am späteren Warteplatz – so tief wie möglich, aber über Höhe 0. Eine Ebene unter "
+          "deinen Füßen: westlich ein Boden 7 × 7 aus Endstein, dazwischen 3 Blöcke Endstein und unter deinem Platz "
+          "eine untere Stufe (darauf spawnen keine Endermen; erst setzen, wenn du schon auf dem Endstein stehst).", {
+    -1: """
+        NNNNNNN..
+        NNNNNNN..
+        NNNNNNN..
+        NNNNNNNNs
+        NNNNNNNNN
+        NNNNNNN..
+        NNNNNNN..
+    """}, x0=-8, z0=-3)
+f.schritt("Doppeltruhe direkt westlich neben deinem Platz: zwei Truhen nebeneinander, beim Setzen nach Westen schauen – "
+          "dann zeigt ihre Vorderseite zu dir.", {
+    0: "K\nK"}, x0=-1)
+f.schritt("Westlich davon der Trichterboden 5 × 5 – hier landen später die Endermen – und ein Trichter zur Truhe. Ein "
+          "Trichter zeigt in den Block, an den du klickst; immer schleichend klicken, sonst öffnet sich Truhe oder "
+          "Trichter. Du stehst dabei auf dem Boden hinter dem neuen Trichter und rückst nach jedem einen Block zurück. "
+          "Erst den Trichter an die Westseite der Truhe, dann den nächsten an dessen Westseite. In der östlichen Spalte "
+          "des Bodens zeigen die zwei nördlichen Trichter nach Süden (an die Nordseite des mittleren klicken), die "
+          "zwei südlichen nach Norden. Alle anderen zeigen nach Osten: Reihe für Reihe von Osten nach Westen, jeweils "
+          "an die Westseite des Nachbarn klicken.", {
+    0: """
+        >>>>v
+        >>>>v
+        >>>>>>
+        >>>>^
+        >>>>^
+    """}, x0=-7, z0=-2)
+f.schritt("Rand um den Trichterboden: ein Ring aus Endstein auf Höhe der Trichter (der Trichter zur Truhe ist ein Teil "
+          "davon) und darauf ein Ring aus Glas. Er hält Perlen fest, die beim Tod eines Enderman etwas wegspringen; auf "
+          "Glas spawnt nichts.", {
+    0: """
+        NNNNNNN
+        N.....N
+        N.....N
+        N......
+        N.....N
+        N.....N
+        NNNNNNN
+    """,
+    1: """
+        GGGGGGG
+        G.....G
+        G.....G
+        G.....G
+        G.....G
+        G.....G
+        GGGGGGG
+    """}, x0=-8, z0=-3)
+f.schritt("Südlich neben deinem Platz eine Gerüst-Säule, 45 hoch: Gerüst an Gerüst klicken setzt es oben auf die "
+          "Säule. Darin kletterst du hinauf (Springen) und hinunter (Schleichen).", {
+    y: "X" for y in range(0, 45)}, z0=1)
+f.schritt("Oben auf der Säule die Plattform 19 × 19 aus Endstein, auf gleicher Höhe wie das oberste Gerüst (die "
+          "Säule ist ein Feld davon): vom Gerüst aus nach allen Seiten bauen. Über dem Trichterboden alles zubauen – "
+          "das Loch kommt später. Der Block genau über der Mitte des Trichterbodens wird der Mittelblock.", {
+    44: "\n".join(["N" * 19] * 10 + ["N" * 14 + "." + "N" * 4] + ["N" * 19] * 8)}, x0=-14, z0=-9)
+f.schritt("Dach: Auf dem Mittelblock zwei Hilfsblöcke hochbauen (springen und unter dich setzen), als dritte Lage eine "
+          "untere Stufe unter dich setzen. Auf ihr stehend an den Kanten schleichen und 8 weitere untere Stufen an die "
+          "untere Hälfte ihrer Seiten klicken – Dach 3 × 3, zwei Blöcke über der Plattform. Hinunterspringen und die "
+          "zwei Hilfsblöcke abbauen. Unter dem Dach sind nur 2 Blöcke Platz: Kein Enderman kann sich neben die "
+          "Endermilbe teleportieren. Auf unteren Stufen spawnen keine Endermen; sehen können sie die Endermilbe "
+          "trotzdem.", {
+    47: "UUU\nUUU\nUUU"}, x0=-6, z0=-1)
+f.schritt("Auf den Mittelblock (unter das Dach) ein Boot. Eine Endermilbe hineinlocken – sie entsteht manchmal beim "
+          "Werfen einer Enderperle und läuft dir nach – und ihr ein Namensschild geben, sonst verschwindet sie nach 2 "
+          "Minuten. Solange du auf der Plattform bist, spawnen dort keine Endermen (näher als 24 Blöcke an dir nie).", {
+    45: "B"}, x0=-5)
+f.schritt("Endermilbe im Boot.", {45: "M"}, x0=-5)
+f.schritt("Um den Mittelblock ein Loch 5 × 5 ausheben (24 Blöcke, der Mittelblock bleibt) – genau über dem "
+          "Trichterboden. 2 breit: Über einen schmalen Ring steigen Endermen hinüber, und wer neben der Endermilbe "
+          "steht, schlägt sie (8 Leben, ein Schlag 7).", {
+    44: "-----\n-----\n--.--\n-----\n-----"}, x0=-7, z0=-2)
+f.schritt("4 Falltüren an die Seiten des Mittelblocks klicken (Klappe am Mittelblock), alle öffnen.", {
+    44: ".b.\nd.c\n.a."}, x0=-6, z0=-1)
+f.schritt("16 Falltüren an den Rand des Lochs klicken (Klappe am Rand) – schräg von der Seite an die Innenwand des "
+          "Lochs klicken. Dann alle öffnen. Die 4 inneren Ecken bleiben offen. Endermen halten die Falltüren für Boden, "
+          "wollen zur Endermilbe und fallen.", {
+    44: "aaaaa\nc...d\nc...d\nc...d\nbbbbb"}, x0=-7, z0=-2)
+f.schritt("Im Gerüst hinunter (schleichen) und hier warten: 45 Blöcke unter der Plattform – näher als 24 Blöcke "
+          "spawnt nichts, und bis 128 Blöcke bleiben die Endermen da. Die Perlen landen in der Truhe neben dir.", {
+    0: "P"})
+
+f.pruefe(dimension="the_end", zeit="day", hoehe=15, ursprung=[400, 400],   # Plattform auf Höhe 59 wie bei der einfachen
+         nachher=["kill @e[type=minecraft:endermite,x={x-5},y={y+45},z={z},distance=..8]",
+                  "kill @e[type=minecraft:oak_boat,x={x-5},y={y+45},z={z},distance=..8]",
+                  'summon minecraft:oak_boat {x-5}.5 {y+45} {z}.5 {Passengers:[{id:"minecraft:endermite",'
+                  'PersistenceRequired:1b}]}'],
+         bereich=[-6, 45, -1, -4, 47, 1],
+         erwartet={"beute": {"minecraft:ender_pearl": 50}, "wesen": {"minecraft:endermite": 1}})

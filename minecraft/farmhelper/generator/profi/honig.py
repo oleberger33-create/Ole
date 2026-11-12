@@ -2,11 +2,16 @@
 
 Je Stock (Spalte x): Trichter (x, -1, 0) direkt UNTER dem Stock, alle nach Osten in die Truhe (8, -1, 0); Stock
 (x, 0, 0); Werfer mit Schere dahinter (x, 0, 1), zeigt nach Norden auf den Stock; Beobachter auf dem Stock (x, 1, 0),
-schaut nach unten auf den Stock (Ausgang oben); Redstone-Staub auf jedem Beobachter (x, 2, 0) und auf jedem Werfer
-(x, 1, 1) – zusammen eine Leitung, die von jedem Beobachter zu allen Werfern führt. Blume vor jedem Stock (x, 0, -1).
-Seitlich zu: Steinziegel (-1, 0, 0) im Westen, Glas (8, 0, 0) auf der Truhe im Osten.
+schaut nach unten auf den Stock (Ausgang oben); darauf ein Block S (x, 2, 0), den der Beobachter stark mit Strom
+versorgt. Auf jedem Werfer ein Block T (x, 1, 1), darauf Redstone-Staub (x, 2, 1): eine Leitung über alle Werfer, direkt
+neben den Blöcken S. Blume vor jedem Stock (x, 0, -1). Seitlich zu: Steinziegel (-1, 0, 0) im Westen, Glas (8, 0, 0)
+auf der Truhe im Osten.
 
-Ablauf: Jede Änderung der Honigstufe eines Stocks → sein Beobachter gibt einen Puls → alle 8 Werfer versuchen zu scheren.
+Warum nicht Staub direkt auf Beobachter und Werfer: Beobachter leiten keinen Strom, Staub auf einem Beobachter gibt sein
+Signal nicht eine Stufe nach unten weiter (Wiki: Observer). Darum liegt die Leitung auf gleicher Höhe wie die Blöcke S.
+
+Ablauf: Jede Änderung der Honigstufe eines Stocks → sein Beobachter gibt einen Puls in S → die Staubleitung daneben
+schaltet alle Blöcke T → alle 8 Werfer darunter versuchen zu scheren.
 Nur bei vollem Stock (Stufe 5) klappt es; die 3 Waben entstehen IM Stock, der Trichter darunter saugt sie an (Java:
 Bienenstöcke blockieren Trichter nicht). Fehlversuche kosten die Schere nichts.
 """
@@ -25,16 +30,17 @@ f = profi("honig", dict(
         "sie durch den Stock hindurch an (Bienenstöcke und -nester blockieren Trichter nicht) – nichts fliegt mehr "
         "herum. Alle Trichter führen nach Osten in eine Truhe. Hinter jedem Stock zeigt ein Werfer mit Schere auf "
         "ihn. Statt eines Dauertakts schaut auf jedem Stock ein Beobachter nach unten: Bei jeder neuen Honigstufe "
-        "gibt er einen Puls in die Redstone-Leitung auf Beobachtern und Werfern, und alle 8 Werfer versuchen zu "
-        "scheren. Nur ein voller Stock (Stufe 5) gibt 3 Waben her; bei den anderen passiert nichts, die Schere "
+        "gibt er einen Puls in den Block über sich, die Redstone-Leitung daneben (auf Blöcken über den Werfern) "
+        "schaltet alle 8 Werfer, und sie versuchen zu scheren. Nur ein voller Stock (Stufe 5) gibt 3 Waben her; "
+        "bei den anderen passiert nichts, die Schere "
         "nutzt sich dabei nicht ab und die Bienen werden nicht wütend. Vor jedem Stock steht eine Blume: Die Bienen "
         "kommen vorne heraus und sammeln sofort, statt Blumen zu suchen.",
     help=[["Ein voller Stock wird nicht geleert", "Liegt in seinem Werfer eine Schere? Der Werfer muss nach Norden "
                                                  "auf den Stock zeigen, der Beobachter auf dem Stock nach unten "
-                                                 "(roter Punkt oben). Der Platz über dem Staub auf den Werfern muss "
-                                                 "frei bleiben, sonst reißt die Leitung zwischen den beiden "
-                                                 "Staubreihen. Sobald irgendein Stock eine Stufe weiter ist, "
-                                                 "versuchen es alle Werfer erneut."],
+                                                 "(roter Punkt oben), auf ihm ein fester Block, direkt daneben "
+                                                 "die Staubleitung auf den Blöcken über den Werfern. Sobald "
+                                                 "irgendein Stock eine Stufe weiter ist, versuchen es alle Werfer "
+                                                 "erneut."],
           ["Waben liegen vor den Stöcken", "Jeder Stock muss direkt auf einem Trichter stehen, links und rechts "
                                            "müssen Stöcke bzw. die Endblöcke sein, oben der Beobachter, hinten der "
                                            "Werfer – nur vorne frei. Zeigt ein Trichter in einen Block statt zum "
@@ -63,6 +69,10 @@ f = profi("honig", dict(
              "die Honigstufe um 1, bei Stufe 5 gibt Scheren 3 Waben.", W + "Beehive"),
             ("Ein Stock zeigt mit der Öffnung zu dem, der ihn setzt; Werfer zeigen zum Spieler, Beobachter "
              "schauen in die Blickrichtung.", W + "Beehive#Block_states"),
+            ("Beobachter geben einen starken Puls (Stärke 15) in den Block hinter sich; sie leiten selbst keinen "
+             "Strom, Staub auf ihnen gibt kein Signal nach unten weiter.", W + "Observer"),
+            ("Redstone-Staub schaltet den Block, auf dem er liegt; ein so geschalteter Block schaltet Werfer daneben.",
+             W + "Redstone_Dust"),
             (TEST + "einfache Variante: Werfer mit Schere erntet ein volles Nest, Glasflaschen würden bei nicht "
                     "vollem Nest herausfliegen.", None)])))
 
@@ -85,12 +95,16 @@ f.schritt(f"Auf jeden Trichter einen Bienenstock (oder ein Bienennest), die Öff
 f.schritt("Auf jeden Stock einen Beobachter, der nach unten auf den Stock schaut: Stell dich auf die Werfer, schau "
           "steil nach unten auf die Oberseite des Stocks und setz ihn – der rote Punkt zeigt dann nach oben.", {
     1: "O" * N})
-f.schritt("Redstone-Staub auf alle Beobachter (dafür auf den Werfern stehen).", {
-    2: "R" * N})
-f.schritt("Redstone-Staub auf alle Werfer (dafür hinter den Werfern stehen). Er verbindet sich treppenartig mit dem "
-          "Staub auf den Beobachtern – über diesem Staub muss es frei bleiben. Ändert sich ein Stock, gibt sein "
-          "Beobachter einen Puls und alle Werfer versuchen zu scheren.", {
-    1: "R" * N}, z0=1)
+f.schritt("Auf jeden Beobachter einen Steinziegel (dafür auf den Werfern stehen, dann siehst du die Oberseite) – "
+          "der Beobachter schaltet ihn bei jeder neuen Honigstufe. Dann von hinten (Süden) auf jeden Werfer einen "
+          "Steinziegel.", {
+    2: "#" * N,
+    1: "." * N + "\n" + "#" * N})
+f.schritt("Redstone-Staub auf die Steinziegel über den Werfern: Stell dich dafür hinter den Werfern auf einen "
+          "Hilfsblock (danach abbauen), vom Boden aus siehst du die Oberseiten nicht. Die Leitung liegt direkt neben "
+          "den Steinziegeln auf den Beobachtern: Ändert sich ein Stock, schaltet sie alle Steinziegel über den "
+          "Werfern, und alle Werfer versuchen zu scheren.", {
+    2: "R" * N}, z0=1)
 f.schritt("Vor jeden Stock eine Blume (auf Gras oder Erde) – dort kommen die Bienen heraus.", {
     0: "Y" * N}, z0=-1)
 f.schritt(f"Bienen holen: 3 je Stock, zusammen {3 * N}. Mit Behutsamkeit abgebaute Nester haben ihre Bienen schon drin "
