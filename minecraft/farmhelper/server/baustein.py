@@ -45,6 +45,10 @@ wbet = '|'.join(re.escape(b) for b in sorted(WAEHLBAR, key=len, reverse=True))
 PRAED = re.compile(r'(block ~ ~ ~ )(' + bet + r')(?![a-z_\[{])')
 GEIST = re.compile(r'^(execute .*?)run (particle minecraft:block_marker\{block_state:\{id:"(' + wbet + r')"\}\} '
                    r'~0\.5 ~0\.5 ~0\.5 0 0 0 0 1 force @a\[tag=ofh\.sieht\])$')
+# Geister als Blöcke (nur_spieler.py): summon block_display mit dem Plan-Stein -> bei Auswahl der gewählte Stein
+GEIST_B = re.compile(r'^(execute .*?)run summon minecraft:block_display (\S+ \S+ \S+) \{block_state:\{id:"(' + wbet
+                     + r')"\},(.*)$')
+geist_b_nbt = None
 zaehl = {'praedikate': 0, 'geister': 0, 'hud_zaehler': 0, 'hud_titel': 0, 'menues': 0}
 item_tags = set()  # Gruppen, die ein Material-Zähler (clear @s #ofh:…) braucht
 
@@ -57,9 +61,17 @@ for rel in list(dateien):
         z2, n = PRAED.subn(lambda m: m.group(1) + '#ofh:' + BETROFFEN[m.group(2)], z)
         zaehl['praedikate'] += n
         m = GEIST.match(z2)
+        mb = GEIST_B.match(z2)
         if m and n:
             neu.append(f'{m.group(1)}if score #wahl ofh matches 0 run {m.group(2)}')
             neu.append(f'{m.group(1)}unless score #wahl ofh matches 0 run function ofh:wahl/geist with storage ofh:tmp d')
+            zaehl['geister'] += 1
+        elif mb and n:
+            pos, rest = mb.group(2), mb.group(4)
+            assert geist_b_nbt in (None, (pos, rest)), 'Geister-Blöcke mit unterschiedlichem NBT'
+            geist_b_nbt = (pos, rest)
+            neu.append(f'{mb.group(1)}if score #wahl ofh matches 0 run ' + z2[len(mb.group(1)) + len('run '):])
+            neu.append(f'{mb.group(1)}unless score #wahl ofh matches 0 run function ofh:wahl/geist with storage ofh:tmp d')
             zaehl['geister'] += 1
         else:
             neu.append(z2)
@@ -197,7 +209,8 @@ neu = {
     'wahl/setzen': setzen,
     'wahl/bestaetigt': ['$tellraw @s [{text:"Baustein: ",color:"gold"},{text:"$(name)",color:"yellow"},{text:" – die Geisterblöcke zeigen jetzt diesen Stein.",color:"gray"}]',
                         'playsound minecraft:block.stone.place master @s ~ ~ ~ 1 1.2'],
-    'wahl/geist': ['$particle minecraft:block_marker{block_state:{id:"$(stein)"}} ~0.5 ~0.5 ~0.5 0 0 0 0 1 force @a[tag=ofh.sieht]'],
+    'wahl/geist': (['$summon minecraft:block_display %s {block_state:{id:"$(stein)"},%s' % geist_b_nbt] if geist_b_nbt else
+                   ['$particle minecraft:block_marker{block_state:{id:"$(stein)"}} ~0.5 ~0.5 ~0.5 0 0 0 0 1 force @a[tag=ofh.sieht]']),
 }
 for name, zeilen in neu.items():
     setze(FN + name + '.mcfunction', '\n'.join(zeilen) + '\n')

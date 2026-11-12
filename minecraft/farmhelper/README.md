@@ -93,13 +93,15 @@ Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. 
 ```bash
 # 1. Original bauen
 python3 generator/farmhelper.py generator/plaene.json aus/
-# 2. Auf einen Spieler beschränken, Geister als Partikel nur für ihn (Werkzeug liegt im Branch speedrun-plan)
-python3 smp/tools/farmhelper_nur_fuer.py aus/OlesFarmhelper.zip FNGreg nur.zip
-# 3. Für mehrere Spieler freigeben; jeder sieht nur die Geister seiner eigenen Pläne
+# 2. Auf einen Spieler beschränken; die Geister bleiben leuchtende Blöcke (alle in der Nähe sehen sie)
+python3 server/nur_spieler.py aus/OlesFarmhelper.zip FNGreg nur.zip
+#    (Alternative: Geister als Partikel nur für den Planbesitzer – smp/tools/farmhelper_nur_fuer.py, Branch
+#     speedrun-plan; in Vanilla sieht ein Block-Geist immer jeder, nur Partikel lassen sich einem Spieler schicken)
+# 3. Für mehrere Spieler freigeben (Namensliste)
 python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris
 # 4. Ersatzblöcke und Bausteinauswahl
 python3 server/baustein.py mehrere.zip baustein.zip server/baustein.json
-# 5. Blöcke im Weg an allen Seiten markieren (orange ausgraben, rot abbauen), „im Weg N“ in der Aktionsleiste
+# 5. „im Weg N“ in der Aktionsleiste; Ausgraben-Geister bleiben orange (Partikel-Fassung: Seiten markieren)
 python3 server/geister.py baustein.zip OlesFarmhelper.zip
 ```
 
@@ -113,10 +115,10 @@ auch Stein und das Weizenfeld auch Karotten, Kartoffeln und Rote Bete. Fest blei
 Magma, Seelensand, Wasser, Lava und alle Funktionsblöcke. Grundlage ist eine Prüfung aller 33 Farmen gegen 26.3
 (Spawnregeln, Redstone, Kolben, Feuer, Wasser, Explosionen) mit anschließender Gegenprüfung.
 
-**Geister in der Server-Fassung:** Die Geisterblöcke sind Partikel (nur der Planbesitzer sieht sie). Steht an der
-Stelle schon ein Block, steckt der Geist darin – darum markiert `geister.py` solche Blöcke an allen freien Seiten
-(orange: ausgraben, rot: falscher Block, abbauen) und die Aktionsleiste zeigt „im Weg N“. Ist der Block weg,
-erscheint der Geist.
+**Geister in der Server-Fassung:** Die Geister sind leuchtende, leicht verkleinerte Blöcke wie im Original
+(grün: hier hinsetzen, orange: ausgraben, rot: falscher Block). Steckt ein Geist in einem Block, sieht man die
+Leucht-Umrandung trotzdem; die Aktionsleiste zeigt dazu „im Weg N“. Alle Spieler in der Nähe sehen die Geister –
+das geht in Vanilla nicht anders. Bei gewähltem Baustein zeigen die Geister diesen Stein.
 
 **Bausteinauswahl:** Im Plan-Menü öffnet „Baustein“ eine Auswahl von 14 Steinsorten. Die Wahl gilt für den eigenen Plan:
 Geisterblöcke und der Zähler in der Aktionsleiste zeigen dann diesen Stein. „Vorgabe des Plans“ stellt zurück.

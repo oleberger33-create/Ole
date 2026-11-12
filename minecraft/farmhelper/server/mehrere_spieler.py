@@ -2,7 +2,8 @@
 
 Aufruf: python3 mehrere_spieler.py <nur_fuer.zip> <ausgabe.zip> <Name1> [<Name2> ...]
 
-Eingabe ist die Ausgabe von farmhelper_nur_fuer.py (Branch speedrun-plan, smp/tools/) für <Name1>.
+Eingabe ist die Ausgabe von nur_spieler.py (Geister bleiben Blöcke, alle sehen sie) oder von farmhelper_nur_fuer.py
+(Branch speedrun-plan, smp/tools/; Geister als Partikel nur für den Planbesitzer) für <Name1>.
 - tick: Wer den Farmhelper benutzen darf, steht in einer Namensliste (Tag ofh.darf), statt fest @a[name=<Name1>].
 - Geisterblöcke und Hinweise: gehen an den Besitzer des jeweiligen Plans (Tag ofh.sieht, gesetzt in plan/daten),
   statt fest an <Name1>. Jeder sieht nur seine eigenen Pläne; alle anderen sehen nichts.
@@ -41,7 +42,8 @@ dateien[DATEN] = ('# Besitzer dieses Plans markieren: nur er sieht Geisterblöck
                   'tag @a[tag=ofh.sieht] remove ofh.sieht\n'
                   'execute as @a if score @s ofh.id = #cur ofh.id run tag @s add ofh.sieht\n' + d).encode('utf-8')
 meta = json.loads(dateien['pack.mcmeta'])
-meta['pack']['description'] = "Ole's Farmhelper (nur " + ' und '.join(namen) + ', unsichtbar für andere)'
+meta['pack']['description'] = ("Ole's Farmhelper (nur " + ' und '.join(namen)
+                               + (', unsichtbar für andere)' if zaehler['partikel'] else ')'))
 dateien['pack.mcmeta'] = json.dumps(meta, indent=2, ensure_ascii=False).encode('utf-8')
 
 with zipfile.ZipFile(aus, 'w', zipfile.ZIP_DEFLATED) as zf:
