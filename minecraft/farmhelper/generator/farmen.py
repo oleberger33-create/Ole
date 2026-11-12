@@ -329,7 +329,8 @@ f.pruefe(boden=GRAS,
                   "item replace block {x+1} {y} {z} container.0 with minecraft:bone_meal 64",
                   "setblock {x+1} {y} {z-1} minecraft:observer[facing=north]",
                   "setblock {x+1} {y} {z-2} minecraft:observer[facing=south]"],
-         erwartet={"boden": {"minecraft:sunflower": 5}})
+         erwartet={"bloecke": {"minecraft:sunflower": 1}},          # Blume steht noch
+         hoechstens={"items": {"minecraft:bone_meal": 0}})          # jedes Knochenmehl hat eine Blume abgeworfen
 
 # ===================================================================== Tiere
 f = farm("wolle")
@@ -689,7 +690,7 @@ f.schritt("In die Mitte ein Schildkrötenei, an drei Seiten Glas 2 hoch – nur 
 f.schritt("Hier warten (25 Blöcke unter der Plattform: näher spawnt nichts, weiter weg laufen sie nicht herum).",
           {1: "P"}, x0=5, z0=4)
 f.pruefe(dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit="day",
-         erwartet={"items": {"minecraft:gold_nugget": 1}})
+         erwartet={"items": {"minecraft:rotten_flesh": 1}})
 
 f = farm("enderman")
 f.zeichen(N="end_stone", Y="rail", M="minecart", X="endermite",
@@ -741,9 +742,11 @@ f.schritt("Wasserquelle vorne in den Kanal – sie fließt genau 7 Blöcke bis z
     -2: "\n".join(["W"] + ["F"] * 7)}, x0=3)
 f.schritt("Über die Quelle einen Block, über den Kanal offene Falltüren (Klappe an der Kanalwand): Hexen halten sie "
           "für Boden, laufen drauf und fallen hinein.", {-1: "\n".join(["#"] + ["O"] * 7 + ["O"])}, x0=3)
-f.schritt("Rand rundherum (Hexen sollen nicht herunterfallen), ein Dach (dunkel, sonst spawnen sie nur nachts) "
-          "ist optional.", {0: "\n".join(["#########"] + ["#.......#"] * 9 + ["#########"])}, x0=-1, z0=-1)
-f.schritt("Hier warten.", {-33: "P"}, x0=5, z0=8)
+rand = "\n".join(["#########"] + ["#.......#"] * 9 + ["#########"])
+f.schritt("Rand rundherum, 2 hoch – über einen Block springen Hexen drüber. Ein Dach (dunkel, sonst spawnen sie nur "
+          "nachts) ist optional.", {0: rand, 1: rand}, x0=-1, z0=-1)
+f.schritt("Auf deiner Treppe hinunter zur Truhe warten, 26 Blöcke unter den Hexenfüßen: näher als 24 spawnt nichts, "
+          "weiter als 32 weg laufen die Hexen nicht herum.", {-26: "P", -25: "-"}, x0=5, z0=8)
 f.pruefe(zeit="night", welt="struktur",
          bauwerk={"id": "minecraft:swamp_hut", "anker": [3, 3, 4], "suchen": True, "hoehe": 64},
          erwartet={})
@@ -773,16 +776,17 @@ f.pruefe(biom="minecraft:river", boden=GRAS, zeit="day", bereich=[2, -22, 2, 3, 
          erwartet={"wesen": {"minecraft:drowned": 1}})
 
 f = farm("aussenposten")
-f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}))
+f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}), X="scaffolding")
 ring = "---\n-.-\n---"
 f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum 8 Gruben ausheben, "
           "2 tief – der Block in der Mitte bleibt.", {-1: ring, -2: ring}, x0=-1, z0=-1)
 f.schritt("In jede Grube oben eine offene Falltür: Plünderer halten sie für Boden.", {
     -1: "OOO\nO.O\nOOO"}, x0=-1, z0=-1)
-f.schritt("Auf den mittleren Block eine Säule 27 hoch (z. B. Erde, oben Glas) – oben wartest du. Plünderer sehen "
-          "dich, wollen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu runter und sie "
-          "erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen.", {
-    **{y: "#" for y in range(0, 27)}, 27: "G"})
+f.schritt("Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer "
+          "hindurch (durch Erde oder Glas nicht): Sie sehen dich, wollen zu dir, treten auf die Falltüren und sitzen in "
+          "der Grube fest. Ab und zu runter (Gerüst: Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt "
+          "eine Unheilvolle Flasche fallen.", {
+    **{y: "X" for y in range(0, 28)}})
 f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
          bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72},
@@ -981,10 +985,22 @@ def mobs(typ, punkte, extra="PersistenceRequired:1b"):
     "ertrunkene_mech", boden=GRAS, zeit="day", bereich=[2, -22, 2, 3, -20, 3],
     nachher=mobs("drowned", [(0, 0, 0), (5, 0, 0), (0, 0, 5), (5, 0, 5)]),
     erwartet={"wesen": {"minecraft:drowned": 1}})
+# Großer Boden mit Mauer drumherum, damit die Plünderer nicht vom Testboden fallen
+WEIT = ["forceload add {x-18} {z-18} {x+18} {z+18}",
+        "fill {x-16} {y-2} {z-16} {x+16} {y-2} {z+16} minecraft:dirt",
+        "fill {x-16} {y-1} {z-16} {x+16} {y-1} {z+16} minecraft:grass_block",
+        "fill {x-17} {y-1} {z-17} {x+17} {y+1} {z-17} minecraft:stone_bricks",
+        "fill {x-17} {y-1} {z+17} {x+17} {y+1} {z+17} minecraft:stone_bricks",
+        "fill {x-17} {y-1} {z-17} {x-17} {y+1} {z+17} minecraft:stone_bricks",
+        "fill {x+17} {y-1} {z-17} {x+17} {y+1} {z+17} minecraft:stone_bricks"]
 [f for f in Farm.alle if f.id == "aussenposten"][0].pruefe_auch(
-    "aussenposten_mech", boden=GRAS, zeit="day",
-    nachher=mobs("pillager", [(0, 0, -10), (0, 0, 10), (-10, 0, 0), (10, 0, 0), (7, 0, 7), (-7, 0, -7)]),
-    bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 2}})
+    "aussenposten_mech", boden=GRAS, zeit="day", vorher=WEIT,
+    nachher=mobs("pillager", [(0, 0, -12), (0, 0, 12), (-12, 0, 0), (12, 0, 0), (9, 0, 9), (-9, 0, -9)]),
+    bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 4}})
+[f for f in Farm.alle if f.id == "gold"][0].pruefe_auch(
+    "gold_mech", dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit="day",
+    nachher=mobs("zombified_piglin", [(0, 26, 0), (8, 26, 8), (0, 26, 8), (8, 26, 0), (1, 26, 6), (7, 26, 2)]),
+    erwartet={"items": {"minecraft:gold_nugget": 1}})
 
 
 if __name__ == "__main__":

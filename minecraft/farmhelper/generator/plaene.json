@@ -27851,7 +27851,7 @@
   "diff": 3,
   "out": "Redstone, Glowstone-Staub, Zucker, Flaschen",
   "where": "Hexenhütte im Sumpf",
-  "afk": "Unten am Schacht",
+  "afk": "Auf der Treppe, 26 Blöcke unter den Hexenfüßen (24–32 Blöcke weg)",
   "why": "In der Box einer Hexenhütte (7 × 9 Grundfläche) spawnen nur Hexen – aber nicht im Wasser. Darum ist die Plattform trocken; mittendurch läuft ein 2 tiefer Kanal mit offenen Falltüren darüber. Hexen halten sie für Boden, fallen hinein, das Wasser schiebt sie zum Schacht, 32 Blöcke Fall töten sie (26 Leben). Ohne Dach läuft die Farm nachts; ein dunkles Dach macht sie auch tagsüber.",
   "help": [
    [
@@ -27861,6 +27861,10 @@
    [
     "Hexen bleiben im Kanal",
     "Falltüren über dem Kanal offen, im Loch am Ende eine offene Falltür auf Wasserhöhe."
+   ],
+   [
+    "Hexen stehen nur herum",
+    "Höchstens 32 Blöcke weg warten – weiter weg laufen Mobs nicht herum (im Test nachgeprüft)."
    ]
   ],
   "verified": true,
@@ -29445,7 +29449,7 @@
     ]
    },
    {
-    "text": "Rand rundherum (Hexen sollen nicht herunterfallen), ein Dach (dunkel, sonst spawnen sie nur nachts) ist optional.",
+    "text": "Rand rundherum, 2 hoch – über einen Block springen Hexen drüber. Ein Dach (dunkel, sonst spawnen sie nur nachts) ist optional.",
     "luft": [],
     "added": [
      {
@@ -29731,6 +29735,294 @@
      {
       "x": 7,
       "y": 0,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": -1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 0,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 0,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 1,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 2,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 3,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 4,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 4,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 5,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 6,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 7,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 8,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
+      "z": 8,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": -1,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 0,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 2,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 3,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 4,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 5,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 6,
+      "y": 1,
+      "z": 9,
+      "id": "stone_bricks",
+      "p": {},
+      "ent": false
+     },
+     {
+      "x": 7,
+      "y": 1,
       "z": 9,
       "id": "stone_bricks",
       "p": {},
@@ -29739,12 +30031,18 @@
     ]
    },
    {
-    "text": "Hier warten.",
-    "luft": [],
+    "text": "Auf deiner Treppe hinunter zur Truhe warten, 26 Blöcke unter den Hexenfüßen: näher als 24 spawnt nichts, weiter als 32 weg laufen die Hexen nicht herum.",
+    "luft": [
+     {
+      "x": 5,
+      "y": -25,
+      "z": 8
+     }
+    ],
     "added": [
      {
       "x": 5,
-      "y": -33,
+      "y": -26,
       "z": 8,
       "id": "player",
       "p": {},
@@ -30673,8 +30971,296 @@
     "ent": false
    },
    {
+    "x": -1,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
     "x": 5,
-    "y": -33,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": -1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 0,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 0,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 1,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 2,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 3,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 4,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 5,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 6,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 7,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 8,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 8,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": -1,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 0,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 1,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 2,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 3,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 4,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 6,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 7,
+    "y": 1,
+    "z": 9,
+    "id": "stone_bricks",
+    "p": {},
+    "ent": false
+   },
+   {
+    "x": 5,
+    "y": -26,
     "z": 8,
     "id": "player",
     "p": {},
@@ -46454,8 +47040,8 @@
   "diff": 2,
   "out": "Unheilvolle Flaschen, Armbrüste, Pfeile",
   "where": "Am Plünderer-Außenposten",
-  "afk": "28 Blöcke über dem Boden",
-  "why": "Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Sie laufen herum und fallen in Gruben mit offener Falltür (sieht aus wie Boden) auf ein Lagerfeuer. Jeder Hauptmann lässt beim Tod eine Unheilvolle Flasche fallen – auch durchs Lagerfeuer. Trichter darunter sammeln.",
+  "afk": "Oben auf dem Gerüstturm, 28 Blöcke hoch",
+  "why": "Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus Gerüst – durch Gerüst sehen sie hindurch. Sie wollen zu dir, treten auf die offenen Falltüren rund um den Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Ab und zu runter und sie erledigen: Jeder Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.",
   "help": [
    [
     "Keine Flaschen",
@@ -46672,14 +47258,14 @@
     ]
    },
    {
-    "text": "Auf den mittleren Block eine Säule 27 hoch (z. B. Erde, oben Glas) – oben wartest du. Plünderer sehen dich, wollen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu runter und sie erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen.",
+    "text": "Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas nicht): Sie sehen dich, wollen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu runter (Gerüst: Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen.",
     "luft": [],
     "added": [
      {
       "x": 0,
       "y": 0,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46687,7 +47273,7 @@
       "x": 0,
       "y": 1,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46695,7 +47281,7 @@
       "x": 0,
       "y": 2,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46703,7 +47289,7 @@
       "x": 0,
       "y": 3,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46711,7 +47297,7 @@
       "x": 0,
       "y": 4,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46719,7 +47305,7 @@
       "x": 0,
       "y": 5,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46727,7 +47313,7 @@
       "x": 0,
       "y": 6,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46735,7 +47321,7 @@
       "x": 0,
       "y": 7,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46743,7 +47329,7 @@
       "x": 0,
       "y": 8,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46751,7 +47337,7 @@
       "x": 0,
       "y": 9,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46759,7 +47345,7 @@
       "x": 0,
       "y": 10,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46767,7 +47353,7 @@
       "x": 0,
       "y": 11,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46775,7 +47361,7 @@
       "x": 0,
       "y": 12,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46783,7 +47369,7 @@
       "x": 0,
       "y": 13,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46791,7 +47377,7 @@
       "x": 0,
       "y": 14,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46799,7 +47385,7 @@
       "x": 0,
       "y": 15,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46807,7 +47393,7 @@
       "x": 0,
       "y": 16,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46815,7 +47401,7 @@
       "x": 0,
       "y": 17,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46823,7 +47409,7 @@
       "x": 0,
       "y": 18,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46831,7 +47417,7 @@
       "x": 0,
       "y": 19,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46839,7 +47425,7 @@
       "x": 0,
       "y": 20,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46847,7 +47433,7 @@
       "x": 0,
       "y": 21,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46855,7 +47441,7 @@
       "x": 0,
       "y": 22,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46863,7 +47449,7 @@
       "x": 0,
       "y": 23,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46871,7 +47457,7 @@
       "x": 0,
       "y": 24,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46879,7 +47465,7 @@
       "x": 0,
       "y": 25,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46887,7 +47473,7 @@
       "x": 0,
       "y": 26,
       "z": 0,
-      "id": "stone_bricks",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      },
@@ -46895,7 +47481,7 @@
       "x": 0,
       "y": 27,
       "z": 0,
-      "id": "glass",
+      "id": "scaffolding",
       "p": {},
       "ent": false
      }
@@ -47017,7 +47603,7 @@
     "x": 0,
     "y": 0,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47025,7 +47611,7 @@
     "x": 0,
     "y": 1,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47033,7 +47619,7 @@
     "x": 0,
     "y": 2,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47041,7 +47627,7 @@
     "x": 0,
     "y": 3,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47049,7 +47635,7 @@
     "x": 0,
     "y": 4,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47057,7 +47643,7 @@
     "x": 0,
     "y": 5,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47065,7 +47651,7 @@
     "x": 0,
     "y": 6,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47073,7 +47659,7 @@
     "x": 0,
     "y": 7,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47081,7 +47667,7 @@
     "x": 0,
     "y": 8,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47089,7 +47675,7 @@
     "x": 0,
     "y": 9,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47097,7 +47683,7 @@
     "x": 0,
     "y": 10,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47105,7 +47691,7 @@
     "x": 0,
     "y": 11,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47113,7 +47699,7 @@
     "x": 0,
     "y": 12,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47121,7 +47707,7 @@
     "x": 0,
     "y": 13,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47129,7 +47715,7 @@
     "x": 0,
     "y": 14,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47137,7 +47723,7 @@
     "x": 0,
     "y": 15,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47145,7 +47731,7 @@
     "x": 0,
     "y": 16,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47153,7 +47739,7 @@
     "x": 0,
     "y": 17,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47161,7 +47747,7 @@
     "x": 0,
     "y": 18,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47169,7 +47755,7 @@
     "x": 0,
     "y": 19,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47177,7 +47763,7 @@
     "x": 0,
     "y": 20,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47185,7 +47771,7 @@
     "x": 0,
     "y": 21,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47193,7 +47779,7 @@
     "x": 0,
     "y": 22,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47201,7 +47787,7 @@
     "x": 0,
     "y": 23,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47209,7 +47795,7 @@
     "x": 0,
     "y": 24,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47217,7 +47803,7 @@
     "x": 0,
     "y": 25,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47225,7 +47811,7 @@
     "x": 0,
     "y": 26,
     "z": 0,
-    "id": "stone_bricks",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },
@@ -47233,7 +47819,7 @@
     "x": 0,
     "y": 27,
     "z": 0,
-    "id": "glass",
+    "id": "scaffolding",
     "p": {},
     "ent": false
    },

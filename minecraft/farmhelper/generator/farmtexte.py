@@ -474,7 +474,7 @@ TEXTE = {
 # ---------------------------------------------------------------------------------------------------------------
 # Nachgeschärft nach der Gegenprüfung und den Mechanik-Tests (Mobs in die Farm gesetzt)
 TEXTE["hexe"].update(
-    afk="Unten am Schacht",
+    afk="Auf der Treppe, 26 Blöcke unter den Hexenfüßen (24–32 Blöcke weg)",
     why="In der Box einer Hexenhütte (7 × 9 Grundfläche) spawnen nur Hexen – aber nicht im Wasser. Darum ist die "
         "Plattform trocken; mittendurch läuft ein 2 tiefer Kanal mit offenen Falltüren darüber. Hexen halten sie für "
         "Boden, fallen hinein, das Wasser schiebt sie zum Schacht, 32 Blöcke Fall töten sie (26 Leben). Ohne Dach "
@@ -482,7 +482,15 @@ TEXTE["hexe"].update(
     help=[["Keine Hexen", "Der Boden muss genau unter der Box liegen: deine Füße eine Ebene unter dem alten "
                           "Hüttenboden, dann den Plan mit den Pfeilen im Plan-Menü verschieben."],
           ["Hexen bleiben im Kanal", "Falltüren über dem Kanal offen, im Loch am Ende eine offene Falltür auf "
-                                     "Wasserhöhe."]])
+                                     "Wasserhöhe."],
+          ["Hexen stehen nur herum", "Höchstens 32 Blöcke weg warten – weiter weg laufen Mobs nicht herum (im Test "
+                                     "nachgeprüft)."]])
+TEXTE["aussenposten"].update(
+    afk="Oben auf dem Gerüstturm, 28 Blöcke hoch",
+    why="Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus "
+        "Gerüst – durch Gerüst sehen sie hindurch. Sie wollen zu dir, treten auf die offenen Falltüren rund um den "
+        "Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Ab und zu runter und sie erledigen: Jeder "
+        "Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.")
 TEXTE["ertrunkene"].update(
     why="In Flussbiomen spawnen Ertrunkene in dunklem Wasser (die Stelle und der Block darunter Wasser, darüber Platz) "
         "in jeder Höhe. Das geschlossene Becken ist stockdunkel; durch die Schilder im Boden sinken sie in den Schacht "

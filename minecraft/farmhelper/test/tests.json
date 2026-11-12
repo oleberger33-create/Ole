@@ -88,8 +88,13 @@
    "setblock {x+1} {y} {z-2} minecraft:observer[facing=south]"
   ],
   "erwartet": {
-   "boden": {
-    "minecraft:sunflower": 5
+   "bloecke": {
+    "minecraft:sunflower": 1
+   }
+  },
+  "hoechstens": {
+   "items": {
+    "minecraft:bone_meal": 0
    }
   }
  },
@@ -260,7 +265,7 @@
   "zeit": "day",
   "erwartet": {
    "items": {
-    "minecraft:gold_nugget": 1
+    "minecraft:rotten_flesh": 1
    }
   }
  },
@@ -468,13 +473,22 @@
  "aussenposten_mech": {
   "boden": "minecraft:grass_block",
   "zeit": "day",
+  "vorher": [
+   "forceload add {x-18} {z-18} {x+18} {z+18}",
+   "fill {x-16} {y-2} {z-16} {x+16} {y-2} {z+16} minecraft:dirt",
+   "fill {x-16} {y-1} {z-16} {x+16} {y-1} {z+16} minecraft:grass_block",
+   "fill {x-17} {y-1} {z-17} {x+17} {y+1} {z-17} minecraft:stone_bricks",
+   "fill {x-17} {y-1} {z+17} {x+17} {y+1} {z+17} minecraft:stone_bricks",
+   "fill {x-17} {y-1} {z-17} {x-17} {y+1} {z+17} minecraft:stone_bricks",
+   "fill {x+17} {y-1} {z-17} {x+17} {y+1} {z+17} minecraft:stone_bricks"
+  ],
   "nachher": [
-   "summon minecraft:pillager {x+0}.5 {y+0} {z-10}.5 {PersistenceRequired:1b}",
-   "summon minecraft:pillager {x+0}.5 {y+0} {z+10}.5 {PersistenceRequired:1b}",
-   "summon minecraft:pillager {x-10}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
-   "summon minecraft:pillager {x+10}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
-   "summon minecraft:pillager {x+7}.5 {y+0} {z+7}.5 {PersistenceRequired:1b}",
-   "summon minecraft:pillager {x-7}.5 {y+0} {z-7}.5 {PersistenceRequired:1b}"
+   "summon minecraft:pillager {x+0}.5 {y+0} {z-12}.5 {PersistenceRequired:1b}",
+   "summon minecraft:pillager {x+0}.5 {y+0} {z+12}.5 {PersistenceRequired:1b}",
+   "summon minecraft:pillager {x-12}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:pillager {x+12}.5 {y+0} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:pillager {x+9}.5 {y+0} {z+9}.5 {PersistenceRequired:1b}",
+   "summon minecraft:pillager {x-9}.5 {y+0} {z-9}.5 {PersistenceRequired:1b}"
   ],
   "bereich": [
    -1,
@@ -486,9 +500,29 @@
   ],
   "erwartet": {
    "wesen": {
-    "minecraft:pillager": 2
+    "minecraft:pillager": 4
    }
   },
   "plan": "aussenposten"
+ },
+ "gold_mech": {
+  "dimension": "the_nether",
+  "hoehe": 135,
+  "biom": "minecraft:nether_wastes",
+  "zeit": "day",
+  "nachher": [
+   "summon minecraft:zombified_piglin {x+0}.5 {y+26} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+8}.5 {y+26} {z+8}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+0}.5 {y+26} {z+8}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+8}.5 {y+26} {z+0}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+1}.5 {y+26} {z+6}.5 {PersistenceRequired:1b}",
+   "summon minecraft:zombified_piglin {x+7}.5 {y+26} {z+2}.5 {PersistenceRequired:1b}"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:gold_nugget": 1
+   }
+  },
+  "plan": "gold"
  }
 }
