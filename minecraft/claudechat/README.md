@@ -30,7 +30,7 @@ Weitere Einstellungen in derselben Datei:
 
 | Einstellung | Bedeutung | Standard |
 |---|---|---|
-| `spieler` | wer fragen darf (leer = alle) | `FNGreg,korokchris` |
+| `spieler` | wer fragen darf, z. B. `FNGreg,korokchris` (leer = alle) | leer (alle Spieler) |
 | `praefix` | so beginnt eine Frage im Chat | `@claude,!claude` |
 | `modell`, `aufwand` | Modell und Denk-Aufwand (`low` antwortet am schnellsten) | `claude-opus-5-5`, `low` |
 | `web_suche`, `web_seiten` | Websuche erlaubt und wo | `true`, `minecraft.wiki,modrinth.com` |
