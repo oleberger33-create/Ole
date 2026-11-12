@@ -83,7 +83,7 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
 
 ## Server-Version (OLE SMP, Welt „welt“)
 
-Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. Sie entsteht in vier Schritten:
+Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. Sie entsteht in fünf Schritten:
 
 ```bash
 # 1. Original bauen
@@ -93,7 +93,9 @@ python3 smp/tools/farmhelper_nur_fuer.py aus/OlesFarmhelper.zip FNGreg nur.zip
 # 3. Für mehrere Spieler freigeben; jeder sieht nur die Geister seiner eigenen Pläne
 python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris
 # 4. Ersatzblöcke und Bausteinauswahl
-python3 server/baustein.py mehrere.zip OlesFarmhelper.zip server/baustein.json
+python3 server/baustein.py mehrere.zip baustein.zip server/baustein.json
+# 5. Blöcke im Weg an allen Seiten markieren (orange ausgraben, rot abbauen), „im Weg N“ in der Aktionsleiste
+python3 server/geister.py baustein.zip OlesFarmhelper.zip
 ```
 
 Das Ergebnis kommt nach `welt/datapacks/OlesFarmhelper.zip`, danach `/reload`.
@@ -105,6 +107,11 @@ Steingruppe ohne Netherziegel, Obsidian in der Enderman-Farm die Steingruppe, Le
 auch Stein und das Weizenfeld auch Karotten, Kartoffeln und Rote Bete. Fest bleiben Netherziegel (Festungs-Spawns),
 Magma, Seelensand, Wasser, Lava und alle Funktionsblöcke. Grundlage ist eine Prüfung aller 33 Farmen gegen 26.3
 (Spawnregeln, Redstone, Kolben, Feuer, Wasser, Explosionen) mit anschließender Gegenprüfung.
+
+**Geister in der Server-Fassung:** Die Geisterblöcke sind Partikel (nur der Planbesitzer sieht sie). Steht an der
+Stelle schon ein Block, steckt der Geist darin – darum markiert `geister.py` solche Blöcke an allen freien Seiten
+(orange: ausgraben, rot: falscher Block, abbauen) und die Aktionsleiste zeigt „im Weg N“. Ist der Block weg,
+erscheint der Geist.
 
 **Bausteinauswahl:** Im Plan-Menü öffnet „Baustein“ eine Auswahl von 14 Steinsorten. Die Wahl gilt für den eigenen Plan:
 Geisterblöcke und der Zähler in der Aktionsleiste zeigen dann diesen Stein. „Vorgabe des Plans“ stellt zurück.
