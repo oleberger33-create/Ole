@@ -8,6 +8,7 @@ Für jede Farm:
   dann Lebewesen und Behälter-Inhalte,
 - Testspieler (Carpet) auf den AFK-Platz stellen,
 - Zeit laufen lassen (/tick sprint), dann messen: Items in Behältern, Items am Boden, Blöcke, Wesen, Spieler-Inventar.
+  Erwartung "*" zählt alle Sorten zusammen (z. B. {"items": {"*": 1}}: irgendeine Beute).
 
 tests.json: {"<farm>": {"dimension": "overworld|the_nether|the_end", "biom": "minecraft:…", "zeit": "day|night|cycle",
              "bauwerk": {"id": "minecraft:swamp_hut", "anker": [x, y, z]},
@@ -224,6 +225,8 @@ class Test:
         mx = sum(p[0] for p in treffer) // len(treffer)
         my = sum(p[1] for p in treffer) // len(treffer)
         mz = sum(p[2] for p in treffer) // len(treffer)
+        if bw.get('suchen'):     # große Bauwerke (Festung): Mittelpunkt liegt oft außerhalb – nächsten Treffer nehmen
+            mx, my, mz = min(treffer, key=lambda p: (p[0] - mx) ** 2 + (p[1] - my) ** 2 + (p[2] - mz) ** 2)
         ax, ay, az = bw.get('anker', [0, 0, 0])
         self.x, self.y, self.z = mx - ax, my - ay, mz - az
         if bw.get('suchen'):
@@ -427,12 +430,12 @@ def main():
         ok = True
         for art, ziel in t.t.get('erwartet', {}).items():
             for key, mindest in ziel.items():
-                ist = sum(v for k2, v in erg[art].items() if k2.split(' ')[0] == key)
+                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] == key)
                 if ist < mindest:
                     ok = False
         for art, ziel in t.t.get('hoechstens', {}).items():
             for key, hoechst in ziel.items():
-                ist = sum(v for k2, v in erg[art].items() if k2.split(' ')[0] == key)
+                ist = sum(v for k2, v in erg[art].items() if key == '*' or k2.split(' ')[0] == key)
                 if ist > hoechst:
                     ok = False
                     t.meld.append(f'zu viel {key}: {ist} > {hoechst}')

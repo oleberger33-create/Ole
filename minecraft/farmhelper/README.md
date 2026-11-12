@@ -47,6 +47,13 @@ installieren nichts, nur das Item-Bild kommt beim Beitreten als kleines Ressourc
 - Spender mit Glasflaschen werfen sie bei nicht vollem Bienennest heraus, Scheren nicht.
 - Trichter saugen durch Schlamm und Ackerboden (nicht ganz hohe Blöcke), nicht durch Erde oder Magma.
 - Ein Dispenser direkt auf Gras macht das Gras zu Erde.
+- Mobs, die weiter als 32 Blöcke von jedem Spieler sind, laufen nicht herum (Hexen standen bei 33 Blöcken still).
+  Der AFK-Platz liegt darum 24–32 Blöcke von der Spawnfläche entfernt.
+- Durch Gerüst sehen Mobs hindurch (Plünderer zielen auf den Spieler oben auf dem Gerüstturm), durch Erde/Glas nicht.
+- Mobs können auf der Oberkante einer offenen Falltür stehen und darauf laufen; von dort springen sie einen Block
+  hoch. Klappen darum an die Außenkante, Ziel-Blöcke in der Mitte mindestens 2 hoch.
+- Per `/summon` mit Daten gesetzte Mobs bekommen keine Ausrüstung (Plünderer ohne Armbrust laufen nicht zum Ziel) –
+  in Tests die Ausrüstung mitgeben.
 
 ## Server-Version (OLE SMP, Welt „welt“)
 

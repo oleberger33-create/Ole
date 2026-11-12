@@ -488,9 +488,13 @@ TEXTE["hexe"].update(
 TEXTE["aussenposten"].update(
     afk="Oben auf dem Gerüstturm, 28 Blöcke hoch",
     why="Am Außenposten spawnen Plünderer immer wieder (auch wenn er abgebaut ist). Du wartest oben auf einem Turm aus "
-        "Gerüst – durch Gerüst sehen sie hindurch. Sie wollen zu dir, treten auf die offenen Falltüren rund um den "
+        "Gerüst – durch Gerüst sehen sie hindurch. Sie rennen zu dir, treten auf die offenen Falltüren rund um den "
         "Turm (sieht aus wie Boden) und sitzen in 2 tiefen Gruben fest. Ab und zu runter und sie erledigen: Jeder "
         "Hauptmann (Banner auf dem Kopf) lässt eine Unheilvolle Flasche fallen.")
+TEXTE["gold"]["help"] = TEXTE["gold"]["help"] + [
+    ["Wenig Gold", "Spawns verteilen sich auf alle dunklen Flächen bis 128 Blöcke um dich – auch auf Höhlen unter dem "
+                   "Dach. Mehr Plattform = mehr Piglins: Netherrack ist billig, die Plattform darf viel größer sein "
+                   "(alle Wege führen zum Loch am Ei)."]]
 TEXTE["ertrunkene"].update(
     why="In Flussbiomen spawnen Ertrunkene in dunklem Wasser (die Stelle und der Block darunter Wasser, darüber Platz) "
         "in jeder Höhe. Das geschlossene Becken ist stockdunkel; durch die Schilder im Boden sinken sie in den Schacht "

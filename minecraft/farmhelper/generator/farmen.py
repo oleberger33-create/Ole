@@ -749,7 +749,7 @@ f.schritt("Auf deiner Treppe hinunter zur Truhe warten, 26 Blöcke unter den Hex
           "weiter als 32 weg laufen die Hexen nicht herum.", {-26: "P", -25: "-"}, x0=5, z0=8)
 f.pruefe(zeit="night", welt="struktur",
          bauwerk={"id": "minecraft:swamp_hut", "anker": [3, 3, 4], "suchen": True, "hoehe": 64},
-         erwartet={})
+         erwartet={"items": {"*": 1}})
 
 f = farm("ertrunkene")
 f.zeichen(a=("wall_sign", "e"), b=("wall_sign", "w"), H=("hopper", "d"))
@@ -776,17 +776,23 @@ f.pruefe(biom="minecraft:river", boden=GRAS, zeit="day", bereich=[2, -22, 2, 3, 
          erwartet={"wesen": {"minecraft:drowned": 1}})
 
 f = farm("aussenposten")
-f.zeichen(O=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}), X="scaffolding")
+f.zeichen(a=("oak_trapdoor", {"half": "bottom", "f": "s", "open": True}),
+          b=("oak_trapdoor", {"half": "bottom", "f": "n", "open": True}),
+          c=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
+          d=("oak_trapdoor", {"half": "bottom", "f": "w", "open": True}), X="scaffolding")
 ring = "---\n-.-\n---"
 f.schritt("Neben dem Außenposten (oder an Stelle des abgebauten Turms) um einen Block herum 8 Gruben ausheben, "
           "2 tief – der Block in der Mitte bleibt.", {-1: ring, -2: ring}, x0=-1, z0=-1)
-f.schritt("In jede Grube oben eine offene Falltür: Plünderer halten sie für Boden.", {
-    -1: "OOO\nO.O\nOOO"}, x0=-1, z0=-1)
-f.schritt("Auf den mittleren Block einen Turm aus Gerüst, 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer "
-          "hindurch (durch Erde oder Glas nicht): Sie sehen dich, wollen zu dir, treten auf die Falltüren und sitzen in "
-          "der Grube fest. Ab und zu runter (Gerüst: Schleichen) und sie erledigen: Jeder Hauptmann (Banner) lässt "
-          "eine Unheilvolle Flasche fallen.", {
-    **{y: "X" for y in range(0, 28)}})
+f.schritt("In jede Grube oben eine offene Falltür, die Klappe an der Außenkante (nicht am Mittelblock – sonst laufen "
+          "sie auf den Klappen-Kanten bis zur Mitte). Plünderer halten sie für Boden.", {
+    -1: "aaa\nc.d\nbbb"}, x0=-1, z0=-1)
+f.schritt("Auf den mittleren Block einen Sockel 2 hoch (auf 1 Block springen Plünderer hinauf), darauf einen Turm "
+          "aus Gerüst bis 28 hoch – oben wartest du. Durch Gerüst sehen die Plünderer hindurch (durch Erde oder Glas "
+          "nicht): Sie sehen dich, rennen zu dir, treten auf die Falltüren und sitzen in der Grube fest. Ab und zu "
+          "auf den Sockel hinunter (Gerüst: Schleichen), sie von oben erledigen und wieder hochklettern: Jeder "
+          "Hauptmann (Banner) lässt eine Unheilvolle Flasche fallen. Zum Wiederkommen von außen einen Block neben die "
+          "Gruben stellen, auf den Sockel springen, Block wieder abbauen.", {
+    0: "#", 1: "#", **{y: "X" for y in range(2, 28)}})
 f.schritt("Hier oben warten (28 Blöcke hoch: näher spawnt nichts, weiter weg laufen sie nicht herum).", {28: "P"})
 f.pruefe(boden=GRAS, zeit="day", welt="struktur",
          bauwerk={"id": "minecraft:pillager_outpost", "anker": [12, 10, 0], "suchen": True, "hoehe": 72},
@@ -995,7 +1001,8 @@ WEIT = ["forceload add {x-18} {z-18} {x+18} {z+18}",
         "fill {x+17} {y-1} {z-17} {x+17} {y+1} {z+17} minecraft:stone_bricks"]
 [f for f in Farm.alle if f.id == "aussenposten"][0].pruefe_auch(
     "aussenposten_mech", boden=GRAS, zeit="day", vorher=WEIT,
-    nachher=mobs("pillager", [(0, 0, -12), (0, 0, 12), (-12, 0, 0), (12, 0, 0), (9, 0, 9), (-9, 0, -9)]),
+    nachher=mobs("pillager", [(0, 0, -12), (0, 0, 12), (-12, 0, 0), (12, 0, 0), (9, 0, 9), (-9, 0, -9)],
+                 'PersistenceRequired:1b,equipment:{mainhand:{id:"minecraft:crossbow",count:1}}'),
     bereich=[-1, -2, -1, 1, -1, 1], erwartet={"wesen": {"minecraft:pillager": 4}})
 [f for f in Farm.alle if f.id == "gold"][0].pruefe_auch(
     "gold_mech", dimension="the_nether", hoehe=135, biom="minecraft:nether_wastes", zeit="day",
