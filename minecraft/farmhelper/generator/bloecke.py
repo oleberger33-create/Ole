@@ -30,6 +30,8 @@ EINFACH = {
     "stone_bricks": ("stone_bricks", "minecraft:stone_bricks", "minecraft:stone_bricks", "Steinziegel"),
     "stone": ("stone", "minecraft:stone", "minecraft:stone", "Stein"),
     "cobblestone": ("cobblestone", "minecraft:cobblestone", "minecraft:cobblestone", "Bruchstein"),
+    # Stütze: steht sonst als Erde/Stein im Boden; jeder feste Block zählt (Stein, Erde, Sand, Erz, Netherrack …)
+    "fest": ("cobblestone", "#ofh:fest", "minecraft:cobblestone", "Fester Block (Stein, Erde, Bruchstein …)"),
     "smooth_stone": ("smooth_stone", "minecraft:smooth_stone", "minecraft:smooth_stone", "Glatter Stein"),
     "dirt": ("dirt", "#ofh:boden", "#minecraft:dirt", "Erde"),
     "grass_block": ("grass_block", "#ofh:boden", "#minecraft:dirt", "Grasblock (oder Erde)"),

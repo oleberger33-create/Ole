@@ -96,22 +96,66 @@ class Farm:
         return self
 
     # ------------------------------------------------------------------ Ausgabe
-    def fertig(self):
+    def fertig(self, schritte=None):
         stand = {}
-        for st in self.steps:
+        for st in (schritte if schritte is not None else self.schritte_mit_stuetzen()):
             for q in st["luft"]:
                 stand.pop((q["x"], q["y"], q["z"], False), None)
             for b in st["added"]:
                 stand[(b["x"], b["y"], b["z"], b["ent"])] = b
         return [dict(b) for b in stand.values()]
 
+    # ------------------------------------------------------------------ Stützen
+    def stuetzen(self):
+        """Blöcke, die der Plan sonst stillschweigend aus dem Boden erwartet: Unter der Starthöhe (y < 0) brauchen
+        Gruben, Schächte, Wasser und Blöcke feste Wände und einen Boden, auf Starthöhe (y = 0) alles einen Boden.
+        Wer in die Erde baut, hat sie schon (jeder feste Block zählt); wer in der Luft baut, sieht sie als Geister.
+        Liefert {Schritt-Nr: [Stütz-Blöcke]} – jede Stütze kommt in den Schritt, in dem sie zuerst gebraucht wird."""
+        if self.info.get("ohne_stuetzen"):
+            return {}
+        erst = {}                                        # Position → erster Schritt, der dort etwas plant
+        afk = set()
+        for k, st in enumerate(self.steps):
+            for q in st["luft"]:
+                erst.setdefault((q["x"], q["y"], q["z"]), k)
+            for b in st["added"]:
+                erst.setdefault((b["x"], b["y"], b["z"]), k)
+                if b["id"] == bloecke.AFK:
+                    afk |= {(b["x"], b["y"], b["z"]), (b["x"], b["y"] + 1, b["z"])}
+        frei = set(self.info.get("frei_lassen", []))     # Stellen, die offen bleiben müssen (Zugang, Quelle …)
+        stuetze = {}
+        for (x, y, z), k in sorted(erst.items(), key=lambda kv: kv[1]):
+            if y > 0:
+                continue
+            nachbarn = [(x, y - 1, z)]
+            if y < 0 and (x, y, z) not in afk:
+                nachbarn += [(x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+            for n in nachbarn:
+                if n in erst or n in afk or n in frei or n in stuetze:
+                    continue
+                stuetze[n] = k
+        out = {}
+        for (x, y, z), k in stuetze.items():
+            out.setdefault(k, []).append({"x": x, "y": y, "z": z, "id": "fest", "p": {}, "ent": False})
+        return out
+
+    def schritte_mit_stuetzen(self):
+        st = self.stuetzen()
+        neu = []
+        for k, s in enumerate(self.steps):
+            s = dict(s)
+            if st.get(k):
+                s["added"] = sorted(st[k], key=lambda b: (b["y"], b["z"], b["x"])) + list(s["added"])
+            neu.append(s)
+        return neu
+
     def plan(self):
         f = {"id": self.id}
         f.update({k: self.info[k] for k in ("name", "cat", "diff", "out", "where", "afk", "why", "help")})
         f["verified"] = self.info.get("verified", True)
         f["meta"] = self.info.get("meta", {"rate": "", "ort": [], "meta": []})
-        f["steps"] = [dict(s) for s in self.steps]
-        f["fertig"] = self.fertig()
+        f["steps"] = [dict(s) for s in self.schritte_mit_stuetzen()]
+        f["fertig"] = self.fertig(f["steps"])
         for b in f["fertig"]:                         # jeder Block muss übersetzbar sein
             if b["id"] not in bloecke.VON_SELBST:
                 bloecke.block(b, 0)

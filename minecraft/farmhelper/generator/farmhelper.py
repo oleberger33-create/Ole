@@ -568,12 +568,27 @@ def kategorie_dialog(i):
             "can_close_with_escape": True, "pause": False, "after_action": "close", "columns": 2, "actions": knoepfe}
 
 
+def hoehe_wort(y):
+    if y == 0:
+        return "auf Höhe deiner Füße beim Start"
+    return f"{abs(y)} {'unter' if y < 0 else 'über'} deinen Füßen beim Start"
+
+
+def hoehe_text(liste):
+    """Auf welcher Höhe dieser Teil liegt (die Anzeige-Leiste zeigt dazu die echte Y-Koordinate)."""
+    ys = sorted({b["y"] for b in liste})
+    if not ys:
+        return {"text": ""}
+    w = hoehe_wort(ys[0]) if len(ys) == 1 else f"von {hoehe_wort(ys[0])} bis {hoehe_wort(ys[-1])}"
+    return [{"text": "\nHöhe: ", "color": "aqua"}, {"text": w + " (echte Y-Zahl unten in der Leiste)", "color": "gray"}]
+
+
 def plan_dialog(nr, f, i, ts, gesamt):
     k, text, e, n, liste = ts
     t = [balken(i, gesamt),
          [{"text": f"Schritt {k + 1} von {len(f['steps'])}", "color": "gold", "bold": True},
           {"text": (f"   Ebene {e}/{n}" if n else "   Ausgraben") + f" · Teil {i + 1}/{gesamt}", "color": "gray"}],
-         LINIE, {"text": text, "color": "white"}, LINIE,
+         LINIE, {"text": text, "color": "white"}, hoehe_text(liste), LINIE,
          kopf("chest", "Für diesen Teil brauchst du", "yellow")] + material_text(material(liste)) + [
          LINIE, [{"text": "■ ", "color": "green"}, {"text": "hier hinsetzen   ", "color": "gray"},
                  {"text": "■ ", "color": "red"}, {"text": "falscher Block / muss weg   ", "color": "gray"},
@@ -663,6 +678,15 @@ for nr, f in enumerate(PLAENE, 1):
                 hud.append(f"execute store result score #h{k} {NS} run clear @s {item} 0")
                 teile += [{"score": {"name": f"#h{k}", "objective": NS}, "color": "white"}, {"text": "/", "color": "dark_gray"}]
             teile.append({"score": {"name": f"#m{k}", "objective": NS}, "color": "yellow"})
+        ys = sorted({b["y"] for b in liste})
+        if ys:
+            for nm, wert in (("#hy", ys[0]), ("#hy2", ys[-1])):
+                hud.append(f"scoreboard players operation {nm} {NS} = #oy {NS}")
+                if wert:
+                    hud.append(f"scoreboard players {'add' if wert > 0 else 'remove'} {nm} {NS} {abs(wert)}")
+            teile[2:2] = [{"text": " Y ", "color": "gray"}, {"score": {"name": "#hy", "objective": NS}, "color": "aqua"}] + (
+                [{"text": "–", "color": "gray"}, {"score": {"name": "#hy2", "objective": NS}, "color": "aqua"}]
+                if ys[-1] != ys[0] else []) + [{"text": " "}]
         hud.append(f"title @s actionbar {j(teile)}")
         funktion(f"f/{fid}/s{i}/hud", hud)
         for r in range(4):
@@ -786,6 +810,7 @@ funktion("plan/material_m", ["$function " + NS + ":f/$(farm)/material"])
 BESITZER = f"execute as @a if score @s {NS}.id = #cur {NS}.id run"
 funktion("plan/sekunde", [f"scoreboard players operation #cur {NS}.id = @s {NS}.id",
                           f"function {P}/daten",
+                          f"execute store result score #oy {NS} run data get entity @s Pos[1]",
                           f"function {P}/pruefen_m with storage {NS}:tmp d",
                           f"{BESITZER} function {P}/hud_m with storage {NS}:tmp d",
                           f"execute if score #fehlt {NS} matches 0 run function {P}/naechster"])
@@ -834,7 +859,27 @@ for name, werte in {"truhe": ["minecraft:chest", "minecraft:trapped_chest"],
                     "seetang": ["minecraft:kelp", "minecraft:kelp_plant"],
                     "staengel": ["minecraft:melon_stem", "minecraft:attached_melon_stem", "minecraft:pumpkin_stem",
                                  "minecraft:attached_pumpkin_stem"],
-                    "bienen": ["minecraft:bee_nest", "minecraft:beehive"]}.items():
+                    "bienen": ["minecraft:bee_nest", "minecraft:beehive"],
+                    # Stütze: alles Feste, was im Boden schon steht oder womit man in der Luft baut
+                    "fest": ["#minecraft:dirt", "#minecraft:base_stone_overworld", "#minecraft:base_stone_nether",
+                             "#minecraft:sand", "#minecraft:planks", "#minecraft:logs", "#minecraft:stone_bricks",
+                             "#minecraft:terracotta", "#minecraft:wool", "#minecraft:impermeable",
+                             "#minecraft:coal_ores", "#minecraft:iron_ores", "#minecraft:copper_ores",
+                             "#minecraft:gold_ores", "#minecraft:redstone_ores", "#minecraft:lapis_ores",
+                             "#minecraft:diamond_ores", "#minecraft:emerald_ores", "#minecraft:nylium",
+                             "#minecraft:soul_fire_base_blocks", "#minecraft:wart_blocks",
+                             "minecraft:cobblestone", "minecraft:mossy_cobblestone", "minecraft:cobbled_deepslate",
+                             "minecraft:gravel", "minecraft:clay", "minecraft:sandstone", "minecraft:red_sandstone",
+                             "minecraft:smooth_stone", "minecraft:bricks", "minecraft:obsidian", "minecraft:bedrock",
+                             "minecraft:mud", "minecraft:packed_mud", "minecraft:mud_bricks", "minecraft:snow_block",
+                             "minecraft:ice", "minecraft:packed_ice", "minecraft:blue_ice", "minecraft:end_stone",
+                             "minecraft:end_stone_bricks", "minecraft:calcite", "minecraft:dripstone_block",
+                             "minecraft:magma_block", "minecraft:glowstone", "minecraft:nether_bricks",
+                             "minecraft:prismarine", "minecraft:prismarine_bricks", "minecraft:dark_prismarine",
+                             "minecraft:sea_lantern", "minecraft:nether_gold_ore", "minecraft:nether_quartz_ore",
+                             "minecraft:polished_blackstone_bricks", "minecraft:gilded_blackstone",
+                             "minecraft:stone", "minecraft:deepslate", "minecraft:tuff", "minecraft:moss_block",
+                             "minecraft:sculk", "minecraft:amethyst_block", "minecraft:smooth_basalt"]}.items():
     datei(f"data/{NS}/tags/block/{name}.json", json.dumps({"values": werte}, indent=2))
 datei(f"data/{NS}/recipe/farmhelper.json", json.dumps({
     "type": "minecraft:crafting_shapeless", "category": "misc",
