@@ -1054,6 +1054,34 @@ import profi_basis  # noqa: E402
 PROFI = profi_basis.lade_alle()
 REIHENFOLGE_ALLE = [i for fid in REIHENFOLGE for i in ([fid, fid + "_profi"] if fid in PROFI else [fid])]
 
+# Stützen (entwurf.Farm.stuetzen): Ausnahmen nach der Prüfung aller Pläne
+STUETZ_REGELN = {
+    # steht bewusst in der Luft, im Void oder im Ozean – dort ersetzen Stützen keinen Boden
+    "waechter": {"ohne_stuetzen": True}, "waechter_profi": {"ohne_stuetzen": True},
+    "enderman": {"ohne_stuetzen": True}, "gold_profi": {"ohne_stuetzen": True},
+    "witherskelett_profi": {"ohne_stuetzen": True},
+    "lohe_profi": {"frei_lassen": [(0, -14, 4), (0, -13, 4)]},           # Ausgang vom Platz
+    # Räume, die sonst in den Boden gegraben werden: Wände und Decke gehören dazu (Dunkelheit, Höhe)
+    "mobfarm": {"raum_schliessen": True}, "mobfarm_profi": {"raum_schliessen": True},
+    "creeper": {"raum_schliessen": True}, "creeper_profi": {"raum_schliessen": True}, "lohe": {"raum_schliessen": True},
+    # ganze Grundfläche braucht Boden (Weide, Gang)
+    "kuh": {"boden_flaeche": True}, "handel_profi": {"boden_flaeche": True}, "lava_profi": {"boden_flaeche": True},
+}
+for _f in Farm.alle:
+    _f.info.update(STUETZ_REGELN.get(_f.id, {}))
+
+# Hühner (einfach): Lavakessel wie in der Profi-Fassung mit Glas einfassen – Küken entwischen sonst seit 26.1
+for _f in Farm.alle:
+    if _f.id == "huehner":
+        for _st in _f.steps:
+            _k = [b for b in _st["added"] if b["id"] == "lava_cauldron"]
+            for _b in _k:
+                _da = {(b["x"], b["y"], b["z"]) for s in _f.steps for b in s["added"]}
+                for _dx, _dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    _p = (_b["x"] + _dx, _b["y"], _b["z"] + _dz)
+                    if _p not in _da:
+                        _st["added"].append({"x": _p[0], "y": _p[1], "z": _p[2], "id": "glass", "p": {}, "ent": False})
+
 
 if __name__ == "__main__":
     if "--material" in sys.argv:

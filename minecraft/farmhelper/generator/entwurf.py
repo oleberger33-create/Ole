@@ -30,6 +30,8 @@ GRUND = {
     "<": ("hopper", "w"), ">": ("hopper", "e"), "^": ("hopper", "n"), "v": ("hopper", "s"), "H": ("hopper", "d"),
 }
 LEER = {".", " "}
+PFLANZEN = ("sapling", "flower", "poppy", "dandelion", "tulip", "orchid", "allium", "bluet", "daisy", "cornflower",
+            "lily_of", "rose", "peony", "lilac", "berry")
 
 
 def _eintrag(wert):
@@ -114,29 +116,45 @@ class Farm:
         if self.info.get("ohne_stuetzen"):
             return {}
         erst = {}                                        # Position → erster Schritt, der dort etwas plant
+        art = {}                                         # Position → id im fertigen Bau
         afk = set()
         for k, st in enumerate(self.steps):
             for q in st["luft"]:
                 erst.setdefault((q["x"], q["y"], q["z"]), k)
             for b in st["added"]:
                 erst.setdefault((b["x"], b["y"], b["z"]), k)
+                art[(b["x"], b["y"], b["z"])] = b["id"]
                 if b["id"] == bloecke.AFK:
                     afk |= {(b["x"], b["y"], b["z"]), (b["x"], b["y"] + 1, b["z"])}
-        frei = set(self.info.get("frei_lassen", []))     # Stellen, die offen bleiben müssen (Zugang, Quelle …)
+            for q in st["luft"]:
+                art.setdefault((q["x"], q["y"], q["z"]), "luft")
+        frei = {tuple(p) for p in self.info.get("frei_lassen", [])}   # muss offen bleiben (Zugang, Ausgang …)
+        raum = self.info.get("raum_schliessen")          # ausgegrabene Räume auch über y 0 ganz umschließen
         stuetze = {}
         for (x, y, z), k in sorted(erst.items(), key=lambda kv: kv[1]):
-            if y > 0:
+            seiten = [(x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+            if raum and art.get((x, y, z)) == "luft" and y >= 0:
+                nachbarn = [(x, y - 1, z), (x, y + 1, z)] + seiten
+            elif y > 0:
                 continue
-            nachbarn = [(x, y - 1, z)]
-            if y < 0 and (x, y, z) not in afk:
-                nachbarn += [(x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+            else:
+                nachbarn = [(x, y - 1, z)] + (seiten if y < 0 else [])
             for n in nachbarn:
-                if n in erst or n in afk or n in frei or n in stuetze:
+                if n in erst or n in frei or n in stuetze:
                     continue
                 stuetze[n] = k
+        if self.info.get("boden_flaeche"):              # ganze Grundfläche bekommt einen Boden (Weide, Gang …)
+            xs = [p[0] for p in erst]; zs = [p[2] for p in erst]
+            for x in range(min(xs), max(xs) + 1):
+                for z in range(min(zs), max(zs) + 1):
+                    n = (x, -1, z)
+                    if n not in erst and n not in frei and n not in stuetze:
+                        stuetze[n] = 0
         out = {}
         for (x, y, z), k in stuetze.items():
-            out.setdefault(k, []).append({"x": x, "y": y, "z": z, "id": "fest", "p": {}, "ent": False})
+            oben = art.get((x, y + 1, z), "")
+            i = "grass_block" if any(w in oben for w in PFLANZEN) else "fest"   # Pflanzen brauchen Erde/Gras
+            out.setdefault(k, []).append({"x": x, "y": y, "z": z, "id": i, "p": {}, "ent": False})
         return out
 
     def schritte_mit_stuetzen(self):
