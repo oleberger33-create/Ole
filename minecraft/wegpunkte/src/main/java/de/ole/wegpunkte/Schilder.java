@@ -28,6 +28,7 @@ import java.util.*;
 final class Schilder {
 	static final double WEIT = 24;           // so weit vor dem Spieler stehen Schilder ferner Wegpunkte
 	static final double NAH_HOEHE = 2.5;     // am echten Ort: so hoch über dem Wegpunkt
+	static double faktor = 0.022;            // Schildgröße je Block Abstand (/wp groesse, gespeichert)
 	static final double ESP_AB = 40;         // Spieler-Schilder erst ab dieser Entfernung (näher: Leuchtrand + Namensschild)
 
 	static final class Schild {
@@ -170,14 +171,14 @@ final class Schilder {
 			double dist = d.length();
 			Vec3 r = dist < 1e-3 ? new Vec3(0, 1, 0) : d.scale(1 / dist);
 			double abstand = Math.min(dist, WEIT);
-			float groesse = (float) Math.max(0.5, abstand * 0.07);
+			float groesse = (float) Math.max(0.2, abstand * faktor);
 			// Schilder in fast gleicher Richtung übereinander stapeln
 			int stufe = 0;
 			for (int i = 0; i < richtungen.size(); i++)
-				if (richtungen.get(i).dot(r) > 0.9985 && stufen.get(i) >= stufe) stufe = stufen.get(i) + 1;
+				if (richtungen.get(i).dot(r) > 0.9995 && stufen.get(i) >= stufe) stufe = stufen.get(i) + 1;
 			richtungen.add(r); stufen.add(stufe);
-			Vec3 pos = auge.add(r.scale(abstand)).add(0, stufe * groesse * 0.55, 0);
-			if (dist <= WEIT) pos = z.add(0, stufe * groesse * 0.55, 0);
+			Vec3 pos = auge.add(r.scale(abstand)).add(0, stufe * groesse * 0.3, 0);
+			if (dist <= WEIT) pos = z.add(0, stufe * groesse * 0.3, 0);
 
 			String text = w.name() + "\n" + entfernung(w.boden().distanceTo(p.position()));
 			Schild s = m.get(w.key());
@@ -188,7 +189,7 @@ final class Schilder {
 				SynchedEntityData sd = ent.getEntityData();
 				sd.set(BILLBOARD, (byte) 3);                                   // immer zum Spieler gedreht
 				sd.set(FLAGS, (byte) (Display.TextDisplay.FLAG_SEE_THROUGH | Display.TextDisplay.FLAG_SHADOW));
-				sd.set(HINTERGRUND, 0x60000000);
+				sd.set(HINTERGRUND, 0);                                        // kein Hintergrund
 				sd.set(HELL, 15 << 4 | 15 << 20);                               // volle Helligkeit
 				sd.set(SICHT, 2.0f);
 				sd.set(INTERPOL, 3);                                            // weich nachziehen
@@ -219,11 +220,11 @@ final class Schilder {
 	/** Etwas mit Schild: key, Zeichen davor, Name, Farbe, Schild-Ort (nah) und Boden-Ort (für die Entfernung). */
 	record Ziel(String key, String zeichen, String name, int rgb, ChatFormatting chat, Vec3 pos, Vec3 boden) {}
 
+	/** Eine Zeile: „Name 123 m“ – Name in seiner Farbe, Entfernung grau. */
 	static Component anzeige(Ziel w, String text) {
 		String[] t = text.split("\n", 2);
-		return Component.literal(w.zeichen()).withStyle(w.chat())
-			.append(Component.literal(t[0]).withStyle(s -> s.withColor(w.rgb()).withBold(true)))
-			.append(Component.literal("\n" + t[1]).withStyle(ChatFormatting.GRAY));
+		return Component.literal(t[0]).withStyle(s -> s.withColor(w.rgb()))
+			.append(Component.literal(" " + t[1]).withStyle(ChatFormatting.GRAY));
 	}
 
 	static String entfernung(double m) {

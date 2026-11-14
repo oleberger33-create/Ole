@@ -89,7 +89,7 @@ public class Wegpunkte implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTED.register(s -> { server = s; laden(); Schilder.selbsttest(s); });
+		ServerLifecycleEvents.SERVER_STARTED.register(s -> { server = s; laden(); einstellungenLaden(); Schilder.selbsttest(s); });
 		ServerLifecycleEvents.SERVER_STOPPING.register(s -> speichern());
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, s) -> {
@@ -168,6 +168,11 @@ public class Wegpunkte implements ModInitializer {
 					.then(Commands.literal("schilder")
 						.then(Commands.literal("an").executes(c -> schilderSchalten(c, true)))
 						.then(Commands.literal("aus").executes(c -> schilderSchalten(c, false))))
+					.then(Commands.literal("groesse")
+						.executes(c -> { c.getSource().sendSuccess(() -> Component.literal("◆ Schildgröße: " + Schilder.faktor
+							+ " (Standard 0.022, kleiner = kleiner)").withStyle(ChatFormatting.GRAY), false); return 1; })
+						.then(Commands.argument("wert", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0.005, 0.2))
+							.executes(Wegpunkte::groesseSetzen)))
 					.then(Commands.literal("info")
 						.then(Commands.argument("name", StringArgumentType.greedyString()).suggests(alle).executes(Wegpunkte::info)))
 				);
@@ -316,6 +321,39 @@ public class Wegpunkte implements ModInitializer {
 			? "◆ ESP an: Du siehst andere Spieler durch Wände. Aus mit /esp off"
 			: "◆ ESP aus. Wieder an mit /esp on").withStyle(ChatFormatting.GRAY), false);
 		return 1;
+	}
+
+	static int groesseSetzen(CommandContext<CommandSourceStack> c) {
+		ServerPlayer p = c.getSource().getPlayer();
+		if (p != null && !istOp(p)) { fehler(c, "Nur Ops können die Schildgröße ändern."); return 0; }
+		Schilder.faktor = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(c, "wert");
+		einstellungenSpeichern();
+		c.getSource().sendSuccess(() -> Component.literal("◆ Schildgröße jetzt " + Schilder.faktor + " – gilt sofort für alle.")
+			.withStyle(ChatFormatting.GRAY), false);
+		return 1;
+	}
+
+	static Path einstellungenDatei() { return server.getWorldPath(LevelResource.ROOT).resolve("wegpunkte_einstellungen.json"); }
+
+	static void einstellungenLaden() {
+		try {
+			Path f = einstellungenDatei();
+			if (!Files.exists(f)) return;
+			var o = com.google.gson.JsonParser.parseString(Files.readString(f, StandardCharsets.UTF_8)).getAsJsonObject();
+			if (o.has("schildgroesse")) Schilder.faktor = o.get("schildgroesse").getAsDouble();
+		} catch (Exception e) {
+			LOG.error("wegpunkte_einstellungen.json konnte nicht gelesen werden", e);
+		}
+	}
+
+	static void einstellungenSpeichern() {
+		try {
+			var o = new com.google.gson.JsonObject();
+			o.addProperty("schildgroesse", Schilder.faktor);
+			Files.writeString(einstellungenDatei(), GSON.toJson(o), StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			LOG.error("wegpunkte_einstellungen.json konnte nicht gespeichert werden", e);
+		}
 	}
 
 	static int info(CommandContext<CommandSourceStack> c) {

@@ -16,7 +16,8 @@ Anzeige:
   Server schickt jedem Spieler eigene Text-Displays (nur Pakete, nicht in der Welt), see_through, höchstens 24 Blöcke
   vor ihm in Richtung des Wegpunkts, mit Name und Entfernung; nah dran steht das Schild am echten Ort. Beim Start
   prüft ein Selbsttest die Pakete (verschlüsseln und lesen); schlägt er fehl, bleiben die Schilder aus.
-  `/wp schilder aus|an` blendet sie für einen selbst aus und ein.
+  `/wp schilder aus|an` blendet sie für einen selbst aus und ein; `/wp groesse <Zahl>` (Ops) stellt die Größe live ein
+  (gespeichert in `<welt>/wegpunkte_einstellungen.json`, Standard 0.022).
 - ESP (`Esp.java`): andere Spieler leuchten durch Wände – nur für den Zuschauer (die Status-Bits mit „leuchtet“
   gehen nur an ihn, alle 2 Ticks erneuert). Weiter als 40 Blöcke entfernte Spieler bekommen zusätzlich ein Schild mit
   Name und Entfernung, egal wie weit. `/esp off` / `/esp on` (auch aus/an) für sich selbst.
