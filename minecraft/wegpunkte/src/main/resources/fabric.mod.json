@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "wegpunkte",
+	"version": "${version}",
+	"name": "Wegpunkte",
+	"description": "Gemeinsame Wegpunkte für alle Spieler: /wp add <Name>. Sie erscheinen in der Ortungsleiste und als Schild am Ort. Nur auf dem Server nötig.",
+	"authors": ["Ole"],
+	"license": "MIT",
+	"environment": "server",
+	"entrypoints": {
+		"main": ["de.ole.wegpunkte.Wegpunkte"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
