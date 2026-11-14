@@ -924,6 +924,37 @@
    }
   }
  },
+ "ueberfall_profi": {
+  "boden": "minecraft:grass_block",
+  "zeit": "day",
+  "hoehe": 100,
+  "vorher": [
+   "forceload add {x-110} {z-110} {x+110} {z+110}",
+   "fill {x-110} {y-1} {z-110} {x-1} {y-1} {z-1} minecraft:grass_block keep",
+   "fill {x-110} {y-1} {z+0} {x-1} {y-1} {z+109} minecraft:grass_block keep",
+   "fill {x+0} {y-1} {z-110} {x+109} {y-1} {z-1} minecraft:grass_block keep",
+   "fill {x+0} {y-1} {z+0} {x+109} {y-1} {z+109} minecraft:grass_block keep"
+  ],
+  "behaelter": [
+   [
+    0,
+    -36,
+    -1
+   ]
+  ],
+  "danach": [
+   "difficulty normal",
+   "effect give {spieler} minecraft:bad_omen 6000 0"
+  ],
+  "erwartet": {
+   "items": {
+    "minecraft:totem_of_undying": 1
+   },
+   "wesen": {
+    "minecraft:villager": 1
+   }
+  }
+ },
  "handel": {
   "boden": "minecraft:grass_block",
   "erwartet": {

@@ -20,6 +20,7 @@ tests.json: {"<farm>": {"dimension": "overworld|the_nether|the_end", "biom": "mi
              "erwartet": {"items": {"minecraft:iron_ingot": 1}, "bloecke": {"minecraft:lava_cauldron": 1},
                           "wesen": {"minecraft:iron_golem": 1}, "inventar": {"minecraft:cod": 1}},
              "spieler": {"hand": "minecraft:fishing_rod", "aktion": "use continuous"},
+             "danach": ["effect give {spieler} minecraft:bad_omen 6000 0"],   (nach dem Testspieler)
              "behaelter": [[dx, dy, dz], …]}}   (weitere Behälter zählen, z. B. einen nur im Test gesetzten Werfer)
 """
 import json, os, re, socket, struct, sys, time
@@ -341,6 +342,8 @@ class Test:
         if sp.get('aktion'):
             self.r(f'player {name} {sp["aktion"]}')
         self.name = name
+        for c in self.t.get('danach', []):               # Befehle nach dem Testspieler, {spieler} = sein Name
+            self.cmd(self.ersetze(c.replace('{spieler}', name)))
 
     # ---------------------------------------------------------------- Messen
     def messen(self):

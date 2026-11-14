@@ -84,8 +84,15 @@ Monument 32 Prismarinscherben, Lohe 100 (6), Gold 354 Nuggets (9), Wither-Skelet
 Außenposten tötet und sammelt selbst (3 Flaschen am echten Außenposten), Bruchstein 1561, Lava 15 Kessel (4),
 Schnee automatisch in die Truhe, AFK-Angeln 40 Fänge, Stöcke 455.
 
-Noch Entwurf (Test nicht bestanden, nicht im Pack): Enderman (Endermilbe stirbt trotz Umbau), Überfall (die
-Ersatztests kamen unten nicht an).
+Noch Entwurf (Test nicht bestanden, nicht im Pack): Enderman (Endermilbe stirbt trotz Umbau).
+
+**Totem-Farm vollautomatisch (Überfall, Profi):** Dorfbewohner in einer Glaszelle 13 über einem Wasserbecken 13 × 13,
+in der Mitte ein Loch 3 × 3 mit 8 offenen Falltüren (Räuber halten sie für Boden und laufen zum Punkt unter dem
+Dorfbewohner), 33 Blöcke Fall auf 9 Lagerfeuer (Fall tötet alle außer Verwüstern, die Feuer erledigen sie), Trichter →
+Doppeltruhe. AFK-Kammer unter der Erde ≤ 16 Blöcke unter dem Bett: dort zählt der Spieler als „im Dorf“, Flasche
+trinken genügt. Test mit echtem Überfall: Der Carpet-Testspieler ist ein echter Spieler, `danach` gibt ihm Böses Omen.
+Gelernt: Signs eine Ebene unter dem Wasser → Räuber treiben auf dem Wasser über dem Loch; Schilder auf Wasserhöhe →
+sie bleiben am Rand stehen (den tiefen Fall meidet die Wegsuche); erst offene Falltüren locken sie hinein.
 
 ### Teststand (26.3)
 
