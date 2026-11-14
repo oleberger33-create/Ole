@@ -820,7 +820,7 @@ funktion("plan/sekunde", [f"scoreboard players operation #cur {NS}.id = @s {NS}.
 # Nächster Teil: Teile, die schon fertig sind (z. B. natürlicher Stein als Wand), sofort am Stück überspringen –
 # ohne Ton und Meldung je Teil; Geister und Ton erst beim ersten Teil, in dem wirklich etwas fehlt.
 funktion("plan/naechster", [f"scoreboard players add @s {NS}.s 1",
-                            f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/fertig",
+                            f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/endkontrolle",
                             f"function {P}/daten",
                             f"function {P}/pruefen_m with storage {NS}:tmp d",
                             f"execute if score #fehlt {NS} matches 0 run return run function {P}/naechster",
@@ -828,6 +828,21 @@ funktion("plan/naechster", [f"scoreboard players add @s {NS}.s 1",
                             f"execute as @a if score @s {NS}.id = #cur {NS}.id at @s run playsound "
                             "minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 1 1.2",
                             f"{BESITZER} title @s actionbar " + '{text:"✔ Teil fertig – weiter geht\'s!",color:"green"}'])
+# Endkontrolle vor „Farm fertig!“: alle Teile noch einmal prüfen. Wurde in einem fertigen Teil später etwas
+# abgebaut, zurück zu diesem Teil (Geister zeigen, was fehlt) statt die Farm für fertig zu erklären.
+funktion("plan/endkontrolle", [f"scoreboard players set @s {NS}.s 0", f"function {P}/kontrolle_teil"])
+funktion("plan/kontrolle_teil", [f"function {P}/daten",
+                                 f"function {P}/pruefen_m with storage {NS}:tmp d",
+                                 f"execute if score #fehlt {NS} matches 1.. run return run function {P}/zurueck_zu",
+                                 f"scoreboard players add @s {NS}.s 1",
+                                 f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/fertig",
+                                 f"function {P}/kontrolle_teil"])
+funktion("plan/zurueck_zu", [f"function {P}/zeigen",
+                             f"execute as @a if score @s {NS}.id = #cur {NS}.id at @s run playsound "
+                             "minecraft:block.note_block.bass master @s ~ ~ ~ 1 0.8",
+                             f"{BESITZER} tellraw @s " + '[{text:"Fast fertig – ",color:"gold"},{text:"in einem schon fertigen '
+                             'Teil fehlt wieder etwas. Der Plan ist dorthin zurückgesprungen; die Geister zeigen, was fehlt.",'
+                             'color:"gray"}]'])
 funktion("plan/fertig", [f"function {P}/geister_weg",
                          f"execute as @a if score @s {NS}.id = #cur {NS}.id at @s run playsound "
                          "minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1 1",
