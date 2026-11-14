@@ -96,14 +96,14 @@ public class Wegpunkte implements ModInitializer {
 			UUID u = handler.getPlayer().getUUID();
 			gesendet.put(u, new HashSet<>());
 			neuSenden.add(u);
-			Schilder.vergessen(u);
+			Schilder.vergessen(u); Esp.vergessen(u);
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, s) -> {
 			UUID u = handler.getPlayer().getUUID();
-			gesendet.remove(u); neuSenden.remove(u); letzteAnzeige.remove(u); Schilder.vergessen(u);
+			gesendet.remove(u); neuSenden.remove(u); letzteAnzeige.remove(u); Schilder.vergessen(u); Esp.vergessen(u);
 		});
-		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((p, von, nach) -> { neuSenden.add(p.getUUID()); Schilder.vergessen(p.getUUID()); });
-		ServerPlayerEvents.AFTER_RESPAWN.register((alt, neu, ende) -> { neuSenden.add(neu.getUUID()); Schilder.vergessen(neu.getUUID()); });
+		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((p, von, nach) -> { neuSenden.add(p.getUUID()); Schilder.vergessen(p.getUUID()); Esp.vergessen(p.getUUID()); });
+		ServerPlayerEvents.AFTER_RESPAWN.register((alt, neu, ende) -> { neuSenden.add(neu.getUUID()); Schilder.vergessen(neu.getUUID()); Esp.vergessen(neu.getUUID()); });
 
 		// Verwaiste Namensschilder (Wegpunkt wurde gelöscht, während der Chunk nicht geladen war) entfernen
 		ServerEntityEvents.ENTITY_LOAD.register((e, welt) -> {
@@ -116,6 +116,9 @@ public class Wegpunkte implements ModInitializer {
 			tick++;
 			if (tick % 20 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) abgleichen(p);
 			if (tick % 5 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) kompass(p);
+			if (tick % 2 == 0) {
+				try { Esp.tick(s, tick); } catch (RuntimeException e) { LOG.error("ESP", e); }
+			}
 			if (tick % 2 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) {
 				try { Schilder.aktualisieren(p); } catch (RuntimeException e) { LOG.error("Schilder", e); }
 			}
@@ -140,6 +143,13 @@ public class Wegpunkte implements ModInitializer {
 				return b.buildFuture();
 			};
 			SuggestionProvider<CommandSourceStack> alle = (c, b) -> { for (Punkt w : punkte.values()) b.suggest(w.name); return b.buildFuture(); };
+
+			d.register(Commands.literal("esp")
+				.executes(c -> espSchalten(c, null))
+				.then(Commands.literal("on").executes(c -> espSchalten(c, true)))
+				.then(Commands.literal("off").executes(c -> espSchalten(c, false)))
+				.then(Commands.literal("an").executes(c -> espSchalten(c, true)))
+				.then(Commands.literal("aus").executes(c -> espSchalten(c, false))));
 
 			for (String wurzel : new String[]{"wp", "wegpunkt"}) {
 				d.register(Commands.literal(wurzel)
@@ -294,6 +304,17 @@ public class Wegpunkte implements ModInitializer {
 		if (an) Schilder.aus.remove(p.getUUID()); else Schilder.aus.add(p.getUUID());
 		c.getSource().sendSuccess(() -> Component.literal(an ? "◆ Namensschilder an." : "◆ Namensschilder aus. Wieder an: /wp schilder an")
 			.withStyle(ChatFormatting.GRAY), false);
+		return 1;
+	}
+
+	static int espSchalten(CommandContext<CommandSourceStack> c, Boolean an) {
+		ServerPlayer p = c.getSource().getPlayer();
+		if (p == null) return 0;
+		boolean neu = an == null ? !Esp.an(p) : an;
+		if (neu) Esp.einschalten(p); else Esp.ausschalten(server, p);
+		c.getSource().sendSuccess(() -> Component.literal(neu
+			? "◆ ESP an: Du siehst andere Spieler durch Wände. Aus mit /esp off"
+			: "◆ ESP aus. Wieder an mit /esp on").withStyle(ChatFormatting.GRAY), false);
 		return 1;
 	}
 

@@ -28,6 +28,7 @@ import java.util.*;
 final class Schilder {
 	static final double WEIT = 24;           // so weit vor dem Spieler stehen Schilder ferner Wegpunkte
 	static final double NAH_HOEHE = 2.5;     // am echten Ort: so hoch über dem Wegpunkt
+	static final double ESP_AB = 40;         // Spieler-Schilder erst ab dieser Entfernung (näher: Leuchtrand + Namensschild)
 
 	static final class Schild {
 		final Display.TextDisplay ent;
@@ -101,6 +102,12 @@ final class Schilder {
 			var tp = ClientboundTeleportEntityPacket.teleport(ent.getId(), new PositionMoveRotation(new Vec3(4, 5, 6), Vec3.ZERO, 0f, 0f), Set.of(), false);
 			ClientboundTeleportEntityPacket.STREAM_CODEC.encode(buf, tp);
 			var tp2 = ClientboundTeleportEntityPacket.STREAM_CODEC.decode(buf);
+			if (Esp.bereit()) {
+				var esp = new ClientboundSetEntityDataPacket(7, List.of(SynchedEntityData.DataValue.create(Esp.FLAGS, Esp.LEUCHTEN)));
+				ClientboundSetEntityDataPacket.STREAM_CODEC.encode(buf, esp);
+				if (ClientboundSetEntityDataPacket.STREAM_CODEC.decode(buf).packedItems().size() != 1)
+					throw new IllegalStateException("ESP-Paket stimmt nicht");
+			}
 			if (add2.getType() != EntityTypes.TEXT_DISPLAY || daten2.packedItems().size() != daten.packedItems().size()
 				|| tp2.id() != ent.getId() || buf.readableBytes() != 0)
 				throw new IllegalStateException("Pakete stimmen nach dem Lesen nicht");
@@ -126,25 +133,39 @@ final class Schilder {
 		String dim = p.level().dimension().identifier().toString();
 		boolean an = !aus.contains(p.getUUID());
 
-		// Weg mit Schildern gelöschter oder fremder Wegpunkte
+		Vec3 auge = p.getEyePosition();
+		// Was angezeigt werden soll: Wegpunkte der Dimension, mit ESP auch andere Spieler (ab ESP_AB Blöcken)
+		List<Ziel> l = new ArrayList<>();
+		if (an) {
+			for (Wegpunkte.Punkt w : Wegpunkte.punkte.values())
+				if (w.dim.equals(dim)) l.add(new Ziel(w.id, "◆ ", w.name, w.farbeEnum().rgb, w.farbeEnum().chat,
+					new Vec3(w.x + 0.5, w.y + NAH_HOEHE, w.z + 0.5), w.mitte()));
+		}
+		if (Esp.an(p)) {
+			for (ServerPlayer z : p.level().getServer().getPlayerList().getPlayers()) {
+				if (z == p || z.level() != p.level() || z.isSpectator()) continue;
+				if (z.position().distanceTo(p.position()) < ESP_AB) continue;
+				l.add(new Ziel("p:" + z.getUUID(), "☻ ", z.getGameProfile().name(), 0x55FFFF, ChatFormatting.AQUA,
+					z.position().add(0, 2.4, 0), z.position()));
+			}
+		}
+		Set<String> soll = new HashSet<>();
+		for (Ziel z : l) soll.add(z.key());
+
+		// Weg mit Schildern, die nicht mehr gebraucht werden
 		List<Integer> weg = new ArrayList<>();
 		for (Iterator<Map.Entry<String, Schild>> it = m.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<String, Schild> e = it.next();
-			Wegpunkte.Punkt w = Wegpunkte.punkte.get(e.getKey());
-			if (!an || w == null || !w.dim.equals(dim)) { weg.add(e.getValue().id); it.remove(); }
+			if (!soll.contains(e.getKey())) { weg.add(e.getValue().id); it.remove(); }
 		}
 		if (!weg.isEmpty()) p.connection.send(new ClientboundRemoveEntitiesPacket(weg.stream().mapToInt(i -> i).toArray()));
-		if (!an) return;
 
-		Vec3 auge = p.getEyePosition();
-		List<Wegpunkte.Punkt> l = new ArrayList<>();
-		for (Wegpunkte.Punkt w : Wegpunkte.punkte.values()) if (w.dim.equals(dim)) l.add(w);
-		l.sort(Comparator.comparingDouble(w -> ziel(w).distanceToSqr(auge)));
+		l.sort(Comparator.comparingDouble(z -> z.pos().distanceToSqr(auge)));
 		List<Vec3> richtungen = new ArrayList<>();
 		List<Integer> stufen = new ArrayList<>();
 
-		for (Wegpunkte.Punkt w : l) {
-			Vec3 z = ziel(w);
+		for (Ziel w : l) {
+			Vec3 z = w.pos();
 			Vec3 d = z.subtract(auge);
 			double dist = d.length();
 			Vec3 r = dist < 1e-3 ? new Vec3(0, 1, 0) : d.scale(1 / dist);
@@ -158,8 +179,8 @@ final class Schilder {
 			Vec3 pos = auge.add(r.scale(abstand)).add(0, stufe * groesse * 0.55, 0);
 			if (dist <= WEIT) pos = z.add(0, stufe * groesse * 0.55, 0);
 
-			String text = w.name + "\n" + entfernung(w.mitte().distanceTo(p.position()));
-			Schild s = m.get(w.id);
+			String text = w.name() + "\n" + entfernung(w.boden().distanceTo(p.position()));
+			Schild s = m.get(w.key());
 			if (s == null) {
 				Display.TextDisplay ent = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, p.level());
 				s = new Schild(ent);
@@ -179,7 +200,7 @@ final class Schilder {
 				List<SynchedEntityData.DataValue<?>> werte = sd.getNonDefaultValues();
 				if (werte != null) p.connection.send(new ClientboundSetEntityDataPacket(s.id, werte));
 				sd.packDirty();
-				m.put(w.id, s);
+				m.put(w.key(), s);
 				continue;
 			}
 			SynchedEntityData sd = s.ent.getEntityData();
@@ -195,12 +216,13 @@ final class Schilder {
 		}
 	}
 
-	static Vec3 ziel(Wegpunkte.Punkt w) { return new Vec3(w.x + 0.5, w.y + NAH_HOEHE, w.z + 0.5); }
+	/** Etwas mit Schild: key, Zeichen davor, Name, Farbe, Schild-Ort (nah) und Boden-Ort (für die Entfernung). */
+	record Ziel(String key, String zeichen, String name, int rgb, ChatFormatting chat, Vec3 pos, Vec3 boden) {}
 
-	static Component anzeige(Wegpunkte.Punkt w, String text) {
+	static Component anzeige(Ziel w, String text) {
 		String[] t = text.split("\n", 2);
-		return Component.literal("◆ ").withStyle(w.farbeEnum().chat)
-			.append(Component.literal(t[0]).withStyle(s -> s.withColor(w.farbeEnum().rgb).withBold(true)))
+		return Component.literal(w.zeichen()).withStyle(w.chat())
+			.append(Component.literal(t[0]).withStyle(s -> s.withColor(w.rgb()).withBold(true)))
 			.append(Component.literal("\n" + t[1]).withStyle(ChatFormatting.GRAY));
 	}
 
