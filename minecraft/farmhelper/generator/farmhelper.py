@@ -393,8 +393,10 @@ PRUEF = {
                   "Zu nah an der Hauptinsel – mindestens 128 Blöcke Abstand zu anderen Spawnflächen")],
     "aussenposten": [("struktur", "minecraft:pillager_outpost", "Du stehst in einer Plünderer-Außenposten-Box",
                       "Kein Außenposten hier – die Farm geht nur dort")],
-    "ueberfall": [("keine_wesen", ("minecraft:villager", 96), "Keine fremden Dorfbewohner in 96 Blöcken",
-                   "Dorfbewohner in der Nähe – der Überfall kann am falschen Dorf landen")],
+    "ueberfall": [("keine_wesen", ("minecraft:villager", 96, 16),
+                   "Keine fremden Dorfbewohner in 96 Blöcken (deinen eigenen in 16 Blöcken zählt der Check nicht)",
+                   "Fremde Dorfbewohner 16–96 Blöcke entfernt – der Überfall kann am falschen Dorf landen. "
+                   "Deinen eigenen Dorfbewohner darfst du dabeihaben (bis 16 Blöcke Abstand)")],
     "eisen": [("keine_wesen", ("minecraft:iron_golem", 16), "Kein Eisengolem in 16 Blöcken",
                "Ein Eisengolem ist in 16 Blöcken – dann rufen die Dorfbewohner keinen neuen")],
     "schnee": [("nicht_biom", HEISS, "Kein heißes Biom: der Schneegolem schmilzt hier nicht",
@@ -444,8 +446,9 @@ def ort_zeilen(fid):
         elif art == "weg_von_mitte":
             aus(gut, schlecht, [f"positioned 0 ~ 0 unless entity @s[distance=..{wert}]"])
         elif art == "keine_wesen":
-            typ, weit = wert
-            aus(gut, schlecht, [f"unless entity @e[type={typ},distance=..{weit}]"])
+            typ, weit, ab = (wert + (0,))[:3]       # ab: näher als das zählt nicht (z. B. der mitgebrachte Dorfbewohner)
+            aus(gut, schlecht, [f"unless entity @e[type={typ},distance={ab}..{weit}]" if ab
+                                else f"unless entity @e[type={typ},distance=..{weit}]"])
         elif art == "block_unter":
             aus(gut, schlecht, [f"if block ~ ~-1 ~ {wert}"])
     if len(pr) == 0:
