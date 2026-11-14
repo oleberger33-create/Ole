@@ -114,7 +114,7 @@ Bauwerk-Farmen in einer normalen Welt.
 
 ## Server-Version (OLE SMP, Welt „welt“)
 
-Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. Sie entsteht in fünf Schritten:
+Auf dem Server läuft nicht das Original, sondern eine nachbearbeitete Fassung. Sie entsteht in sechs Schritten:
 
 ```bash
 # 1. Original bauen
@@ -128,7 +128,9 @@ python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris
 # 4. Ersatzblöcke und Bausteinauswahl
 python3 server/baustein.py mehrere.zip baustein.zip server/baustein.json
 # 5. „im Weg N“ in der Aktionsleiste; Ausgraben-Geister bleiben orange (Partikel-Fassung: Seiten markieren)
-python3 server/geister.py baustein.zip OlesFarmhelper.zip
+python3 server/geister.py baustein.zip geister.zip
+# 6. Fehlende Geister alle 3 Sekunden nachziehen (wenn ein Block erst nach dem Start des Teils fehlt)
+python3 server/nachziehen.py geister.zip OlesFarmhelper.zip
 ```
 
 Das Ergebnis kommt nach `welt/datapacks/OlesFarmhelper.zip`, danach `/reload`.

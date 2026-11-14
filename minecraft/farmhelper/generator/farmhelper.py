@@ -817,8 +817,13 @@ funktion("plan/sekunde", [f"scoreboard players operation #cur {NS}.id = @s {NS}.
                           f"function {P}/pruefen_m with storage {NS}:tmp d",
                           f"{BESITZER} function {P}/hud_m with storage {NS}:tmp d",
                           f"execute if score #fehlt {NS} matches 0 run function {P}/naechster"])
+# Nächster Teil: Teile, die schon fertig sind (z. B. natürlicher Stein als Wand), sofort am Stück überspringen –
+# ohne Ton und Meldung je Teil; Geister und Ton erst beim ersten Teil, in dem wirklich etwas fehlt.
 funktion("plan/naechster", [f"scoreboard players add @s {NS}.s 1",
                             f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/fertig",
+                            f"function {P}/daten",
+                            f"function {P}/pruefen_m with storage {NS}:tmp d",
+                            f"execute if score #fehlt {NS} matches 0 run return run function {P}/naechster",
                             f"function {P}/zeigen",
                             f"execute as @a if score @s {NS}.id = #cur {NS}.id at @s run playsound "
                             "minecraft:entity.experience_orb.pickup master @s ~ ~ ~ 1 1.2",
