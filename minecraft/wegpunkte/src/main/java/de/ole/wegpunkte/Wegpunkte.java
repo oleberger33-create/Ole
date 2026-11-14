@@ -89,20 +89,21 @@ public class Wegpunkte implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTED.register(s -> { server = s; laden(); });
+		ServerLifecycleEvents.SERVER_STARTED.register(s -> { server = s; laden(); Schilder.selbsttest(s); });
 		ServerLifecycleEvents.SERVER_STOPPING.register(s -> speichern());
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, s) -> {
 			UUID u = handler.getPlayer().getUUID();
 			gesendet.put(u, new HashSet<>());
 			neuSenden.add(u);
+			Schilder.vergessen(u);
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, s) -> {
 			UUID u = handler.getPlayer().getUUID();
-			gesendet.remove(u); neuSenden.remove(u); letzteAnzeige.remove(u);
+			gesendet.remove(u); neuSenden.remove(u); letzteAnzeige.remove(u); Schilder.vergessen(u);
 		});
-		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((p, von, nach) -> neuSenden.add(p.getUUID()));
-		ServerPlayerEvents.AFTER_RESPAWN.register((alt, neu, ende) -> neuSenden.add(neu.getUUID()));
+		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((p, von, nach) -> { neuSenden.add(p.getUUID()); Schilder.vergessen(p.getUUID()); });
+		ServerPlayerEvents.AFTER_RESPAWN.register((alt, neu, ende) -> { neuSenden.add(neu.getUUID()); Schilder.vergessen(neu.getUUID()); });
 
 		// Verwaiste Namensschilder (Wegpunkt wurde gelöscht, während der Chunk nicht geladen war) entfernen
 		ServerEntityEvents.ENTITY_LOAD.register((e, welt) -> {
@@ -115,6 +116,9 @@ public class Wegpunkte implements ModInitializer {
 			tick++;
 			if (tick % 20 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) abgleichen(p);
 			if (tick % 5 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) kompass(p);
+			if (tick % 2 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) {
+				try { Schilder.aktualisieren(p); } catch (RuntimeException e) { LOG.error("Schilder", e); }
+			}
 		});
 
 		CommandRegistrationCallback.EVENT.register((d, reg, env) -> {
@@ -151,6 +155,9 @@ public class Wegpunkte implements ModInitializer {
 					.then(Commands.literal("farbe")
 						.then(Commands.argument("farbe", StringArgumentType.word()).suggests(farben)
 							.then(Commands.argument("name", StringArgumentType.greedyString()).suggests(eigene).executes(Wegpunkte::farbeAendern))))
+					.then(Commands.literal("schilder")
+						.then(Commands.literal("an").executes(c -> schilderSchalten(c, true)))
+						.then(Commands.literal("aus").executes(c -> schilderSchalten(c, false))))
 					.then(Commands.literal("info")
 						.then(Commands.argument("name", StringArgumentType.greedyString()).suggests(alle).executes(Wegpunkte::info)))
 				);
@@ -167,6 +174,7 @@ public class Wegpunkte implements ModInitializer {
 			.append(befehl("/wp liste", "/wp liste", " – alle Wegpunkte\n"))
 			.append(befehl("/wp entfernen <Name>", "/wp entfernen ", " – eigenen Wegpunkt löschen\n"))
 			.append(befehl("/wp farbe <Farbe> <Name>", "/wp farbe ", " – Farbe ändern\n"))
+			.append(befehl("/wp schilder an|aus", "/wp schilder ", " – Namensschilder ein-/ausblenden\n"))
 			.append(Component.literal("Beispiel: /wp add Meine Farm blau. Farben: rot orange gelb gruen tuerkis blau lila rosa weiss.\n").withStyle(ChatFormatting.GRAY))
 			.append(Component.literal("Tipp: Mit einem Kompass in der Hand siehst du den Namen des Wegpunkts, auf den du schaust.").withStyle(ChatFormatting.GRAY)), false);
 		return 1;
@@ -204,7 +212,6 @@ public class Wegpunkte implements ModInitializer {
 		w.farbe = f.name();
 		w.erstellt = System.currentTimeMillis();
 		punkte.put(w.id, w);
-		schildSetzen(w);
 		speichern();
 		for (ServerPlayer q : server.getPlayerList().getPlayers()) abgleichen(q);
 		Farbe ff = f;
@@ -268,8 +275,7 @@ public class Wegpunkte implements ModInitializer {
 		Farbe f = Farbe.von(StringArgumentType.getString(c, "farbe"));
 		if (f == null) { fehler(c, "Unbekannte Farbe. Möglich: rot orange gelb gruen tuerkis blau lila rosa weiss"); return 0; }
 		w.farbe = f.name();
-		schildEntfernen(w);
-		schildSetzen(w);
+		for (ServerPlayer q : server.getPlayerList().getPlayers()) Schilder.zuruecksetzen(q);
 		speichern();
 		// Client kennt die alte Farbe: bei allen neu schicken
 		for (ServerPlayer q : server.getPlayerList().getPlayers()) {
@@ -279,6 +285,15 @@ public class Wegpunkte implements ModInitializer {
 		}
 		c.getSource().sendSuccess(() -> Component.literal("◆ \"" + w.name + "\" ist jetzt ").withStyle(ChatFormatting.GRAY)
 			.append(Component.literal(f.name()).withStyle(f.chat)), false);
+		return 1;
+	}
+
+	static int schilderSchalten(CommandContext<CommandSourceStack> c, boolean an) {
+		ServerPlayer p = c.getSource().getPlayer();
+		if (p == null) return 0;
+		if (an) Schilder.aus.remove(p.getUUID()); else Schilder.aus.add(p.getUUID());
+		c.getSource().sendSuccess(() -> Component.literal(an ? "◆ Namensschilder an." : "◆ Namensschilder aus. Wieder an: /wp schilder an")
+			.withStyle(ChatFormatting.GRAY), false);
 		return 1;
 	}
 

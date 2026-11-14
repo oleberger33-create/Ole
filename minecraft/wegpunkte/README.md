@@ -12,9 +12,13 @@ Farben: rot orange gelb gruen tuerkis blau lila rosa weiss
 
 Anzeige:
 - in der Ortungsleiste über der Hotbar, für alle Spieler in derselben Dimension (direkte Waypoint-Pakete, ohne Entities, auch wenn der Ort weit weg ist)
-- am Ort schwebt ein Namensschild (text_display)
+- Namensschilder für jeden Spieler, immer sichtbar – durch Wände und egal wie weit weg (`Schilder.java`): Der
+  Server schickt jedem Spieler eigene Text-Displays (nur Pakete, nicht in der Welt), see_through, höchstens 24 Blöcke
+  vor ihm in Richtung des Wegpunkts, mit Name und Entfernung; nah dran steht das Schild am echten Ort. Beim Start
+  prüft ein Selbsttest die Pakete (verschlüsseln und lesen); schlägt er fehl, bleiben die Schilder aus.
+  `/wp schilder aus|an` blendet sie für einen selbst aus und ein.
 - mit Kompass in der Hand: Name und Entfernung des Wegpunkts, auf den man schaut
 
 Daten: `<welt>/wegpunkte.json`
 
-Bauen: `JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64 ./gradlew build` → `build/libs/wegpunkte-1.0.0.jar` in den `mods`-Ordner.
+Bauen: `JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64 ./gradlew build` → `build/libs/wegpunkte-<version>.jar` in den `mods`-Ordner.
