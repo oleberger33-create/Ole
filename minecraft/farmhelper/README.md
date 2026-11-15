@@ -124,7 +124,7 @@ python3 server/nur_spieler.py aus/OlesFarmhelper.zip FNGreg nur.zip
 #    (Alternative: Geister als Partikel nur für den Planbesitzer – smp/tools/farmhelper_nur_fuer.py, Branch
 #     speedrun-plan; in Vanilla sieht ein Block-Geist immer jeder, nur Partikel lassen sich einem Spieler schicken)
 # 3. Für mehrere Spieler freigeben (Namensliste)
-python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris
+python3 server/mehrere_spieler.py nur.zip mehrere.zip FNGreg korokchris matsllll
 # 4. Ersatzblöcke und Bausteinauswahl
 python3 server/baustein.py mehrere.zip baustein.zip server/baustein.json
 # 5. „im Weg N“ in der Aktionsleiste; Ausgraben-Geister bleiben orange (Partikel-Fassung: Seiten markieren)
