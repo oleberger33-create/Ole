@@ -419,7 +419,8 @@ TEXTE = {
         where="Überall, nicht direkt in einem Dorf (dort gibt es fremde Betten)", afk="In der Nähe",
         why="Zwei Dorfbewohner in einem Gehege mit Dach: Einer ist Bauer (Komposter als Arbeitsplatz) und erntet das "
             "Karottenfeld; satte Dorfbewohner geben Essen ab und bekommen ein Baby, wenn ein Bett frei ist. Darum "
-            "stehen im Gehege 3 Betten für 2 Erwachsene. Am Boden läuft eine Wasserrinne unter der Wand hindurch – "
+            "stehen im Gehege 3 Betten für 2 Erwachsene – und die Wände sind 3 hoch, denn ein Elternteil muss das "
+            "freie Bett erreichen können (auch oben drauf stehen). Am Boden läuft eine Wasserrinne unter der Wand hindurch – "
             "dort ist nur 1 Block Platz: Babys passen durch, Erwachsene nicht. Die Strömung trägt Babys hinaus, sie "
             "fallen in eine Grube und wachsen dort zu Erwachsenen heran. Nachts merkt ein Baby in der Grube, dass es "
             "sein Bett nicht erreicht, und gibt es nach einer Minute frei – dann kommt das nächste Baby.",
