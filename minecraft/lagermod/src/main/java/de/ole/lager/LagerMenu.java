@@ -387,9 +387,10 @@ public class LagerMenu extends ChestMenu {
 	}
 
 	/** Legt den Stapel ins Lager (zuerst zu gleichen Items, dann in freie Plätze). Gibt den Rest zurück. */
-	ItemStack einlagern(ItemStack st) {
+	ItemStack einlagern(ItemStack st) { return einlagern(Lager.behaelter(spieler), st); }
+
+	static ItemStack einlagern(List<Container> bs, ItemStack st) {
 		if (st.isEmpty() || Lager.istTerminal(st)) return st;
-		List<Container> bs = Lager.behaelter(spieler);
 		for (Container c : bs) {
 			for (int i = 0; i < c.getContainerSize() && !st.isEmpty(); i++) {
 				ItemStack da = c.getItem(i);
@@ -413,10 +414,12 @@ public class LagerMenu extends ChestMenu {
 	}
 
 	/** Holt bis zu n Stück der Sorte aus dem Lager. */
-	ItemStack entnehmen(ItemStack muster, int n) {
+	ItemStack entnehmen(ItemStack muster, int n) { return entnehmen(Lager.behaelter(spieler), muster, n); }
+
+	static ItemStack entnehmen(List<Container> bs, ItemStack muster, int n) {
 		n = Math.min(n, muster.getMaxStackSize());
 		ItemStack ergebnis = ItemStack.EMPTY;
-		for (Container c : Lager.behaelter(spieler)) {
+		for (Container c : bs) {
 			for (int i = c.getContainerSize() - 1; i >= 0; i--) {
 				int fehlt = n - ergebnis.getCount();
 				if (fehlt <= 0) return ergebnis;

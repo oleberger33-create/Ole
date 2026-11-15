@@ -143,6 +143,9 @@ public class Lager implements ModInitializer {
 			.then(Commands.literal("suche").then(Commands.argument("text", StringArgumentType.greedyString())
 				.executes(c -> { LagerMenu.oeffnen(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "text")); return 1; })))
 			.then(Commands.literal("liste").executes(Lager::liste))
+			.then(Commands.literal("herstellen").then(Commands.argument("item", net.minecraft.commands.arguments.item.ItemArgument.item(reg))
+				.executes(c -> herstellen(c, 1))
+				.then(Commands.argument("anzahl", IntegerArgumentType.integer(1, 2304)).executes(c -> herstellen(c, IntegerArgumentType.getInteger(c, "anzahl"))))))
 			.then(Commands.literal("scan").then(Commands.argument("radius", IntegerArgumentType.integer(1, 64)).executes(Lager::scan)))
 			// Nur für Tests (Ops): einen Klick im offenen Lager-Menü auslösen
 			.then(Commands.literal("testklick").then(Commands.argument("slot", IntegerArgumentType.integer(-999, 200))
@@ -260,6 +263,7 @@ public class Lager implements ModInitializer {
 			.append(Component.literal("Rechtsklick mit Terminal").withStyle(ChatFormatting.YELLOW)).append(Component.literal(" – Lager öffnen (alle verbundenen Kisten)\n").withStyle(ChatFormatting.GRAY))
 			.append(Component.literal("Schleichen + Rechtsklick auf Kiste").withStyle(ChatFormatting.YELLOW)).append(Component.literal(" – verbinden → privat → trennen\n").withStyle(ChatFormatting.GRAY))
 			.append(Component.literal("/lager suche <Text>").withStyle(ChatFormatting.YELLOW)).append(Component.literal(" – nur passende Items zeigen\n").withStyle(ChatFormatting.GRAY))
+			.append(Component.literal("/lager herstellen <Item> [Anzahl]").withStyle(ChatFormatting.YELLOW)).append(Component.literal(" – aus dem Lager herstellen, auch Zwischenschritte\n").withStyle(ChatFormatting.GRAY))
 			.append(Component.literal("/lager liste").withStyle(ChatFormatting.YELLOW)).append(Component.literal(" – deine verbundenen Kisten").withStyle(ChatFormatting.GRAY)), false);
 		return 1;
 	}
@@ -298,6 +302,19 @@ public class Lager implements ModInitializer {
 		int z = neu;
 		c.getSource().sendSuccess(() -> Component.literal("◆ " + z + " Behälter im Umkreis " + r + " verbunden.").withStyle(ChatFormatting.GOLD), true);
 		return neu;
+	}
+
+	static int herstellen(CommandContext<CommandSourceStack> c, int anzahl) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		ServerPlayer p = c.getSource().getPlayerOrException();
+		net.minecraft.world.item.Item item = net.minecraft.commands.arguments.item.ItemArgument.getItem(c, "item").item().value();
+		Herstellen.Ergebnis e = Herstellen.herstellen(p, item, anzahl);
+		String name = new ItemStack(item).getHoverName().getString();
+		if (e.gemacht() > 0) {
+			String t = "◆ " + e.gemacht() + "× " + name + " hergestellt" + (e.fehlt() != null && e.gemacht() < anzahl ? " – dann ging es nicht weiter: " + e.fehlt() : "");
+			c.getSource().sendSuccess(() -> Component.literal(t).withStyle(ChatFormatting.GOLD), false);
+		} else c.getSource().sendFailure(Component.literal(name + " nicht hergestellt. " + (e.fehlt() == null ? "" : e.fehlt())));
+		if (p.containerMenu instanceof LagerMenu m) { m.anzeigen(); m.broadcastChanges(); }
+		return e.gemacht();
 	}
 
 	static int testKlick(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

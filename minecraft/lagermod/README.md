@@ -15,6 +15,8 @@ Gemeinsames Kisten-Lager für den Server. Spieler brauchen keinen Mod: alles lä
   Doppelkisten zählen als eine. Nur wer die Kiste verbunden hat (oder ein Op), kann sie umschalten.
 - **Private Kisten** sieht im Lager nur der Besitzer. Andere können sie nicht öffnen und nicht abbauen
   (Ops schon). Trichter können trotzdem daraus ziehen.
+- `/lager herstellen <Item> [Anzahl]`: stellt mit Werkbank-Rezepten aus dem Lager her. Fehlende Zutaten werden
+  selbst hergestellt, bis 4 Stufen tief (z. B. Truhe ← Bretter ← Stamm). Ergebnis ins Inventar, Zwischenprodukte ins Lager.
 - `/lager suche <Text>`: nur passende Items zeigen · `/lager liste`: Anzahl deiner Kisten
 - `/lager scan <Radius>` (Op): alle Kisten und Fässer im Umkreis als geteilt verbinden
 
