@@ -629,6 +629,7 @@ for nr, f in enumerate(PLAENE, 1):
     fid = f["id"]
     ts = teilschritte(f)
     sp = spawner_lage(f)
+    FEST_AM_ENDE = {(b["x"], b["y"], b["z"]) for b in f["fertig"] if not b.get("ent")}
     funktion(f"f/{fid}/info", [f"dialog show @s {j(info_dialog(nr, f))}"])
     funktion(f"f/{fid}/ort", ort_zeilen(fid))
     funktion(f"f/{fid}/material", [f"dialog show @s {j(material_dialog(f))}"])
@@ -692,6 +693,33 @@ for nr, f in enumerate(PLAENE, 1):
                 if ys[-1] != ys[0] else []) + [{"text": " "}]
         hud.append(f"title @s actionbar {j(teile)}")
         funktion(f"f/{fid}/s{i}/hud", hud)
+        # Endkontrolle: Grab-Felder, die ein späterer Schritt wieder füllt (Falltüren, Wasser …), nicht prüfen
+        endliste = [b for b in liste if not (b["id"] == "luft" and (b["x"], b["y"], b["z"]) in FEST_AM_ENDE)]
+        for r in range(4):
+            if len(endliste) == len(liste):
+                funktion(f"f/{fid}/r{r}/s{i}/endpruefen", [f"function {NS}:f/{fid}/r{r}/s{i}/pruefen"])
+                funktion(f"f/{fid}/r{r}/s{i}/endzeigen", [f"function {NS}:f/{fid}/r{r}/s{i}/zeigen"])
+            else:
+                ez = []
+                for b in endliste:
+                    d = bloecke.block(b, r)
+                    if d:
+                        x, z = drehe_xz(b["x"], b["z"], r)
+                        ez.append(geist(x, b["y"], z, d))
+                ez.append(f"scoreboard players operation @e[tag={NS}_neu] {NS}.id = #cur {NS}.id")
+                ez.append(f"tag @e[tag={NS}_neu] remove {NS}_neu")
+                funktion(f"f/{fid}/r{r}/s{i}/endzeigen", ez)
+                ende = [f"scoreboard players set #m{k} {NS} 0" for k in range(len(keys))]
+                for b in endliste:
+                    d = bloecke.block(b, r)
+                    if not d or d["art"] == "afk":
+                        continue
+                    x, z = drehe_xz(b["x"], b["z"], r)
+                    ende += {"block": zeilen_block, "wesen": zeilen_wesen, "inhalt": zeilen_inhalt}[d["art"]](
+                        x, b["y"], z, d, keys.index(d["name"]))
+                ende.append(f"scoreboard players set #fehlt {NS} 0")
+                ende += [f"scoreboard players operation #fehlt {NS} += #m{k} {NS}" for k in range(len(keys))]
+                funktion(f"f/{fid}/r{r}/s{i}/endpruefen", ende)
         for r in range(4):
             zeigen, pruefen = [], [f"scoreboard players set #m{k} {NS} 0" for k in range(len(keys))]
             for b in liste:
@@ -803,8 +831,12 @@ funktion("plan/geister_weg", [f"scoreboard players operation #cur {NS}.id = @s {
                               f"execute as @e[tag={NS}_g] if score @s {NS}.id = #cur {NS}.id run kill @s"])
 funktion("plan/zeigen", [f"function {P}/geister_weg", f"function {P}/daten",
                          f"function {P}/zeigen_m with storage {NS}:tmp d"])
-funktion("plan/zeigen_m", ["$function " + NS + ":f/$(farm)/r$(r)/s$(s)/zeigen"])
-funktion("plan/pruefen_m", ["$function " + NS + ":f/$(farm)/r$(r)/s$(s)/pruefen"])
+# Kontroll-Modus (Tag ofh_ende, gesetzt von der Endkontrolle): nur zeigen und prüfen, was im fertigen Bau so bleibt
+funktion("plan/zeigen_m", ["$execute unless entity @s[tag=" + NS + "_ende] run function " + NS + ":f/$(farm)/r$(r)/s$(s)/zeigen",
+                           "$execute if entity @s[tag=" + NS + "_ende] run function " + NS + ":f/$(farm)/r$(r)/s$(s)/endzeigen"])
+funktion("plan/pruefen_m", ["$execute unless entity @s[tag=" + NS + "_ende] run function " + NS + ":f/$(farm)/r$(r)/s$(s)/pruefen",
+                            "$execute if entity @s[tag=" + NS + "_ende] run function " + NS + ":f/$(farm)/r$(r)/s$(s)/endpruefen"])
+funktion("plan/endpruefen_m", ["$function " + NS + ":f/$(farm)/r$(r)/s$(s)/endpruefen"])
 funktion("plan/hud_m", ["$function " + NS + ":f/$(farm)/s$(s)/hud"])
 funktion("plan/menu_m", ["$function " + NS + ":f/$(farm)/s$(s)/menu"])
 funktion("plan/ort_m", ["$function " + NS + ":f/$(farm)/ort", "$function " + NS + ":f/$(farm)/r$(r)/hindernisse"])
@@ -819,7 +851,8 @@ funktion("plan/sekunde", [f"scoreboard players operation #cur {NS}.id = @s {NS}.
                           f"execute if score #fehlt {NS} matches 0 run function {P}/naechster"])
 # Nächster Teil: Teile, die schon fertig sind (z. B. natürlicher Stein als Wand), sofort am Stück überspringen –
 # ohne Ton und Meldung je Teil; Geister und Ton erst beim ersten Teil, in dem wirklich etwas fehlt.
-funktion("plan/naechster", [f"scoreboard players add @s {NS}.s 1",
+funktion("plan/naechster", [f"execute if entity @s[tag={NS}_ende] run return run function {P}/kontrolle_weiter",
+                            f"scoreboard players add @s {NS}.s 1",
                             f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/endkontrolle",
                             f"function {P}/daten",
                             f"function {P}/pruefen_m with storage {NS}:tmp d",
@@ -830,9 +863,12 @@ funktion("plan/naechster", [f"scoreboard players add @s {NS}.s 1",
                             f"{BESITZER} title @s actionbar " + '{text:"✔ Teil fertig – weiter geht\'s!",color:"green"}'])
 # Endkontrolle vor „Farm fertig!“: alle Teile noch einmal prüfen. Wurde in einem fertigen Teil später etwas
 # abgebaut, zurück zu diesem Teil (Geister zeigen, was fehlt) statt die Farm für fertig zu erklären.
-funktion("plan/endkontrolle", [f"scoreboard players set @s {NS}.s 0", f"function {P}/kontrolle_teil"])
+funktion("plan/endkontrolle", [f"tag @s add {NS}_ende", f"scoreboard players set @s {NS}.s 0", f"function {P}/kontrolle_teil"])
+funktion("plan/kontrolle_weiter", [f"scoreboard players add @s {NS}.s 1",
+                                   f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/fertig",
+                                   f"function {P}/kontrolle_teil"])
 funktion("plan/kontrolle_teil", [f"function {P}/daten",
-                                 f"function {P}/pruefen_m with storage {NS}:tmp d",
+                                 f"function {P}/endpruefen_m with storage {NS}:tmp d",
                                  f"execute if score #fehlt {NS} matches 1.. run return run function {P}/zurueck_zu",
                                  f"scoreboard players add @s {NS}.s 1",
                                  f"execute if score @s {NS}.s >= @s {NS}.n run return run function {P}/fertig",
