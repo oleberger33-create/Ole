@@ -33,6 +33,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
@@ -133,7 +136,7 @@ public class Lager implements ModInitializer {
 			return true;
 		});
 		PlayerBlockBreakEvents.AFTER.register((welt, spieler, pos, zustand, be) -> {
-			if (kisten.remove(schluessel(dimName(welt), pos.getX(), pos.getY(), pos.getZ())) != null) speichern();
+			if (kisten.remove(schluessel(dimName(welt), pos.getX(), pos.getY(), pos.getZ())) != null) { cacheLeeren(); speichern(); }
 		});
 
 		CommandRegistrationCallback.EVENT.register((d, reg, env) -> d.register(Commands.literal("lager")
@@ -231,11 +234,27 @@ public class Lager implements ModInitializer {
 			meldung = Component.literal("✖ " + art + " vom Lager getrennt").withStyle(ChatFormatting.GRAY);
 		}
 		p.sendSystemMessage(meldung, true);
+		cacheLeeren();
 		speichern();
 	}
 
+	/** Pro Spieler und Tick nur einmal suchen (ein Klick braucht die Liste mehrmals). */
+	static final Map<UUID, List<Container>> cache = new HashMap<>();
+	static final Map<UUID, Integer> cacheTick = new HashMap<>();
+
+	static void cacheLeeren() { cache.clear(); cacheTick.clear(); }
+
 	/** Alle Behälter, die p im Terminal sieht. Kisten, deren Block weg ist, werden entfernt. */
 	static List<Container> behaelter(ServerPlayer p) {
+		Integer t = cacheTick.get(p.getUUID());
+		if (t != null && t == tick) return cache.get(p.getUUID());
+		List<Container> l = behaelterSuchen(p);
+		cache.put(p.getUUID(), l);
+		cacheTick.put(p.getUUID(), tick);
+		return l;
+	}
+
+	static List<Container> behaelterSuchen(ServerPlayer p) {
 		List<Container> eigene = new ArrayList<>(), geteilte = new ArrayList<>();
 		boolean geaendert = false;
 		for (Iterator<Kiste> it = kisten.values().iterator(); it.hasNext(); ) {
@@ -243,6 +262,10 @@ public class Lager implements ModInitializer {
 			if (!k.sichtbar(p)) continue;
 			ServerLevel welt = server.getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(k.dim)));
 			if (welt == null) continue;
+			// Chunk geladen halten, solange das Terminal benutzt wird (Ticket läuft nach ~15 s ab) – sonst würde er bei
+			// jedem Klick neu von der Platte geladen
+			net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(k.x >> 4, k.z >> 4);
+			welt.getChunkSource().addTicketWithRadius(net.minecraft.server.level.TicketType.PORTAL, cp, 1);
 			welt.getChunk(k.x >> 4, k.z >> 4);          // lädt den Chunk, falls nötig
 			BlockEntity be = welt.getBlockEntity(k.pos());
 			if (lagerfaehig(be) && be instanceof Container c) (k.privat ? eigene : geteilte).add(c);
@@ -298,6 +321,7 @@ public class Lager implements ModInitializer {
 			n.besitzer = p.getUUID().toString(); n.besitzerName = p.getPlainTextName();
 			kisten.put(s, n); neu++;
 		}
+		cacheLeeren();
 		speichern();
 		int z = neu;
 		c.getSource().sendSuccess(() -> Component.literal("◆ " + z + " Behälter im Umkreis " + r + " verbunden.").withStyle(ChatFormatting.GOLD), true);
@@ -325,6 +349,41 @@ public class Lager implements ModInitializer {
 		ItemStack hand = m.getCarried();
 		c.getSource().sendSuccess(() -> Component.literal("Hand: " + hand.getCount() + " " + hand.getItem() + " | Sorten: " + m.sichtbar.size()), false);
 		return 1;
+	}
+
+	// ------------------------------------------------------------------ Ordner (aus den Kreativ-Reitern)
+
+	record Ordner(String name, Item symbol, List<ResourceKey<CreativeModeTab>> reiter) {}
+
+	static final List<Ordner> ORDNER = List.of(
+		new Ordner("Alles", Items.CHEST, List.of()),
+		new Ordner("Baublöcke", Items.BRICKS, List.of(CreativeModeTabs.BUILDING_BLOCKS, CreativeModeTabs.COLORED_BLOCKS)),
+		new Ordner("Natur", Items.GRASS_BLOCK, List.of(CreativeModeTabs.NATURAL_BLOCKS)),
+		new Ordner("Funktionsblöcke", Items.FURNACE, List.of(CreativeModeTabs.FUNCTIONAL_BLOCKS)),
+		new Ordner("Redstone", Items.REDSTONE, List.of(CreativeModeTabs.REDSTONE_BLOCKS)),
+		new Ordner("Werkzeuge", Items.IRON_PICKAXE, List.of(CreativeModeTabs.TOOLS_AND_UTILITIES)),
+		new Ordner("Kampf & Rüstung", Items.IRON_SWORD, List.of(CreativeModeTabs.COMBAT)),
+		new Ordner("Essen", Items.BREAD, List.of(CreativeModeTabs.FOOD_AND_DRINKS)),
+		new Ordner("Rohstoffe & Sonstiges", Items.IRON_INGOT, List.of(CreativeModeTabs.INGREDIENTS, CreativeModeTabs.SPAWN_EGGS)));
+
+	static Map<Item, Integer> ordnerVonItem;
+
+	/** Ordner-Nummer (1 … 8) für ein Item; Items ohne Kreativ-Reiter landen in „Rohstoffe & Sonstiges“. */
+	static int ordner(Item item) {
+		if (ordnerVonItem == null) {
+			ordnerVonItem = new HashMap<>();
+			try {
+				CreativeModeTabs.tryRebuildTabContents(server.getWorldData().enabledFeatures(), true, server.registryAccess());
+				for (int o = 1; o < ORDNER.size(); o++)
+					for (ResourceKey<CreativeModeTab> k : ORDNER.get(o).reiter()) {
+						CreativeModeTab tab = net.minecraft.core.registries.BuiltInRegistries.CREATIVE_MODE_TAB.getValue(k);
+						if (tab == null) continue;
+						for (ItemStack s : tab.getDisplayItems()) ordnerVonItem.putIfAbsent(s.getItem(), o);
+					}
+				LOG.info("Lager: {} Items in Ordner einsortiert", ordnerVonItem.size());
+			} catch (RuntimeException e) { LOG.error("Lager: Ordner", e); }
+		}
+		return ordnerVonItem.getOrDefault(item, ORDNER.size() - 1);
 	}
 
 	static boolean istOp(ServerPlayer p) { return server.getPlayerList().isOp(p.nameAndId()); }

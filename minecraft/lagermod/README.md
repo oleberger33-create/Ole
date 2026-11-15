@@ -3,8 +3,10 @@
 Gemeinsames Kisten-Lager für den Server. Spieler brauchen keinen Mod: alles läuft über normale Kisten-Menüs.
 
 - `/lager item`: Lager-Terminal holen (Bergungskompass mit Glanz)
+- **Ordner** oben (wie die Kreativ-Reiter): Alles, Baublöcke, Natur, Funktionsblöcke, Redstone, Werkzeuge, Kampf, Essen, Rohstoffe.
+  Sortierung standardmäßig nach Name, damit nichts herumspringt; „Inventar einlagern“ räumt das Inventar (ohne Schnellleiste) ins Lager.
 - **Rechtsklick** mit dem Terminal: Lager-Terminal öffnen (wie das Crafting-Terminal aus Applied Energistics 2).
-  Links alle Items aus allen verbundenen Kisten und Fässern zusammen, rechts ein 3×3-Werkbank-Raster.
+  Links alle Items aus allen verbundenen Kisten und Fässern zusammen, über den Knopf „Werkbank öffnen“ ein 3×3-Werkbank-Raster.
   - Links-Klick: Stapel nehmen · Rechts-Klick: 1 Stück · Shift-Klick: Stapel ins Inventar · Zahl-Taste: in den Hotbar-Platz
   - Item in der Hand auf ein Feld klicken oder Shift-Klick im eigenen Inventar: ins Lager legen
   - Werkbank: Zutaten aus dem Lager ins Raster legen, Ergebnis anklicken (1×) oder Shift-Klick (ein Stapel).

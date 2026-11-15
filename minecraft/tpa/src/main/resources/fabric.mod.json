@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"id": "tpa",
+	"version": "${version}",
+	"name": "TPA",
+	"description": "/tpa, /tpahere, /tpaccept, /tpdeny: Teleport-Anfragen zwischen Spielern. Nur auf dem Server nötig.",
+	"authors": ["Ole"],
+	"license": "MIT",
+	"environment": "server",
+	"entrypoints": { "main": ["de.ole.tpa.Tpa"] },
+	"depends": { "fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*" }
+}
