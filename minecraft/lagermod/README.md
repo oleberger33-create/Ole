@@ -3,9 +3,13 @@
 Gemeinsames Kisten-Lager für den Server. Spieler brauchen keinen Mod: alles läuft über normale Kisten-Menüs.
 
 - `/lager item`: Lager-Terminal holen (Bergungskompass mit Glanz)
-- **Rechtsklick** mit dem Terminal: Lager öffnen. Zeigt alle Items aus allen verbundenen Kisten und Fässern zusammen.
+- **Rechtsklick** mit dem Terminal: Lager-Terminal öffnen (wie das Crafting-Terminal aus Applied Energistics 2).
+  Links alle Items aus allen verbundenen Kisten und Fässern zusammen, rechts ein 3×3-Werkbank-Raster.
   - Links-Klick: Stapel nehmen · Rechts-Klick: 1 Stück · Shift-Klick: Stapel ins Inventar · Zahl-Taste: in den Hotbar-Platz
   - Item in der Hand auf ein Feld klicken oder Shift-Klick im eigenen Inventar: ins Lager legen
+  - Werkbank: Zutaten aus dem Lager ins Raster legen, Ergebnis anklicken (1×) oder Shift-Klick (ein Stapel).
+    Verbrauchte Zutaten füllen sich automatisch aus dem Lager nach; Reste wie leere Eimer gehen ins Lager.
+    Beim Schließen wandert alles aus dem Raster zurück ins Lager.
   - Unten: Seiten blättern, nach Menge/Name sortieren, Suche aufheben
 - **Schleichen + Rechtsklick** mit dem Terminal auf eine Kiste oder ein Fass: verbinden (für alle) → privat → trennen.
   Doppelkisten zählen als eine. Nur wer die Kiste verbunden hat (oder ein Op), kann sie umschalten.

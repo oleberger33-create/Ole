@@ -1,6 +1,7 @@
 package de.ole.lager;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,17 +18,29 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.util.Prediction;
 
 import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * Das Lager-Menü: eine große Kiste (6 Reihen). Oben 45 Felder mit allen Item-Sorten aus den verbundenen Behältern,
- * unten die Knöpfe. Die angezeigten Items sind nur Bilder – jeder Klick wird hier ausgewertet und holt echte Items
- * aus den Kisten bzw. legt sie hinein.
+ * Das Lager-Terminal (wie das Crafting-Terminal aus Applied Energistics 2), als große Kiste mit 6 Reihen:
+ * links 6 × 5 Felder mit allen Item-Sorten aus den verbundenen Behältern, rechts ein 3 × 3-Werkbank-Raster mit
+ * Ergebnisfeld, unten die Knöpfe. Die angezeigten Items sind nur Bilder – jeder Klick wird hier ausgewertet und holt
+ * echte Items aus den Kisten bzw. legt sie hinein. Nach dem Herstellen füllt sich das Raster aus dem Lager nach.
  */
 public class LagerMenu extends ChestMenu {
-	static final int FELDER = 45;
+	/** Felder für Lager-Items: Reihen 0–4, Spalten 0–5. */
+	static final int[] FELD = new int[30];
+	static {
+		for (int r = 0, i = 0; r < 5; r++) for (int s = 0; s < 6; s++) FELD[i++] = r * 9 + s;
+	}
+	static final int[] RASTER = {6, 7, 8, 15, 16, 17, 24, 25, 26};
+	static final int ERGEBNIS = 34, LEEREN = 43;
 	static final int ZURUECK = 45, SORTIEREN = 48, INFO = 49, FILTER = 50, VOR = 53;
 
 	static class Sorte {
@@ -37,13 +50,14 @@ public class LagerMenu extends ChestMenu {
 
 	final ServerPlayer spieler;
 	final Container anzeige;
+	final SimpleContainer raster = new SimpleContainer(9);
 	int seite;
 	boolean nachName;
 	String filter;
 	List<Sorte> sichtbar = List.of();
 
 	static void oeffnen(ServerPlayer p, String filter) {
-		String titel = filter.isEmpty() ? "Lager" : "Lager – Suche: " + filter;
+		String titel = filter.isEmpty() ? "Lager-Terminal" : "Lager – Suche: " + filter;
 		p.openMenu(new SimpleMenuProvider((id, inv, pl) -> new LagerMenu(id, inv, p, filter), Component.literal(titel)));
 	}
 
@@ -61,6 +75,18 @@ public class LagerMenu extends ChestMenu {
 
 	@Override public boolean stillValid(Player p) { return true; }
 	@Override public ItemStack quickMoveStack(Player p, int slot) { return ItemStack.EMPTY; }
+
+	/** Beim Schließen: was noch im Raster liegt, zurück ins Lager (Rest ins Inventar). */
+	@Override
+	public void removed(Player p) {
+		super.removed(p);
+		for (int i = 0; i < 9; i++) {
+			ItemStack s = raster.removeItemNoUpdate(i);
+			if (s.isEmpty()) continue;
+			ItemStack rest = einlagern(s);
+			if (!rest.isEmpty()) spieler.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+		}
+	}
 
 	// ------------------------------------------------------------------ Anzeige
 
@@ -86,15 +112,32 @@ public class LagerMenu extends ChestMenu {
 		Comparator<Sorte> nachNamen = Comparator.comparing(s -> s.muster.getHoverName().getString().toLowerCase(Locale.ROOT));
 		liste.sort(nachName ? nachNamen : Comparator.<Sorte>comparingLong(s -> -s.anzahl).thenComparing(nachNamen));
 		sichtbar = liste;
-		int seiten = Math.max(1, (liste.size() + FELDER - 1) / FELDER);
+		int seiten = seiten();
 		seite = Math.max(0, Math.min(seite, seiten - 1));
 
-		for (int i = 0; i < FELDER; i++) {
-			int idx = seite * FELDER + i;
-			anzeige.setItem(i, idx < liste.size() ? bild(liste.get(idx)) : ItemStack.EMPTY);
-		}
 		ItemStack rand = knopf(Items.STAINED_GLASS_PANE.gray(), " ");
-		for (int i = FELDER; i < 54; i++) anzeige.setItem(i, rand);
+		for (int i = 0; i < 54; i++) anzeige.setItem(i, rand);
+		for (int i = 0; i < FELD.length; i++) {
+			int idx = seite * FELD.length + i;
+			anzeige.setItem(FELD[i], idx < liste.size() ? bild(liste.get(idx)) : ItemStack.EMPTY);
+		}
+		// Werkbank
+		for (int i = 0; i < 9; i++) anzeige.setItem(RASTER[i], raster.getItem(i).copy());
+		ItemStack erg = vorschau();
+		if (erg.isEmpty()) anzeige.setItem(ERGEBNIS, knopf(Items.STAINED_GLASS_PANE.white(), "Ergebnis",
+			"Leg ein Rezept ins Raster darüber.", "Items nimmst du links aus dem Lager."));
+		else {
+			List<Component> z = new ArrayList<>();
+			ItemLore alt = erg.get(DataComponents.LORE);
+			if (alt != null) z.addAll(alt.lines());
+			z.add(Component.literal("Klick: 1× herstellen").withStyle(st -> st.withColor(ChatFormatting.YELLOW).withItalic(false)));
+			z.add(Lager.grau("Shift-Klick: einen Stapel herstellen"));
+			z.add(Lager.grau("Zutaten kommen automatisch aus dem Lager"));
+			erg.set(DataComponents.LORE, new ItemLore(z));
+			anzeige.setItem(ERGEBNIS, erg);
+		}
+		anzeige.setItem(LEEREN, knopf(Items.BARRIER, "Raster leeren", "Legt alles aus dem Raster ins Lager"));
+		// Leiste unten
 		if (seite > 0) anzeige.setItem(ZURUECK, knopf(Items.ARROW, "◀ Seite zurück"));
 		if (seite < seiten - 1) anzeige.setItem(VOR, knopf(Items.ARROW, "Seite vor ▶"));
 		anzeige.setItem(SORTIEREN, knopf(Items.HOPPER, "Sortiert nach: " + (nachName ? "Name" : "Menge"), "Klick: umschalten"));
@@ -102,11 +145,14 @@ public class LagerMenu extends ChestMenu {
 			bs.size() + " Behälter verbunden",
 			alle.size() + " Sorten, " + zahl(frei) + " von " + zahl(plaetze) + " Plätzen frei",
 			"",
-			"Items aus deinem Inventar:",
-			"Shift-Klick legt sie ins Lager"));
+			"Links: Stapel · Rechts: 1 Stück · Shift: ins Inventar",
+			"Item in der Hand auf ein Feld: ins Lager",
+			"Shift-Klick im eigenen Inventar: ins Lager"));
 		if (filter.isEmpty()) anzeige.setItem(FILTER, knopf(Items.NAME_TAG, "Suche", "Im Chat: /lager suche <Text>"));
 		else anzeige.setItem(FILTER, knopf(Items.NAME_TAG, "Suche: " + filter, "Klick: Suche aufheben"));
 	}
+
+	int seiten() { return Math.max(1, (sichtbar.size() + FELD.length - 1) / FELD.length); }
 
 	boolean passt(ItemStack s) {
 		if (filter.isEmpty()) return true;
@@ -122,8 +168,6 @@ public class LagerMenu extends ChestMenu {
 		ItemLore alt = s.muster.get(DataComponents.LORE);
 		if (alt != null) zeilen.addAll(alt.lines());
 		zeilen.add(Component.literal("Im Lager: " + zahl(s.anzahl)).withStyle(st -> st.withColor(ChatFormatting.YELLOW).withItalic(false)));
-		zeilen.add(Lager.grau("Links: Stapel · Rechts: 1 Stück"));
-		zeilen.add(Lager.grau("Shift-Klick: Stapel ins Inventar"));
 		b.set(DataComponents.LORE, new ItemLore(zeilen));
 		return b;
 	}
@@ -163,20 +207,28 @@ public class LagerMenu extends ChestMenu {
 		super.clicked(slot, button, art, p);
 	}
 
+	int feldNr(int slot) { for (int i = 0; i < FELD.length; i++) if (FELD[i] == slot) return i; return -1; }
+	int rasterNr(int slot) { for (int i = 0; i < 9; i++) if (RASTER[i] == slot) return i; return -1; }
+
 	void obenGeklickt(int slot, int button, ContainerInput art) {
+		int r = rasterNr(slot);
+		if (r >= 0) { rasterGeklickt(r, button, art); return; }
+		if (slot == ERGEBNIS) { ergebnisGeklickt(art); return; }
+		int f = feldNr(slot);
+		if (f >= 0) { lagerGeklickt(f, button, art); return; }
+		if (art != ContainerInput.PICKUP || !getCarried().isEmpty()) return;
+		if (slot == ZURUECK && seite > 0) seite--;
+		else if (slot == VOR && seite < seiten() - 1) seite++;
+		else if (slot == SORTIEREN) nachName = !nachName;
+		else if (slot == FILTER && !filter.isEmpty()) { filter = ""; seite = 0; }
+		else if (slot == LEEREN) rasterLeeren();
+	}
+
+	void lagerGeklickt(int f, int button, ContainerInput art) {
 		ItemStack hand = getCarried();
-		if (slot >= FELDER) {
-			if (art != ContainerInput.PICKUP) return;
-			int seiten = Math.max(1, (sichtbar.size() + FELDER - 1) / FELDER);
-			if (slot == ZURUECK && seite > 0) seite--;
-			else if (slot == VOR && seite < seiten - 1) seite++;
-			else if (slot == SORTIEREN) nachName = !nachName;
-			else if (slot == FILTER && !filter.isEmpty()) { filter = ""; seite = 0; }
-			return;
-		}
+		Sorte s = sorte(f);
 		// Mit einem Item in der Hand auf ein Feld klicken: hineinlegen (links alles, rechts eins)
 		if (!hand.isEmpty() && art == ContainerInput.PICKUP) {
-			Sorte s = sorte(slot);
 			if (button == 1 && s != null && ItemStack.isSameItemSameComponents(s.muster, hand)) {
 				// Rechtsklick mit derselben Sorte in der Hand: noch eins dazunehmen
 				if (hand.getCount() < hand.getMaxStackSize()) hand.grow(entnehmen(s.muster, 1).getCount());
@@ -192,7 +244,6 @@ public class LagerMenu extends ChestMenu {
 			}
 			return;
 		}
-		Sorte s = sorte(slot);
 		if (s == null) return;
 		int stapel = s.muster.getMaxStackSize();
 		if (art == ContainerInput.PICKUP && hand.isEmpty()) {
@@ -206,8 +257,132 @@ public class LagerMenu extends ChestMenu {
 		}
 	}
 
-	Sorte sorte(int slot) {
-		int idx = seite * FELDER + slot;
+	/** Klicks ins Werkbank-Raster verhalten sich wie bei einem normalen Platz. */
+	void rasterGeklickt(int r, int button, ContainerInput art) {
+		ItemStack hand = getCarried(), da = raster.getItem(r);
+		if (art == ContainerInput.QUICK_MOVE) {
+			if (!da.isEmpty()) raster.setItem(r, einlagern(da));
+			return;
+		}
+		if (art == ContainerInput.SWAP && button >= 0 && button < 9) {
+			ItemStack hb = spieler.getInventory().getItem(button);
+			spieler.getInventory().setItem(button, da);
+			raster.setItem(r, hb);
+			return;
+		}
+		if (art != ContainerInput.PICKUP) return;
+		if (hand.isEmpty()) {
+			if (da.isEmpty()) return;
+			int n = button == 0 ? da.getCount() : (da.getCount() + 1) / 2;
+			setCarried(da.split(n));
+			raster.setItem(r, da.isEmpty() ? ItemStack.EMPTY : da);
+		} else if (da.isEmpty() || ItemStack.isSameItemSameComponents(da, hand)) {
+			int platz = hand.getMaxStackSize() - da.getCount();
+			int n = Math.min(platz, button == 0 ? hand.getCount() : 1);
+			if (n <= 0) return;
+			if (da.isEmpty()) raster.setItem(r, hand.split(n));
+			else { da.grow(n); hand.shrink(n); }
+			setCarried(hand);
+		} else {                                         // andere Sorte: tauschen
+			raster.setItem(r, hand);
+			setCarried(da);
+		}
+	}
+
+	void rasterLeeren() {
+		for (int i = 0; i < 9; i++) {
+			ItemStack s = raster.getItem(i);
+			if (s.isEmpty()) continue;
+			ItemStack rest = einlagern(s);
+			raster.setItem(i, ItemStack.EMPTY);
+			if (!rest.isEmpty()) spieler.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+		}
+	}
+
+	// ------------------------------------------------------------------ Herstellen
+
+	List<ItemStack> rasterListe() {
+		List<ItemStack> l = new ArrayList<>(9);
+		for (int i = 0; i < 9; i++) l.add(raster.getItem(i));
+		return l;
+	}
+
+	Optional<RecipeHolder<CraftingRecipe>> rezept(CraftingInput in) {
+		if (in.isEmpty()) return Optional.empty();
+		return Lager.server.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, in, spieler.level());
+	}
+
+	ItemStack vorschau() {
+		CraftingInput in = CraftingInput.ofPositioned(3, 3, rasterListe()).input();
+		return rezept(in).map(h -> h.value().assemble(in)).orElse(ItemStack.EMPTY);
+	}
+
+	/** Einmal herstellen: Zutaten aus dem Raster verbrauchen, leere Felder aus dem Lager nachfüllen. */
+	ItemStack einmalHerstellen() {
+		CraftingInput.Positioned pos = CraftingInput.ofPositioned(3, 3, rasterListe());
+		CraftingInput in = pos.input();
+		Optional<RecipeHolder<CraftingRecipe>> rz = rezept(in);
+		if (rz.isEmpty()) return ItemStack.EMPTY;
+		ItemStack erg = rz.get().value().assemble(in);
+		if (erg.isEmpty()) return ItemStack.EMPTY;
+		NonNullList<ItemStack> reste = rz.get().value().getRemainingItems(in);
+		ItemStack[] vorher = new ItemStack[9];
+		for (int i = 0; i < 9; i++) vorher[i] = raster.getItem(i).copyWithCount(1);
+
+		erg.onCraftedBy(spieler, erg.getCount());
+		spieler.triggerRecipeCrafted(rz.get(), in.items());
+		for (int y = 0; y < in.height(); y++)
+			for (int x = 0; x < in.width(); x++) {
+				int i = (y + pos.top()) * 3 + x + pos.left();
+				ItemStack s = raster.getItem(i);
+				if (!s.isEmpty()) { s.shrink(1); if (s.isEmpty()) raster.setItem(i, ItemStack.EMPTY); }
+				ItemStack rest = reste.get(x + y * in.width());
+				if (!rest.isEmpty()) {
+					rest = einlagern(rest);
+					if (!rest.isEmpty()) spieler.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+				}
+			}
+		for (int i = 0; i < 9; i++)
+			if (raster.getItem(i).isEmpty() && !vorher[i].isEmpty()) {
+				ItemStack neu = entnehmen(vorher[i], 1);
+				if (!neu.isEmpty()) raster.setItem(i, neu);
+			}
+		return erg;
+	}
+
+	void ergebnisGeklickt(ContainerInput art) {
+		ItemStack hand = getCarried();
+		if (art == ContainerInput.PICKUP) {
+			ItemStack v = vorschau();
+			if (v.isEmpty()) return;
+			if (!hand.isEmpty() && (!ItemStack.isSameItemSameComponents(hand, v) || hand.getCount() + v.getCount() > hand.getMaxStackSize())) return;
+			ItemStack erg = einmalHerstellen();
+			if (erg.isEmpty()) return;
+			if (hand.isEmpty()) setCarried(erg); else { hand.grow(erg.getCount()); setCarried(hand); }
+		} else if (art == ContainerInput.QUICK_MOVE) {
+			ItemStack erstes = vorschau();
+			if (erstes.isEmpty()) return;
+			int gemacht = 0;
+			while (gemacht < erstes.getMaxStackSize()) {
+				ItemStack v = vorschau();
+				if (v.isEmpty() || !ItemStack.isSameItemSameComponents(v, erstes)) break;
+				ItemStack erg = einmalHerstellen();
+				if (erg.isEmpty()) break;
+				gemacht += erg.getCount();
+				spieler.getInventory().add(erg);
+				if (!erg.isEmpty()) {                           // Inventar voll: Rest ins Lager, dann aufhören
+					ItemStack rest = einlagern(erg);
+					if (!rest.isEmpty()) spieler.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+					break;
+				}
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------ Lager
+
+	Sorte sorte(int f) {
+		int idx = seite * FELD.length + f;
 		return idx < sichtbar.size() ? sichtbar.get(idx) : null;
 	}
 
