@@ -414,6 +414,28 @@ TEXTE = {
                [("Überall.", W + "Tutorial:Villager_trading_hall")],
                [("Rabatte durch Heilen eines Zombie-Dorfbewohners.", W + "Tutorial:Villager_trading_hall"),
                 (TEST + "4 Dorfbewohner bleiben in ihren Zellen.", None)])),
+    "zucht": dict(
+        name="Dorfbewohner-Zucht", cat="Handel", diff=2, out="Dorfbewohner (für Handelshalle, Eisenfarm …)",
+        where="Überall, nicht direkt in einem Dorf (dort gibt es fremde Betten)", afk="In der Nähe",
+        why="Zwei Dorfbewohner in einem Gehege mit Dach: Einer ist Bauer (Komposter als Arbeitsplatz) und erntet das "
+            "Karottenfeld; satte Dorfbewohner geben Essen ab und bekommen ein Baby, wenn ein Bett frei ist. Darum "
+            "stehen im Gehege 3 Betten für 2 Erwachsene. Am Boden läuft eine Wasserrinne unter der Wand hindurch – "
+            "dort ist nur 1 Block Platz: Babys passen durch, Erwachsene nicht. Die Strömung trägt Babys hinaus, sie "
+            "fallen in eine Grube und wachsen dort zu Erwachsenen heran. Nachts merkt ein Baby in der Grube, dass es "
+            "sein Bett nicht erreicht, und gibt es nach einer Minute frei – dann kommt das nächste Baby.",
+        help=[("Keine Babys", "Beide brauchen genug Essen: wirf jedem vorher 12 Karotten oder 3 Brote zu. Und ein "
+                              "Bett muss frei sein – im Umkreis von 48 Blöcken keine weiteren Dorfbewohner."),
+              ("Bauer erntet nicht", "Er braucht den Komposter als Arbeitsplatz; ein Dorfbewohner ohne Beruf nimmt "
+                                     "ihn von selbst. Erntet nur tagsüber."),
+              ("Baby bleibt im Gehege", "Babys laufen zufällig in die Rinne – das dauert manchmal einen Tag."),
+              ("Dorfbewohner abholen", "Zauntor an der Grube öffnen und ihn mit einer Leine oder einem Boot holen.")],
+        meta=m("Etwa 1 Baby pro Spieltag (20 Minuten), solange beide satt sind",
+               [("Gehege mit Dach (Blitze machen aus Dorfbewohnern Hexen), Licht gegen Zombies.",
+                 W + "Tutorial:Villager_breeding")],
+               [("Babys gibt es nur mit freiem Bett; Karotten/Kartoffeln zählen 1, Brot 4 – nötig sind 12.",
+                 W + "Villager#Breeding"),
+                ("Ein Dorfbewohner gibt sein Bett frei, wenn er es nachts eine Minute lang nicht erreicht "
+                 "(Spielcode 26.3).", None)])),
     "bruchstein": dict(
         name="Bruchstein-Generator", cat="Blöcke", diff=1, out="Bruchstein", where="Überall",
         afk="Nein – abbauen",

@@ -971,6 +971,29 @@
    }
   }
  },
+ "zucht": {
+  "boden": "minecraft:grass_block",
+  "zeit": "cycle",
+  "nachher": [
+   "kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..12]",
+   "summon minecraft:villager {x}.5 {y} {z+1}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:farmer\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:carrot\",count:24}]}",
+   "summon minecraft:villager {x+1}.5 {y} {z+2}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{profession:\"minecraft:none\",level:1,type:\"minecraft:plains\"},Inventory:[{id:\"minecraft:carrot\",count:24}]}",
+   "fill {x} {y} {z} {x+3} {y} {z} minecraft:carrots[age=7]"
+  ],
+  "bereich": [
+   6,
+   -4,
+   2,
+   7,
+   -2,
+   4
+  ],
+  "erwartet": {
+   "wesen": {
+    "minecraft:villager": 1
+   }
+  }
+ },
  "bruchstein": {
   "boden": "minecraft:grass_block",
   "erwartet": {

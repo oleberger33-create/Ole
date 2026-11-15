@@ -338,7 +338,7 @@ ICON = {"zuckerrohr": "sugar_cane", "bambus": "bamboo", "kaktus": "cactus", "kue
         "xpspawner": "experience_bottle", "mobfarm": "bone", "creeper": "gunpowder", "schleim": "slime_ball",
         "hexe": "redstone", "waechter": "prismarine_shard", "lohe": "blaze_rod", "gold": "gold_nugget",
         "witherskelett": "wither_skeleton_skull", "enderman": "ender_pearl", "ertrunkene": "trident",
-        "aussenposten": "ominous_bottle", "ueberfall": "totem_of_undying", "handel": "emerald",
+        "aussenposten": "ominous_bottle", "ueberfall": "totem_of_undying", "handel": "emerald", "zucht": "villager_spawn_egg",
         "bruchstein": "cobblestone", "lava": "lava_bucket", "schnee": "snowball", "angeln": "fishing_rod",
         "stockcrafter": "stick"}
 KATEGORIEN = []                          # [(Name, Bild, Farbe, [Farm-Nummern])]
@@ -408,7 +408,7 @@ PRUEF = {
 }
 NUR_OBERWELT = {"zuckerrohr", "bambus", "kaktus", "kuerbis", "seetang", "weizen", "baum", "knochenmehl", "huehner",
                 "kuh", "wolle", "honig", "eisen", "mobfarm", "creeper", "schleim", "hexe", "waechter", "ertrunkene",
-                "aussenposten", "ueberfall", "handel", "schnee", "angeln", "blumen"}
+                "aussenposten", "ueberfall", "handel", "zucht", "schnee", "angeln", "blumen"}
 
 
 def ort_zeilen(fid):

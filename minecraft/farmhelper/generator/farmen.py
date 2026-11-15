@@ -15,7 +15,7 @@ from farmtexte import TEXTE
 REIHENFOLGE = ["zuckerrohr", "bambus", "kaktus", "kuerbis", "seetang", "weizen", "baum", "knochenmehl", "blumen",
                "huehner", "kuh", "wolle", "honig", "eisen", "xpspawner", "mobfarm", "creeper", "schleim", "hexe",
                "waechter", "lohe", "gold", "witherskelett", "enderman", "ertrunkene", "aussenposten", "ueberfall",
-               "handel", "bruchstein", "lava", "schnee", "angeln", "stockcrafter"]
+               "handel", "zucht", "bruchstein", "lava", "schnee", "angeln", "stockcrafter"]
 
 
 def farm(fid, **info):
@@ -928,6 +928,65 @@ f.schritt("Je einen Dorfbewohner hinein. Passt der Handel nicht: Arbeitsblock ab
     0: "V.V.V.V"})
 f.pruefe(boden=GRAS, erwartet={"wesen": {"minecraft:villager": 4}})
 
+# ===================================================================== Dorfbewohner-Zucht
+def _raster(zellen, x0, z0, x1, z1):
+    return "\n".join("".join(zellen.get((x, z), ".") for x in range(x0, x1 + 1)) for z in range(z0, z1 + 1))
+
+
+f = farm("zucht")
+f.zeichen(A="farmland", O="composter", Q="feldfrucht", V="villager", L="glowstone", g=("fence_gate", "e"),
+          k=("white_bed", {"part": "head", "f": "n"}), q=("white_bed", {"part": "foot", "f": "n"}),
+          s=("wall_sign", "s"))
+# Gehege innen x 0..4, z 0..3; Rinne z 3 (Höhe -1), Ausgang unter der Ostwand (x 5) zum Schild (x 6) über der Grube
+GRUBE = {(x, z) for x in (6, 7) for z in (2, 3, 4)}
+f.schritt("Rinne und Grube ausheben: Im künftigen Gehege (5 × 4) an der Südseite eine Rinne 1 tief, 7 lang nach Osten "
+          "(sie läuft später unter der Ostwand hindurch). Am Ende rechts eine Grube 2 × 3, 3 tief unter der Rinne.", {
+    -1: _raster({(x, 3): "-" for x in range(0, 7)}, 0, 0, 7, 4),
+    -2: _raster({(6, 3): "-"} | {p: "-" for p in GRUBE}, 0, 0, 7, 4),
+    -3: _raster({p: "-" for p in GRUBE}, 0, 0, 7, 4),
+    -4: _raster({p: "-" for p in GRUBE}, 0, 0, 7, 4)})
+f.schritt("Zum Herausholen: vor der Ostwand der Grube eine Treppe nach oben graben (4 Stufen nach Osten).", {
+    -4: ".-", -3: ".--", -2: "..--", -1: "...--", 0: "....-"}, x0=8, z0=3)
+f.schritt("Zauntor in die Ostwand der Grube (unten), die Grube oben zudecken – nur das Feld über der Grube, in das die "
+          "Rinne mündet, bleibt offen: dort hinein ein Schild an die Nordseite (es hält das Wasser, Babys fallen "
+          "hindurch).", {
+    -4: "g", -1: ".", 0: "."}, x0=8, z0=3)
+f.schritt("Deckel der Grube und Schild.", {
+    -1: _raster({(6, 2): "#", (7, 2): "#", (7, 3): "#", (6, 4): "#", (7, 4): "#", (6, 3): "s"}, 6, 2, 7, 4),
+    0: _raster({(6, 3): "#"}, 6, 2, 7, 4)}, x0=6, z0=2)
+f.schritt("Boden des Geheges: vorne (Norden) 4 Ackerboden, daneben ein Block für den Komposter, dahinter normaler "
+          "Boden. In die Rinne ganz im Westen eine Wasserquelle – sie fließt nach Osten bis zum Schild und bewässert "
+          "das Feld.", {
+    -1: _raster({(x, 0): "A" for x in range(4)} | {(4, 0): "#"} | {(x, z): "#" for x in range(5) for z in (1, 2)}
+                | {(0, 3): "W"}, 0, 0, 4, 3)})
+f.schritt("Wände 2 hoch rundherum (die Ostwand steht über der Rinne – darunter bleibt die 1 Block hohe Lücke für "
+          "die Babys). Im Norden in der Mitte eine Lücke 1 breit lassen, durch die die Dorfbewohner hineinkommen.", {
+    y: _raster({(x, z): "#" for x in range(-1, 6) for z in range(-1, 5)
+                if (x in (-1, 5) or z in (-1, 4)) and (x, z) != (2, -1)}, -1, -1, 5, 4) for y in (0, 1)}, x0=-1, z0=-1)
+f.schritt("Komposter in die Ecke vorne rechts, 3 Betten nebeneinander dahinter (Kopfende im Norden) und Karotten oder "
+          "Kartoffeln aufs Feld.", {
+    0: _raster({(x, 0): "Q" for x in range(4)} | {(4, 0): "O"} | {(x, 1): "k" for x in (2, 3, 4)}
+               | {(x, 2): "q" for x in (2, 3, 4)}, 0, 0, 4, 2)})
+f.schritt("Zwei Dorfbewohner hinein (Leine, Boot oder Lore durch die Lücke im Norden). Einer ohne Beruf nimmt den "
+          "Komposter und wird Bauer. Vorher jedem 12 Karotten oder 3 Brote zuwerfen – dann sind sie gleich bereit.", {
+    0: _raster({(0, 1): "V", (1, 2): "V"}, 0, 1, 1, 2)}, z0=1)
+f.schritt("Lücke im Norden schließen, dann das Dach mit 2 Leuchtsteinen (gegen Blitze und Zombies).", {
+    0: "#", 1: "#"}, x0=2, z0=-1)
+f.schritt("Dach.", {
+    2: _raster({(x, z): ("L" if (x, z) in ((1, 1), (3, 2)) else "#") for x in range(-1, 6) for z in range(-1, 5)},
+               -1, -1, 5, 4)}, x0=-1, z0=-1)
+
+f.pruefe(boden=GRAS, zeit="cycle",
+         nachher=["kill @e[type=minecraft:villager,x={x},y={y},z={z},distance=..12]",
+                  'summon minecraft:villager {x}.5 {y} {z+1}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{'
+                  'profession:"minecraft:farmer",level:1,type:"minecraft:plains"},Inventory:[{id:"minecraft:carrot",count:24}]}',
+                  'summon minecraft:villager {x+1}.5 {y} {z+2}.5 {PersistenceRequired:1b,CanPickUpLoot:1b,VillagerData:{'
+                  'profession:"minecraft:none",level:1,type:"minecraft:plains"},Inventory:[{id:"minecraft:carrot",count:24}]}',
+                  "fill {x} {y} {z} {x+3} {y} {z} minecraft:carrots[age=7]"],
+         bereich=[6, -4, 2, 7, -2, 4],
+         erwartet={"wesen": {"minecraft:villager": 1}})
+
+
 # ===================================================================== Blöcke
 f = farm("bruchstein")
 f.zeichen(K="cobblestone")
@@ -1090,3 +1149,4 @@ if __name__ == "__main__":
     else:
         p, t = schreiben(reihenfolge=REIHENFOLGE_ALLE)
         print(len(p), "Farmen,", len(t), "Tests")
+
