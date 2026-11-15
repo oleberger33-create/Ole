@@ -95,7 +95,9 @@ f.zeichen(E=("oak_trapdoor", {"half": "bottom", "f": "e", "open": True}),
 
 # ---------------------------------------------------------------- oberer Raum und Zugang
 f.schritt("Oberer Raum: unter der Erde einen Raum 18 × 18 Blöcke und 2 hoch ausgraben. Solange du baust, Fackeln "
-          "aufstellen, damit nichts spawnt – ganz zum Schluss baust du sie alle wieder ab.", {
+          "aufstellen, damit nichts spawnt – ganz zum Schluss baust du sie alle wieder ab. Wichtig: Im Boden bleibt in "
+          "der Mitte ein Kreuz frei (dort zeigen die Geister nichts) – da kommen im nächsten Schritt die Wasserkanäle "
+          "hin, also nicht zubauen.", {
     OBEN: GRABEN_RAUM, OBEN + 1: GRABEN_RAUM})
 f.schritt("Im oberen Raum Kanäle in Kreuzform 2 breit und 2 tief ausheben, von jeder Wand bis zur Mitte; in der "
           "Mitte bleibt ein Loch 2 × 2 (auch 2 tief). Jeder Kanal ist genau 8 Blöcke lang – so weit fließt das "
@@ -113,7 +115,8 @@ f.schritt("Leitern an die Ostwand des Leiterschachts, von ganz unten (Höhe -29)
 # ---------------------------------------------------------------- unterer Raum
 f.schritt("Unterer Raum: Vom Leiterschacht auf Höhe -5 eine Tür-Öffnung 2 hoch nach Westen und von dort einen "
           "zweiten Raum 18 × 18, 2 hoch, genau unter dem oberen ausgraben (Höhe -5 und -4). Die Schicht -3 bleibt "
-          "als Decke stehen – darin liegen die Böden der oberen Kanäle.", {
+          "als Decke stehen – darin liegen die Böden der oberen Kanäle. Auch hier bleibt im Boden das Kreuz frei (keine "
+          "Geister) – dort kommen die unteren Kanäle hin.", {
     UNTEN: GRABEN_UNTEN, UNTEN + 1: GRABEN_UNTEN})
 f.schritt("Im unteren Raum genauso Kanäle in Kreuzform und das Loch in der Mitte ausheben, 2 breit und 2 tief "
           "(Höhe -6 und -7), jeder Kanal genau 8 lang.", {
