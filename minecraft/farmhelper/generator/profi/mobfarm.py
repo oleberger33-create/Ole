@@ -103,6 +103,15 @@ f.schritt("Im oberen Raum Kanäle in Kreuzform 2 breit und 2 tief ausheben, von 
           "Mitte bleibt ein Loch 2 × 2 (auch 2 tief). Jeder Kanal ist genau 8 Blöcke lang – so weit fließt das "
           "Wasser später, es endet von selbst am Rand des Lochs.", {
     OBEN - 1: GRABEN_KREUZ, OBEN - 2: GRABEN_KREUZ})
+# Zwischen den Räumen: unter der Erde ist das Erdreich; wer die Farm in die Luft baut, braucht beide Schichten
+# (sonst fällt Licht in den unteren Raum, und im 1 Block hohen Spalt spawnen Spinnen)
+ZWISCHEN_2 = raster_aus({(x, z): "Q" for x in range(N) for z in range(N) if (x, z) not in KREUZ}, 0, 0, N - 1, N - 1)
+ZWISCHEN_3 = raster_aus({(x, z): "Q" for x in range(N) for z in range(N) if (x, z) not in LOCH}, 0, 0, N - 1, N - 1)
+f.zeichen(Q="fest")
+f.schritt("Zwischendecke unter dem oberen Raum: die zwei Schichten unter seinem Boden ganz schließen (Höhe -2 und -3), "
+          "nur die Kanäle und das Loch in der Mitte bleiben offen. Unter der Erde ist das schon Erdreich; baust du "
+          "in der Luft, ist das die Decke des unteren Raums – ohne sie fällt Licht hinein und es spawnt nichts.", {
+    OBEN - 3: ZWISCHEN_3, OBEN - 2: ZWISCHEN_2})
 f.schritt("Zugang: Östlich vom Raum, mit 1 Block Wand dazwischen, einen Leiterschacht 1 × 1 graben – von Höhe 1 "
           "hinunter, bis du auf Höhe -29 stehst. Oben eine Tür-Öffnung 2 hoch durch die Wand in den Raum, direkt "
           "südlich neben dem Ende des Ostkanals (sie wird am Ende wieder zugemacht). Den Schacht nach oben "
