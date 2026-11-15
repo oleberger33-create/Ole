@@ -202,7 +202,12 @@ public class Wegpunkte implements ModInitializer {
 
 	static int hinzufuegen(CommandContext<CommandSourceStack> c) {
 		ServerPlayer p = c.getSource().getPlayer();
-		if (p == null) { fehler(c, "Nur Spieler können Wegpunkte setzen."); return 0; }
+		// Ohne Spieler (Server-Konsole, z. B. „execute in … positioned x y z run wp add …“): Wegpunkt des Servers
+		// an der Befehlsstelle; nur Ops können ihn löschen.
+		boolean konsole = p == null;
+		if (konsole && !c.getSource().permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+			fehler(c, "Nur Spieler können Wegpunkte setzen."); return 0;
+		}
 		String name = StringArgumentType.getString(c, "name").trim().replaceAll("\\s+", " ");
 		// Letztes Wort eine Farbe? "/wp add Meine Farm blau"
 		String farbeText = null;
@@ -212,17 +217,17 @@ public class Wegpunkte implements ModInitializer {
 		if (finde(name) != null) { fehler(c, "Es gibt schon einen Wegpunkt namens \"" + name + "\"."); return 0; }
 		Farbe f = Farbe.gelb;
 		if (farbeText != null) f = Farbe.von(farbeText);
-		String uid = p.getUUID().toString();
+		String uid = konsole ? "00000000-0000-0000-0000-000000000000" : p.getUUID().toString();
 		long anzahl = punkte.values().stream().filter(w -> w.besitzerUuid.equals(uid)).count();
-		if (anzahl >= LIMIT && !istOp(p)) { fehler(c, "Du hast schon " + LIMIT + " Wegpunkte. Lösche erst einen mit /wp entfernen."); return 0; }
+		if (!konsole && anzahl >= LIMIT && !istOp(p)) { fehler(c, "Du hast schon " + LIMIT + " Wegpunkte. Lösche erst einen mit /wp entfernen."); return 0; }
 
 		Punkt w = new Punkt();
 		w.id = UUID.randomUUID().toString();
 		w.name = name;
-		w.besitzer = p.getGameProfile().name();
+		w.besitzer = konsole ? "Server" : p.getGameProfile().name();
 		w.besitzerUuid = uid;
-		w.dim = p.level().dimension().identifier().toString();
-		BlockPos b = p.blockPosition();
+		w.dim = (konsole ? c.getSource().getLevel() : p.level()).dimension().identifier().toString();
+		BlockPos b = konsole ? BlockPos.containing(c.getSource().getPosition()) : p.blockPosition();
 		w.x = b.getX(); w.y = b.getY(); w.z = b.getZ();
 		w.farbe = f.name();
 		w.erstellt = System.currentTimeMillis();
