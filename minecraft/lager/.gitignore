@@ -1,1 +1,3 @@
-ort.json
+build/
+.gradle/
+run/

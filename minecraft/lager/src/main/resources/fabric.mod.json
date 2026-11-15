@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "lager",
+	"version": "${version}",
+	"name": "Lager",
+	"description": "Gemeinsames Kisten-Lager: Kisten und Fässer mit dem Lager-Terminal verbinden und von überall darauf zugreifen. Private Kisten möglich. Nur auf dem Server nötig.",
+	"authors": ["Ole"],
+	"license": "MIT",
+	"environment": "server",
+	"entrypoints": {
+		"main": ["de.ole.lager.Lager"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
