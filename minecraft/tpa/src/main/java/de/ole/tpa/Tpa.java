@@ -42,7 +42,10 @@ public class Tpa implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerTickEvents.END_SERVER_TICK.register(s -> { server = s; tick++; ticken(); });
+		ServerTickEvents.END_SERVER_TICK.register(s -> {
+			server = s; tick++; ticken();
+			if (Bedrock.FLOODGATE) try { BedrockChat.tick(s, tick); } catch (RuntimeException e) { org.slf4j.LoggerFactory.getLogger("tpa").error("Bedrock", e); }
+		});
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
 		// Bedrock-Spieler können im Teleport-Buch nichts anklicken: dort öffnet das Buch stattdessen ein Kisten-Menü
 		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((spieler, welt, hand) -> {
@@ -109,8 +112,7 @@ public class Tpa implements ModInitializer {
 		p.sendSystemMessage(Component.empty()
 			.append(text("✉ Anfrage an " + ziel.getPlainTextName() + " geschickt. ", ChatFormatting.GRAY))
 			.append(knopf("[Zurückziehen]", ChatFormatting.DARK_RED, "/tpacancel", "Klick: Anfrage zurückziehen")));
-		// Bedrock: Chat-Knöpfe gehen dort nicht – stattdessen ein Fenster mit Annehmen/Ablehnen
-		if (Bedrock.istBedrock(ziel)) Bedrock.anfrageFenster(ziel, p, hier);
+		// Bedrock: die Chat-Knöpfe werden automatisch zu einem Fenster (BedrockChat)
 		return 1;
 	}
 

@@ -7,6 +7,7 @@
 	"authors": ["Ole"],
 	"license": "MIT",
 	"environment": "server",
+	"mixins": ["tpa.mixins.json"],
 	"entrypoints": { "main": ["de.ole.tpa.Tpa"] },
 	"suggests": { "floodgate": "*" },
 	"depends": { "fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*" }

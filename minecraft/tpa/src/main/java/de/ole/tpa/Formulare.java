@@ -28,6 +28,22 @@ final class Formulare {
 		Tpa.server.getCommands().performPrefixedCommand(p.createCommandSourceStack(), befehl);
 	}
 
+	/** Fenster aus anklickbaren Chat-Nachrichten: Knopf = Befehl, als der Spieler ausgeführt. */
+	static void knopfFenster(ServerPlayer p, String text, List<BedrockChat.Knopf> knoepfe) {
+		UUID u = p.getUUID();
+		List<BedrockChat.Knopf> l = new ArrayList<>(knoepfe);
+		String inhalt = text.length() > 900 ? text.substring(text.length() - 900) : text;
+		SimpleForm.Builder b = SimpleForm.builder().title("OLE SMP").content(inhalt);
+		for (BedrockChat.Knopf k : l) b.button(k.text());
+		senden(p, b.validResultHandler(r -> aufServer(() -> {
+			ServerPlayer q = online(u);
+			int i = r.clickedButtonId();
+			if (q == null || i < 0 || i >= l.size()) return;
+			String befehl = l.get(i).befehl();
+			befehl(q, befehl.startsWith("/") ? befehl.substring(1) : befehl);
+		})).build());
+	}
+
 	static void hauptmenue(ServerPlayer p) {
 		UUID u = p.getUUID();
 		senden(p, SimpleForm.builder()
