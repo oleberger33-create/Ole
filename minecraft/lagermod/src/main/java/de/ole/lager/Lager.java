@@ -86,14 +86,33 @@ public class Lager implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> { server = s; laden(); });
-		ServerLifecycleEvents.SERVER_STOPPING.register(s -> speichern());
+		ServerLifecycleEvents.SERVER_STOPPING.register(s -> { speichern(); Tresor.allesSpeichern(); });
+		// Jeder bekommt beim Betreten einen Tresor, falls er keinen hat (neue und alte Spieler)
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((h, sender, s) -> s.execute(() -> Tresor.geben(h.getPlayer())));
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {
+			Tresor.speichern(h.getPlayer().getUUID());
+			cache.remove(h.getPlayer().getUUID());
+			cacheTick.remove(h.getPlayer().getUUID());
+		});
 
 		ServerTickEvents.END_SERVER_TICK.register(s -> {
-			if (++tick % 40 != 0) return;
+			if (++tick % 1200 == 0) Tresor.allesSpeichern();
+			if (tick % 40 != 0) return;
 			for (ServerPlayer p : s.getPlayerList().getPlayers())
 				if (p.containerMenu instanceof LagerMenu m) {
 					try { m.anzeigen(); m.broadcastChanges(); } catch (RuntimeException e) { LOG.error("Lager-Anzeige", e); }
 				}
+		});
+
+		// Tresor-Item: Rechtsklick öffnet den eigenen Tresor, schleichend die nächste Seite
+		UseItemCallback.EVENT.register((spieler, welt, hand) -> {
+			if (!Tresor.istTresor(spieler.getItemInHand(hand))) return InteractionResult.PASS;
+			if (welt.isClientSide() || !(spieler instanceof ServerPlayer p)) return InteractionResult.SUCCESS;
+			int s = Tresor.letzteSeite.getOrDefault(p.getUUID(), 1);
+			if (p.isShiftKeyDown()) s = s % Tresor.SEITEN + 1;
+			Tresor.letzteSeite.put(p.getUUID(), s);
+			Tresor.oeffnen(p, s);
+			return InteractionResult.SUCCESS;
 		});
 
 		// Rechtsklick in die Luft mit dem Terminal: Lager öffnen
@@ -106,6 +125,10 @@ public class Lager implements ModInitializer {
 
 		UseBlockCallback.EVENT.register((spieler, welt, hand, treffer) -> {
 			if (welt.isClientSide() || !(spieler instanceof ServerPlayer p)) return InteractionResult.PASS;
+			if (Tresor.istTresor(spieler.getItemInHand(hand))) {
+				if (hand == InteractionHand.MAIN_HAND) Tresor.oeffnen(p, Tresor.letzteSeite.getOrDefault(p.getUUID(), 1));
+				return InteractionResult.SUCCESS;
+			}
 			BlockPos pos = treffer.getBlockPos();
 			boolean terminal = istTerminal(spieler.getItemInHand(hand));
 			if (terminal) {
@@ -139,6 +162,14 @@ public class Lager implements ModInitializer {
 			if (kisten.remove(schluessel(dimName(welt), pos.getX(), pos.getY(), pos.getZ())) != null) { cacheLeeren(); speichern(); }
 		});
 
+		CommandRegistrationCallback.EVENT.register((d, reg, env) -> d.register(Commands.literal("tresor")
+			.executes(c -> { Tresor.oeffnen(c.getSource().getPlayerOrException(), 1); return 1; })
+			.then(Commands.literal("item").executes(c -> {
+				ServerPlayer p = c.getSource().getPlayerOrException();
+				if (Tresor.hat(p)) { c.getSource().sendFailure(Component.literal("Du hast schon einen Tresor.")); return 0; }
+				Tresor.geben(p); return 1; }))
+			.then(Commands.argument("seite", IntegerArgumentType.integer(1, Tresor.SEITEN))
+				.executes(c -> { Tresor.oeffnen(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "seite")); return 1; }))));
 		CommandRegistrationCallback.EVENT.register((d, reg, env) -> d.register(Commands.literal("lager")
 			.executes(Lager::hilfe)
 			.then(Commands.literal("item").executes(Lager::itemGeben))
@@ -384,6 +415,17 @@ public class Lager implements ModInitializer {
 			} catch (RuntimeException e) { LOG.error("Lager: Ordner", e); }
 		}
 		return ordnerVonItem.getOrDefault(item, ORDNER.size() - 1);
+	}
+
+	/** Protokoll aller Ein- und Auslagerungen (welt/lager_protokoll.log), damit verlorene Sachen nachvollziehbar sind. */
+	static void protokoll(ServerPlayer p, String art, ItemStack muster, int anzahl) {
+		if (anzahl <= 0 || server == null) return;
+		try {
+			String z = java.time.LocalDateTime.now().withNano(0) + " " + p.getPlainTextName() + " " + art + " " + anzahl + " "
+				+ net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(muster.getItem()) + "\n";
+			Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("lager_protokoll.log"), z, StandardCharsets.UTF_8,
+				java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+		} catch (Exception e) { LOG.error("Lager-Protokoll", e); }
 	}
 
 	static boolean istOp(ServerPlayer p) { return server.getPlayerList().isOp(p.nameAndId()); }

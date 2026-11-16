@@ -22,6 +22,12 @@ Gemeinsames Kisten-Lager für den Server. Spieler brauchen keinen Mod: alles lä
 - `/lager suche <Text>`: nur passende Items zeigen · `/lager liste`: Anzahl deiner Kisten
 - `/lager scan <Radius>` (Op): alle Kisten und Fässer im Umkreis als geteilt verbinden
 
+**Tresor**: jeder Spieler bekommt beim Betreten ein Tresor-Item (Shulkerschale). Rechtsklick öffnet den persönlichen
+Speicher (3 Seiten × 54 Plätze, schleichend = nächste Seite, oder `/tresor [1-3]`). Gespeichert direkt auf dem Server in
+`welt/tresor/<uuid>.json` (mit `.bak`), unabhängig von Kisten und Chunks.
+
+Protokoll: jedes Ein- und Auslagern im Lager steht in `welt/lager_protokoll.log`.
+
 Daten: `lager.json` im Weltordner. Kisten in nicht geladenen Chunks werden beim Öffnen kurz geladen.
 
 Bauen: `JAVA_HOME=<JDK 25> ./gradlew build` → `build/libs/lager-<version>.jar` in den `mods`-Ordner.

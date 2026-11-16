@@ -431,7 +431,14 @@ public class LagerMenu extends ChestMenu {
 	}
 
 	/** Legt den Stapel ins Lager (zuerst zu gleichen Items, dann in freie Plätze). Gibt den Rest zurück. */
-	ItemStack einlagern(ItemStack st) { return einlagern(Lager.behaelter(spieler), st); }
+	ItemStack einlagern(ItemStack st) {
+		if (st.isEmpty()) return st;
+		ItemStack muster = st.copyWithCount(1);
+		int vorher = st.getCount();
+		ItemStack rest = einlagern(Lager.behaelter(spieler), st);
+		Lager.protokoll(spieler, "rein", muster, vorher - rest.getCount());
+		return rest;
+	}
 
 	static ItemStack einlagern(List<Container> bs, ItemStack st) {
 		if (st.isEmpty() || Lager.istTerminal(st)) return st;
@@ -458,7 +465,11 @@ public class LagerMenu extends ChestMenu {
 	}
 
 	/** Holt bis zu n Stück der Sorte aus dem Lager. */
-	ItemStack entnehmen(ItemStack muster, int n) { return entnehmen(Lager.behaelter(spieler), muster, n); }
+	ItemStack entnehmen(ItemStack muster, int n) {
+		ItemStack r = entnehmen(Lager.behaelter(spieler), muster, n);
+		Lager.protokoll(spieler, "raus", muster, r.getCount());
+		return r;
+	}
 
 	static ItemStack entnehmen(List<Container> bs, ItemStack muster, int n) {
 		n = Math.min(n, muster.getMaxStackSize());
