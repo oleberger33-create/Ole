@@ -48,6 +48,17 @@ public class Tpa implements ModInitializer {
 		});
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
 		// Bedrock-Spieler können im Teleport-Buch nichts anklicken: dort öffnet das Buch stattdessen ein Kisten-Menü
+		// Menü-Stern: Benutzen (in die Luft oder auf einen Block) öffnet das Menü
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((spieler, welt, hand) -> {
+			if (!Bedrock.istMenueItem(spieler.getItemInHand(hand))) return net.minecraft.world.InteractionResult.PASS;
+			if (!welt.isClientSide() && spieler instanceof ServerPlayer p) Bedrock.hauptmenue(p);
+			return net.minecraft.world.InteractionResult.SUCCESS;
+		});
+		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((spieler, welt, hand, treffer) -> {
+			if (!Bedrock.istMenueItem(spieler.getItemInHand(hand))) return net.minecraft.world.InteractionResult.PASS;
+			if (!welt.isClientSide() && spieler instanceof ServerPlayer p && hand == net.minecraft.world.InteractionHand.MAIN_HAND) Bedrock.hauptmenue(p);
+			return net.minecraft.world.InteractionResult.SUCCESS;
+		});
 		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((spieler, welt, hand) -> {
 			if (welt.isClientSide() || !(spieler instanceof ServerPlayer p)) return net.minecraft.world.InteractionResult.PASS;
 			if (!TpMenu.istTpBuch(spieler.getItemInHand(hand)) || !TpMenu.istBedrock(p)) return net.minecraft.world.InteractionResult.PASS;
@@ -58,7 +69,10 @@ public class Tpa implements ModInitializer {
 		ServerPlayConnectionEvents.JOIN.register((h, sender, s) -> s.execute(() -> {
 			ServerPlayer p = h.getPlayer();
 			BedrockChat.vergessen(p.getUUID());
-			if (Bedrock.istBedrock(p)) p.sendSystemMessage(text("✦ Bedrock: Tippe /menu für Teleport, Lager, Tresor und TPA", ChatFormatting.GOLD));
+			if (Bedrock.istBedrock(p)) {
+				Bedrock.menueItemGeben(p);
+				p.sendSystemMessage(text("✦ Menü: zweimal schnell schleichen, den Menü-Stern benutzen oder /menu", ChatFormatting.GOLD));
+			}
 		}));
 		ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {
 			UUID u = h.getPlayer().getUUID();
@@ -75,7 +89,8 @@ public class Tpa implements ModInitializer {
 				.then(Commands.argument("spieler", EntityArgument.player()).executes(c -> antworten(c, EntityArgument.getPlayer(c, "spieler"), false))));
 			d.register(Commands.literal("tpacancel").executes(Tpa::abbrechen));
 			d.register(Commands.literal("tpmenu").executes(c -> { TpMenu.oeffnen(c.getSource().getPlayerOrException()); return 1; }));
-			d.register(Commands.literal("menu").executes(c -> { Bedrock.hauptmenue(c.getSource().getPlayerOrException()); return 1; }));
+			d.register(Commands.literal("menu").executes(c -> { Bedrock.hauptmenue(c.getSource().getPlayerOrException()); return 1; })
+				.then(Commands.literal("item").executes(c -> { Bedrock.menueItemGeben(c.getSource().getPlayerOrException()); return 1; })));
 		});
 	}
 

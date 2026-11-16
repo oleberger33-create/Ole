@@ -68,7 +68,30 @@ public final class BedrockChat {
 			}
 			offen.clear();
 		}
-		if (tick % 10 == 0) for (ServerPlayer p : s.getPlayerList().getPlayers()) if (Bedrock.istBedrock(p)) geister(p);
+		for (ServerPlayer p : s.getPlayerList().getPlayers()) {
+			if (!Bedrock.istBedrock(p)) continue;
+			schleichen(p, tick);
+			if (tick % 10 == 0) geister(p);
+		}
+	}
+
+	// ------------------------------------------------------------------ Menü ohne Tippen (Controller/Handy)
+
+	static final Map<UUID, Boolean> schlichVorher = new HashMap<>();
+	static final Map<UUID, Integer> letztesSchleichen = new HashMap<>();
+
+	/** Zweimal kurz hintereinander schleichen (innerhalb 0,4 s) öffnet das Menü. */
+	static void schleichen(ServerPlayer p, int tick) {
+		UUID u = p.getUUID();
+		boolean jetzt = p.isShiftKeyDown();
+		boolean vorher = schlichVorher.getOrDefault(u, false);
+		schlichVorher.put(u, jetzt);
+		if (!jetzt || vorher) return;                       // nur der Moment des Drückens zählt
+		Integer z = letztesSchleichen.get(u);
+		if (z != null && tick - z <= 8 && !p.isSpectator()) {
+			letztesSchleichen.remove(u);
+			Formulare.hauptmenue(p);
+		} else letztesSchleichen.put(u, tick);
 	}
 
 	// ------------------------------------------------------------------ Geisterblöcke für Bedrock
@@ -89,7 +112,7 @@ public final class BedrockChat {
 		return OHNE_SCHWERKRAFT;
 	}
 
-	static void vergessen(UUID u) { geschickt.remove(u); welt.remove(u); }
+	static void vergessen(UUID u) { geschickt.remove(u); welt.remove(u); schlichVorher.remove(u); letztesSchleichen.remove(u); }
 
 	/**
 	 * Farmhelper-Geisterblöcke (block_display, zeigt Geyser nicht an) in 32 Blöcken als schwebende fallende Blöcke
