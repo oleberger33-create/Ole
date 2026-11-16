@@ -12,6 +12,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Floodgate-API (Bedrock-Fenster), nur zum Kompilieren – zur Laufzeit liefert Floodgate sie selbst
+	compileOnly files('libs/floodgate-api.jar', 'libs/cumulus-1.1.2.jar')
 }
 
 processResources {

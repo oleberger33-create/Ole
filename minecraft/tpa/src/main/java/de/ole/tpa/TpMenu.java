@@ -47,7 +47,7 @@ public class TpMenu extends ChestMenu {
 		} catch (Exception e) { ziele = List.of(); }
 	}
 
-	static boolean istBedrock(ServerPlayer p) { return p.getPlainTextName().startsWith("."); }
+	static boolean istBedrock(ServerPlayer p) { return Bedrock.istBedrock(p); }
 
 	static boolean istTpBuch(ItemStack s) {
 		CustomData d = s.get(DataComponents.CUSTOM_DATA);
@@ -57,6 +57,7 @@ public class TpMenu extends ChestMenu {
 	static void oeffnen(ServerPlayer p) {
 		laden();
 		if (ziele.isEmpty()) { p.sendSystemMessage(Component.literal("Keine Teleport-Ziele eingerichtet.").withStyle(ChatFormatting.RED)); return; }
+		if (Bedrock.formulare(p)) { Bedrock.zieleFenster(p); return; }
 		int reihen = Math.min(6, Math.max(1, (ziele.size() + 8) / 9));
 		MenuType<ChestMenu> typ = switch (reihen) {
 			case 1 -> MenuType.GENERIC_9x1; case 2 -> MenuType.GENERIC_9x2; case 3 -> MenuType.GENERIC_9x3;
@@ -93,17 +94,19 @@ public class TpMenu extends ChestMenu {
 		}
 	}
 
+	static void hinreisen(ServerPlayer p, Ziel z) {
+		Tpa.server.getCommands().performPrefixedCommand(Tpa.server.createCommandSourceStack().withSuppressedOutput(),
+			"execute as " + p.getUUID() + " at @s run " + z.befehl());
+	}
+
 	@Override public boolean stillValid(Player p) { return true; }
 	@Override public ItemStack quickMoveStack(Player p, int slot) { return ItemStack.EMPTY; }
 
 	@Override
 	public void clicked(int slot, int button, ContainerInput art, Player p) {
 		if (slot >= 0 && slot < groesse && slot < ziele.size() && (art == ContainerInput.PICKUP || art == ContainerInput.QUICK_MOVE)) {
-			Ziel z = ziele.get(slot);
 			spieler.closeContainer();
-			String uuid = spieler.getUUID().toString();
-			Tpa.server.getCommands().performPrefixedCommand(Tpa.server.createCommandSourceStack().withSuppressedOutput(),
-				"execute as " + uuid + " at @s run " + z.befehl());
+			hinreisen(spieler, ziele.get(slot));
 			return;
 		}
 		// alles andere (Ziehen, Doppelklick, Shift) sperren, damit niemand die Symbole herausnimmt

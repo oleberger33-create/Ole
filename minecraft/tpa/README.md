@@ -11,3 +11,9 @@ Teleport-Anfragen zwischen Spielern, ohne Client-Mod.
 
 Anfragen gelten 60 Sekunden, zwischen zwei Anfragen 10 Sekunden Pause. Nach dem Annehmen 3 Sekunden stillstehen,
 dann Teleport, auch in Nether und End.
+
+## Bedrock
+
+Mit Floodgate bekommen Bedrock-Spieler Fenster statt Chat-Links: `/menu` (Teleport-Ziele, TPA mit Spielerliste, Lager,
+Tresor), Teleport-Anfragen als Fenster mit Annehmen/Ablehnen. `libs/` enthält nur die Floodgate-/Cumulus-API zum
+Kompilieren (MIT-Lizenz, GeyserMC).

@@ -51,6 +51,10 @@ public class Tpa implements ModInitializer {
 			TpMenu.oeffnen(p);
 			return net.minecraft.world.InteractionResult.SUCCESS;
 		});
+		ServerPlayConnectionEvents.JOIN.register((h, sender, s) -> s.execute(() -> {
+			ServerPlayer p = h.getPlayer();
+			if (Bedrock.istBedrock(p)) p.sendSystemMessage(text("✦ Bedrock: Tippe /menu für Teleport, Lager, Tresor und TPA", ChatFormatting.GOLD));
+		}));
 		ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {
 			UUID u = h.getPlayer().getUUID();
 			anfragen.removeIf(a -> a.von().equals(u) || a.an().equals(u));
@@ -65,6 +69,7 @@ public class Tpa implements ModInitializer {
 				.then(Commands.argument("spieler", EntityArgument.player()).executes(c -> antworten(c, EntityArgument.getPlayer(c, "spieler"), false))));
 			d.register(Commands.literal("tpacancel").executes(Tpa::abbrechen));
 			d.register(Commands.literal("tpmenu").executes(c -> { TpMenu.oeffnen(c.getSource().getPlayerOrException()); return 1; }));
+			d.register(Commands.literal("menu").executes(c -> { Bedrock.hauptmenue(c.getSource().getPlayerOrException()); return 1; }));
 		});
 	}
 
@@ -77,12 +82,16 @@ public class Tpa implements ModInitializer {
 	}
 
 	static int fragen(CommandContext<CommandSourceStack> c, boolean hier) throws CommandSyntaxException {
-		ServerPlayer p = c.getSource().getPlayerOrException();
-		ServerPlayer ziel = EntityArgument.getPlayer(c, "spieler");
-		if (ziel == p) { c.getSource().sendFailure(Component.literal("Du kannst dir nicht selbst eine Anfrage schicken.")); return 0; }
+		return fragen(c.getSource().getPlayerOrException(), EntityArgument.getPlayer(c, "spieler"), hier);
+	}
+
+	static void fehler(ServerPlayer p, String t) { p.sendSystemMessage(text(t, ChatFormatting.RED)); }
+
+	static int fragen(ServerPlayer p, ServerPlayer ziel, boolean hier) {
+		if (ziel == p) { fehler(p, "Du kannst dir nicht selbst eine Anfrage schicken."); return 0; }
 		Integer z = zuletzt.get(p.getUUID());
 		if (z != null && tick - z < ABKLINGEN) {
-			c.getSource().sendFailure(Component.literal("Warte noch " + ((ABKLINGEN - (tick - z)) / 20 + 1) + " s bis zur nächsten Anfrage."));
+			fehler(p, "Warte noch " + ((ABKLINGEN - (tick - z)) / 20 + 1) + " s bis zur nächsten Anfrage.");
 			return 0;
 		}
 		zuletzt.put(p.getUUID(), tick);
@@ -100,20 +109,25 @@ public class Tpa implements ModInitializer {
 		p.sendSystemMessage(Component.empty()
 			.append(text("✉ Anfrage an " + ziel.getPlainTextName() + " geschickt. ", ChatFormatting.GRAY))
 			.append(knopf("[Zurückziehen]", ChatFormatting.DARK_RED, "/tpacancel", "Klick: Anfrage zurückziehen")));
+		// Bedrock: Chat-Knöpfe gehen dort nicht – stattdessen ein Fenster mit Annehmen/Ablehnen
+		if (Bedrock.istBedrock(ziel)) Bedrock.anfrageFenster(ziel, p, hier);
 		return 1;
 	}
 
 	static int antworten(CommandContext<CommandSourceStack> c, ServerPlayer von, boolean ja) throws CommandSyntaxException {
-		ServerPlayer p = c.getSource().getPlayerOrException();
+		return antworten(c.getSource().getPlayerOrException(), von, ja);
+	}
+
+	static int antworten(ServerPlayer p, ServerPlayer von, boolean ja) {
 		Anfrage gefunden = null;
 		for (int i = anfragen.size() - 1; i >= 0; i--) {
 			Anfrage a = anfragen.get(i);
 			if (a.an().equals(p.getUUID()) && (von == null || a.von().equals(von.getUUID()))) { gefunden = a; break; }
 		}
-		if (gefunden == null) { c.getSource().sendFailure(Component.literal("Keine offene Teleport-Anfrage.")); return 0; }
+		if (gefunden == null) { fehler(p, "Keine offene Teleport-Anfrage."); return 0; }
 		anfragen.remove(gefunden);
 		ServerPlayer fragender = server.getPlayerList().getPlayer(gefunden.von());
-		if (fragender == null) { c.getSource().sendFailure(Component.literal("Der Spieler ist nicht mehr online.")); return 0; }
+		if (fragender == null) { fehler(p, "Der Spieler ist nicht mehr online."); return 0; }
 		if (!ja) {
 			p.sendSystemMessage(text("Anfrage von " + fragender.getPlainTextName() + " abgelehnt.", ChatFormatting.GRAY));
 			fragender.sendSystemMessage(text("✖ " + p.getPlainTextName() + " hat deine Teleport-Anfrage abgelehnt.", ChatFormatting.RED));
