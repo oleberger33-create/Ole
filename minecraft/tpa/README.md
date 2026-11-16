@@ -6,6 +6,8 @@ Teleport-Anfragen zwischen Spielern, ohne Client-Mod.
 - `/tpahere <Spieler>`: Anfrage, dass er zu dir kommt
 - `/tpaccept [Spieler]`, `/tpdeny [Spieler]`: annehmen/ablehnen (oder die Knöpfe im Chat anklicken)
 - `/tpacancel`: eigene Anfrage zurückziehen
+- `/tpmenu`: Teleport-Menü als Kiste. Bedrock-Spieler (Name beginnt mit `.`) bekommen es automatisch, wenn sie das
+  Teleport-Buch benutzen, weil Bedrock keine Links in Büchern kann. Ziele stehen in `tpmenu.json` im Weltordner.
 
 Anfragen gelten 60 Sekunden, zwischen zwei Anfragen 10 Sekunden Pause. Nach dem Annehmen 3 Sekunden stillstehen,
 dann Teleport, auch in Nether und End.

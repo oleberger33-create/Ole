@@ -43,6 +43,14 @@ public class Tpa implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ServerTickEvents.END_SERVER_TICK.register(s -> { server = s; tick++; ticken(); });
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(s -> server = s);
+		// Bedrock-Spieler können im Teleport-Buch nichts anklicken: dort öffnet das Buch stattdessen ein Kisten-Menü
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((spieler, welt, hand) -> {
+			if (welt.isClientSide() || !(spieler instanceof ServerPlayer p)) return net.minecraft.world.InteractionResult.PASS;
+			if (!TpMenu.istTpBuch(spieler.getItemInHand(hand)) || !TpMenu.istBedrock(p)) return net.minecraft.world.InteractionResult.PASS;
+			TpMenu.oeffnen(p);
+			return net.minecraft.world.InteractionResult.SUCCESS;
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {
 			UUID u = h.getPlayer().getUUID();
 			anfragen.removeIf(a -> a.von().equals(u) || a.an().equals(u));
@@ -56,6 +64,7 @@ public class Tpa implements ModInitializer {
 			d.register(Commands.literal("tpdeny").executes(c -> antworten(c, null, false))
 				.then(Commands.argument("spieler", EntityArgument.player()).executes(c -> antworten(c, EntityArgument.getPlayer(c, "spieler"), false))));
 			d.register(Commands.literal("tpacancel").executes(Tpa::abbrechen));
+			d.register(Commands.literal("tpmenu").executes(c -> { TpMenu.oeffnen(c.getSource().getPlayerOrException()); return 1; }));
 		});
 	}
 
