@@ -18,4 +18,4 @@ Mit Floodgate bekommen Bedrock-Spieler Fenster statt Chat-Links: `/menu` (Telepo
 Tresor), Teleport-Anfragen als Fenster mit Annehmen/Ablehnen. `libs/` enthält nur die Floodgate-/Cumulus-API zum
 Kompilieren (MIT-Lizenz, GeyserMC).
 - Anklickbare Chat-Nachrichten (auch /tellraw aus Datapacks, z. B. Farmhelper) erscheinen für Bedrock-Spieler zusätzlich
-  als Fenster mit Knöpfen; Farmhelper-Geisterblöcke (block_display) als Partikel, weil Geyser sie nicht anzeigt.
+  als Fenster mit Knöpfen; Farmhelper-Geisterblöcke (block_display) als schwebende fallende Blöcke nur für sie, weil Geyser block_display nicht anzeigt.

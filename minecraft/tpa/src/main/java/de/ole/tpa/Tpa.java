@@ -54,12 +54,15 @@ public class Tpa implements ModInitializer {
 			TpMenu.oeffnen(p);
 			return net.minecraft.world.InteractionResult.SUCCESS;
 		});
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((alt, neu, ende) -> BedrockChat.vergessen(neu.getUUID()));
 		ServerPlayConnectionEvents.JOIN.register((h, sender, s) -> s.execute(() -> {
 			ServerPlayer p = h.getPlayer();
+			BedrockChat.vergessen(p.getUUID());
 			if (Bedrock.istBedrock(p)) p.sendSystemMessage(text("✦ Bedrock: Tippe /menu für Teleport, Lager, Tresor und TPA", ChatFormatting.GOLD));
 		}));
 		ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {
 			UUID u = h.getPlayer().getUUID();
+			BedrockChat.vergessen(u);
 			anfragen.removeIf(a -> a.von().equals(u) || a.an().equals(u));
 			wartend.values().removeIf(w -> w.reisender().equals(u) || w.ziel().equals(u));
 		});
