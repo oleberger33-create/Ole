@@ -44,8 +44,7 @@ final class Bedrock {
 		s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("Menü").withStyle(st -> st.withColor(ChatFormatting.GOLD).withBold(true).withItalic(false)));
 		s.set(net.minecraft.core.component.DataComponents.MAX_STACK_SIZE, 1);
 		s.set(net.minecraft.core.component.DataComponents.LORE, new net.minecraft.world.item.component.ItemLore(java.util.List.of(
-			Component.literal("Benutzen: Teleport, TPA, Lager, Tresor").withStyle(st -> st.withColor(ChatFormatting.GRAY).withItalic(false)),
-			Component.literal("Oder: zweimal schnell schleichen").withStyle(st -> st.withColor(ChatFormatting.GRAY).withItalic(false)))));
+			Component.literal("Benutzen: Teleport, TPA, Lager, Tresor").withStyle(st -> st.withColor(ChatFormatting.GRAY).withItalic(false)))));
 		return s;
 	}
 

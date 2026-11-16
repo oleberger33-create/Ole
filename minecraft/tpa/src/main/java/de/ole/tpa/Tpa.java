@@ -71,7 +71,7 @@ public class Tpa implements ModInitializer {
 			BedrockChat.vergessen(p.getUUID());
 			if (Bedrock.istBedrock(p)) {
 				Bedrock.menueItemGeben(p);
-				p.sendSystemMessage(text("✦ Menü: zweimal schnell schleichen, den Menü-Stern benutzen oder /menu", ChatFormatting.GOLD));
+				p.sendSystemMessage(text("✦ Menü: den Menü-Stern benutzen oder /menu", ChatFormatting.GOLD));
 			}
 		}));
 		ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> {

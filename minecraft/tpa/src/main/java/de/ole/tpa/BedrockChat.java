@@ -70,7 +70,6 @@ public final class BedrockChat {
 		}
 		for (ServerPlayer p : s.getPlayerList().getPlayers()) {
 			if (!Bedrock.istBedrock(p)) continue;
-			schleichen(p, tick);
 			if (tick % 10 == 0) geister(p);
 		}
 	}
